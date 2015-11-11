@@ -3,7 +3,7 @@ CFLAGS	= -O3 --std=c++11
 
 all: default
 
-default: TreeSimilarity.cc LblTree.cc SpecializedTree.cc tree.cc
+default: TreeSimilarity.cc LblTree.cc SpecializedTree.cc Node.cc UpperBound.cc
 	$(CC) $(CFLAGS) $? -o TreeSimilarity
 	./TreeSimilarity
 

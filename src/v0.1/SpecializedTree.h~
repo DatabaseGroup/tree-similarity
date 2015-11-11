@@ -9,8 +9,7 @@ class SpecializedTree : public LblTree {
 
 	public:
 		SpecializedTree() : LblTree() { }
-		SpecializedTree(int t_id) : LblTree(t_id) {}
-		SpecializedTree(int t_id, int label_id) : LblTree(t_id, label_id) { }
+		SpecializedTree(int id) : LblTree(id) { }
 		~SpecializedTree() { }
 
 		const int getDummy() const;

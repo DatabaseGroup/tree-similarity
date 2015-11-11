@@ -1,0 +1,19 @@
+#ifndef LBLTREE_H
+#define LBLTREE_H
+
+#include "Node.h"
+
+//TODO Brackets-Parsen
+
+class LblTree : public Node{
+	protected:
+		int id;
+
+	public:
+		LblTree() : id(0) { }
+		LblTree(int id) : id(id) { };
+		virtual ~LblTree() { };
+		const int getId() const;
+};
+
+#endif // LBLTREE_H

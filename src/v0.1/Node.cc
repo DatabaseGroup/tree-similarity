@@ -1,9 +1,11 @@
-#include "tree.h"
+#include "Node.h"
 #include <cstdlib>
 #include <iostream>
 #include <ctime>
 
 //Node::Node(int val) :label(val) {}
+
+Node::Node(){this->label = -1;}
 Node::Node(int val)
 //Node::Node(const std::string& val)
 {
