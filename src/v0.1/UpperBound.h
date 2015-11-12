@@ -4,8 +4,6 @@
 #include "LblTree.h"
 
 class UpperBound {
-	protected:
-		//int simplyUpperBound;
 
 	public:
 		UpperBound(){ };
@@ -13,6 +11,5 @@ class UpperBound {
 
 		int calculateSimplyUpperBound(LblTree* t1, LblTree* t2);
 };
-
 
 #endif // UpperBound_H

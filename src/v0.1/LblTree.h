@@ -16,11 +16,8 @@ class LblTree : public Node{
 		{
             this->id = t_id;
         };
-		//SpecializedTree(int id) : LblTree(id) { }
 		virtual ~LblTree() { };
 		const int getId() const;
-
-
 };
 
 #endif // LBLTREE_H

@@ -4,6 +4,7 @@
 #include "Node.h"
 #include "SpecializedTree.h"
 #include "UpperBound.h"
+#include "StringEditDistance.h"
 
 using namespace std;
 
@@ -29,6 +30,12 @@ int main(int argc, char** argv) {
     UpperBound* ub = new UpperBound();
     int sup = ub->calculateSimplyUpperBound(t1,t2);
     std::cout << "UpperBound t1->t2: " << sup << std::endl;
+
+    StringEditDistance* sed = new StringEditDistance();
+
+    int sedResult;
+    sedResult = sed->calculateSED("mond","moon"); //should be 3
+    std::cout << "String Edit Distance: " << sedResult << std::endl;
 
 	return 0;
 }

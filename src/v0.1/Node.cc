@@ -4,7 +4,6 @@
 #include <ctime>
 
 //Node::Node(int val) :label(val) {}
-
 Node::Node(){this->label = -1;}
 Node::Node(int val)
 //Node::Node(const std::string& val)
@@ -42,7 +41,6 @@ Node::~Node() {
 }
 
 //modiefied by Sibylle and Stefan
-//
 int Node::get_children_number()
 {
     return this->children.size();
