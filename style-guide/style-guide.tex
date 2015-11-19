@@ -1,0 +1,384 @@
+\documentclass[onecolumn, a4paper, 11pt]{article}%
+
+\usepackage{listings}%
+\usepackage{xcolor}%
+\usepackage[a4paper, total={7.25in, 10in}]{geometry}%
+\usepackage{hyperref}%
+\usepackage{multicol}%
+
+% Some proper colors
+\definecolor{darkgreen}{rgb}{0.0, 0.5, 0.0}%
+\definecolor{alizarin}{rgb}{0.82, 0.1, 0.26}
+
+% Code snippet style
+\newcommand{\cppstylegood}{%
+  \lstset{language=C++,%
+          basicstyle = \ttfamily,%
+          keywordstyle = \color{blue}\ttfamily,%
+          stringstyle = \color{red}\ttfamily,%
+          commentstyle = \color{gray}\ttfamily,%
+          morecomment = [l][\color{magenta}]{\#},%
+          frame = single,%
+          %numbers = left,%
+          numberstyle = \tiny,%
+          backgroundcolor=\color{green!37.5},%
+          showspaces=false,%
+          showstringspaces=false%
+  }
+}%
+\newcommand{\cppstylebad}{%
+  \cppstylegood%
+  \lstset{backgroundcolor=\color{red!37.5}}%
+}%
+% Example heading
+\newcommand{\example}{{\vspace{0.5cm}\bfseries\noindent Example(s):}}%
+
+% Remove indentation in pars
+\setlength{\parindent}{0pt}%
+
+\begin{document}%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Titling page / Initialization
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{C++ Style Guide}%
+\date{\today}%
+\author{Daniel Kocher}%
+
+\maketitle%
+\clearpage%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{\label{sec:introduction}Introduction}
+
+This style guide explains the basic style used in the \emph{Tree Similarity}
+project. When adding new code one should stick to these guidelines as close as
+possible in order to guarantee consistent source coude throughout this project.
+
+If there is no rule for a certain code construct, one has the freedom to choose
+the respective style.
+
+This style guide is mostly inspired by the \emph{Coding style} of Mozilla
+\footnote{\url{https://developer.mozilla.org/en-US/docs/Mozilla/Developer_guide/Coding_Style}},
+(for a basic overview) and the coding standard Bjarne Stroustrup suggests on his
+official website
+\footnote{\url{http://www.stroustrup.com/JSF-AV-rules.pdf}} (for more specific
+rules). Also some elements from the \emph{C++ Style Guide} of Google
+\footnote{\url{https://google.github.io/styleguide/cppguide.html}} are included.
+
+In essence, this is sort of a short \emph{Best of} of those three coding standards.
+
+All code snippets considered {\bfseries\color{darkgreen}good} have a green
+background. In contrast, all code snippets considered {\bfseries\color{alizarin}bad}
+are marked with a red background color.
+
+\section{\label{sec:coding-style}Coding Style}%
+
+\subsection{\label{subsec:formatting}Formatting}%
+
+Here some general formatting guidelines are defined. For some parts, no examples
+are provided due to their obviousness. However, the examples shown in subsequent
+sections stick to these formatting guidelines.
+
+\paragraph{\label{par:whitespace}Whitespace}
+Don't use tabs but Whitespaces instead. No whitespaces at the end of a line.
+Use Unix-style linebreaks (\texttt{'\textbackslash n'}) instead of Windows-style
+(\texttt{'\textbackslash r\textbackslash n'}).
+
+\paragraph{\label{par:line-length}Line length}
+Line length is limited to 80 characters. A rule of thumb is the following:
+If the last word is longer than 4 characters and exceeds the 80 character limit
+only by at most 2 charaters, this word can stay in the same line. All subsequent
+characters move to the next line.
+
+\emph{Exceptions}: very long variable or function/method names and their return
+type. Furthermore, combination of identifiers in calls (using \texttt{.} or
+\texttt{->}) but {\bfseries not} the parameters supplied.
+
+\paragraph{\label{par:indentation}Indentation}
+Two spaces per logic level. The easiest way to do so: change the preferences of
+your editor/IDE to insert two spaces instead of a tab.
+Class and namespace visibility do not consume a logic level, but
+\texttt{switch case} labels do.
+
+\paragraph{\label{par:braces}Braces}
+Use Kernighan \& Ritchie's (K\&R) bracing style for control structures (%
+\texttt{if else}, loops, \texttt{switch}, \ldots), classes/structs,
+functions/methods, namespaces and lamba expressions, i.e. left brace at the end
+of first line. Cuddle \texttt{else} on both sides. Always brace controlled
+statements, even single-line statements inside e.g. \texttt{if else} constructs.
+
+There are some exceptions to this rule, see%
+~\hyperref[par:line-breaking]{line breaking}.
+
+\clearpage%
+\example%
+\begin{multicols}{3}%
+\cppstylegood%
+\begin{lstlisting}
+if (...) {
+  // ...
+} else if {
+  // ...
+} else {
+  // ...
+}
+\end{lstlisting}
+\vfill
+
+\cppstylegood%
+\begin{lstlisting}
+while (...) {
+  // ...
+}
+
+do {
+
+} while (...);
+
+for (...; ...; ...) {
+
+}
+\end{lstlisting}
+\vfill
+
+\cppstylegood%
+\begin{lstlisting}
+switch (...) {
+  case 1:
+    // ...
+    break;
+  case 2:
+    // ...
+    break;
+  default:
+    // ...
+    break;
+}
+\end{lstlisting}
+\vfill
+\end{multicols}
+
+\paragraph{\label{par:line-breaking}Line breaking}
+Break conditional expression after logical connectives (\texttt{\&\&},
+\texttt{||}) if it would otherwise exceed the 80 character line limit. Indent
+the subsequent expression such that it aligns vertically with the expression in
+the previous line.
+The same principle is applied if a function/method definition/declaration exceeds
+the line limit. The first parameter exceeding the limit is moved to the next line.
+If the first parameter declaration already exceeds the line limit, indent all
+parameters vertically aligned.
+
+In all cases mentioned, the braces are not attached in the same (last) line but
+in a new line (vertically aligned with the beginning of the original statement).
+
+\example%
+\cppstylegood%
+\begin{lstlisting}
+if (variable1 + variable2 <= (variable3 - variable4) * variable5 &&
+    variable6 * variable7 == variable8 * variable9 &&
+    very_long_length >= long_length)
+{
+  // ...    
+}
+
+void foo (int bar, int bas, int bat, char bau, char bav, char baw,
+          std::string bax, std::string bay, std::vector<int> baz)
+{
+  // ...
+}
+
+std::vector<std::string> example_class::really_really_long_method_name (
+  int bar, char baz, std::string bax)
+{
+  // ...
+}
+\end{lstlisting}
+
+\paragraph{\label{par:spacing}Spacing}
+A single space is inserted between keywords (\texttt{if}, \texttt{while}, \ldots)
+and the opening parenthesis. Function/Method calls have no such space before their
+opening parenthesis.
+
+\paragraph{\label{par:lambda-expressions}Lambda expressions}
+As lambda expression should be short (typically), always inline them. No space
+after the \texttt{\&} for by-reference captures.
+
+\example%
+\cppstylegood%
+\begin{lstlisting}
+auto squared = [&x] (int n) { x = n * n; };
+
+std::vector<int> x;
+std::for_each(x.begin(), x.end(), [] (int& n) {
+                ++n;
+                n *= 3;
+              });
+\end{lstlisting}
+
+\subsection{\label{subsec:naming}Naming}%
+
+For names of e.g. a class, consisting of multiple parts, an underscore is inserted
+between two parts and all parts are writting lowercase letters. An exception to
+this rule are constants and enums which are written in capitabel letters only.
+
+\example%
+\cppstylegood%
+\begin{lstlisting}
+namespace example_namespace {
+
+template<class example_type>
+public class example_class {
+private:
+  int no_constant;
+  const int A_CONSTANT = 1;
+  
+public:
+  example_type example_method(int example_parameter);
+};
+
+struct example_struct {
+  // ...
+};
+
+enum EXAMPLE_ENUM {
+  // ...
+};
+\end{lstlisting}
+
+\subsection{\label{subsec:implementation}Implementation}%
+
+\paragraph{\label{par:preprocessor-directives}Preprocessor directives}
+Within C++, preprocessor directives should not be used to do things C++ can
+accomplish by default. Exceptions to this rule: \texttt{\#ifndef},
+\texttt{\#define}, \texttt{\#endif} and \texttt{\#include} may be used if
+necessary, i.e. Header guards to prevent multiple inclusion of the same file.
+
+Furthermore, for performance reasons, \texttt{\#ifndef} and \texttt{\#endif}
+may be used for conditional compilation (especially the logging mechanism).
+The alternative (a function and an \texttt{if} clause) causes issues when
+it comes to performance evaluations.
+
+Never use \texttt{\#define} to declare/define constants - use
+\texttt{const} instead - or to create inline macros - use
+\texttt{inline} functions instead.  \texttt{\#include} may only be used for
+including header files.
+
+\clearpage%
+\example%
+\cppstylegood%
+\begin{lstlisting}
+// Header guard (always on top)
+#ifndef HEADER_FILENAME_H
+#define HEADER_FILENAME_H
+
+#include <iostream>
+#include <cstdlib>
+#include <vector>
+
+const int A_CONSTANT = 1;
+
+#endif // HEADER_FILENAME_H
+\end{lstlisting}
+
+\paragraph{\label{par:namespaces}Namespaces}
+Should have a unique name (based on the project). Every nonlocal code should
+reside in a namespace, except for the \texttt{main} function. This avoids
+name clashes throughout the project. Never nest namespace more than two levels
+deep for the sake of simplicity and readability.
+
+Select elements from a namespace by utilizing the \texttt{using} \emph{declaration}
+or explicit qualification (for few - let's say 5 - elements). Use the
+\texttt{using} \emph{directive} for many names. But be careful about the scoping
+in both cases: do not use every \texttt{using} directive globally. All elements
+in a namespace need not be pulled in if only few elements are used.
+
+As mentioned in~\hyperref[par:indentation]{Indentation}: do not indent code inside
+namespaces.
+
+\example%
+\begin{multicols}{2}%
+\cppstylebad%
+\begin{lstlisting}
+// (global) using directive
+using namespace std;
+
+void foo () {
+  int input;
+  cout << "Give input: " << endl;
+  cin >> input;
+}
+\end{lstlisting}
+\vfill%
+
+\cppstylegood%
+\begin{lstlisting}
+void foo () {
+  // using declarations
+  using std::cout;
+  using std::endl;
+
+  int input = 0;
+  
+  cout << "Give input: " << endl;
+  std::cin >> input;
+}
+\end{lstlisting}
+\vfill%
+\end{multicols}%
+
+\begin{multicols}{2}%
+\cppstylebad%
+\begin{lstlisting}
+namespace foo {
+  // indentation
+  class bar {
+    // ...
+  };
+
+  namespace fop {
+    class bas {
+      // ...
+    };
+
+    // more than two namespace levels
+    namespace foq {
+      class bat {
+        // ...
+      }
+    } // namespace foq
+  } // namespace fop
+} // namespace foo
+\end{lstlisting}
+\vfill%
+
+\cppstylegood%
+\begin{lstlisting}
+namespace foo {
+
+class bar {
+  // ...
+};
+
+namespace fop {
+
+class bas {
+  // ...
+};
+
+class bat {
+  // ...
+};
+
+} // namespace fop
+
+} // namespace foo
+\end{lstlisting}
+\vfill%
+\end{multicols}%
+
+
+
+\end{document}%
