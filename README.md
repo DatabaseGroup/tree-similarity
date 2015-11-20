@@ -1,0 +1,1 @@
+Coding style: see [cpp-style-guide](https://frosch.cosy.sbg.ac.at/dkocher/cpp-style-guide) repository.
