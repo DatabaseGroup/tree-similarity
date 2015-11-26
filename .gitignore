@@ -1,0 +1,8 @@
+*.class
+*.war
+*.direcotry
+*.sw?
+*.png
+
+TreeSimilarity
+*~
