@@ -5,16 +5,20 @@
 
 // Node represents a single node in a tree.
 class Node {
-  // Node's label.
-  int label;
+
   // Node's children - a vector of pointers to children.
   std::vector<Node*> children;
 
   // Public methods.
   public:
+    // Node's label.
+    int id;
+    int label_id;
+    int childrenNumber;
+
     Node();
-    // Constructor - label as input.
-    Node(int val);
+    // Constructor - id and label as input.
+    Node(int label_id);
     //Node(const std::string& val);
     // Destructor which should delete a node and all its descendants.
     ~Node();
@@ -22,14 +26,16 @@ class Node {
     void add_child(Node* child);
     // Return node's children.
     std::vector<Node*> get_children();
-    // Return node's label.
-    int get_label();
+    // Return node's id.
+    int get_id();
+    // Return node's label_id.
+    int get_labelID();
     // Return subtree size rooted at this node, including this node.
     int get_subtree_size();
 
     //modified by Sibylle and Stefan
     //set the ID of a node
-    void set_label(int new_int);
+    void set_id(int new_int);
     //returns the i-th child of a node
     Node* get_child(int i);
     //returns the number of children

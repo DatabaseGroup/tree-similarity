@@ -4,19 +4,28 @@
 #include <ctime>
 
 //Node::Node(int val) :label(val) {}
-Node::Node(){this->label = -1;}
-Node::Node(int val)
+Node::Node(){
+    this->id = -1;
+    this->label_id = -1;
+    this->childrenNumber = 0;}
+Node::Node(int label_id)
 //Node::Node(const std::string& val)
 {
-    this->label = val;
+    this->label_id = label_id;
+    this->childrenNumber = 0;
 }
 
-int Node::get_label() {
-  return label;
+int Node::get_id() {
+  return id;
+}
+
+int Node::get_labelID(){
+    return label_id;
 }
 
 void Node::add_child(Node* child) {
   this->children.push_back(child);
+  this->childrenNumber ++;
 }
 
 std::vector<Node*> Node::get_children() {
@@ -43,7 +52,9 @@ Node::~Node() {
 //modiefied by Sibylle and Stefan
 int Node::get_children_number()
 {
-    return this->children.size();
+    //std::cout << "Aufruf childrennumber " << this->get_labelID() << " Children number: " << this->childrenNumber << std::endl;
+    //return this->children.size();
+    return childrenNumber;
 }
 
 Node* Node::get_child(int i)
@@ -51,9 +62,9 @@ Node* Node::get_child(int i)
     return this->children.at(i);
 }
 
-void Node::set_label(int new_int)
+void Node::set_id(int new_int)
 {
-    this->label = new_int;
+    this->id= new_int;
 }
 
 
@@ -75,7 +86,8 @@ void generate_full_tree(Node *root, int fixed_depth, int max_fanout) {
     // Create new node.
     // We have to use 'new' here. Otherwise as soon as we get out of this
     // method's scope, the object gets deleted.
-    Node *node = new Node(random_label);
+    //Node *node = new Node(i, random_label);
+    Node *node = new Node(random_label); // TODO geandert
     // Add node as a child of root.
     root->add_child(node);
     // Recursively generate consecutive levels.
@@ -85,7 +97,7 @@ void generate_full_tree(Node *root, int fixed_depth, int max_fanout) {
 
 void print_tree_labels(Node *node) {
   // Print the label of node.
-  std::cout << node->get_label() << "\n";
+  //std::cout << node->get_id() << "\n";
 
   // Recursively print labels of all descendants of node.
   std::vector<Node*> ch = node->get_children();
