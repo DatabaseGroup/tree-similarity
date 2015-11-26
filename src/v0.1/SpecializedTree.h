@@ -12,7 +12,6 @@ class SpecializedTree : public LblTree {
 		SpecializedTree(int t_id) : LblTree(t_id) {}
 		SpecializedTree(int t_id, int label_id) : LblTree(t_id, label_id) { }
 		~SpecializedTree() { }
-
 		const int getDummy() const;
 };
 

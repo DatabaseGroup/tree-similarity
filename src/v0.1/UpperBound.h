@@ -8,7 +8,6 @@ class UpperBound {
 	public:
 		UpperBound(){ };
 		virtual ~UpperBound() { };
-
 		int calculateSimplyUpperBound(LblTree* t1, LblTree* t2);
 };
 

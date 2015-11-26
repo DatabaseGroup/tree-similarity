@@ -1,10 +1,8 @@
 #include "StringEditDistance.h"
 
-
 int StringEditDistance::calculateSED(std::string s1, std::string s2)
 {
     int c, temp;
-
 
     int result[s1.length()][s2.length()];
     for(unsigned int i = 0; i < s1.length(); i++){
@@ -26,14 +24,5 @@ int StringEditDistance::calculateSED(std::string s1, std::string s2)
         }
     }
 
-    //Debug
-    /*
-    for(unsigned int i = 0; i < sizeof(result)/sizeof(*result); i++){
-        for(unsigned int j = 0; j < sizeof(result)/sizeof(*result); j++){
-            std::cout << result[i][j] << " ";
-        }
-        std::cout << std::endl;
-    }
-    */
     return result[s1.length()-1][s2.length()-1];
 }

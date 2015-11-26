@@ -10,7 +10,6 @@ class LblTree : public Node{
         static int nodeIDCounter;
 
 	public:
-
         int t_id;
         std::vector<Node*> tr_post;
         std::vector<Node*> leaves;

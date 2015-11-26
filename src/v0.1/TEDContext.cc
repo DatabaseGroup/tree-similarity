@@ -1,6 +1,5 @@
 #include "TEDContext.h"
 
-
 int TEDContext::execute(LblTree* t1, LblTree* t2, bool debug){
     return strategy->calculateDistance(t1,t2,debug);
 }
