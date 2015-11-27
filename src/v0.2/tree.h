@@ -9,7 +9,7 @@ template<class _node = node>
 class tree {
 private:
   _node* root;
-  std::vector<_node *> nodes;
+  std::vector<_node*> nodes;
 
 public:
   tree() {}
