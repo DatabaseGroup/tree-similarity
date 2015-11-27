@@ -27,7 +27,12 @@ public:
 
 /**
  * Represents the cost functions to be used for the distance computation.
- * Costs are generic for different node classes.
+ * Costs are generic for different node classes. A cost model has to provide
+ * three cost functions:
+ *  - ren(n1, n2) for rename costs between two nodes n1 and n2
+ *  - del(n) for deletion costs of a node n
+ *  - ins(n) for insertion costs of a node n
+ * All three cost functions must return an integer.
  */
 template<class _node>
 struct costs {
