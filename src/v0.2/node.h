@@ -11,18 +11,18 @@
 class node {
 private:
   std::string label;
-  std::vector<node>* children;
+  std::vector<node*> children;
 
 public:
   // Basic constructor
   node( std::string label = std::string(),
-        std::vector<node>* children = new std::vector<node>())
+        std::vector<node*> children = std::vector<node*>())
     : label(label), children(children)
   {  }
   
   // Getters
   std::string get_label() const { return label; }
-  std::vector<node>* get_children() const { return children; }
+  std::vector<node*> get_children() const { return children; }
 };
 
 /**
@@ -55,18 +55,18 @@ class custom_node {
 private:
   // custom label
   std::vector<std::string> label;
-  std::vector<custom_node>* children;
+  std::vector<custom_node*> children;
 
 public:
   // Basic constructor
   custom_node( std::vector<std::string> label = std::vector<std::string>(),
-        std::vector<custom_node>* children = new std::vector<custom_node>())
+        std::vector<custom_node*> children = std::vector<custom_node*>())
     : label(label), children(children)
   { }
 
   // Getters
   std::vector<std::string> get_label() const { return label; }
-  std::vector<custom_node>* get_children() const { return children; }
+  std::vector<custom_node*> get_children() const { return children; }
 };
 
 /**

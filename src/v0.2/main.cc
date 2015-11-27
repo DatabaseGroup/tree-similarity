@@ -5,11 +5,11 @@
 
 int main(int argc, char** argv) {
   node leaf_n1("Leaf node 1"), leaf_n2("Leaf node 2"), leaf_n3("Leaf node 3"),
-    parent("Parent node", new std::vector<node>({ leaf_n1, leaf_n2, leaf_n3 }));
+    parent("Parent node", std::vector<node*>({ &leaf_n1, &leaf_n2, &leaf_n3 }));
 
   custom_node leaf_cn1({"One", "Two"}), leaf_cn2({"Three", "Four", "Five"}),
     leaf_cn3({"Six", "Seven", "Eight", "Nine"}),
-    parent_c({"Ten"}, new std::vector<custom_node>({ leaf_cn1, leaf_cn2, leaf_cn3 }));
+    parent_c({"Ten"}, std::vector<custom_node*>({ &leaf_cn1, &leaf_cn2, &leaf_cn3 }));
   custom_costs<custom_node> cc;
 
   // standard nodes and standard cost model
