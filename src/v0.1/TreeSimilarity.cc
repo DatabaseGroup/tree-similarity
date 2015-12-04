@@ -1,7 +1,6 @@
 #include <iostream>
 #include "LblTree.h"
 #include "Node.h"
-#include "SpecializedTree.h"
 #include "UpperBound.h"
 #include "StringEditDistance.h"
 #include "TEDContext.h"
@@ -9,9 +8,6 @@
 using namespace std;
 
 int main(int argc, char** argv) {
-	//LblTree* t = new LblTree(11);
-	//t = new SpecializedTree(42);
-
 	//Create test-trees for simplyUpperBound
 	LblTree* t1 = new LblTree(1, 5);
 	t1->add_child(new Node(1));
