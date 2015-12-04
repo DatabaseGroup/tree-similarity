@@ -3,13 +3,19 @@
 
 #include <string>
 #include <iostream>
+#include "TreeEditDistance.h"
 
-class StringEditDistance {
+
+class StringEditDistance : public TreeEditDistance{
+    private:
+    std::vector<int> s1;
+    std::vector<int> s2;
+
 	public:
-		StringEditDistance(){ };
+		StringEditDistance(int ins, int del, int ren) :TreeEditDistance(ins,del,ren){}
 		virtual ~StringEditDistance() { };
 
-		int calculateSED(std::string, std::string);
+		int calculateDistance(LblTree*, LblTree*, bool);
 };
 
 #endif // StringEditDistance_H

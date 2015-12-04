@@ -31,10 +31,24 @@ int main(int argc, char** argv) {
     int sup = ub->calculateSimplyUpperBound(t1,t2);
     std::cout << "UpperBound t1->t2: " << sup << std::endl;
 
-    StringEditDistance* sed = new StringEditDistance();
+    StringEditDistance* sed = new StringEditDistance(1,1,1);
 
     int sedResult;
-    sedResult = sed->calculateSED("mond","moon"); //should be 2
+    LblTree* string1 = new LblTree(3,13);
+    Node* char2 = new Node(15);
+    Node* char3 = new Node(14);
+    char3->add_child(new Node(4));
+    char2->add_child(char3);
+    string1->add_child(char2);
+
+    LblTree* string2 = new LblTree(4, 13);
+    Node* char22 = new Node(15);
+    Node* char33 = new Node(15);
+    char33->add_child(new Node(14));
+    char22->add_child(char33);
+    string2->add_child(char22);
+
+    sedResult = sed->calculateDistance(string1,string2, false); //should be 2
     std::cout << "String Edit Distance: " << sedResult << std::endl;
 
     TEDContext* context = new TEDContext();
