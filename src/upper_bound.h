@@ -1,14 +1,13 @@
-#ifndef UpperBound_H
-#define UpperBound_H
+#ifndef UPPER_BOUND_H
+#define UPPER_BOUND_H
 
-#include "LblTree.h"
+#include "lbl_tree.h"
 
-class UpperBound {
-
-	public:
-		UpperBound(){ };
-		virtual ~UpperBound() { };
-		int calculateSimplyUpperBound(LblTree* t1, LblTree* t2);
+class upper_bound {
+public:
+	upper_bound () { };
+	virtual ~upper_bound () { };
+	int calculate_simply_upper_bound (lbl_tree* t1, lbl_tree* t2);
 };
 
-#endif // UpperBound_H
+#endif // UPPER_BOUND_H
