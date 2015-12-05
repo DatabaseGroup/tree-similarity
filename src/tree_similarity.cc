@@ -1,55 +1,57 @@
 #include <iostream>
-#include "LblTree.h"
-#include "Node.h"
-#include "UpperBound.h"
-#include "StringEditDistance.h"
-#include "TEDContext.h"
+#include "lbl_tree.h"
+#include "node.h"
+#include "upper_bound.h"
+#include "string_edit_distance.h"
+#include "ted_context.h"
 
 using namespace std;
 
 int main(int argc, char** argv) {
 	//Create test-trees for simplyUpperBound
-	LblTree* t1 = new LblTree(1, 5);
-	t1->add_child(new Node(1));
-	Node* middleChild = new Node(3);
-	middleChild->add_child(new Node(2));
+	lbl_tree* t1 = new lbl_tree(1, 5);
+  node* middleChild = new node(3);
+	
+  t1->add_child(new node(1));
+	middleChild->add_child(new node(2));
 	t1->add_child(middleChild);
-	t1->add_child(new Node(4));
+	t1->add_child(new node(4));
 
-    LblTree* t2 = new LblTree(13, 5);
-	Node* leftChild = new Node(4);
-    leftChild->add_child(new Node(1));
-  	leftChild->add_child(new Node(2));
-  	leftChild->add_child(new Node(3));
-  	t2->add_child(leftChild);
+  lbl_tree* t2 = new lbl_tree(13, 5);
+	node* leftChild = new node(4);
+  
+  leftChild->add_child(new node(1));
+  leftChild->add_child(new node(2));
+  leftChild->add_child(new node(3));
+  t2->add_child(leftChild);
 
-    UpperBound* ub = new UpperBound();
-    int sup = ub->calculateSimplyUpperBound(t1,t2);
-    std::cout << "UpperBound t1->t2: " << sup << std::endl;
+  upper_bound* ub = new upper_bound();
+  int sup = ub->calculate_simply_upper_bound(t1, t2);
+  std::cout << "UpperBound t1->t2: " << sup << std::endl;
 
-    StringEditDistance* sed = new StringEditDistance(1,1,1);
+  string_edit_distance* sed = new string_edit_distance(1, 1, 1);
 
-    int sedResult;
-    LblTree* string1 = new LblTree(3,13);
-    Node* char2 = new Node(15);
-    Node* char3 = new Node(14);
-    char3->add_child(new Node(4));
-    char2->add_child(char3);
-    string1->add_child(char2);
+  int sed_result;
+  lbl_tree* string1 = new lbl_tree(3,13);
+  node* char2 = new node(15);
+  node* char3 = new node(14);
+  char3->add_child(new node(4));
+  char2->add_child(char3);
+  string1->add_child(char2);
 
-    LblTree* string2 = new LblTree(4, 13);
-    Node* char22 = new Node(15);
-    Node* char33 = new Node(15);
-    char33->add_child(new Node(14));
-    char22->add_child(char33);
-    string2->add_child(char22);
+  lbl_tree* string2 = new lbl_tree(4, 13);
+  node* char22 = new node(15);
+  node* char33 = new node(15);
+  char33->add_child(new node(14));
+  char22->add_child(char33);
+  string2->add_child(char22);
 
-    sedResult = sed->calculateDistance(string1,string2, false); //should be 2
-    std::cout << "String Edit Distance: " << sedResult << std::endl;
+  sed_result = sed->calculate_distance(string1, string2, false); //should be 2
+  std::cout << "String Edit Distance: " << sed_result << std::endl;
 
-    TEDContext* context = new TEDContext();
-    context->setStrategy(TEDContext::ZS,1,1,1); //Zhang and Shasha cost = 1 (insert), 1 (delete), 1 (rename)
-    std::cout << "TED = " << context->execute(t1,t2,false);
+  ted_context* context = new ted_context();
+  context->set_strategy(ted_context::ZS, 1, 1, 1); //Zhang and Shasha cost = 1 (insert), 1 (delete), 1 (rename)
+  std::cout << "TED = " << context->execute(t1, t2, false);
 
 	return 0;
 }
