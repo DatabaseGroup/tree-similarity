@@ -1,17 +1,16 @@
-#include "TEDContext.h"
+#include "ted_context.h"
 
-int TEDContext::execute(LblTree* t1, LblTree* t2, bool debug){
-    return strategy->calculateDistance(t1,t2,debug);
+int ted_context::execute(lbl_tree* t1, lbl_tree* t2, bool debug){
+  return strategy->calculate_distance(t1, t2, debug);
 }
 
-void TEDContext::setStrategy(int type, int ins, int del, int ren){
-    //delete strategy;
-    if(type == ZS){
-        strategy = new ZhangShasha(ins, del, ren);
-    }
+void ted_context::set_strategy(int type, int ins, int del, int ren){
+  //delete strategy;
+  if(type == ZS){
+    strategy = new zhang_shasha(ins, del, ren);
+  }
 }
 
-TreeEditDistance* TEDContext::getStrategy(){
-    return strategy;
+tree_edit_distance* ted_context::get_strategy(){
+  return strategy;
 }
-

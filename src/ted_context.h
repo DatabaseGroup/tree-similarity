@@ -1,26 +1,22 @@
-#ifndef TEDContext_H
-#define TEDContext_H
+#ifndef TED_CONTEXT_H
+#define TED_CONTEXT_H
 
-#include "ZhangShasha.h"
+#include "zhang_shasha.h"
 
+class ted_context {
+private:
+  tree_edit_distance *strategy;
 
-class TEDContext{
+public:
+  enum strategy_type {
+  ZS
+  };
+  ted_context () { };
+  ~ted_context () { };
 
-    private:
-        TreeEditDistance *strategy;
-
-    public:
-        TEDContext(){};
-        ~TEDContext(){};
-
-        int execute(LblTree*, LblTree*, bool);
-        void setStrategy(int, int, int, int);
-        TreeEditDistance* getStrategy();
-
-         enum StrategyType
-        {
-            ZS
-        };
+  int execute(lbl_tree*, lbl_tree*, bool);
+  void set_strategy(int, int, int, int);
+  tree_edit_distance* get_strategy();
 };
 
-#endif // TEDContext_H
+#endif // TED_CONTEXT_H
