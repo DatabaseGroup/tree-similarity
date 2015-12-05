@@ -1,33 +1,33 @@
-#ifndef LBLTREE_H
-#define LBLTREE_H
+#ifndef LBL_TREE_H
+#define LBL_TREE_H
 
-#include "Node.h"
+#include "node.h"
 
 //TODO Brackets-Parsen
 
-class LblTree : public Node{
-	protected:
-        static int nodeIDCounter;
+class lbl_tree : public node {
+protected:
+  static int node_id_counter;
 
-	public:
-        int t_id;
-        std::vector<Node*> tr_post;
-        std::vector<Node*> leaves;
+public:
+  int t_id;
+  std::vector<node*> tr_post;
+  std::vector<node*> leaves;
 
-		LblTree() : Node() {this->t_id = 0;}
-		LblTree(int t_id) : Node() {this->t_id = t_id;}
-		LblTree(int t_id, int label_id) : Node(label_id)
-		{
-            this->t_id = t_id;
-        };
-		virtual ~LblTree() { };
-		const int getId() const;
+  lbl_tree () : node () { t_id = 0; }
+  lbl_tree (int t_id) : node() { this->t_id = t_id; }
+  lbl_tree (int t_id, int label_id) : node(label_id) {
+    this->t_id = t_id;
+  };
+	
+  virtual ~lbl_tree() { };
+  const int get_id() const;
 
-		std::vector<Node*> generatePostorder();
-        void postorder(Node*);
+  std::vector<node*> generate_postorder();
+  void postorder(node*);
 
-        void setLeaves(LblTree*, std::vector<Node*>&);
-        void makeLeaves();
+  void set_leaves(lbl_tree*, std::vector<node*>&);
+  void make_leaves();
 };
 
-#endif // LBLTREE_H
+#endif // LBL_TREE_H

@@ -1,42 +1,43 @@
-#include "LblTree.h"
+#include "lbl_tree.h"
 
-int LblTree::nodeIDCounter = 0;
+int lbl_tree::node_id_counter = 0;
 
-const int LblTree::getId() const {
+const int lbl_tree::get_id() const {
 	return id;
 }
 
-std::vector<Node*> LblTree::generatePostorder(){
-    nodeIDCounter = 1;
-    LblTree::postorder((Node*) this);
-    return tr_post;
+std::vector<node*> lbl_tree::generate_postorder () {
+  node_id_counter = 1;
+  lbl_tree::postorder((node*)this);
+  return tr_post;
 }
 
-void LblTree::postorder(Node* root){
-    if(root){ //not null
-        if(root->get_children_number() > 0){
-            for(int i = 0; i < root->get_children_number(); i++){
-                LblTree::postorder(root->get_child(i));
-            }
-        }
-        root->id = nodeIDCounter;
-        nodeIDCounter++;
-        tr_post.push_back(root);
+void lbl_tree::postorder (node* root) {
+  if (root) { //not null
+    if (root->get_children_number() > 0) {
+      for (int i = 0; i < root->get_children_number(); i++) {
+        lbl_tree::postorder(root->get_child(i));
+      }
     }
-}
-void LblTree::makeLeaves(){
-    LblTree::setLeaves(this, leaves);
+
+    root->set_id(node_id_counter);
+    ++node_id_counter;
+    tr_post.push_back(root);
+  }
 }
 
-void LblTree::setLeaves(LblTree* root, std::vector<Node*>& leaves){
-    if(root){ //not null
-        if(root->get_children_number() > 0){
-            for(int i = 0; i < root->get_children_number(); i++){
-                root->setLeaves((LblTree*)root->get_child(i), leaves);
-            }
-        }else{
-            leaves.push_back(root);
-        }
+void lbl_tree::make_leaves () {
+  set_leaves(this, leaves);
+}
+
+void lbl_tree::set_leaves (lbl_tree* root, std::vector<node*>& leaves) {
+  if (root) { //not null
+    if (root->get_children_number() > 0) {
+      for (int i = 0; i < root->get_children_number(); i++) {
+        root->set_leaves((lbl_tree*)root->get_child(i), leaves);
+      }
+    } else {
+      leaves.push_back(root);
     }
+  }
 }
-
