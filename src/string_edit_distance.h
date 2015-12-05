@@ -1,21 +1,21 @@
-#ifndef StringEditDistance_H
-#define StringEditDistance_H
+#ifndef STRING_EDIT_DISTANCE_H
+#define STRING_EDIT_DISTANCE_H
 
 #include <string>
 #include <iostream>
-#include "TreeEditDistance.h"
+#include "tree_edit_distance.h"
 
+class string_edit_distance : public tree_edit_distance {
+private:
+  std::vector<int> s1;
+  std::vector<int> s2;
 
-class StringEditDistance : public TreeEditDistance{
-    private:
-    std::vector<int> s1;
-    std::vector<int> s2;
+public:
+  string_edit_distance (int ins, int del, int ren)
+    : tree_edit_distance(ins, del, ren) { }
+  virtual ~string_edit_distance () { };
 
-	public:
-		StringEditDistance(int ins, int del, int ren) :TreeEditDistance(ins,del,ren){}
-		virtual ~StringEditDistance() { };
-
-		int calculateDistance(LblTree*, LblTree*, bool);
+  int calculate_distance(lbl_tree*, lbl_tree*, bool);
 };
 
-#endif // StringEditDistance_H
+#endif // STRING_EDIT_DISTANCE_H
