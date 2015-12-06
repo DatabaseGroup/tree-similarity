@@ -2,9 +2,9 @@
 #define ZHANG_SHASHA_H
 
 #include <vector>
-#include "tree_edit_distance.h"
+#include "tree_edit_distance_strategy.h"
 
-class zhang_shasha : public tree_edit_distance {
+class zhang_shasha : public tree_edit_distance_strategy {
 private:
   std::vector<node*> tr_post1;
   std::vector<node*> tr_post2;
@@ -26,7 +26,7 @@ public:
   int zaehler; //debug
 
   zhang_shasha (int ins, int del, int ren)
-    : tree_edit_distance(ins, del, ren) { }
+    : tree_edit_distance_strategy(ins, del, ren) { }
   ~zhang_shasha ();
 
   int calculate_distance (lbl_tree*, lbl_tree*, bool);
