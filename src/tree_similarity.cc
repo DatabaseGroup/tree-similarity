@@ -3,12 +3,10 @@
 #include "node.h"
 #include "upper_bound.h"
 #include "string_edit_distance.h"
-#include "ted_context.h"
-
-using namespace std;
+#include "tree_edit_distance.h"
 
 int main(int argc, char** argv) {
-	//Create test-trees for simplyUpperBound
+	// Create test-trees for simplyUpperBound
 	lbl_tree* t1 = new lbl_tree(1, 5);
   node* middleChild = new node(3);
 	
@@ -49,8 +47,8 @@ int main(int argc, char** argv) {
   sed_result = sed->calculate_distance(string1, string2, false); //should be 2
   std::cout << "String Edit Distance: " << sed_result << std::endl;
 
-  ted_context* context = new ted_context();
-  context->set_strategy(ted_context::ZS, 1, 1, 1); //Zhang and Shasha cost = 1 (insert), 1 (delete), 1 (rename)
+  tree_edit_distance* context = new tree_edit_distance(new zhang_shasha(1, 1, 1));
+  //Zhang and Shasha cost = 1 (insert), 1 (delete), 1 (rename)
   std::cout << "TED = " << context->execute(t1, t2, false);
 
 	return 0;
