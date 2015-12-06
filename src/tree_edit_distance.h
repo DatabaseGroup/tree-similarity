@@ -1,17 +1,19 @@
 #ifndef TREE_EDIT_DISTANCE_H
 #define TREE_EDIT_DISTANCE_H
 
-#include "lbl_tree.h"
+#include "zhang_shasha.h"
 
 class tree_edit_distance {
-public:
-  int w_insert, w_delete, w_rename;
+private:
+  tree_edit_distance_strategy* teds;
 
-  tree_edit_distance (int ins, int del, int ren)
-    : w_insert(ins), w_delete(del), w_rename(ren) { }
-  
-  ~tree_edit_distance () { };
-  virtual int calculate_distance (lbl_tree*, lbl_tree*, bool) = 0;
+public:
+  tree_edit_distance (tree_edit_distance_strategy* teds);
+  ~tree_edit_distance () { }
+
+  int execute (lbl_tree* t1, lbl_tree* t2, bool debug);
+  void set_strategy (tree_edit_distance_strategy* teds);
+  tree_edit_distance_strategy* get_strategy ();
 };
 
 #endif // TREE_EDIT_DISTANCE_H
