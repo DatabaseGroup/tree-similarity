@@ -3,6 +3,8 @@
 #include <iostream>
 #include <ctime>
 
+int node::node_id_counter = 1;
+
 void node::add_child (node* child) {
   children.push_back(child);
   ++children_number;
@@ -29,6 +31,45 @@ node::~node () {
   
   // Clear vector to avoid dangling pointers
   children.clear();
+}
+
+std::vector<node*> node::generate_postorder () {
+  node_id_counter = 1;
+  postorder(this);
+  return tr_post;
+}
+
+void node::postorder (node* root) {
+  // TODO: REVISE
+  // As far as I understand it, this approach alters the ids of the original nodes
+
+  if (root) { //not null
+    if (root->get_children_number() > 0) {
+      for (int i = 0; i < root->get_children_number(); ++i) {
+        postorder(root->get_child(i));
+      }
+    }
+
+    root->set_id(node_id_counter);
+    ++node_id_counter;
+    tr_post.push_back(root);
+  }
+}
+
+void node::make_leaves () {
+  set_leaves(this, leaves);
+}
+
+void node::set_leaves (node* root, std::vector<node*>& leaves) {
+  if (root) { //not null
+    if (root->get_children_number() > 0) {
+      for (int i = 0; i < root->get_children_number(); ++i) {
+        root->set_leaves(root->get_child(i), leaves);
+      }
+    } else {
+      leaves.push_back(root);
+    }
+  }
 }
 
 void generate_full_tree (node *root, int fixed_depth, int max_fanout) {
