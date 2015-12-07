@@ -77,10 +77,15 @@ struct costs {
   int ren (_node n1, _node n2) { return 1; }
 
   // Basic delete cost function
-  int del (_node n) { return 2; }
+  int del (_node n) { return 1; }
 
   // Basic insert cost function
-  int ins (_node n) { return 3; }
+  int ins (_node n) { return 1; }
+
+  // TODO: dicuss zhang_shasha how to use with arguments
+  int ren() { return 1; }
+  int del() { return 1; }
+  int ins() { return 1; }
 };
 
 /**
@@ -115,13 +120,18 @@ public:
 template<class _node>
 struct custom_costs {
   // custom rename cost function
-  int ren (_node n1, _node n2) { return 11; }
+  int ren (_node n1, _node n2) { return 2; }
 
   // custom delete cost function
-  int del (_node n) { return 12; }
+  int del (_node n) { return 2; }
   
   // custom insert cost function
-  int ins (_node n) { return 13; }
+  int ins (_node n) { return 2; }
+
+  // TODO: discuss zhang_shasha how to use with arguments
+  int ren () { return 2; }
+  int del () { return 2; }
+  int ins () { return 2; }
 };
 
 #endif // NODE_H
