@@ -17,9 +17,14 @@ protected:
   int children_number;
 
 public:
+  static int node_id_counter; // TODO: static necessary?
+  std::vector<node*> tr_post;
+  std::vector<node*> leaves;
+
   // Basic constructor
   node () : id(-1), label_id(-1), children_number(0) { } 
   node (int label_id) : label_id(label_id) { }
+  node (int id, int label_id) : id(id), label_id(label_id) { }
 
   // Delete a node and all its descendants
   ~node ();
@@ -38,6 +43,13 @@ public:
 
   void set_id (int id) { this->id = id; }
   node* get_child (int i) { return children[i]; }
+
+  std::vector<node*> generate_postorder ();
+  void postorder (node* root);
+
+  void set_leaves (node* t1, std::vector<node*>& );
+  void make_leaves ();
+
 };
 
 // Generate a simple tree recursively.
