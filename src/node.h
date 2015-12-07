@@ -44,6 +44,8 @@ public:
   void set_id (int id) { this->id = id; }
   node* get_child (int i) { return children[i]; }
 
+  // maybe modularize the following 4 methods to keep node class as short as
+  // possible
   std::vector<node*> generate_postorder ();
   void postorder (node* root);
 
