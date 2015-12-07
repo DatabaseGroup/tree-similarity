@@ -5,7 +5,7 @@
 #include "zhang_shasha.h"
 
 int main(int argc, char** argv) {
-	// Create test-trees for simplyUpperBound
+	// create test-trees for simplyUpperBound
 	node* t1 = new node(1, 5);
   node* middleChild = new node(3);
 	
@@ -41,16 +41,11 @@ int main(int argc, char** argv) {
   char22->add_child(char33);
   string2->add_child(char22);
 
-  //custom_node* t3 = new custom_node(
-
   //should be 2
   sed_result = sed::compute_string_edit_distance<node, costs<node>>(string1, string2);
   std::cout << "String Edit Distance: " << sed_result << std::endl;
 
-  //tree_edit_distance* context = new zhang_shasha(1, 1, 1);
-  //Zhang and Shasha cost = 1 (insert), 1 (delete), 1 (rename)
-  //std::cout << "TED = " << context->execute(t1, t2);i
-
+  // Zhang and Shasha cost = 1 (insert), 1 (delete), 1 (rename)
   // compute distance using basic nodes and basic cost model
   // no need to generate basic cost model since it is set as default template
   // parameter
