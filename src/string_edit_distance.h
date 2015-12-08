@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "node.h"
+#include "array_2d.h"
 
 namespace sed {
 
@@ -14,8 +15,8 @@ namespace sed {
  * type is specified as first template parameter, the cost model type as second
  * template parameter.
  */
-template<class _node = node, class _costs = costs<_node>>
-int compute_string_edit_distance (_node* t1, _node* t2, _costs c = _costs()) {
+template<class _node = node>
+int compute_string_edit_distance (_node* t1, _node* t2) {
   std::vector<int> s1, s2;
   int c0 = 0, temp = 0;
 
@@ -49,7 +50,8 @@ int compute_string_edit_distance (_node* t1, _node* t2, _costs c = _costs()) {
   }
 
   //calculate string edit distance
-  int result[t1->get_subtree_size()][t2->get_subtree_size()];
+  array_2d<int> result(t1->get_subtree_size(), t2->get_subtree_size());
+
   for (int i = 0; i < t1->get_subtree_size(); ++i) {
     result[i][0] = i;
   }
@@ -72,6 +74,6 @@ int compute_string_edit_distance (_node* t1, _node* t2, _costs c = _costs()) {
   return result[t1->get_subtree_size() - 1][t2->get_subtree_size() - 1];
 }
 
-};
+}
 
 #endif // STRING_EDIT_DISTANCE_H
