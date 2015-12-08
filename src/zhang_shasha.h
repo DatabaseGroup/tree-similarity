@@ -119,6 +119,6 @@ int compute_zhang_shasha (_node* t1, _node* t2, _costs c = _costs()) {
   return td[tr_post1.size()][tr_post2.size()];
 }
 
-};
+}
 
 #endif // ZHANG_SHASHA_H

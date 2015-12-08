@@ -52,4 +52,4 @@ std::vector<int> kr (std::vector<int>& l, int leaf_count) {
   return kr;
 }
 
-};
+}
