@@ -5,7 +5,7 @@
 #include "string_edit_distance.h"
 #include "zhang_shasha.h"
 
-int main(int argc, char** argv) {
+int main () {
 	// create test-trees for simplyUpperBound
 	node* t1 = new node(1, 5);
   node* middle_child = new node(3);
@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
 
   //should be 2
   sed_result =
-    sed::compute_string_edit_distance<node, costs<node>>(string1, string2);
+    sed::compute_string_edit_distance<node>(string1, string2);
   std::cout << "String Edit Distance: " << sed_result << std::endl;
 
   // Zhang and Shasha cost = 1 (insert), 1 (delete), 1 (rename)
