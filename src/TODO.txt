@@ -15,3 +15,6 @@ node:
     Do they alter the original tree rooted at root?
   - Discuss cost struct functions (arguments necessary or not?)
 
+string_edit_distance:
+  - Documentation
+
