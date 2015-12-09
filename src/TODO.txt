@@ -18,3 +18,5 @@ node:
 string_edit_distance:
   - Documentation
 
+upper_bound:
+  - Same interface as zhang_shasha (template function) instead of a class?
