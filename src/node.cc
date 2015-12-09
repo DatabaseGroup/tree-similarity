@@ -3,7 +3,6 @@
 #include <iostream>
 #include <ctime>
 
-// Constructor(s)
 node::node (int id, int label_id, int children_number)
   : id(id), label_id(label_id), children_number(children_number) { }
 node::node (int label_id)
@@ -11,7 +10,6 @@ node::node (int label_id)
 node::node (int id, int label_id)
   : id(id), label_id(label_id) { }
 
-// Destructor(s)
 node::~node () {
   // delete all children nodes
   for ( std::vector<node*>::iterator node_it = children.begin();
@@ -24,34 +22,28 @@ node::~node () {
   children.clear();
 }
 
-// Getter id
 int node::get_id () const {
   return id;
 }
 
-// Getter label_id
 int node::get_label_id () const {
   return label_id;
 }
 
-// Getter children
 std::vector<node*> node::get_children () const {
   return children;
 }
 
-// Getter children_number
 int node::get_children_number () const {
   return children_number;
 }
 
-// Add a child at last position
 void node::add_child (node* child) {
   children.push_back(child);
   ++children_number;
 }
 
-// Get subtree size rooted at this node (including this node)
-int node::get_subtree_size () {
+int node::get_subtree_size () const {
   int descendants_sum = 1;
   // Sum up sizes of subtrees rooted at child nodes (number of descendants)
   for ( std::vector<node*>::const_iterator node_it = children.cbegin();
@@ -63,17 +55,46 @@ int node::get_subtree_size () {
   return descendants_sum;
 }
 
+void node::set_id(int id) {
+  this->id = id;
+}
+
+node* node::get_child(int position) const {
+  return children[position];
+}
+
+void node::make_leaves () {
+  set_leaves(this, leaves);
+}
+
+void node::set_leaves (node* root, std::vector<node*>& leaves) {
+  if (root) {
+    if (root->get_children_number() > 0) {
+      for (int i = 0; i < root->get_children_number(); ++i) {
+        root->set_leaves(root->get_child(i), leaves);
+      }
+    } else {
+      leaves.push_back(root);
+    }
+  }
+}
+
 std::vector<node*>* generate_postorder (node* root) {
   int node_id_counter = 1;
+  // Heap allocation
   std::vector<node*>* tr_post = new std::vector<node*>();
+  
+  // Recursively traverse tree in postorder
   postorder(root, tr_post, &node_id_counter);
+
   return tr_post;
 }
 
 void postorder (node* root, std::vector<node*>* tr_post,
   int* node_id_counter)
 {
-  if (root) { //not null
+  if (root) {
+    // traverse children first
     if (root->get_children_number() > 0) {
       for (int i = 0; i < root->get_children_number(); ++i) {
         postorder(root->get_child(i), tr_post, node_id_counter);
@@ -83,22 +104,6 @@ void postorder (node* root, std::vector<node*>* tr_post,
     root->set_id(*node_id_counter);
     ++(*node_id_counter);
     tr_post->push_back(root);
-  }
-}
-
-void node::make_leaves () {
-  set_leaves(this, leaves);
-}
-
-void node::set_leaves (node* root, std::vector<node*>& leaves) {
-  if (root) { //not null
-    if (root->get_children_number() > 0) {
-      for (int i = 0; i < root->get_children_number(); ++i) {
-        root->set_leaves(root->get_child(i), leaves);
-      }
-    } else {
-      leaves.push_back(root);
-    }
   }
 }
 

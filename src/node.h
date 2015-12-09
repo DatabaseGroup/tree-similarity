@@ -47,18 +47,18 @@ public:
   // Get subtree size rooted at this node.
   //
   // Return:  The size of the subtree rooted at this node (including this node)
-  int get_subtree_size ();
+  int get_subtree_size () const;
 
   // Setter id
-  void set_id (int id) { this->id = id; }
+  void set_id (int id);
 
-  // Get a child node at a given position.
+  // Get a pointer to a child at a given position.
   //
-  // Params:  i Position of the child
+  // Params:  position Position of the child in the vector
   //
   // Return:  A pointer to the child at position i if it exists or nullptr
   //          otherwise
-  node* get_child (int i) { return children[i]; }
+  node* get_child (int position) const;
 
   void make_leaves ();
   void set_leaves (node* root, std::vector<node*>& leaves);
