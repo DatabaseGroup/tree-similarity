@@ -18,8 +18,10 @@ public:
   custom_node (std::vector<std::string> label,
     std::vector<custom_node*> children);
 
-  // Getters
+  // Getter label
   std::vector<std::string> get_label () const;
+  
+  // Getter children
   std::vector<custom_node*> get_children () const;
 };
 
@@ -29,17 +31,29 @@ public:
 // classes.
 template<class _node>
 struct custom_costs {
-  // custom rename cost function
+  // Basic rename cost function
+  //
+  // Params:  n1  The node to be renamed
+  //          n2  The node having the desired name
+  //
+  // Return:  The cost of renaming n1 to n2
   int ren (_node n1, _node n2) { return 2; }
-
-  // custom delete cost function
+  
+  // Basic delete cost function
+  //
+  // Params:  n The node to be deleted
+  //
+  // Return:  The cost of deleting n
   int del (_node n) { return 2; }
   
-  // custom insert cost function
+  // Basic insert cost function
+  //
+  // Params:  n The node to be inserted
+  //
+  // Return:  The cost of inserting n
   int ins (_node n) { return 2; }
 
   // Dummy methods
-  // TODO: discuss zhang_shasha how to use with arguments
   int ren () { return 2; }
   int del () { return 2; }
   int ins () { return 2; }
