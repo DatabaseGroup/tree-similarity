@@ -13,4 +13,5 @@ node:
     modularize it out of the node class
   - Discuss the currently implemented generate_postorder and postorder approaches.
     Do they alter the original tree rooted at root?
+  - Discuss cost struct functions (arguments necessary or not?)
 
