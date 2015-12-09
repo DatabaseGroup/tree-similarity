@@ -4,10 +4,8 @@
 #include <vector>
 #include <string>
 
-/**
- * Represents a node in a tree. A node label is a string and the children
- * are stored in an array of pointers to nodes.
- */
+// Represents a node in a tree. A node label is a string and the children
+// are stored in an array of pointers to nodes.
 class node {
 private:
   int id;
@@ -30,10 +28,13 @@ public:
   
   // Get id
   int get_id () const;
+
   // Get label_id
   int get_label_id () const;
+
   // Get children
   std::vector<node*> get_children () const;
+
   // Get children_number
   int get_children_number () const;
 
@@ -135,7 +136,6 @@ struct costs {
   int ins (_node n) { return 1; }
 
   // Dummy methods
-  // TODO: dicuss zhang_shasha how to use with arguments
   int ren() { return 1; }
   int del() { return 1; }
   int ins() { return 1; }
