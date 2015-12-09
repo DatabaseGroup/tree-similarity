@@ -73,9 +73,6 @@ std::vector<node*>* generate_postorder (node* root) {
 void postorder (node* root, std::vector<node*>* tr_post,
   int* node_id_counter)
 {
-  // TODO: REVISE
-  // As far as I understand it, this approach alters the ids of the original nodes
-
   if (root) { //not null
     if (root->get_children_number() > 0) {
       for (int i = 0; i < root->get_children_number(); ++i) {

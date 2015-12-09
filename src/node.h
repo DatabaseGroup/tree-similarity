@@ -60,12 +60,27 @@ public:
   //          otherwise
   node* get_child (int i) { return children[i]; }
 
-  void set_leaves (node* t1, std::vector<node*>& leaves);
   void make_leaves ();
-
+  void set_leaves (node* root, std::vector<node*>& leaves);
 };
 
+// Generates the postorder for a tree rooted at a given root node.
+//
+// Params:  root  The root node of the tree to be 'postorderified'
+//
+// Return:  A pointer to a vector of node pointers of the 'postorderified' tree
 std::vector<node*>* generate_postorder (node* root);
+
+// Recursively traverses the subtree rooted at a given root.
+//
+// Params:  root            The root node of the subtree to be traversed in
+//                          postorder
+//          tr_post         A pointer to a vector which is filled with the
+//                          traverse nodes in postorder
+//          node_id_counter A pointer to the counter which is incremented each
+//                          time a node is added to the resulting vector
+//
+// Return:  None (the result is stored in tr_post, which is altered)
 void postorder(node* root, std::vector<node*>* tr_post, int* node_id_counter);
 
 // Generate a simple tree recursively.
