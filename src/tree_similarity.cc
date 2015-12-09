@@ -24,7 +24,7 @@ int main () {
   t2->add_child(left_child);
 
   upper_bound* ub = new upper_bound();
-  int sup = ub->calculate_simply_upper_bound(t1, t2);
+  int sup = ub->compute_simple_upper_bound(t1, t2);
   std::cout << "UpperBound t1->t2: " << sup << std::endl;
 
   int sed_result;
