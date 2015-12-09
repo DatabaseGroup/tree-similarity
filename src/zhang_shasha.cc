@@ -16,7 +16,7 @@ int cost_rename;
 
 void lmld (node* root, std::vector<int> &lm) {
   node* tempNode;
-  for (int i = 1; i <= root->get_children_number(); i++) {
+  for (int i = 1; i <= root->get_children_number(); ++i) {
     tempNode = root->get_children().at(i-1);
     lmld(tempNode, lm);
   }
@@ -33,7 +33,7 @@ std::vector<int> kr (std::vector<int>& l, int leaf_count) {
   std::vector<int> kr(leaf_count + 1);
   std::vector<int> visit(l.capacity());
 
-  for (unsigned int i = 0; i < visit.capacity(); i++) {
+  for (unsigned int i = 0; i < visit.capacity(); ++i) {
     visit[i] = 0;
   }
 

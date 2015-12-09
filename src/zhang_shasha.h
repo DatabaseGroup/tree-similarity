@@ -26,16 +26,16 @@ void forest_dist(int i, int j, _costs c = _costs()) {
 
   fd[lm1[i] - 1][lm2[j] - 1] = 0;
 
-  for (int di = lm1[i]; di <= i; di++) {
+  for (int di = lm1[i]; di <= i; ++di) {
     fd[di][lm2[j] - 1] = fd[di - 1][lm2[j] - 1] + c.del();
   }
 
-  for (int dj = lm2[j]; dj<= j; dj++) {
+  for (int dj = lm2[j]; dj<= j; ++dj) {
     fd[lm1[i] - 1][dj] = fd[lm1[i] - 1][dj - 1] + c.ins();
   }
 
-  for (int di = lm1[i]; di <= i; di++) {
-    for (int dj = lm2[j]; dj <= j; dj++) {
+  for (int di = lm1[i]; di <= i; ++di) {
+    for (int dj = lm2[j]; dj <= j; ++dj) {
       if (lm1[di] == lm1[i] && lm2[dj] == lm2[j]) {
         cost_rename =
           ((*tr_post1)[di - 1]->get_label_id() == (*tr_post2)[dj - 1]->get_label_id())
@@ -58,12 +58,10 @@ void forest_dist(int i, int j, _costs c = _costs()) {
   }
 }
 
-/**
- * Generic function to compute the distance between two trees under a specified
- * cost model. Each tree is represented by its respective root node. A root node
- * type is specified as first template parameter, the cost model type as second
- * template parameter.
- */
+// Generic function to compute the distance between two trees under a specified
+// cost model. Each tree is represented by its respective root node. A root node
+// type is specified as first template parameter, the cost model type as second
+// template parameter.
 template<class _node = node, class _costs = costs<_node>>
 int compute_zhang_shasha (_node* t1, _node* t2, _costs c = _costs()) {
   tr_post1 = generate_postorder(t1);
@@ -110,8 +108,8 @@ int compute_zhang_shasha (_node* t1, _node* t2, _costs c = _costs()) {
   kr2 = kr(lm2, t2->leaves.size());
 
   //compute the distance
-  for (unsigned int x = 1; x < kr1.size(); x++) {
-    for (unsigned int y = 1; y < kr2.size(); y++) {
+  for (unsigned int x = 1; x < kr1.size(); ++x) {
+    for (unsigned int y = 1; y < kr2.size(); ++y) {
       forest_dist(kr1[x], kr2[y], c);
     }
   }
