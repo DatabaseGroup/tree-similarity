@@ -1,0 +1,9 @@
+General:
+  - Directory structure
+  - Makefile(s) according to directory structure
+  - Use references where possible (no copying!)
+
+node:
+  - Keep it as short as possible to minimize user effort for a custom node class
+  - Change label_id to a string label (default node class)
+
