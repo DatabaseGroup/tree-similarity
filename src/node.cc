@@ -3,8 +3,6 @@
 #include <iostream>
 #include <ctime>
 
-int node::node_id_counter = 0;
-
 // Constructor(s)
 node::node (int id, int label_id, int children_number)
   : id(id), label_id(label_id), children_number(children_number) { }

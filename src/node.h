@@ -18,8 +18,6 @@ private:
   int children_number;
 
 public:
-  static int node_id_counter;
-  std::vector<node*> tr_post;
   std::vector<node*> leaves;
 
   // Constructors
@@ -62,7 +60,7 @@ public:
   //          otherwise
   node* get_child (int i) { return children[i]; }
 
-  void set_leaves (node* t1, std::vector<node*>& );
+  void set_leaves (node* t1, std::vector<node*>& leaves);
   void make_leaves ();
 
 };
