@@ -20,3 +20,7 @@ string_edit_distance:
 
 upper_bound:
   - Same interface as zhang_shasha (template function) instead of a class?
+
+zhang_shasha:
+  - Documentation
+  - Replace extern namespace-global variables to be compute_zhang_shasha-internal?
