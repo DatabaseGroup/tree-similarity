@@ -9,4 +9,8 @@ General:
 node:
   - Keep it as short as possible to minimize user effort for a custom node class
   - Change label_id to a string label (default node class)
+  - Discuss with Stefan what's make_leaves and set_leaves for and how to
+    modularize it out of the node class
+  - Discuss the currently implemented generate_postorder and postorder approaches.
+    Do they alter the original tree rooted at root?
 
