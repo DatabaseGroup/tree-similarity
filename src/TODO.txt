@@ -2,6 +2,9 @@ General:
   - Directory structure
   - Makefile(s) according to directory structure
   - Use references where possible (no copying!)
+  - Resolve memory leaks (valgrind, cppcheck)
+    - Pass at least
+      valgrind --leak-check=full --show-reachable=yes --track-origins
 
 node:
   - Keep it as short as possible to minimize user effort for a custom node class
