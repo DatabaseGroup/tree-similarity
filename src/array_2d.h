@@ -1,11 +1,12 @@
 #ifndef ARRAY_2D_H
 #define ARRAY_2D_H
 
+// size_t
 #include <memory>
 
 /**
  * Encapsulates a two dimensional array of a given type (generic).
- * Mainly because it gives better performance than the standard _type** approach
+ * Main reason: it gives better performance than the standard _type** approach
  * due to its allocation pattern. In a _type** array each row in the matrix is
  * a separately allocated dynamic array on the heap - O(n) in general. Same goes
  * for the deallocation because one has to iterate through all elements again.
@@ -16,23 +17,45 @@
 template<class _type>
 class array_2d {
 private:
+  // consecutive allocated memory: rows * columns
   size_t rows;
   size_t columns;
+  // consecutive allocated row containing the array elements
   _type* data;
 
 public:
-  array_2d (size_t rows, size_t columns) : rows(rows), columns(columns),
-    data(nullptr)
+  // Constructor
+  array_2d (size_t rows, size_t columns)
+    : rows(rows), columns(columns), data(nullptr)
   {
-    data = new _type[rows * columns];
+    // allocate array
+    data = new int[rows * columns];
   }
 
-  ~array_2d () { delete data; }
+  // Destructor
+  ~array_2d () {
+    // deallocate array
+    delete[] data;
+  }
 
-  size_t get_rows () const { return rows; }
-  size_t get_columns () const { return columns; }
+  // Get number of rows
+  size_t get_rows () const {
+    return rows;
+  }
 
-  _type* operator[] (size_t row) { return row * columns + data; }
+  // Get number of columns
+  size_t get_columns () const {
+    return columns;
+  }
+
+  // Enable access as usual using the [][] notation.
+  //
+  // Params:  row the row to be accessed
+  //
+  // Return:  A pointer to the beginning of the row to be accessed
+  _type* operator[] (size_t row) {
+    return data + row * columns;
+  }
 };
 
 #endif // ARRAY_2D_H
