@@ -3,8 +3,8 @@
 
 namespace zs {
 
-std::vector<node*> tr_post1;
-std::vector<node*> tr_post2;
+std::vector<node*>* tr_post1;
+std::vector<node*>* tr_post2;
 std::vector<std::vector<int> > td;
 std::vector<std::vector<int> > fd;
 std::vector<int> lm1;

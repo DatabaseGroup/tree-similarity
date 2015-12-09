@@ -7,8 +7,8 @@
 
 namespace zs {
 
-extern std::vector<node*> tr_post1;
-extern std::vector<node*> tr_post2;
+extern std::vector<node*>* tr_post1;
+extern std::vector<node*>* tr_post2;
 extern std::vector<std::vector<int> > td;
 extern std::vector<std::vector<int> > fd;
 extern std::vector<int> lm1;
@@ -38,7 +38,7 @@ void forest_dist(int i, int j, _costs c = _costs()) {
     for (int dj = lm2[j]; dj <= j; dj++) {
       if (lm1[di] == lm1[i] && lm2[dj] == lm2[j]) {
         cost_rename =
-          (tr_post1[di - 1]->get_label_id() == tr_post2[dj - 1]->get_label_id())
+          ((*tr_post1)[di - 1]->get_label_id() == (*tr_post2)[dj - 1]->get_label_id())
           ? 0 : c.ren();
         tempmin =
           (fd[di - 1][dj] + c.del() < fd[di][dj - 1] + c.ins()) ?
@@ -66,24 +66,24 @@ void forest_dist(int i, int j, _costs c = _costs()) {
  */
 template<class _node = node, class _costs = costs<_node>>
 int compute_zhang_shasha (_node* t1, _node* t2, _costs c = _costs()) {
-  tr_post1 = t1->generate_postorder();
-  tr_post2 = t2->generate_postorder();
+  tr_post1 = generate_postorder(t1);
+  tr_post2 = generate_postorder(t2);
 
-  td.resize(tr_post1.size() + 1);
-  for (unsigned int i = 0; i < tr_post1.size() + 1; ++i) {
-    td[i].resize(tr_post2.size() + 1);
+  td.resize(tr_post1->size() + 1);
+  for (unsigned int i = 0; i < tr_post1->size() + 1; ++i) {
+    td[i].resize(tr_post2->size() + 1);
   }
 
-  lm1.reserve(tr_post1.size() + 1);
-  lm2.reserve(tr_post2.size() + 1);
+  lm1.reserve(tr_post1->size() + 1);
+  lm2.reserve(tr_post2->size() + 1);
 
-  for (unsigned i = 0; i < tr_post1.size(); ++i) {
+  for (unsigned i = 0; i < tr_post1->size(); ++i) {
     lm1[i] = 0;
     lm2[i] = 0;
   }
 
-  int max = ((tr_post1.size() < tr_post2.size()) ? tr_post1.size() + 1 :
-    tr_post2.size() + 1);
+  int max = ((tr_post1->size() < tr_post2->size()) ? tr_post1->size() + 1 :
+    tr_post2->size() + 1);
 
   fd.resize(max);
   for (int i = 0; i < max; ++i) {
@@ -116,7 +116,11 @@ int compute_zhang_shasha (_node* t1, _node* t2, _costs c = _costs()) {
     }
   }
 
-  return td[tr_post1.size()][tr_post2.size()];
+  int ted = td[tr_post1->size()][tr_post2->size()];
+  delete tr_post1;
+  delete tr_post2;
+
+  return ted;
 }
 
 }

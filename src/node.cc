@@ -3,16 +3,59 @@
 #include <iostream>
 #include <ctime>
 
-int node::node_id_counter = 1;
+int node::node_id_counter = 0;
 
+// Constructor(s)
+node::node (int id, int label_id, int children_number)
+  : id(id), label_id(label_id), children_number(children_number) { }
+node::node (int label_id)
+  : label_id(label_id) { }
+node::node (int id, int label_id)
+  : id(id), label_id(label_id) { }
+
+// Destructor(s)
+node::~node () {
+  // delete all children nodes
+  for ( std::vector<node*>::iterator node_it = children.begin();
+      node_it != children.end(); ++node_it)
+  {
+    delete *node_it;
+  }
+  
+  // clear vector to avoid dangling pointers
+  children.clear();
+}
+
+// Getter id
+int node::get_id () const {
+  return id;
+}
+
+// Getter label_id
+int node::get_label_id () const {
+  return label_id;
+}
+
+// Getter children
+std::vector<node*> node::get_children () const {
+  return children;
+}
+
+// Getter children_number
+int node::get_children_number () const {
+  return children_number;
+}
+
+// Add a child at last position
 void node::add_child (node* child) {
   children.push_back(child);
   ++children_number;
 }
 
+// Get subtree size rooted at this node (including this node)
 int node::get_subtree_size () {
   int descendants_sum = 1;
-  // Sum up sizes of subtrees rooted at all children nodes (number of descendants).
+  // Sum up sizes of subtrees rooted at child nodes (number of descendants)
   for ( std::vector<node*>::const_iterator node_it = children.cbegin();
         node_it != children.cend(); ++node_it)
   {
@@ -22,37 +65,29 @@ int node::get_subtree_size () {
   return descendants_sum;
 }
 
-node::~node () {
-  // Delete all children nodes.
-  for ( std::vector<node*>::iterator node_it = children.begin();
-        node_it != children.end(); ++node_it) {
-    delete *node_it;
-  }
-  
-  // Clear vector to avoid dangling pointers
-  children.clear();
-}
-
-std::vector<node*> node::generate_postorder () {
-  node_id_counter = 1;
-  postorder(this);
+std::vector<node*>* generate_postorder (node* root) {
+  int node_id_counter = 1;
+  std::vector<node*>* tr_post = new std::vector<node*>();
+  postorder(root, tr_post, &node_id_counter);
   return tr_post;
 }
 
-void node::postorder (node* root) {
+void postorder (node* root, std::vector<node*>* tr_post,
+  int* node_id_counter)
+{
   // TODO: REVISE
   // As far as I understand it, this approach alters the ids of the original nodes
 
   if (root) { //not null
     if (root->get_children_number() > 0) {
       for (int i = 0; i < root->get_children_number(); ++i) {
-        postorder(root->get_child(i));
+        postorder(root->get_child(i), tr_post, node_id_counter);
       }
     }
 
-    root->set_id(node_id_counter);
-    ++node_id_counter;
-    tr_post.push_back(root);
+    root->set_id(*node_id_counter);
+    ++(*node_id_counter);
+    tr_post->push_back(root);
   }
 }
 
@@ -91,7 +126,6 @@ void generate_full_tree (node *root, int fixed_depth, int max_fanout) {
     // Create new node.
     // We have to use 'new' here. Otherwise as soon as we get out of this
     // method's scope, the object gets deleted.
-    //Node *node = new Node(i, random_label);
     node* new_node = new node(random_label); // modified by stefan
     // Add node as a child of root.
     root->add_child(new_node);
@@ -102,7 +136,6 @@ void generate_full_tree (node *root, int fixed_depth, int max_fanout) {
 
 void print_tree_labels (node* n) {
   // Print the label of node.
-  //std::cout << node->get_id() << "\n";
   // Recursively print labels of all descendants of node.
   std::vector<node*> children = n->get_children();
   for ( std::vector<node*>::const_iterator node_it = children.cbegin();
