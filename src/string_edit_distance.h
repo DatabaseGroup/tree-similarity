@@ -9,12 +9,10 @@
 
 namespace sed {
 
-/**
- * Generic function to compute the distance between two trees under a specified
- * cost model. Each tree is represented by its respective root node. A root node
- * type is specified as first template parameter, the cost model type as second
- * template parameter.
- */
+// Generic function to compute the distance between two trees under a specified
+// cost model. Each tree is represented by its respective root node. A root node
+// type is specified as first template parameter, the cost model type as second
+// template parameter.
 template<class _node = node>
 int compute_string_edit_distance (_node* t1, _node* t2) {
   std::vector<int> s1, s2;
