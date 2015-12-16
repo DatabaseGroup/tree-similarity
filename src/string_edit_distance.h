@@ -13,8 +13,8 @@ namespace sed {
 // cost model. Each tree is represented by its respective root node. A root node
 // type is specified as first template parameter, the cost model type as second
 // template parameter.
-template<class _node = node>
-int compute_string_edit_distance (_node* t1, _node* t2) {
+template<class _node = node, class _costs = costs<_node>>
+int compute_string_edit_distance (_node* t1, _node* t2, _costs c = _costs()) {
   std::vector<int> s1, s2;
   int c0 = 0, temp = 0;
 
@@ -48,24 +48,23 @@ int compute_string_edit_distance (_node* t1, _node* t2) {
   }
 
   //calculate string edit distance
-  array_2d<int> result(t1->get_subtree_size(), t2->get_subtree_size());
+  array_2d<double> result(t1->get_subtree_size(), t2->get_subtree_size());
 
   for (int i = 0; i < t1->get_subtree_size(); ++i) {
-    result[i][0] = i;
+    result[i][0] = i * c.del();
   }
 
   for (int i = 0; i < t2->get_subtree_size(); ++i) {
-    result[0][i] = i;
+    result[0][i] = i * c.ins();
   }
 
   for (int j = 1; j < t2->get_subtree_size(); ++j) {
     for (int i = 1; i < t1->get_subtree_size(); ++i) {
-      c0 = (s1.at(i) == s2.at(j)) ? 0 : 1;
+      c0 = (s1.at(i) == s2.at(j)) ? 0 : c.ren();
 
       //calculate minimum
-      temp = (result[i - 1][j - 1] + c0 < result[i - 1][j] + 1) ?
-        result[i - 1][j - 1] + c0 : result[i - 1][j] + 1;
-      result[i][j] = (temp < result[i][j - 1] + 1) ? temp : result[i][j - 1] + 1;
+      temp = (result[i - 1][j - 1] + c0 < result[i - 1][j] + c.del()) ? result[i - 1][j - 1] + c0 : result[i - 1][j] + c.del();
+      result[i][j] = (temp < result[i][j - 1] + c.ins()) ? temp : result[i][j - 1] + c.ins();
     }
   }
 

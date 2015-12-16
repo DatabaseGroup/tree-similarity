@@ -9,7 +9,7 @@ int main () {
 	// create test-trees for simplyUpperBound
 	node* t1 = new node(1, 5);
   node* middle_child = new node(3);
-	
+
   t1->add_child(new node(1));
 	middle_child->add_child(new node(2));
 	t1->add_child(middle_child);
@@ -17,14 +17,14 @@ int main () {
 
   node* t2 = new node(13, 5);
 	node* left_child = new node(4);
-  
+
   left_child->add_child(new node(1));
   left_child->add_child(new node(2));
   left_child->add_child(new node(3));
   t2->add_child(left_child);
 
   upper_bound* ub = new upper_bound();
-  int sup = ub->compute_simple_upper_bound(t1, t2);
+  double sup = ub->compute_simple_upper_bound(t1, t2);
   std::cout << "UpperBound t1->t2: " << sup << std::endl;
 
   int sed_result;
@@ -44,7 +44,7 @@ int main () {
 
   //should be 2
   sed_result =
-    sed::compute_string_edit_distance<node>(string1, string2);
+    sed::compute_string_edit_distance<node, costs<node>>(string1, string2);
   std::cout << "String Edit Distance: " << sed_result << std::endl;
 
   // Zhang and Shasha cost = 1 (insert), 1 (delete), 1 (rename)

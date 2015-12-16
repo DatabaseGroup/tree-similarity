@@ -14,7 +14,7 @@ public:
 
   // Computes a very simple upper bound by just adding the subtree sizes of two
   // tree rooted at two given root nodes.
-	int compute_simple_upper_bound (node* t1, node* t2);
+	double compute_simple_upper_bound (node* t1, node* t2);
 };
 
 #endif // UPPER_BOUND_H

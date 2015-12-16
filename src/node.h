@@ -16,7 +16,6 @@ private:
   int children_number;
 
 public:
-  std::vector<node*> leaves;
 
   // Constructors
   node (int id, int label_id, int children_number);
@@ -25,7 +24,7 @@ public:
 
   // Destructor
   ~node ();
-  
+
   // Get id
   int get_id () const;
 
@@ -61,8 +60,7 @@ public:
   //          otherwise
   node* get_child (int position) const;
 
-  void make_leaves ();
-  void set_leaves (node* root, std::vector<node*>& leaves);
+
 };
 
 // Generates the postorder for a tree rooted at a given root node.

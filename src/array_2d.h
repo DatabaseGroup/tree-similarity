@@ -29,7 +29,7 @@ public:
     : rows(rows), columns(columns), data(nullptr)
   {
     // allocate array
-    data = new int[rows * columns];
+    data = new double[rows * columns];
   }
 
   // Destructor

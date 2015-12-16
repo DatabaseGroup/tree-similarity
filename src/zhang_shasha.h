@@ -9,15 +9,18 @@ namespace zs {
 
 extern std::vector<node*>* tr_post1;
 extern std::vector<node*>* tr_post2;
-extern std::vector<std::vector<int> > td;
-extern std::vector<std::vector<int> > fd;
+extern std::vector<std::vector<double> > td;
+extern std::vector<std::vector<double> > fd;
 extern std::vector<int> lm1;
 extern std::vector<int> lm2;
-extern std::vector<int> kr1;
-extern std::vector<int> kr2;
+extern std::vector<node*> leaves_t1;
+extern std::vector<node*> leaves_t2;
 
 void lmld (node* root, std::vector<int>& lm);
 std::vector<int> kr (std::vector<int>& l, int leaf_count);
+
+void make_leaves (node* t1, node* t2);
+void set_leaves (node* root, int whichTree);
 
 template<class _node = node, class _costs = costs<_node>>
 void forest_dist(int i, int j, _costs c = _costs()) {
@@ -63,7 +66,7 @@ void forest_dist(int i, int j, _costs c = _costs()) {
 // type is specified as first template parameter, the cost model type as second
 // template parameter.
 template<class _node = node, class _costs = costs<_node>>
-int compute_zhang_shasha (_node* t1, _node* t2, _costs c = _costs()) {
+double compute_zhang_shasha (_node* t1, _node* t2, _costs c = _costs()) {
   tr_post1 = generate_postorder(t1);
   tr_post2 = generate_postorder(t2);
 
@@ -100,12 +103,14 @@ int compute_zhang_shasha (_node* t1, _node* t2, _costs c = _costs()) {
     }
   }
 
-  t1->make_leaves();
-  t2->make_leaves();
+  make_leaves(t1, t2);
+  //make_leaves(t2, leaves_t2);
   lmld(t1, lm1);
   lmld(t2, lm2);
-  kr1 = kr(lm1, t1->leaves.size());
-  kr2 = kr(lm2, t2->leaves.size());
+  std::vector<int> kr1;
+  std::vector<int> kr2;
+  kr1 = kr(lm1, leaves_t1.size());
+  kr2 = kr(lm2, leaves_t2.size());
 
   //compute the distance
   for (unsigned int x = 1; x < kr1.size(); ++x) {
@@ -114,7 +119,7 @@ int compute_zhang_shasha (_node* t1, _node* t2, _costs c = _costs()) {
     }
   }
 
-  int ted = td[tr_post1->size()][tr_post2->size()];
+  double ted = td[tr_post1->size()][tr_post2->size()];
   delete tr_post1;
   delete tr_post2;
 

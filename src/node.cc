@@ -17,7 +17,7 @@ node::~node () {
   {
     delete *node_it;
   }
-  
+
   // clear vector to avoid dangling pointers
   children.clear();
 }
@@ -63,27 +63,13 @@ node* node::get_child(int position) const {
   return children[position];
 }
 
-void node::make_leaves () {
-  set_leaves(this, leaves);
-}
 
-void node::set_leaves (node* root, std::vector<node*>& leaves) {
-  if (root) {
-    if (root->get_children_number() > 0) {
-      for (int i = 0; i < root->get_children_number(); ++i) {
-        root->set_leaves(root->get_child(i), leaves);
-      }
-    } else {
-      leaves.push_back(root);
-    }
-  }
-}
 
 std::vector<node*>* generate_postorder (node* root) {
   int node_id_counter = 1;
   // Heap allocation
   std::vector<node*>* tr_post = new std::vector<node*>();
-  
+
   // Recursively traverse tree in postorder
   postorder(root, tr_post, &node_id_counter);
 
