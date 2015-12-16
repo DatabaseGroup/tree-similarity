@@ -7,14 +7,17 @@
 class upper_bound {
 public:
   // Constructor(s)
-	upper_bound ();
+    upper_bound () { }
 
   // Destructor(s)
-	virtual ~upper_bound ();
+    ~upper_bound () { }
 
   // Computes a very simple upper bound by just adding the subtree sizes of two
   // tree rooted at two given root nodes.
-	double compute_simple_upper_bound (node* t1, node* t2);
+	template<class _node = node, class _costs = costs<_node>>
+double compute_simple_upper_bound (_node* t1, _node* t2, _costs c = _costs()) {
+    return (t1->get_subtree_size() * c.del() + t2->get_subtree_size() * c.ins());
+}
 };
 
 #endif // UPPER_BOUND_H
