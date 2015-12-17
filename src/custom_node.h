@@ -20,7 +20,7 @@ public:
 
   // Getter label
   std::vector<std::string> get_label () const;
-  
+
   // Getter children
   std::vector<custom_node*> get_children () const;
 };
@@ -38,14 +38,14 @@ struct custom_costs {
   //
   // Return:  The cost of renaming n1 to n2
   int ren (_node n1, _node n2) { return 2; }
-  
+
   // Basic delete cost function
   //
   // Params:  n The node to be deleted
   //
   // Return:  The cost of deleting n
   int del (_node n) { return 2; }
-  
+
   // Basic insert cost function
   //
   // Params:  n The node to be inserted

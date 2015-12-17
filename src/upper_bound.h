@@ -3,7 +3,7 @@
 
 #include "node.h"
 
-// Class to compute an upper bound for the tree edit distance.
+// Class to compute an simple upper bound for the tree edit distance.
 class upper_bound {
 public:
   // Constructor(s)
@@ -12,8 +12,12 @@ public:
   // Destructor(s)
     ~upper_bound () { }
 
-  // Computes a very simple upper bound by just adding the subtree sizes of two
-  // tree rooted at two given root nodes.
+// Computes a very simple upper bound by just adding the cost of deleting all nodes of the left-hand-tree
+// and the cost of insertion all nodes of the right-hand-tree.
+//
+// Param: Root-node of the left-hand-tree, root-node of the right-hand-tree and optional cost-model
+//
+//Return: The simple upper bound for the two input-trees
 	template<class _node = node, class _costs = costs<_node>>
 double compute_simple_upper_bound (_node* t1, _node* t2, _costs c = _costs()) {
     return (t1->get_subtree_size() * c.del() + t2->get_subtree_size() * c.ins());

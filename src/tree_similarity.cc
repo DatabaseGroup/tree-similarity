@@ -7,7 +7,7 @@
 
 int main () {
 	// create test-trees for simplyUpperBound
-	node* t1 = new node(1, 5);
+  node* t1 = new node(1, 5);
   node* middle_child = new node(3);
 
   t1->add_child(new node(1));
@@ -27,7 +27,9 @@ int main () {
   double sup = ub->compute_simple_upper_bound(t1, t2);
   std::cout << "UpperBound t1->t2: " << sup << std::endl;
 
+//String-Edit-Distance
   int sed_result;
+  //Creaet Line-Trees (Strings)
   node* string1 = new node(3, 13);
   node* char2 = new node(15);
   node* char3 = new node(14);
@@ -42,7 +44,7 @@ int main () {
   char22->add_child(char33);
   string2->add_child(char22);
 
-  //should be 2
+  //Compute SED (
   sed_result =
     sed::compute_string_edit_distance<node, costs<node>>(string1, string2);
   std::cout << "String Edit Distance: " << sed_result << std::endl;
@@ -52,7 +54,7 @@ int main () {
   // no need to generate basic cost model since it is set as default template
   // parameter
   std::cout << "Distance (basic tree, basic cost model, Zhang Shasha): " << "\t"
-    << zs::compute_zhang_shasha<node, costs<node>>(t1, t2)
+    << zs::compute_zhang_shasha<node, costs2<node>>(t1, t2)
     << std::endl;
 
 	return 0;

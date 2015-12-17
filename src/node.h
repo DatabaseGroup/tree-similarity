@@ -139,6 +139,37 @@ struct costs {
   int ins() { return 1; }
 };
 
+template<class _node>
+struct costs2 {
+  // Basic rename cost function
+  //
+  // Params:  n1  The node to be renamed
+  //          n2  The node having the desired name
+  //
+  // Return:  The cost of renaming n1 to n2
+  int ren (_node n1, _node n2) { return 2; }
+
+  // Basic delete cost function
+  //
+  // Params:  n The node to be deleted
+  //
+  // Return:  The cost of deleting n
+  int del (_node n) { return 2; }
+
+  // Basic insert cost function
+  //
+  // Params:  n The node to be inserted
+  //
+  // Return:  The cost of inserting n
+  int ins (_node n) { return 2; }
+
+  // Dummy methods
+  int ren() { return 2; }
+  int del() { return 2; }
+  int ins() { return 2; }
+};
+
+
 #endif // NODE_H
 
 // TODO:

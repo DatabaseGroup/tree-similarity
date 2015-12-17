@@ -9,7 +9,7 @@
 
 namespace sed {
 
-// Generic function to compute the distance between two trees under a specified
+// Generic function to compute the distance between two line-trees (Strings) under a specified
 // cost model. Each tree is represented by its respective root node. A root node
 // type is specified as first template parameter, the cost model type as second
 // template parameter.
@@ -24,7 +24,7 @@ int compute_string_edit_distance (_node* t1, _node* t2, _costs c = _costs()) {
     s1.push_back(temp_node->get_label_id());
     temp_node = temp_node->get_child(0);
   }
-
+  //if there is a node having more than one child then the input is not a string (error)
   if (temp_node->get_children_number() != 0) {
     //false input
     std::cout << "Error: first input is not a string!" << std::endl;
@@ -32,7 +32,7 @@ int compute_string_edit_distance (_node* t1, _node* t2, _costs c = _costs()) {
   } else {
     s1.push_back(temp_node->get_label_id());
   }
-
+//check String 2
   temp_node = t2;
   while (temp_node->get_children_number() == 1) {
     s2.push_back(temp_node->get_label_id());
@@ -50,19 +50,25 @@ int compute_string_edit_distance (_node* t1, _node* t2, _costs c = _costs()) {
   //calculate string edit distance
   array_2d<double> result(t1->get_subtree_size(), t2->get_subtree_size());
 
+//Costs for deleting of all characters of the left-hand string (assuming that the right-hand-string is a empty string)
   for (int i = 0; i < t1->get_subtree_size(); ++i) {
     result[i][0] = i * c.del();
   }
 
+//Costs for inserting of all characters of the right-hand string (assuming that the left-hand-string is a empty string)
   for (int i = 0; i < t2->get_subtree_size(); ++i) {
     result[0][i] = i * c.ins();
   }
 
+//calculate the costs for all pairs of substrings of the two input strings
   for (int j = 1; j < t2->get_subtree_size(); ++j) {
     for (int i = 1; i < t1->get_subtree_size(); ++i) {
       c0 = (s1.at(i) == s2.at(j)) ? 0 : c.ren();
 
-      //calculate minimum
+      //calculate the minimum cost of:
+      //   * inserting a character to the right-hand string
+      //   * deleting a character of the left-hand string
+      //   * renaming a character of the left-hand string to the value of the character of the right-hand string
       temp = (result[i - 1][j - 1] + c0 < result[i - 1][j] + c.del()) ? result[i - 1][j - 1] + c0 : result[i - 1][j] + c.del();
       result[i][j] = (temp < result[i][j - 1] + c.ins()) ? temp : result[i][j - 1] + c.ins();
     }

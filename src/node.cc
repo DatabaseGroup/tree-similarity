@@ -3,13 +3,18 @@
 #include <iostream>
 #include <ctime>
 
+//Different constructors
+//constructor with id, label_id, and number of children
 node::node (int id, int label_id, int children_number)
   : id(id), label_id(label_id), children_number(children_number) { }
+//constructor with only the label_id
 node::node (int label_id)
   : label_id(label_id) { }
+//constructor with id and label_id
 node::node (int id, int label_id)
   : id(id), label_id(label_id) { }
 
+//Deconstructor
 node::~node () {
   // delete all children nodes
   for ( std::vector<node*>::iterator node_it = children.begin();
@@ -22,27 +27,33 @@ node::~node () {
   children.clear();
 }
 
+//Returns the ID of a node
 int node::get_id () const {
   return id;
 }
 
+//Returns the ID of the label which is necessary to find the matching data (dictionary)
 int node::get_label_id () const {
   return label_id;
 }
 
+//Returns the children nodes
 std::vector<node*> node::get_children () const {
   return children;
 }
 
+//Returns the number of children of a node
 int node::get_children_number () const {
   return children_number;
 }
 
+//Adds a child to the node
 void node::add_child (node* child) {
   children.push_back(child);
   ++children_number;
 }
 
+//Returns the size of the subtree rooted at this node
 int node::get_subtree_size () const {
   int descendants_sum = 1;
   // Sum up sizes of subtrees rooted at child nodes (number of descendants)
@@ -55,16 +66,17 @@ int node::get_subtree_size () const {
   return descendants_sum;
 }
 
+//Sets the ID of a node
 void node::set_id(int id) {
   this->id = id;
 }
 
-node* node::get_child(int position) const {
-  return children[position];
+//Returns the i-th child of a node
+node* node::get_child(int i) const {
+  return children[i];
 }
 
-
-
+//Generate the postorder of a tree and returns the nodes in postorder stored in a vector
 std::vector<node*>* generate_postorder (node* root) {
   int node_id_counter = 1;
   // Heap allocation
@@ -93,6 +105,9 @@ void postorder (node* root, std::vector<node*>* tr_post,
   }
 }
 
+//This function generates a tree
+//Paramerers:
+// root of the tree, the depth of the tree and the maximum fanout (numer of nodes in one level)
 void generate_full_tree (node *root, int fixed_depth, int max_fanout) {
   // If we reached the maximum depth, terminate this branch.
   if (fixed_depth == 0)

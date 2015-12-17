@@ -7,21 +7,26 @@
 
 namespace zs {
 
-extern std::vector<node*>* tr_post1;
-extern std::vector<node*>* tr_post2;
-extern std::vector<std::vector<double> > td;
-extern std::vector<std::vector<double> > fd;
-extern std::vector<int> lm1;
-extern std::vector<int> lm2;
-extern std::vector<node*> leaves_t1;
-extern std::vector<node*> leaves_t2;
+extern std::vector<node*>* tr_post1; //postorder of tree 1
+extern std::vector<node*>* tr_post2; //postorder of tree 2
+extern std::vector<std::vector<double> > td; //stores the tree-edit-distances
+extern std::vector<std::vector<double> > fd; //stores the forest-distances
+extern std::vector<int> lm1; //stores the left-most-leaf-descendants of tree 1
+extern std::vector<int> lm2; //stores the left-most-leaf-descendants of tree 2
+extern std::vector<node*> leaves_t1; //stores the leaves of tree 2
+extern std::vector<node*> leaves_t2; //stores the leaves of tree 2
 
-void lmld (node* root, std::vector<int>& lm);
-std::vector<int> kr (std::vector<int>& l, int leaf_count);
+void lmld (node* root, std::vector<int>& lm); //see .cc-file
+std::vector<int> kr (std::vector<int>& l, int leaf_count);//stores the key-roots (see .cc-file)
 
-void make_leaves (node* t1, node* t2);
+void make_leaves (node* t1, node* t2); //see .cc-file
 void set_leaves (node* root, int whichTree);
 
+//computes the forest-distance of:
+// T1[l(i)...di], where di is element of desc(T1[i]) and
+// T2[l(j)...dj], where dj is element of desc(T2[j])
+//
+//Param: i, j defined as above and a optional cost-model
 template<class _node = node, class _costs = costs<_node>>
 void forest_dist(int i, int j, _costs c = _costs()) {
   int tempmin;
@@ -104,7 +109,6 @@ double compute_zhang_shasha (_node* t1, _node* t2, _costs c = _costs()) {
   }
 
   make_leaves(t1, t2);
-  //make_leaves(t2, leaves_t2);
   lmld(t1, lm1);
   lmld(t2, lm2);
   std::vector<int> kr1;
