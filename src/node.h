@@ -12,7 +12,6 @@ private:
   int label_id;
   // A vector of pointers to child nodes
   std::vector<node*> children;
-  // Should be the same as children.size()
   int children_number;
 
 public:
@@ -21,9 +20,12 @@ public:
   node (int id, int label_id, int children_number);
   node (int label_id);
   node (int id, int label_id);
+  //node(node&);
 
   // Destructor
   ~node ();
+
+  void copy_node(node *n);
 
   // Get id
   int get_id () const;
@@ -51,6 +53,9 @@ public:
 
   // Setter id
   void set_id (int id);
+
+  // Setter label_id
+  void set_label_id(int id);
 
   // Get a pointer to a child at a given position.
   //

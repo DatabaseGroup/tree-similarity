@@ -1,5 +1,5 @@
 #include "node.h"
-
+#include <random>
 #include <iostream>
 #include <ctime>
 
@@ -14,6 +14,8 @@ node::node (int label_id)
 node::node (int id, int label_id)
   : id(id), label_id(label_id) { }
 
+
+
 //Deconstructor
 node::~node () {
   // delete all children nodes
@@ -26,6 +28,13 @@ node::~node () {
   // clear vector to avoid dangling pointers
   children.clear();
 }
+
+
+void node::copy_node(node *n){
+    node tmp = *this;
+    *n = tmp;
+}
+
 
 //Returns the ID of a node
 int node::get_id () const {
@@ -44,13 +53,14 @@ std::vector<node*> node::get_children () const {
 
 //Returns the number of children of a node
 int node::get_children_number () const {
-  return children_number;
+  //return children_number;
+  return children.size();
 }
 
 //Adds a child to the node
 void node::add_child (node* child) {
   children.push_back(child);
-  ++children_number;
+  //++children_number;
 }
 
 //Returns the size of the subtree rooted at this node
@@ -71,6 +81,11 @@ void node::set_id(int id) {
   this->id = id;
 }
 
+//Sets the label-ID of a node
+void node::set_label_id(int id) {
+  this->label_id = id;
+}
+
 //Returns the i-th child of a node
 node* node::get_child(int i) const {
   return children[i];
@@ -84,12 +99,10 @@ std::vector<node*>* generate_postorder (node* root) {
 
   // Recursively traverse tree in postorder
   postorder(root, tr_post, &node_id_counter);
-
   return tr_post;
 }
 
-void postorder (node* root, std::vector<node*>* tr_post,
-  int* node_id_counter)
+void postorder (node* root, std::vector<node*>* tr_post, int* node_id_counter)
 {
   if (root) {
     // traverse children first
@@ -98,7 +111,6 @@ void postorder (node* root, std::vector<node*>* tr_post,
         postorder(root->get_child(i), tr_post, node_id_counter);
       }
     }
-
     root->set_id(*node_id_counter);
     ++(*node_id_counter);
     tr_post->push_back(root);
@@ -118,7 +130,6 @@ void generate_full_tree (node *root, int fixed_depth, int max_fanout) {
   std::srand(std::time(NULL));
   // Generate a random fanout between 1 and max_fanout.
   int random_fanout = 1 + ( std::rand() % ( max_fanout - 1 + 1 ) );
-  std::cout << "rf: " << random_fanout << "\n";
   int random_label = 0;
   // Add as many children to root as random_fanout.
   for (int i = 0; i < random_fanout; ++i) {

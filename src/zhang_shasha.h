@@ -109,8 +109,10 @@ double compute_zhang_shasha (_node* t1, _node* t2, _costs c = _costs()) {
   }
 
   make_leaves(t1, t2);
+
   lmld(t1, lm1);
   lmld(t2, lm2);
+
   std::vector<int> kr1;
   std::vector<int> kr2;
   kr1 = kr(lm1, leaves_t1.size());
@@ -126,6 +128,15 @@ double compute_zhang_shasha (_node* t1, _node* t2, _costs c = _costs()) {
   double ted = td[tr_post1->size()][tr_post2->size()];
   delete tr_post1;
   delete tr_post2;
+
+  std::vector<node*>().swap(leaves_t1);
+  std::vector<node*>().swap(leaves_t2);
+  std::vector<int>().swap(lm1);
+  std::vector<int>().swap(lm2);
+  std::vector<int>().swap(kr1);
+  std::vector<int>().swap(kr2);
+  std::vector<std::vector<double> >().swap(td);
+  std::vector<std::vector<double> >().swap(fd);
 
   return ted;
 }

@@ -49,6 +49,7 @@ std::vector<int> kr (std::vector<int>& l, int leaf_count) {
   int i = l.capacity() - 1;
 
   while (k >= 1) {
+
     if (visit[l[i]] == 0) {
       kr[k] = i;
       --k;
@@ -56,7 +57,6 @@ std::vector<int> kr (std::vector<int>& l, int leaf_count) {
     }
     i -= 1;
   }
-
   return kr;
 }
 
