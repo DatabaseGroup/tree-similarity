@@ -70,12 +70,11 @@ int main () {
 
     //TEST of Zhang & Shasha
     node* tree1 = new node(100);
-    generate_full_tree(tree1, 2, 3);
-    //deep copy of tree 1
-    node* tree2 = new node(*tree1);
-    //node* tree2;
-    //tree1->copy_node(tree2);
+    generate_full_tree(tree1, 4, 4);
 
+    //deep copy
+    node* tree2 = new node(100);
+    copy_tree(tree1, tree2);
 
     std::vector<node*>* post_t1 = generate_postorder(tree1);
     std::vector<node*>* post_t2 = generate_postorder(tree2);
@@ -84,11 +83,10 @@ int main () {
     std::uniform_int_distribution<int> distribution(0,post_t1->size()-1);
 
     int zufall = 0;
-    for(int i = 0; i < 5; i++){
+    int tree_size = tree1->get_subtree_size();
+    for(int i = 0; i < tree_size; i++){
   //  std::cout << "Schleifendurchlauf: " << i << std::endl;
         //zufall = rand() % post_t2.size(); //Random-Number betwenn 0 and number of all nodes
-
-
         std::cout << "post_t1" <<  std::endl;
         for(unsigned int i = 0; i < post_t1->size(); i++){
             std:: cout << post_t1->at(i)->get_label_id() << ", ";
@@ -116,7 +114,12 @@ int main () {
         std::cout << "Distance (basic tree, basic cost model, Zhang Shasha): " << "\t"
     << zs::compute_zhang_shasha(tree1, tree2)
     << std::endl;
+
     }
+
+    delete tree1;
+    delete tree2;
+
 
 	return 0;
 }

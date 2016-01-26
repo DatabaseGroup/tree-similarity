@@ -156,3 +156,11 @@ void print_tree_labels (node* n) {
     print_tree_labels(*node_it);
   }
 }
+
+void copy_tree(node* t, node* copy_t){
+    for(int i = 0; i < t->get_children_number(); i++){
+        node* temp = new node(t->get_child(i)->get_label_id());
+        copy_t->add_child(temp);
+        copy_tree(t->get_child(i),temp);
+    }
+}

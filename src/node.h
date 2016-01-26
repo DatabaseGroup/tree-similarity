@@ -99,6 +99,8 @@ void postorder(node* root, std::vector<node*>* tr_post, int* node_id_counter);
 // Return:  None
 void generate_full_tree (node *root, int depth, int max_fanout);
 
+void copy_tree(node* t, node* copy_t);
+
 // Print recursively the labels of all descendants of node, including node.
 // Each label is printed in a separate line.
 //
