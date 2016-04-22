@@ -2,6 +2,8 @@
 #include <random>
 #include <iostream>
 #include <ctime>
+#include <string.h>
+#include <unordered_map>
 
 //Different constructors
 //constructor with id, label_id, and number of children
@@ -91,6 +93,14 @@ node* node::get_child(int i) const {
   return children[i];
 }
 
+void node::set_lml(node* n){
+  this->lml = n;
+}
+
+node* node::get_lml(){
+  return this->lml;
+}
+
 //Generate the postorder of a tree and returns the nodes in postorder stored in a vector
 std::vector<node*>* generate_postorder (node* root) {
   int node_id_counter = 1;
@@ -164,3 +174,95 @@ void copy_tree(node* t, node* copy_t){
         copy_tree(t->get_child(i),temp);
     }
 }
+
+node* generate_tree_from_string (char *str, ht_ids &hashtable, int &labelid){
+  //std::cout << "----\ngenerating tree" << std::endl;  
+  int length = strlen(str);
+  //std::cout << "length: " << length << " string: " << str << std::endl;
+  int scope = -1;
+   
+  std::vector<node*> scopeParentList;
+  std::vector<node*>::const_iterator it;
+
+  std::string label = "";
+    
+    node* root = new node(1,1);
+    for(int i = 0; i < length; i++){
+      if(str[i]=='{'){
+        if(label.length() != 0){
+          //std::cout << label << ":" << scope << std::endl;
+          if(!hashtable.count(label)){
+            hashtable.emplace(label, labelid++);
+          }
+          node* tmpnode = new node(hashtable[label]);
+          scopeParentList.push_back(tmpnode);
+          if(scope > 0){
+            it=scopeParentList.begin() + scopeParentList.size()-2;
+            node* tmp = *it;
+            //std::cout << label << ".parent_id:" << tmp->get_label_id() << std::endl;
+            tmp->add_child(tmpnode);
+          } else {
+            root = tmpnode;
+          }
+          label = "";
+        }
+        scope++;
+      } else if(str[i]=='}'){
+        if(label.length() != 0){
+          //std::cout << label << ":" << scope << std::endl;
+          if(!hashtable.count(label)){
+            hashtable.emplace(label, labelid++);
+          }
+          node* tmpnode = new node(hashtable[label]);
+
+          std::vector<node*>::reverse_iterator tmp_it = scopeParentList.rbegin();
+          for (; tmp_it!= scopeParentList.rend(); ++tmp_it){
+            node* tmp_par = *tmp_it;
+            if(tmp_par->get_lml()){
+              break;
+            } else {
+              tmp_par->set_lml(tmpnode);
+            }
+          }
+          tmpnode->set_lml(tmpnode);
+          scopeParentList.push_back(tmpnode);
+          if(scope>0 && scopeParentList.size() > 1){
+            it=scopeParentList.begin() + scopeParentList.size()-2;
+            node* tmp = *it;
+            //std::cout << label << ".parent_id:" << tmp->get_label_id() << std::endl;
+            tmp->add_child(tmpnode);
+          }
+          label = "";
+        }
+        scopeParentList.resize(scope);
+        scope--;
+      } else {
+        label += str[i];
+      }
+    }
+    //std::cout << "generating tree [done]\n----"<< std::endl;   
+  return root;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

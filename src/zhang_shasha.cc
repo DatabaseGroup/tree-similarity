@@ -57,6 +57,7 @@ std::vector<int> kr (std::vector<int>& l, int leaf_count) {
     }
     i -= 1;
   }
+  
   return kr;
 }
 

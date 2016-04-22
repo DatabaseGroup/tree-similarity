@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 // Represents a node in a tree. A node label is a string and the children
 // are stored in an array of pointers to nodes.
@@ -13,6 +14,7 @@ private:
   // A vector of pointers to child nodes
   std::vector<node*> children;
   int children_number;
+  node* lml;
 
 public:
 
@@ -38,6 +40,10 @@ public:
 
   // Get children_number
   int get_children_number () const;
+
+  void set_lml(node* n);
+
+  node* get_lml();
 
   // Add a child at last position.
   //
@@ -108,6 +114,10 @@ void copy_tree(node* t, node* copy_t);
 //
 // Return:  None
 void print_tree_labels (node *node);
+
+typedef std::unordered_map<std::string, int> ht_ids;
+
+node* generate_tree_from_string (char *str, ht_ids &hashtable, int &labelid);
 
 // Represents the cost functions to be used for the distance computation.
 // Costs are generic for different node classes. A cost model has to provide

@@ -2,7 +2,6 @@
 #define ZHANG_SHASHA_H
 
 #include <vector>
-
 #include "node.h"
 
 namespace zs {
@@ -64,6 +63,120 @@ void forest_dist(int i, int j, _costs c = _costs()) {
       }
     }
   }
+}
+
+template<class _node = node, class _costs = costs<_node>>
+std::vector<std::array<int, 2> > computeEditMapping(node* r1, node* r2, _costs c = _costs()){
+
+  tr_post1 = generate_postorder(r1);
+  tr_post2 = generate_postorder(r2);
+
+  td.resize(tr_post1->size() + 1);
+  for (unsigned int i = 0; i < tr_post1->size() + 1; ++i) {
+    td[i].resize(tr_post2->size() + 1);
+  }
+
+  lm1.reserve(tr_post1->size() + 1);
+  lm2.reserve(tr_post2->size() + 1);
+
+  for (unsigned i = 0; i < tr_post1->size(); ++i) {
+    lm1[i] = 0;
+    lm2[i] = 0;
+  }
+
+  int max = ((tr_post1->size() < tr_post2->size()) ? tr_post1->size() + 1 :
+    tr_post2->size() + 1);
+
+  fd.resize(max);
+  for (int i = 0; i < max; ++i) {
+    fd[i].resize(max);
+  }
+
+  for (int i = 0; i < max; ++i) {
+    for (int j = 0; j < max; ++j) {
+      td[i][j] = 0;
+    }
+  }
+
+  for (int i = 0; i < max; ++i) {
+    for (int j = 0; j < max; ++j) {
+      fd[i][j] = 0;
+    }
+  }
+
+  make_leaves(r1, r2);
+
+  lmld(r1, lm1);
+  lmld(r2, lm2);
+
+  // ?? what, lm1.size() --> 1?? wt // kk his postorder starts with 0?
+  //std::cout << "lm1size: " << lm1.size() << std::endl;
+
+  std::vector<int> kr1;
+  std::vector<int> kr2;
+  kr1 = kr(lm1, leaves_t1.size());
+  kr2 = kr(lm2, leaves_t2.size());
+
+  //compute the distance
+  for (unsigned int x = 1; x < kr1.size(); ++x) {
+    for (unsigned int y = 1; y < kr2.size(); ++y) {
+      forest_dist(kr1[x], kr2[y],c);
+    }
+  }
+  
+  std::vector<std::array<int, 2> > treePairs;
+  std::vector<std::array<int, 2> > editMapping;
+  treePairs.push_back({r1->get_subtree_size(), r2->get_subtree_size()});  
+  std::array<int, 2> treePair;
+  bool rootNodePair = true;
+
+  std::vector<node*>* post_r1 = generate_postorder(r1);
+  std::vector<node*>* post_r2 = generate_postorder(r2);
+
+  while(!treePairs.empty()){
+    treePair = treePairs.back();
+    treePairs.pop_back();
+
+    int lastRow = treePair[0];
+    int lastCol = treePair[1];
+
+    if(!rootNodePair){
+      forest_dist(lastRow, lastCol,c);
+    }
+    rootNodePair = false;
+
+    int firstRow = post_r1->at(lastRow-1)->get_lml()->get_id() - 1;
+    int firstCol = post_r2->at(lastCol-1)->get_lml()->get_id() - 1;
+    int row = lastRow;
+    int col = lastCol;
+
+    while((row > firstRow) || (col > firstCol)){
+      int costDelete = c.del();
+      int costInsert = c.ins();
+
+      if((row > firstRow) && (fd[row-1][col] + costDelete == fd[row][col])){
+        editMapping.push_back({row,0});
+        row--;
+      } else if((col > firstCol) && (fd[row][col -1] + costInsert == fd[row][col])){
+        editMapping.push_back({0,col});
+        col--;
+      } else {
+        if((post_r1->at(row-1)->get_lml() == post_r1->at(lastRow-1)->get_lml()
+        && post_r2->at(col-1)->get_lml() == post_r2->at(lastCol-1)->get_lml())){
+          
+          editMapping.push_back({row,col});
+          row--;
+          col--;
+        } else {
+          treePairs.push_back({row, col});
+          row = post_r1->at(row-1)->get_lml()->get_id() -1;
+          col = post_r2->at(col-1)->get_lml()->get_id() -1;
+        }
+      }
+    }
+  }
+
+  return editMapping;
 }
 
 // Generic function to compute the distance between two trees under a specified
