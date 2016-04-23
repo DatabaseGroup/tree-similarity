@@ -16,13 +16,19 @@ private:
 public:
   // Basic constructor
   custom_node (std::vector<std::string> label,
-    std::vector<custom_node*> children);
+    std::vector<custom_node*> children)
+    : label(label), children(children)
+  { }
 
   // Getter label
-  std::vector<std::string> get_label () const;
+  std::vector<std::string> get_label () const {
+    return label;
+  }
 
   // Getter children
-  std::vector<custom_node*> get_children () const;
+  std::vector<custom_node*> get_children () const {
+    return children;
+  }
 };
 
 // Example of a struct representing custom cost functions to be used for the

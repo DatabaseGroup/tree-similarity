@@ -1,8 +1,12 @@
 #ifndef NODE_H
 #define NODE_H
 
+#include <iostream>
+#include <random>
 #include <vector>
 #include <string>
+#include <cstring>
+#include <ctime>
 #include <unordered_map>
 
 // Represents a node in a tree. A node label is a string and the children
@@ -17,51 +21,103 @@ private:
   node* lml;
 
 public:
-
   // Constructors
-  node (int id, int label_id, int children_number);
-  node (int label_id);
-  node (int id, int label_id);
+  node (int id, int label_id, int children_number)
+    : id(id), label_id(label_id), children_number(children_number)
+  { }
+
+  node (int label_id)
+    : label_id(label_id)
+  { }
+
+  node (int id, int label_id)
+    : id(id), label_id(label_id)
+  { }
+
   //node(node&);
 
   // Destructor
-  ~node ();
+  ~node () {
+    // delete all children nodes
+    for ( std::vector<node*>::iterator node_it = children.begin();
+          node_it != children.end(); ++node_it)
+    {
+      delete *node_it;
+    }
 
-  void copy_node(node *n);
+    // clear vector to avoid dangling pointers
+    children.clear();
+  }
+
+  void copy_node(node *n) {
+    node tmp = *this;
+    *n = tmp;
+  }
 
   // Get id
-  int get_id () const;
+  int get_id () const {
+    return id;
+  }
 
   // Get label_id
-  int get_label_id () const;
+  int get_label_id () const {
+    return label_id;
+  }
 
   // Get children
-  std::vector<node*> get_children () const;
+  std::vector<node*> get_children () const {
+    return children;
+  }
 
   // Get children_number
-  int get_children_number () const;
+  int get_children_number () const {
+    //return children_number;
+    return children.size();
+  }
 
-  void set_lml(node* n);
+  void set_lml(node* n) {
+    this->lml = n;
+  }
 
-  node* get_lml();
+  node* get_lml() {
+    return this->lml;
+  }
 
   // Add a child at last position.
   //
   // Params:  child A pointer to the node to be added
   //
   // Return:  None
-  void add_child (node* child);
+  void add_child (node* child) {
+    children.push_back(child);
+    //++children_number;
+  }
 
   // Get subtree size rooted at this node.
   //
   // Return:  The size of the subtree rooted at this node (including this node)
-  int get_subtree_size () const;
+  int get_subtree_size () const {
+    int descendants_sum = 1;
+    // Sum up sizes of subtrees rooted at child nodes (number of descendants)
+    for ( std::vector<node*>::const_iterator node_it = children.cbegin();
+          node_it != children.cend(); ++node_it)
+    {
+      descendants_sum = descendants_sum + (*node_it)->get_subtree_size();
+    }
+    // Add this node to subtree size.
+    return descendants_sum;
+
+  }
 
   // Setter id
-  void set_id (int id);
+  void set_id (int id) {
+    this->id = id;
+  }
 
   // Setter label_id
-  void set_label_id(int id);
+  void set_label_id(int id) {
+    this->label_id = id;
+  }
 
   // Get a pointer to a child at a given position.
   //
@@ -69,17 +125,12 @@ public:
   //
   // Return:  A pointer to the child at position i if it exists or nullptr
   //          otherwise
-  node* get_child (int position) const;
-
-
+  node* get_child (int position) const {
+    return children[position];
+  }
 };
 
-// Generates the postorder for a tree rooted at a given root node.
-//
-// Params:  root  The root node of the tree to be 'postorderified'
-//
-// Return:  A pointer to a vector of node pointers of the 'postorderified' tree
-std::vector<node*>* generate_postorder (node* root);
+typedef std::unordered_map<std::string, int> ht_ids;
 
 // Recursively traverses the subtree rooted at a given root.
 //
@@ -91,7 +142,34 @@ std::vector<node*>* generate_postorder (node* root);
 //                          time a node is added to the resulting vector
 //
 // Return:  None (the result is stored in tr_post, which is altered)
-void postorder(node* root, std::vector<node*>* tr_post, int* node_id_counter);
+void postorder(node* root, std::vector<node*>* tr_post, int* node_id_counter) {
+  if (root) {
+    // traverse children first
+    if (root->get_children_number() > 0) {
+      for (int i = 0; i < root->get_children_number(); ++i) {
+        postorder(root->get_child(i), tr_post, node_id_counter);
+      }
+    }
+    root->set_id(*node_id_counter);
+    ++(*node_id_counter);
+    tr_post->push_back(root);
+  }
+}
+
+// Generates the postorder for a tree rooted at a given root node.
+//
+// Params:  root  The root node of the tree to be 'postorderified'
+//
+// Return:  A pointer to a vector of node pointers of the 'postorderified' tree
+std::vector<node*>* generate_postorder (node* root) {
+  int node_id_counter = 1;
+  // Heap allocation
+  std::vector<node*>* tr_post = new std::vector<node*>();
+
+  // Recursively traverse tree in postorder
+  postorder(root, tr_post, &node_id_counter);
+  return tr_post;
+}
 
 // Generate a simple tree recursively.
 // Each path has length equal to depth.
@@ -103,9 +181,39 @@ void postorder(node* root, std::vector<node*>* tr_post, int* node_id_counter);
 //          max_fanout  Maximum fanout
 //
 // Return:  None
-void generate_full_tree (node *root, int depth, int max_fanout);
+void generate_full_tree (node *root, int fixed_depth, int max_fanout) {
+  // If we reached the maximum depth, terminate this branch.
+  if (fixed_depth == 0)
+    return;
+  // Seed the random generator.
+  // time(NULL) returns seconds, thus each sibling has the same fanout. This is
+  // also true for each node in small trees which are generated in less than a second.
+  std::srand(std::time(NULL));
+  // Generate a random fanout between 1 and max_fanout.
+  int random_fanout = 1 + ( std::rand() % ( max_fanout - 1 + 1 ) );
+  int random_label = 0;
+  // Add as many children to root as random_fanout.
+  for (int i = 0; i < random_fanout; ++i) {
+    // Generate random label as a number from interval 0 to 100.
+    random_label = std::rand() % 100;
+    // Create new node.
+    // We have to use 'new' here. Otherwise as soon as we get out of this
+    // method's scope, the object gets deleted.
+    node* new_node = new node(random_label); // modified by stefan
+    // Add node as a child of root.
+    root->add_child(new_node);
+    // Recursively generate consecutive levels.
+    generate_full_tree(new_node, fixed_depth-1, max_fanout);
+  }
+}
 
-void copy_tree(node* t, node* copy_t);
+void copy_tree(node* t, node* copy_t) {
+  for(int i = 0; i < t->get_children_number(); i++){
+    node* temp = new node(t->get_child(i)->get_label_id());
+    copy_t->add_child(temp);
+    copy_tree(t->get_child(i), temp);
+  }
+}
 
 // Print recursively the labels of all descendants of node, including node.
 // Each label is printed in a separate line.
@@ -113,11 +221,92 @@ void copy_tree(node* t, node* copy_t);
 // Params:  node  The root node of the labels to be printed
 //
 // Return:  None
-void print_tree_labels (node *node);
+void print_tree_labels (node* n) {
+  // Print the label of node.
+  // Recursively print labels of all descendants of node.
+  std::vector<node*> children = n->get_children();
+  for ( std::vector<node*>::const_iterator node_it = children.cbegin();
+        node_it != children.cend(); ++node_it)
+  {
+    print_tree_labels(*node_it);
+  }
+}
 
-typedef std::unordered_map<std::string, int> ht_ids;
+node* generate_tree_from_string (char* str, ht_ids& hashtable, int& labelid) {
+  //std::cout << "----\ngenerating tree" << std::endl;  
+  int length = std::strlen(str);
+  //std::cout << "length: " << length << " string: " << str << std::endl;
+  int scope = -1;
+   
+  std::vector<node*> scopeParentList;
+  std::vector<node*>::const_iterator it;
 
-node* generate_tree_from_string (char *str, ht_ids &hashtable, int &labelid);
+  std::string label = "";
+    
+  node* root = new node(1,1);
+  for (int i = 0; i < length; i++) {
+    if (str[i] == '{') {
+      if (label.length() != 0) {
+        //std::cout << label << ":" << scope << std::endl;
+        if (!hashtable.count(label)) {
+          hashtable.emplace(label, labelid++);
+        }
+
+        node* tmpnode = new node(hashtable[label]);
+        scopeParentList.push_back(tmpnode);
+        
+        if (scope > 0) {
+          it = scopeParentList.begin() + scopeParentList.size() - 2;
+          node* tmp = *it;
+          //std::cout << label << ".parent_id:" << tmp->get_label_id() << std::endl;
+          tmp->add_child(tmpnode);
+        } else {
+          root = tmpnode;
+        }
+        label = "";
+      }
+      scope++;
+    } else if (str[i] == '}') {
+      if(label.length() != 0){
+        //std::cout << label << ":" << scope << std::endl;
+        if (!hashtable.count(label)) {
+          hashtable.emplace(label, labelid++);
+        }
+        
+        node* tmpnode = new node(hashtable[label]);
+        std::vector<node*>::reverse_iterator tmp_it = scopeParentList.rbegin();
+        for (; tmp_it != scopeParentList.rend(); ++tmp_it) {
+          node* tmp_par = *tmp_it;
+          if (tmp_par->get_lml()) {
+            break;
+          } else {
+            tmp_par->set_lml(tmpnode);
+          }
+        }
+        
+        tmpnode->set_lml(tmpnode);
+        scopeParentList.push_back(tmpnode);
+        
+        if (scope > 0 && scopeParentList.size() > 1) {
+          it = scopeParentList.begin() + scopeParentList.size() - 2;
+          node* tmp = *it;
+          //std::cout << label << ".parent_id:" << tmp->get_label_id() << std::endl;
+          tmp->add_child(tmpnode);
+        }
+        label = "";
+      }
+      
+      scopeParentList.resize(scope);
+      --scope;
+    } else {
+      label += str[i];
+    }
+  }
+  
+  //std::cout << "generating tree [done]\n----"<< std::endl;
+
+  return root;
+}
 
 // Represents the cost functions to be used for the distance computation.
 // Costs are generic for different node classes. A cost model has to provide
