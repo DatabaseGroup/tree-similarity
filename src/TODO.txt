@@ -1,26 +1,21 @@
 General:
-  - Directory structure
-  - Makefile(s) according to directory structure
-  - Use references where possible (no copying!)
-  - Resolve memory leaks (valgrind, cppcheck)
-    - Pass at least
-      valgrind --leak-check=full --show-reachable=yes --track-origins
+  * Would a directory structure be useful? (I - Daniel - don't think so, since
+    we only keep .h files)
+  * CMake instead of current hand-crafted Makefile
+  * Check reference/pointer usage (avoid copying as much as possible)
+  * Check if memory leaks are resolved (and if not, resolve them)
+    * Include check target in Makefile, to automatically invoke
+      valgrind/cppcheck/splint
 
 node:
-  - Keep it as short as possible to minimize user effort for a custom node class
-  - Change label_id to a string label (default node class)
-  - Discuss with Stefan what's make_leaves and set_leaves for and how to
-    modularize it out of the node class
-  - Discuss the currently implemented generate_postorder and postorder approaches.
-    Do they alter the original tree rooted at root?
-  - Discuss cost struct functions (arguments necessary or not?)
+  * Check if node class can be shortened (should be as short as possible to
+    minimize the effort of users when creating 
 
-string_edit_distance:
-  - Documentation
+zhang_shasha.h:
+  * Documentation (check for completeness)
 
-upper_bound:
-  - Same interface as zhang_shasha (template function) instead of a class?
+string_edit_distance.h:
+  * Documentation (check for completeness)
 
-zhang_shasha:
-  - Documentation
-  - Replace extern namespace-global variables to be compute_zhang_shasha-internal?
+upper_bound.h:
+  * Template function instead of a class? (like in zhang_shasha.h)
