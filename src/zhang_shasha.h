@@ -19,11 +19,11 @@ std::vector<node*> leaves_t2; //stores the leaves of tree 2
 //
 //Param: root of the tree, a vector which stores the left most leaf descendant for each subtree
 void lmld (node* root, std::vector<int>& lm) {
-  node* tempNode;
+  node* temp_node;
   // call lmld recursively and compute the left-most-leaf descendants
   for (int i = 1; i <= root->get_children_number(); ++i) {
-    tempNode = root->get_children().at(i-1);
-    lmld(tempNode, lm);
+    temp_node = root->get_children().at(i - 1);
+    lmld(temp_node, lm);
   }
 
   if (root->get_children_number() == 0) {
@@ -192,56 +192,59 @@ std::vector<std::array<int, 2> > computeEditMapping(node* r1, node* r2, _costs c
     }
   }
   
-  std::vector<std::array<int, 2> > treePairs;
-  std::vector<std::array<int, 2> > editMapping;
-  treePairs.push_back({r1->get_subtree_size(), r2->get_subtree_size()});  
-  std::array<int, 2> treePair;
-  bool rootNodePair = true;
+  std::vector<std::array<int, 2> > tree_pairs;
+  std::vector<std::array<int, 2> > edit_mapping;
+  tree_pairs.push_back({ r1->get_subtree_size(), r2->get_subtree_size() });  
+  std::array<int, 2> tree_pair;
+  bool root_node_pair = true;
 
-  while(!treePairs.empty()){
-    treePair = treePairs.back();
-    treePairs.pop_back();
+  while (!tree_pairs.empty()) {
+    tree_pair = tree_pairs.back();
+    tree_pairs.pop_back();
 
-    int lastRow = treePair[0];
-    int lastCol = treePair[1];
+    int last_row = tree_pair[0];
+    int last_col = tree_pair[1];
 
-    if(!rootNodePair){
-      forest_dist(lastRow, lastCol,c);
+    if (!root_node_pair) {
+      forest_dist(last_row, last_col, c);
     }
-    rootNodePair = false;
+    root_node_pair = false;
 
-    int firstRow = lm1[lastRow] - 1;
-    int firstCol = lm2[lastCol] - 1;
-    int row = lastRow;
-    int col = lastCol;
+    int first_row = lm1[last_row] - 1;
+    int first_col = lm2[last_col] - 1;
+    int row = last_row;
+    int col = last_col;
 
-    while((row > firstRow) || (col > firstCol)){
-      int costDelete = c.del();
-      int costInsert = c.ins();
+    while ((row > first_row) || (col > first_col)) {
+      int cost_delete = c.del();
+      int cost_insert = c.ins();
 
-      if((row > firstRow) && (fd[row-1][col] + costDelete == fd[row][col])){
-        editMapping.push_back({row,0});
-        row--;
-      } else if((col > firstCol) && (fd[row][col -1] + costInsert == fd[row][col])){
-        editMapping.push_back({0,col});
-        col--;
+      if ((row > first_row) && (fd[row - 1][col] + cost_delete == fd[row][col]))
+      {
+        edit_mapping.push_back({ row, 0 });
+        --row;
+      } else if ( (col > first_col)
+                  && (fd[row][col - 1] + cost_insert == fd[row][col]))
+      {
+        edit_mapping.push_back({ 0, col });
+        --col;
       } else {
-        if(lm1[row]== lm1[lastRow]
-        && lm2[col] == lm2[lastCol]){
-          
-          editMapping.push_back({row,col});
-          row--;
-          col--;
+        if (lm1[row]== lm1[last_row]
+            && lm2[col] == lm2[last_col])
+        {  
+          edit_mapping.push_back({ row, col });
+          --row;
+          --col;
         } else {
-          treePairs.push_back({row, col});
-          row = lm1[row] -1;
-          col = lm2[col] -1;
+          tree_pairs.push_back({ row, col });
+          row = lm1[row] - 1;
+          col = lm2[col] - 1;
         }
       }
     }
   }
 
-  return editMapping;
+  return edit_mapping;
 }
 
 // Generic function to compute the distance between two trees under a specified
