@@ -18,7 +18,6 @@ private:
   // A vector of pointers to child nodes
   std::vector<node*> children;
   int children_number;
-  node* lml;
 
 public:
   // Constructors
@@ -73,14 +72,6 @@ public:
   int get_children_number () const {
     //return children_number;
     return children.size();
-  }
-
-  void set_lml(node* n) {
-    this->lml = n;
-  }
-
-  node* get_lml() {
-    return this->lml;
   }
 
   // Add a child at last position.
@@ -275,16 +266,6 @@ node* generate_tree_from_string (char* str, ht_ids& hashtable, int& labelid) {
         
         node* tmpnode = new node(hashtable[label]);
         std::vector<node*>::reverse_iterator tmp_it = scopeParentList.rbegin();
-        for (; tmp_it != scopeParentList.rend(); ++tmp_it) {
-          node* tmp_par = *tmp_it;
-          if (tmp_par->get_lml()) {
-            break;
-          } else {
-            tmp_par->set_lml(tmpnode);
-          }
-        }
-        
-        tmpnode->set_lml(tmpnode);
         scopeParentList.push_back(tmpnode);
         
         if (scope > 0 && scopeParentList.size() > 1) {

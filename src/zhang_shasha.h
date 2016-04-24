@@ -180,9 +180,6 @@ std::vector<std::array<int, 2> > computeEditMapping(node* r1, node* r2, _costs c
   lmld(r1, lm1);
   lmld(r2, lm2);
 
-  // ?? what, lm1.size() --> 1?? wt // kk his postorder starts with 0?
-  //std::cout << "lm1size: " << lm1.size() << std::endl;
-
   std::vector<int> kr1;
   std::vector<int> kr2;
   kr1 = kr(lm1, leaves_t1.size());
@@ -201,9 +198,6 @@ std::vector<std::array<int, 2> > computeEditMapping(node* r1, node* r2, _costs c
   std::array<int, 2> treePair;
   bool rootNodePair = true;
 
-  std::vector<node*>* post_r1 = generate_postorder(r1);
-  std::vector<node*>* post_r2 = generate_postorder(r2);
-
   while(!treePairs.empty()){
     treePair = treePairs.back();
     treePairs.pop_back();
@@ -216,8 +210,8 @@ std::vector<std::array<int, 2> > computeEditMapping(node* r1, node* r2, _costs c
     }
     rootNodePair = false;
 
-    int firstRow = post_r1->at(lastRow-1)->get_lml()->get_id() - 1;
-    int firstCol = post_r2->at(lastCol-1)->get_lml()->get_id() - 1;
+    int firstRow = lm1[lastRow] - 1;
+    int firstCol = lm2[lastCol] - 1;
     int row = lastRow;
     int col = lastCol;
 
@@ -232,16 +226,16 @@ std::vector<std::array<int, 2> > computeEditMapping(node* r1, node* r2, _costs c
         editMapping.push_back({0,col});
         col--;
       } else {
-        if((post_r1->at(row-1)->get_lml() == post_r1->at(lastRow-1)->get_lml()
-        && post_r2->at(col-1)->get_lml() == post_r2->at(lastCol-1)->get_lml())){
+        if(lm1[row]== lm1[lastRow]
+        && lm2[col] == lm2[lastCol]){
           
           editMapping.push_back({row,col});
           row--;
           col--;
         } else {
           treePairs.push_back({row, col});
-          row = post_r1->at(row-1)->get_lml()->get_id() -1;
-          col = post_r2->at(col-1)->get_lml()->get_id() -1;
+          row = lm1[row] -1;
+          col = lm2[col] -1;
         }
       }
     }

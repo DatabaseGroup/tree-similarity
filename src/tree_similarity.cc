@@ -28,13 +28,13 @@ int main (int argc, char* argv[]) {
 
   std::cout << "post_t1" <<  std::endl;
   for(unsigned int i = 0; i < post_t1->size(); i++){
-      std::cout << post_t1->at(i)->get_id() << "(lml: " << post_t1->at(i)->get_lml()->get_id() << ")" << ", ";
+      std::cout << post_t1->at(i)->get_id() << "(label_id: " << post_t1->at(i)->get_label_id()<< "),";
   }
   std::cout << std::endl;
 
   std::cout << "post_t2" <<  std::endl;
   for(unsigned int i = 0; i < post_t2->size(); i++){
-      std::cout << post_t2->at(i)->get_id() << "(lml: " << post_t2->at(i)->get_lml()->get_id() << ")" << ", ";
+      std::cout << post_t2->at(i)->get_id() << "(label_id: " << post_t2->at(i)->get_label_id()<< "),";
   }
   std::cout << std::endl;
 
