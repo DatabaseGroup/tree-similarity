@@ -13,7 +13,8 @@ fixed, please include some sort of issue description in the commit message, i.e.
 
 # Coding Style
 
-See [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html).
+See [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
+as well as the exceptions in the following section.
 
 ## Exceptions to the Google C++ Style Guide
 
