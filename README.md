@@ -6,8 +6,8 @@ everybody who works on the tree similarity framework to stick to these rules.
 * This `README.md` contains every piece of important information regarding the
 tree similarity framework, e.g., the building process, the coding style, et cetera.
 * If an issue is fixed, please include some sort of issue description in the
-commit message, i.e., **Fix issue #3**, and mark the corresponding issue as
-resolved (see the `Issues` section on the left-hand navigation).
+commit message, i.e., **Fix issue #3**, and close the corresponding issue (see
+the `Issues` section on the left-hand navigation).
 
 # Coding Style
 
