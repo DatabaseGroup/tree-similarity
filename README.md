@@ -1,1 +1,4 @@
-Coding style: see [cpp-style-guide](https://frosch.cosy.sbg.ac.at/dkocher/cpp-style-guide) repository.
+Coding style: see [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html).
+
+Exceptions to this aforementioned style guide:
+==============================================
