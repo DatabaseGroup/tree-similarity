@@ -8,6 +8,10 @@ tree similarity framework, e.g., the building process, the coding style, et cete
 * If an issue is fixed, please include some sort of issue description in the
 commit message, i.e., **Fix issue #3**, and close the corresponding issue (see
 the `Issues` section on the left-hand navigation).
+* If you find any bugs/performance bottlenecks/..., please open an issue (see the
+`Issues` section on the left-hand navigation) with a description. The description
+should contain enough information so that any participant is able to resolve and
+close it.
 
 # Coding Style
 
