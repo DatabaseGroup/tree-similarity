@@ -6,4 +6,5 @@
 
 TreeSimilarity
 tree_similarity
+*.o
 *~
