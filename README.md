@@ -3,7 +3,7 @@ Coding style:
 
 See [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
 
-Exceptions to this aforementioned style guide:
+Exceptions to the Google C++ Style Guide:
 ==============================================
 
 * We declare AND define all functions in the `.h` files. This decision was made
