@@ -31,3 +31,7 @@ add_executable(tree_similarity ${tree_similarity_sources})
 
 # uncomment if Boost is used
 #target_link_libraries(tree_similarity ${Boost_LIBRARIES})
+
+add_custom_target(execute
+  "./tree_similarity" "'{aa{bb{gg}}{ccc{ffff}}}'" "'{aa{ccc{ffff}{gg}}{dd}}'"
+)
