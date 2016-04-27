@@ -26,7 +26,8 @@ repository, i.e. `tree_similarity/`.
 
 ## Compilation
 
-The following commands perform an out-of-source building.
+The following commands perform an out-of-source building (see the
+[CMake FAQs](https://cmake.org/Wiki/CMake_FAQ#Out-of-source_build_trees)).
 
 ~~~
 mkdir build && cd build/ && cmake ../src && make
