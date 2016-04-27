@@ -14,6 +14,40 @@ left-hand navigation). In either case, please add a meaningful description. The
 description should contain enough information so that any person is able to
 resolve it (and mark it as completed).
 
+# Building Process
+
+The following commands are meant to be executed from the root directory of this
+repository, i.e. `tree_similarity/`.
+
+## Prerequisites
+
+* A C++ compiler
+* `CMake` (version >= 2.8)
+
+## Compilation
+
+The following commands perform an out-of-source building.
+
+~~~
+mkdir build && cd build/ && cmake ../src && make
+~~~
+
+## Execution
+
+The following target can be used to execute the binary using a prespecified test
+input.
+
+~~~
+cd build/ && make execute
+~~~
+
+Another option is to execute the binary directly from the command-line. The trees
+have to be supplied using the brackets notation.
+
+~~~
+cd build/ && ./tree_similarity "<first-tree>" "<second-tree>"
+~~~
+
 # Coding Style
 
 See [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
