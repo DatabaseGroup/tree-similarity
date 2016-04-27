@@ -137,7 +137,7 @@ void forest_dist(int i, int j, _costs c = _costs()) {
 }
 
 template<class _node = node, class _costs = costs<_node>>
-std::vector<std::array<int, 2> > computeEditMapping(node* r1, node* r2, _costs c = _costs()){
+std::vector<std::array<int, 2> > compute_edit_mapping(node* r1, node* r2, _costs c = _costs()){
 
   tr_post1 = generate_postorder(r1);
   tr_post2 = generate_postorder(r2);
