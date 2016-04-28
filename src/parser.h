@@ -20,9 +20,11 @@ node* create_tree_from_string (char* str, ht_ids& hashtable, int& labelid) {
         if (scope > 0) {
           it = scopeParentList.begin() + scopeParentList.size() - 2;
           node* tmp = *it;
+          //std::cout << label << ".parent_id:" << tmp->get_label_id() << " scope: " << scope << std::endl;
           tmp->add_child(tmpnode);
         } else {
           root = tmpnode;
+          //std::cout << label << ".parent_id:/" << " scope: " << scope << std::endl;
         }
         label = "";
       }
@@ -38,8 +40,11 @@ node* create_tree_from_string (char* str, ht_ids& hashtable, int& labelid) {
         if (scope > 0 && scopeParentList.size() > 1) {
           it = scopeParentList.begin() + scopeParentList.size() - 2;
           node* tmp = *it;
-          //std::cout << label << ".parent_id:" << tmp->get_label_id() << std::endl;
+          //std::cout << label << ".parent_id:" << tmp->get_label_id() << " scope: " << scope << std::endl;
           tmp->add_child(tmpnode);
+        } else {
+          root = tmpnode;
+          //std::cout << label << ".parent_id:/" << " scope: " << scope << std::endl;
         }
         label = "";
       }
@@ -49,5 +54,6 @@ node* create_tree_from_string (char* str, ht_ids& hashtable, int& labelid) {
       label += str[i];
     }
   }
+  std::cout << "ok" << std::endl;
   return root;
 }

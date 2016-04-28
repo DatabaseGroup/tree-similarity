@@ -37,6 +37,18 @@ std::vector<node*>* generate_postorder (node* root) {
   return tr_post;
 }
 
+// sets the tree id for the tree rooted at the given node
+void set_tree_id (node* root, int tx) {
+  for(int i = 0; i < root->get_children_number(); i++){
+    set_tree_id(root->get_child(i),tx);
+  }
+  if(tx==1){
+    root->set_id_t1(root->get_id());
+  } else {
+    root->set_id_t2(root->get_id());
+  }
+}
+
 // Generate a simple tree recursively.
 // Each path has length equal to depth.
 // Each node has a random fanout between 1 and max_fanout.
@@ -99,7 +111,7 @@ void print_tree_labels (node* n) {
   std::cout << n->get_label_id() << std::endl;
 }
 
-// TODO extern file
+// TODO replace hashtable with a custom node class that supp. strings as labels
 // Creates a json string for the given node
 // e.g.: the json string for the entire tree, recursively
 //
@@ -107,16 +119,20 @@ void print_tree_labels (node* n) {
 //          level   the int level for this level
 //
 // Return: a string in json format
-int get_json_tree(node* root, int level) {
+typedef std::unordered_map<int, std::string> ht_labels;
+int get_json_tree (node* root, int level, ht_labels hashtable) {
   if (root) {
     // traverse children first
-    std::cout << "{\"scope\":\"" << level << "\",\"label\":\""
-              << root->get_label_id() << "\",\"children\":";
+    std::cout << "{\"scope\":\"" << level << "\"";
+    std::cout << ",\"label\":\"" << hashtable[root->get_label_id()] << "\"";
+    std::cout << ",\"id_t1\":\"" << root->get_id_t1() << "\"";
+    std::cout << ",\"id_t2\":\"" << root->get_id_t2() << "\"";
+    std::cout << ",\"children\":";
 
     if (root->get_children_number() > 0) {
       std::cout << "[";
       for (int i = 0; i < root->get_children_number(); ++i) {
-        get_json_tree(root->get_child(i), (level + 1));
+        get_json_tree(root->get_child(i), (level + 1), hashtable);
         if((i + 1) < root->get_children_number()){
           std::cout << ",";
         }
@@ -130,7 +146,6 @@ int get_json_tree(node* root, int level) {
 return 0;
 }
 
-// TODO extern file
 // Creates a hybrid tree based on the given edit mapping and the two trees
 // (tree 2 will be taken and modified based on the edit mapping)
 // (direction of the edit mapping is important)
@@ -139,36 +154,38 @@ return 0;
 //          r2      the root of the second tree
 //          edm     the edit mapping array (a->b)
 //
-// Return: a string in json format (why json? ids would get mixed up)
-int create_hybrid_json_tree (node* r1, node* r2, std::vector<std::array<int, 2> > edm) {
+// ignore for now: Return: a string in json format (why json? ids would get mixed up)
+node* create_hybrid_tree (node* r1, node* r2, std::vector<std::array<int, 2> > edm) {
 
-  node* h1 = new node(r2->get_id(), r2->get_label_id());
-  copy_tree(r2, h1);
-  std::vector<node*>* post_h1 = generate_postorder(h1);
-  std::cout << post_h1->size() << std::endl;
+  node* hybrid = new node(r2->get_id(), r2->get_label_id());
+  copy_tree(r2, hybrid);
+  std::vector<node*>* post_hybrid = generate_postorder(hybrid);
+  std::vector<node*>* post_r1 = generate_postorder(r1);
+  std::cout << "post_hybrid: " << post_hybrid->size() << std::endl;
+  //set_tree_id(hybrid,2);
   
   // TODO 
   // figure out a way how to get the mapping to show in the json-string / tree
   // / node / whatever;
-  
   std::array<int, 2> em;
-  while (!edm.empty()) {
-    em=edm.back();
-    edm.pop_back();
-    std::cout << "(" << em[0] << "->" << em[1] << ")" << std::endl;
+  for(std::vector<std::array<int, 2> >::iterator it = --edm.end(); it >= edm.begin(); --it) {
+      em = *it;
+      std::cout << "(" << em[0] << "->" << em[1] << ")" << std::endl;
     if(em[0]==0){
       // so i dont get unused var
-      std::cout << "ins to: " << r2->get_id() << std::endl;
+      post_hybrid->at(em[1]-1)->set_id_t1(em[0]);
     } else if(em[1]==0){
       // so i dont get unused var
-      std::cout << "del from: " << r1->get_id() << std::endl;
+      std::cout << "del: " << post_r1->at(em[0]-1)->get_id() << std::endl;
+      //insert_node_into_tree(r
     } else {
-        
+        post_hybrid->at(em[1]-1)->set_id_t1(em[0]);
     }
   }
+  std::cout << "-_-_-_-" << std::endl;
 
-  get_json_tree(h1,0);
+
   std::cout << std::endl;
 
-  return 0;
+  return hybrid;
 }

@@ -32,7 +32,15 @@ add_executable(tree_similarity ${tree_similarity_sources})
 
 # uncomment if Boost is used
 #target_link_libraries(tree_similarity ${Boost_LIBRARIES})
-
+  
+# exec error:   "./tree_similarity" "'{a}'" "'{a{b}{c}}'"
+# "-"           "./tree_similarity" "'{a{b{g}}{c{f}}{del}}'" "'{a{b{g}}{c{f}}}'"
+# "-"           "./tree_similarity" "'{a{b{g}}{del}{c{f}}}'" "'{a{b{g}}{c{f}}}'"
+# "-"           "./tree_similarity" "'{a{del}{b{g}}{c{f}}}'" "'{a{b{g}}{c{f}}}'"
+# "-"           "./tree_similarity" "'{a{b{g{del}}}{c{f}}}'" "'{a{b{g}}{c{f}}}'"
+# "-"           "./tree_similarity" "'{a{b{del{g}}}{c{f}}}'" "'{a{b{g}}{c{f}}}'"
+#-------------------------------------------------------------------------------
+# works:        "./tree_similarity" "'{a{b{g}}{c{f}}}'" "'{a{c{f}{g}}{d}}'"
 add_custom_target(execute
-  "./tree_similarity" "'{aa{bb{gg}}{ccc{ffff}}}'" "'{aa{ccc{ffff}{gg}}{dd}}'"
+  "./tree_similarity" "'{a{b{g{del}}}{c{f}}}'" "'{a{b{g}}{c{f}}}'"
 )

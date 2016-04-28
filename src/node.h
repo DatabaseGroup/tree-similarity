@@ -18,6 +18,8 @@ private:
   // A vector of pointers to child nodes
   std::vector<node*> children;
   int children_number;
+  int id_t1;
+  int id_t2;
 
 public:
   // Constructors
@@ -72,6 +74,22 @@ public:
   int get_children_number () const {
     //return children_number;
     return children.size();
+  }
+
+  void set_id_t1 (int t) {
+    id_t1 = t;
+  }
+
+  void set_id_t2 (int t) {
+    id_t2 = t;
+  }
+
+  int get_id_t1 () {
+    return id_t1;
+  }
+
+  int get_id_t2 () {
+    return id_t2;
   }
 
   // Add a child at last position.
