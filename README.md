@@ -13,6 +13,12 @@ issue or add an item to an existing issue (see the `Issues` section on the
 left-hand navigation). In either case, please add a meaningful description. The
 description should contain enough information so that any person is able to
 resolve it (and mark it as completed).
+* In general, write meaningful commit message. One possible rule would be to
+complete the following sentence with your commit message:
+
+    `When applied, this commit will: <commit-message>`
+
+    For instance, `When applied, this commit will Add links to CMake FAQs`.
 
 # Building Process
 
