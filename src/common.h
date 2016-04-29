@@ -1,3 +1,8 @@
+#ifndef COMMON_H
+#define COMMON_H
+
+typedef std::unordered_map<int, std::string> ht_labels;
+
 // Recursively traverses the subtree rooted at a given root.
 //
 // Params:  root            The root node of the subtree to be traversed in
@@ -119,7 +124,6 @@ void print_tree_labels (node* n) {
 //          level   the int level for this level
 //
 // Return: a string in json format
-typedef std::unordered_map<int, std::string> ht_labels;
 int get_json_tree (node* root, int level, ht_labels hashtable) {
   if (root) {
     // traverse children first
@@ -143,7 +147,8 @@ int get_json_tree (node* root, int level, ht_labels hashtable) {
     }
     std::cout << "}";
   }
-return 0;
+
+  return 0;
 }
 
 // Creates a hybrid tree based on the given edit mapping and the two trees
@@ -189,3 +194,5 @@ node* create_hybrid_tree (node* r1, node* r2, std::vector<std::array<int, 2> > e
 
   return hybrid;
 }
+
+#endif // COMMON_H
