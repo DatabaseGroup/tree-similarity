@@ -55,7 +55,7 @@ Another option is to execute the binary directly from the command-line. The tree
 have to be supplied using the brackets notation.
 
 ~~~
-cd build/ && ./tree_similarity "<first-tree>" "<second-tree>"
+cd build/ && ./tree_similarity '<first-tree>' '<second-tree>'
 ~~~
 
 # Coding Style
