@@ -27,8 +27,9 @@ repository, i.e. `tree_similarity/`.
 
 ## Prerequisites
 
-* A C++ compiler (preferably `clang` in version >= 3.4.0)
-* `CMake` in version >= 2.8
+* A C++ compiler (preferably [`clang`](http://clang.llvm.org/) in version >=
+3.4.0)
+* [`CMake`](https://cmake.org/) in version >= 2.8
 
 ## Compilation
 
