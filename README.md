@@ -60,9 +60,27 @@ cd build/ && ./tree_similarity "<first-tree>" "<second-tree>"
 # Coding Style
 
 See [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
-as well as the exceptions in the following section.
+as well as the exceptions/additions/rules in the following section.
 
-## Exceptions to the Google C++ Style Guide
+It is important to mentioned that these exceptions/additions/rules **overrule**
+conflicting/inconsistent rules from 
+[Google's C++ Style Guide](https://google.github.io/styleguide/cppguide.html).
+
+## Exceptions
 
 * We declare AND define all functions in the `.h` files. This is due to the fact
 that template functions/classes are used in almost every `.h` file.
+
+## Additions
+
+* We **always** use the
+[`at`](http://www.cplusplus.com/reference/vector/vector/at/) member of the
+[`std::vector`](http://www.cplusplus.com/reference/vector/) container when we
+want to access an element. As a consequence, we try to avoid the
+[`[]`](http://www.cplusplus.com/reference/vector/vector/operator%5B%5D/) operator.
+
+    The main reason is that
+[`at`](http://www.cplusplus.com/reference/vector/vector/at/) performs a range
+check, whereas the 
+[`[]`](http://www.cplusplus.com/reference/vector/vector/operator%5B%5D/) operator
+does not.
