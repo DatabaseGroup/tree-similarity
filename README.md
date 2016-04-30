@@ -7,11 +7,14 @@ everybody who works on the tree similarity framework to stick to these rules.
 tree similarity framework, e.g., the building process, the coding style, et cetera.
 * If an issue is fixed, please include some sort of issue description in the
 commit message, e.g., **Fix issue #3.2**, and mark the corresponding item in the
-issue as completed (see the `Issues` section on the left-hand navigation).
+issue as completed (see the
+[`Issues`](https://frosch.cosy.sbg.ac.at/mpawlik/tree-similarity/issues) section
+on the left-hand navigation).
 * If you find any bugs/performance bottlenecks/..., either open a completely new
-issue or add an item to an existing issue (see the `Issues` section on the
-left-hand navigation). In either case, please add a meaningful description. The
-description should contain enough information so that any person is able to
+issue or add an item to an existing issue (see the
+[`Issues`](https://frosch.cosy.sbg.ac.at/mpawlik/tree-similarity/issues) section
+on the left-hand navigation). In either case, please add a meaningful description.
+The description should contain enough information so that any person is able to
 resolve it (and mark it as completed).
 * In general, write meaningful commit message. One possible rule would be to
 complete the following sentence with your commit message:
