@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 2.8)
 
 project(tree_similarity)
+set(PROJECT_NAME_EXEC "./${PROJECT_NAME}")
 
 # compiler flags
 set(CMAKE_CXX_FLAGS
-  "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -Wall -Wextra -Werror -pedantic-errors"
+  "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -g"
 )
 
 # uncomment if Boost is used
@@ -28,7 +29,7 @@ set(tree_similarity_sources
 )
 
 # build executable
-add_executable(tree_similarity ${tree_similarity_sources})
+add_executable(${PROJECT_NAME} ${tree_similarity_sources})
 
 # uncomment if Boost is used
 #target_link_libraries(tree_similarity ${Boost_LIBRARIES})
@@ -41,6 +42,22 @@ add_executable(tree_similarity ${tree_similarity_sources})
 # "-"           "./tree_similarity" "'{a{b{del{g}}}{c{f}}}'" "'{a{b{g}}{c{f}}}'"
 #-------------------------------------------------------------------------------
 # works:        "./tree_similarity" "'{a{b{g}}{c{f}}}'" "'{a{c{f}{g}}{d}}'"
+
+# set test inputs (from stdin)
+set(TEST_STDIN_001 "'{a}' '{a{b}{c}}'")
+
 add_custom_target(execute
-  "./tree_similarity" "'{a{b{g{del}}}{c{f}}}'" "'{a{b{g}}{c{f}}}'"
+  "${PROJECT_NAME_EXEC} ${TEST_STDIN_001}"
+)
+
+# valgrind
+find_program(MEMORYCHECK_COMMAND valgrind)
+add_custom_target(check "${MEMORYCHECK_COMMAND}"
+  "-v"
+  "--leak-check=full"
+  "--show-reachable=yes"
+  "--track-origins=yes"
+  "--trace-children=yes"
+  "${PROJECT_NAME_EXEC}"
+  "${TEST_STDIN_001}"
 )
