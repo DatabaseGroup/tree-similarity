@@ -68,8 +68,8 @@ conflicting/inconsistent rules from
 
 ## Exceptions
 
-* We declare AND define all functions in the `.h` files. This is due to the fact
-that template functions/classes are used in almost every `.h` file.
+* We **declare AND define** all functions/classes in the `.h` files. This is due
+to the fact that template functions/classes are used in almost every `.h` file.
 
 ## Additions
 
