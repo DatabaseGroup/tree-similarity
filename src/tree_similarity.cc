@@ -30,9 +30,9 @@ int main (int argc, char* argv[]) {
   std::vector<node*>* post1 = generate_postorder(t1);
   std::vector<node*>* post2 = generate_postorder(t2);
 
-  get_json_tree(t1,0,hashtable_id_to_label);
+  get_json_tree(t1, 0, hashtable_id_to_label);
   std::cout << "\n-" << std::endl;
-  get_json_tree(t2,0,hashtable_id_to_label);
+  get_json_tree(t2, 0, hashtable_id_to_label);
   std::cout << std::endl;
 
   for(unsigned int i = 0; i < post1->size(); i++){
@@ -52,6 +52,7 @@ int main (int argc, char* argv[]) {
     << std::endl;
   std::cout << "[end] z&s" << std::endl;
 
+  /*
   std::cout << "[beg] comp edm" << std::endl;
   std::vector<std::array<int, 2> > edm = zs::compute_edit_mapping<node, costs<node>>(t1,t2);
   std::cout << "[end] comp edm" << std::endl;
@@ -62,9 +63,6 @@ int main (int argc, char* argv[]) {
   get_json_tree(hybrid,0,hashtable_id_to_label);
   std::cout << "[end] hybrid" << std::endl;
 
-
-
-
   std::array<int, 2> em;
   std::cout << "[beg] edit mapping" << std::endl;
   while (!edm.empty())
@@ -74,14 +72,16 @@ int main (int argc, char* argv[]) {
     std::cout << "(" << em[0] << "->" << em[1] << ")" << std::endl;
   }
   std::cout << "[end] edit mapping" << std::endl;
-
-  delete t1;
-  delete t2;
-
+  
   std::cout << "hashtable_label_to_id contains:";
   for ( auto it = hashtable_label_to_id.begin(); it != hashtable_label_to_id.end(); ++it )
     std::cout << " " << it->first << ":" << it->second;
   std::cout << std::endl;
+*/
+  delete t1;
+  delete t2;
+  delete post1;
+  delete post2;
 
 	return 0;
 }
