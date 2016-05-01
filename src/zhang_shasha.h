@@ -127,42 +127,46 @@ void forest_dist(int i, int j, _costs c = _costs()) {
 }
 
 template<class _node = node, class _costs = costs<_node>>
-std::vector<std::array<int, 2> > compute_edit_mapping(node* r1, node* r2, _costs c = _costs()){
-
+std::vector<std::array<int, 2> > compute_edit_mapping (node* r1, node* r2,
+  _costs c = _costs())
+{
   tr_post1 = generate_postorder(r1);
   tr_post2 = generate_postorder(r2);
 
   td.resize(tr_post1->size() + 1);
-  for (unsigned int i = 0; i < tr_post1->size() + 1; ++i) {
+  for (unsigned int i = 0; i < td.size(); ++i) {
     td.at(i).resize(tr_post2->size() + 1);
   }
 
+  // is there any reason to use reserve instead? (reserve was used before)
+  // however, reserve only increases the capacity of the vector, not the size
+  // capacity = the space allocated for the vector (e.g. if push_back is used)
+  // size = the number of actual elements stores in the vector
   lm1.resize(tr_post1->size() + 1);
   lm2.resize(tr_post2->size() + 1);
+ 
+  // initialization (to zero)
+  std::fill(lm1.begin(), lm1.end(), 0);
+  std::fill(lm2.begin(), lm2.end(), 0);
 
-  for (unsigned i = 0; i < tr_post1->size(); ++i) {
-    lm1.at(i) = 0;
-    lm2.at(i) = 0;
-  }
-
-  int max = ((tr_post1->size() < tr_post2->size()) ? tr_post1->size() + 1 :
-    tr_post2->size() + 1);
+  int max = std::max(tr_post1->size(), tr_post2->size()) + 1;
 
   fd.resize(max);
   for (int i = 0; i < max; ++i) {
     fd.at(i).resize(max);
   }
 
-  for (int i = 0; i < max; ++i) {
-    for (int j = 0; j < max; ++j) {
-      td.at(i).at(j) = 0;
-    }
+  // TODO: outsource this into a utils.h/common.h
+  for ( std::vector<std::vector<double>>::iterator it = td.begin();
+        it != td.end(); ++it)
+  {
+    std::fill(it->begin(), it->end(), 0);
   }
 
-  for (int i = 0; i < max; ++i) {
-    for (int j = 0; j < max; ++j) {
-      fd.at(i).at(j) = 0;
-    }
+  for ( std::vector<std::vector<double>>::iterator it = fd.begin();
+        it != fd.end(); ++it)
+  {
+    std::fill(it->begin(), it->end(), 0);
   }
 
   make_leaves(r1, r2);
@@ -176,12 +180,16 @@ std::vector<std::array<int, 2> > compute_edit_mapping(node* r1, node* r2, _costs
   kr2 = kr(lm2, leaves_t2.size());
 
   //compute the distance
-  for (unsigned int x = 1; x < kr1.size(); ++x) {
-    for (unsigned int y = 1; y < kr2.size(); ++y) {
-      forest_dist(kr1.at(x), kr2.at(y), c);
+  for ( std::vector<int>::iterator kr1_it = std::next(kr1.begin());
+        kr1_it != kr1.end(); ++kr1_it)
+  {
+    for ( std::vector<int>::iterator kr2_it = std::next(kr2.begin());
+          kr2_it != kr2.end(); ++kr2_it)
+    {
+      forest_dist(*kr1_it, *kr2_it, c);
     }
   }
-  
+ 
   std::vector<std::array<int, 2> > tree_pairs;
   std::vector<std::array<int, 2> > edit_mapping;
   tree_pairs.push_back({ r1->get_subtree_size(), r2->get_subtree_size() });  
@@ -233,6 +241,9 @@ std::vector<std::array<int, 2> > compute_edit_mapping(node* r1, node* r2, _costs
       }
     }
   }
+
+  delete tr_post1;
+  delete tr_post2;
 
   return edit_mapping;
 }
@@ -293,9 +304,13 @@ double compute_zhang_shasha (_node* t1, _node* t2, _costs c = _costs()) {
   kr2 = kr(lm2, leaves_t2.size());
 
   //compute the distance
-  for (unsigned int x = 1; x < kr1.size(); ++x) {
-    for (unsigned int y = 1; y < kr2.size(); ++y) {
-      forest_dist(kr1.at(x), kr2.at(y), c);
+  for ( std::vector<int>::iterator kr1_it = std::next(kr1.begin());
+        kr1_it != kr1.end(); ++kr1_it)
+  {
+    for ( std::vector<int>::iterator kr2_it = std::next(kr2.begin());
+          kr2_it != kr2.end(); ++kr2_it)
+    {
+      forest_dist(*kr1_it, *kr2_it, c);
     }
   }
 
