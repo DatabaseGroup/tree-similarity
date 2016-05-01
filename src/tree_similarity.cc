@@ -10,8 +10,10 @@
 #include "zhang_shasha.h"
 
 int main (int argc, char* argv[]) {
-
-  if(argc != 3) { return 0; }
+  if(argc != 3) {
+    return 0;
+  }
+  
   std::cout << argv[1] << std::endl;
   std::cout << argv[2] << std::endl;
   std::cout << "--------" << std::endl;
@@ -52,11 +54,9 @@ int main (int argc, char* argv[]) {
     << std::endl;
   std::cout << "[end] z&s" << std::endl;
 
-  /*
   std::cout << "[beg] comp edm" << std::endl;
   std::vector<std::array<int, 2> > edm = zs::compute_edit_mapping<node, costs<node>>(t1,t2);
   std::cout << "[end] comp edm" << std::endl;
-
 
   std::cout << "[beg] hybrid" << std::endl;
   node* hybrid = create_hybrid_tree(t1, t2, edm);
@@ -77,11 +77,12 @@ int main (int argc, char* argv[]) {
   for ( auto it = hashtable_label_to_id.begin(); it != hashtable_label_to_id.end(); ++it )
     std::cout << " " << it->first << ":" << it->second;
   std::cout << std::endl;
-*/
+
   delete t1;
   delete t2;
   delete post1;
   delete post2;
+  delete hybrid;
 
 	return 0;
 }
