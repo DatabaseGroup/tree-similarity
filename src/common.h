@@ -187,10 +187,13 @@ node* create_hybrid_tree (node* r1, node* r2, std::vector<std::array<int, 2> > e
         post_hybrid->at(em[1]-1)->set_id_t1(em[0]);
     }
   }
+  
   std::cout << "-_-_-_-" << std::endl;
-
-
   std::cout << std::endl;
+
+  // free everything not needed after the function call
+  delete post_hybrid;
+  delete post_r1;
 
   return hybrid;
 }
