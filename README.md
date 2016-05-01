@@ -7,11 +7,14 @@ everybody who works on the tree similarity framework to stick to these rules.
 tree similarity framework, e.g., the building process, the coding style, et cetera.
 * If an issue is fixed, please include some sort of issue description in the
 commit message, e.g., **Fix issue #3.2**, and mark the corresponding item in the
-issue as completed (see the `Issues` section on the left-hand navigation).
+issue as completed (see the
+[`Issues`](https://frosch.cosy.sbg.ac.at/mpawlik/tree-similarity/issues) section
+on the left-hand navigation).
 * If you find any bugs/performance bottlenecks/..., either open a completely new
-issue or add an item to an existing issue (see the `Issues` section on the
-left-hand navigation). In either case, please add a meaningful description. The
-description should contain enough information so that any person is able to
+issue or add an item to an existing issue (see the
+[`Issues`](https://frosch.cosy.sbg.ac.at/mpawlik/tree-similarity/issues) section
+on the left-hand navigation). In either case, please add a meaningful description.
+The description should contain enough information so that any person is able to
 resolve it (and mark it as completed).
 * In general, write meaningful commit message. One possible rule would be to
 complete the following sentence with your commit message:
@@ -27,8 +30,9 @@ repository, i.e. `tree_similarity/`.
 
 ## Prerequisites
 
-* A C++ compiler (preferably `clang` in version >= 3.4.0)
-* `CMake` in version >= 2.8
+* A C++ compiler (preferably [`clang`](http://clang.llvm.org/) in version >=
+3.4.0)
+* [`CMake`](https://cmake.org/) in version >= 2.8
 
 ## Compilation
 
@@ -54,15 +58,33 @@ Another option is to execute the binary directly from the command-line. The tree
 have to be supplied using the brackets notation.
 
 ~~~
-cd build/ && ./tree_similarity "<first-tree>" "<second-tree>"
+cd build/ && ./tree_similarity '<first-tree>' '<second-tree>'
 ~~~
 
 # Coding Style
 
 See [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
-as well as the exceptions in the following section.
+as well as the exceptions/additions/rules in the following section.
 
-## Exceptions to the Google C++ Style Guide
+It is important to mentioned that these exceptions/additions/rules **overrule**
+conflicting/inconsistent rules from 
+[Google's C++ Style Guide](https://google.github.io/styleguide/cppguide.html).
 
-* We declare AND define all functions in the `.h` files. This is due to the fact
-that template functions/classes are used in almost every `.h` file.
+## Exceptions
+
+* We **declare AND define** all functions/classes in the `.h` files. This is due
+to the fact that template functions/classes are used in almost every `.h` file.
+
+## Additions
+
+* We **always** use the
+[`at`](http://www.cplusplus.com/reference/vector/vector/at/) member of the
+[`std::vector`](http://www.cplusplus.com/reference/vector/) container when we
+want to access an element. As a consequence, we try to avoid the
+[`[]`](http://www.cplusplus.com/reference/vector/vector/operator%5B%5D/) operator.
+
+    The main reason is that
+[`at`](http://www.cplusplus.com/reference/vector/vector/at/) performs a range
+check, whereas the 
+[`[]`](http://www.cplusplus.com/reference/vector/vector/operator%5B%5D/) operator
+does not.
