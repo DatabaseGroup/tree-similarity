@@ -36,6 +36,8 @@ repository, i.e. `tree_similarity/`.
 * A C++ compiler (preferably [`clang`](http://clang.llvm.org/) in version >=
 3.4.0)
 * [`CMake`](https://cmake.org/) in version >= 2.8
+* [`valgrind`](http://valgrind.org/) in version >= 3.10.1 (to be able to use
+`make check`)
 
 ## Compilation
 
