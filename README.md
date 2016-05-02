@@ -1,3 +1,17 @@
+# Table of Contents
+
+- [General](#general)
+- [Building Process](#building-process)
+    - [Prerequisites](#prerequisites)
+        - [Remarks](#remarks)
+            - [Installing `cppcheck` from Source](#installing-cppcheck-from-source)
+    - [Compilation](#compilation)
+    - [Execution](#execution)
+- [Coding Style](#coding-style)
+    - [Exceptions](#exceptions)
+    - [Additions](#additions)
+    
+
 # General
 
 This section summarizes some general rules for this repository. We encourage
