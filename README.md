@@ -37,7 +37,23 @@ repository, i.e. `tree_similarity/`.
 3.4.0)
 * [`CMake`](https://cmake.org/) in version >= 2.8
 * [`valgrind`](http://valgrind.org/) in version >= 3.10.1 (to be able to use
-`make check`)
+`make check-dynamic` or `make check`)
+* [`cppcheck`](https://github.com/danmar/cppcheck) in version >= 1.74 (to be able
+to use `make check-static` or `make check`)
+
+### Remarks
+
+#### Installing [`cppcheck`](https://github.com/danmar/cppcheck) from Source
+
+~~~
+git clone git@github.com:danmar/cppcheck.git && cd cppcheck
+make SRCDIR=build CFGDIR=/usr/bin/cfg HAVE_RULES=yes
+sudo make install CFGDIR=/usr/bin/cfg
+~~~
+
+The path supplied to `CFGDIR` can be adjusted to a custom path (e.g.,
+`~/cppcheck-cfg`). However, the path has to be consistent for `make` and
+`make install`.
 
 ## Compilation
 
