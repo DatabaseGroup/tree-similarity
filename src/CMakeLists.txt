@@ -48,7 +48,7 @@ set(TEST_TREE_STDIN_001 "'{a{b{c}{d{e}{f}}}{x}}}'")
 set(TEST_TREE_STDIN_002 "'{b{c}{d{e}{f}}}'")
 
 add_custom_target(execute
-  "${PROJECT_NAME_EXEC} ${TEST_STDIN_001}"
+  "${PROJECT_NAME_EXEC}" "${TEST_TREE_STDIN_001}" "${TEST_TREE_STDIN_002}"
 )
 
 # dynamic code analysis - valgrind
