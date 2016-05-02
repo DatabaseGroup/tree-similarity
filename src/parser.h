@@ -43,7 +43,6 @@ node* create_tree_from_string (char* str, ht_ids& hashtable, int& labelid) {
           hashtable.emplace(label, labelid++);
         }
         node* tmpnode = new node(hashtable[label]);
-        std::vector<node*>::reverse_iterator tmp_it = scopeParentList.rbegin();
         scopeParentList.push_back(tmpnode);
         if (scope > 0 && scopeParentList.size() > 1) {
           it = scopeParentList.begin() + scopeParentList.size() - 2;
