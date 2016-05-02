@@ -31,7 +31,7 @@ public:
     id_t2 = 0;
   }
 
-  node (int label_id)
+  explicit node (int label_id)
     : node(0, label_id)
   { }
 
