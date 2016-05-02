@@ -39,7 +39,9 @@ complete the following sentence with your commit message:
 * Use `make check` heavily. It runs several checks (utilizing `valgrind` and
 `cppcheck`, as of yet). However, if one of the checks reports some error, resolve
 them before continue writing new code (and potentially introducing additional
-errors).
+errors) or make sure that it is not necessary to resolve them due to some
+rational reason (e.g., `The scope of the variable 'x' can be reduced` may be
+ignored if the variable scope is chosen on purpose).
 
 # Building Process
 
