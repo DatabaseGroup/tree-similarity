@@ -50,9 +50,9 @@ add_custom_target(execute
   "${PROJECT_NAME_EXEC} ${TEST_STDIN_001}"
 )
 
-# valgrind
-find_program(MEMORYCHECK_COMMAND valgrind)
-add_custom_target(check "${MEMORYCHECK_COMMAND}"
+# dynamic code analysis - valgrind
+find_program(CHECK_DYNAMIC_COMMAND valgrind)
+add_custom_target(check-dynamic "${CHECK_DYNAMIC_COMMAND}"
   "-v"
   "--leak-check=full"
   "--show-reachable=yes"
@@ -61,3 +61,14 @@ add_custom_target(check "${MEMORYCHECK_COMMAND}"
   "${PROJECT_NAME_EXEC}"
   "${TEST_STDIN_001}"
 )
+
+# static code analysis - cppcheck
+find_program(CHECK_STATIC_COMMAND cppcheck)
+add_custom_target(check-static "${CHECK_STATIC_COMMAND}"
+  "--enable=all"
+  "--suppress=missingIncludeSystem"
+  "${PROJECT_SOURCE_DIR}"
+)
+
+# static and dynamic code analysis
+add_custom_target(check DEPENDS check-static check-dynamic)
