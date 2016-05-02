@@ -44,7 +44,8 @@ add_executable(${PROJECT_NAME} ${tree_similarity_sources})
 # works:        "./tree_similarity" "'{a{b{g}}{c{f}}}'" "'{a{c{f}{g}}{d}}'"
 
 # set test inputs (from stdin)
-set(TEST_STDIN_001 "'{a}' '{a{b}{c}}'")
+set(TEST_TREE_STDIN_001 "'{a{b{c}{d{e}{f}}}{x}}}'")
+set(TEST_TREE_STDIN_002 "'{b{c}{d{e}{f}}}'")
 
 add_custom_target(execute
   "${PROJECT_NAME_EXEC} ${TEST_STDIN_001}"
@@ -59,7 +60,8 @@ add_custom_target(check-dynamic "${CHECK_DYNAMIC_COMMAND}"
   "--track-origins=yes"
   "--trace-children=yes"
   "${PROJECT_NAME_EXEC}"
-  "${TEST_STDIN_001}"
+  "${TEST_TREE_STDIN_001}"
+  "${TEST_TREE_STDIN_002}"
 )
 
 # static code analysis - cppcheck

@@ -9,11 +9,14 @@ node* create_tree_from_string (char* str, ht_ids& hashtable, int& labelid) {
    
   std::vector<node*> scopeParentList;
   std::vector<node*>::const_iterator it;
-
   std::string label = "";
     
-  node* root = new node(1,1);
+  node* root = new node(1, 1);
   for (int i = 0; i < length; i++) {
+    if (i != 0 && scope <= -1) {
+      break;
+    }
+
     if (str[i] == '{') {
       if (label.length() != 0) {
         if (!hashtable.count(label)) {
