@@ -92,7 +92,6 @@ void make_leaves (node* t1, node* t2) {
 //Param: i, j defined as above and a optional cost-model
 template<class _node = node, class _costs = costs<_node>>
 void forest_dist(int i, int j, _costs c = _costs()) {
-  int tempmin;
   int cost_rename;
 
   fd.at(lm1.at(i) - 1).at(lm2.at(j) - 1) = 0;
