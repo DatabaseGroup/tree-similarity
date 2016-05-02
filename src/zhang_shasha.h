@@ -2,6 +2,7 @@
 #define ZHANG_SHASHA_H
 
 #include <vector>
+#include <algorithm>
 #include "node.h"
 
 namespace zs {
@@ -19,18 +20,16 @@ std::vector<node*> leaves_t2; //stores the leaves of tree 2
 //
 //Param: root of the tree, a vector which stores the left most leaf descendant for each subtree
 void lmld (node* root, std::vector<int>& lm) {
-  node* temp_node;
   // call lmld recursively and compute the left-most-leaf descendants
   for (int i = 1; i <= root->get_children_number(); ++i) {
-    temp_node = root->get_children().at(i - 1);
-    lmld(temp_node, lm);
+    lmld(root->get_children().at(i - 1), lm);
   }
 
   if (root->get_children_number() == 0) {
-    lm[root->get_id()] = root->get_id();
+    // is leaf
+    lm.at(root->get_id()) = root->get_id();
   } else {
-    node *child1 = root->get_children().at(0);
-    lm[root->get_id()] = lm[child1->get_id()];
+    lm.at(root->get_id()) = lm.at(root->get_children().at(0)->get_id());
   }
 }
 
@@ -41,20 +40,14 @@ void lmld (node* root, std::vector<int>& lm) {
 //Return: A vector storing all key-roots of the input-tree
 std::vector<int> kr (std::vector<int>& l, int leaf_count) {
   std::vector<int> kr(leaf_count + 1);
-  std::vector<int> visit(l.capacity()); //Was node visited
+  std::vector<int> visit(l.size(), 0); // was node visited
 
-  //set all nodes to unvisited
-  for (unsigned int i = 0; i < visit.capacity(); ++i) {
-    visit[i] = 0;
-  }
-
-  int k = leaf_count;
-  int i = l.capacity() - 1;
+  int k = kr.size() - 1;
+  int i = l.size() - 1;
   while (k >= 1) {
-    if (visit[l[i]] == 0) {
-      kr[k] = i;
-      --k;
-      visit[l[i]] = 1;
+    if (visit.at(l.at(i)) == 0) {
+      kr.at(k--) = i;
+      visit.at(l.at(i)) = 1;
     }
     i -= 1;
   }
@@ -102,77 +95,103 @@ void forest_dist(int i, int j, _costs c = _costs()) {
   int tempmin;
   int cost_rename;
 
-  fd[lm1[i] - 1][lm2[j] - 1] = 0;
+  fd.at(lm1.at(i) - 1).at(lm2.at(j) - 1) = 0;
 
-  for (int di = lm1[i]; di <= i; ++di) {
-    fd[di][lm2[j] - 1] = fd[di - 1][lm2[j] - 1] + c.del();
+  for (int di = lm1.at(i); di <= i; ++di) {
+    fd.at(di).at(lm2.at(j) - 1) = fd.at(di - 1).at(lm2.at(j) - 1) + c.del();
+  }
+ 
+  for (int dj = lm2.at(j); dj <= j; ++dj) {
+    fd.at(lm1.at(i) - 1).at(dj) = fd.at(lm1.at(i) - 1).at(dj - 1) + c.ins();
   }
 
-  for (int dj = lm2[j]; dj<= j; ++dj) {
-    fd[lm1[i] - 1][dj] = fd[lm1[i] - 1][dj - 1] + c.ins();
-  }
-
-  for (int di = lm1[i]; di <= i; ++di) {
-    for (int dj = lm2[j]; dj <= j; ++dj) {
-      if (lm1[di] == lm1[i] && lm2[dj] == lm2[j]) {
-        cost_rename =
-          ((*tr_post1)[di - 1]->get_label_id() == (*tr_post2)[dj - 1]->get_label_id())
+  for (int di = lm1.at(i); di <= i; ++di) {
+    for (int dj = lm2.at(j); dj <= j; ++dj) {
+      if (lm1.at(di) == lm1.at(i) && lm2.at(dj) == lm2.at(j)) {
+        cost_rename = ((*tr_post1).at(di - 1)->get_label_id() == (*tr_post2).at(dj - 1)->get_label_id())
           ? 0 : c.ren();
-        tempmin =
-          (fd[di - 1][dj] + c.del() < fd[di][dj - 1] + c.ins()) ?
-          fd[di - 1][dj] + c.del() : fd[di][dj - 1] + c.ins();
-        fd[di][dj] = (tempmin < fd[di - 1][dj - 1] + cost_rename) ?
-          tempmin : fd[di - 1][dj - 1] + cost_rename;
+        fd.at(di).at(dj) = std::min(
+          std::min(fd.at(di - 1).at(dj) + c.del(), fd.at(di).at(dj - 1) + c.ins()),
+          fd.at(di - 1).at(dj - 1) + cost_rename
+        );
 
-        //copy result to permanent array td
-        td[di][dj] = fd[di][dj];
+        td.at(di).at(dj) = fd.at(di).at(dj);
       } else {
-        tempmin = (fd[di - 1][dj] + c.del() < fd[di][dj - 1] + c.ins()) ?
-          fd[di - 1][dj] + c.del() : fd[di][dj - 1] + c.ins();
-        fd[di][dj] = (tempmin < fd[lm1[di] - 1][lm2[dj] - 1] + td[di][dj]) ?
-          tempmin : fd[lm1[di] - 1][lm2[dj] - 1] + td[di][dj];
+        fd.at(di).at(dj) = std::min(
+          std::min(fd.at(di - 1).at(dj) + c.del(), fd.at(di).at(dj - 1) + c.ins()),
+          fd.at(lm1.at(di) - 1).at(lm2.at(dj) - 1) + td.at(di).at(dj)
+        );
       }
     }
   }
 }
 
-template<class _node = node, class _costs = costs<_node>>
-std::vector<std::array<int, 2> > compute_edit_mapping(node* r1, node* r2, _costs c = _costs()){
+// TODO comment2
+template<class _node = node>
+void print_pretty_edit_mapping (
+  std::vector<std::array<node*, 2> > edm)
+{
+  std::array<node*, 2> em;
+  for(std::vector<std::array<node*, 2> >::iterator it = --edm.end(); it >= edm.begin(); --it) {
+      em = *it;
+      std::cout << "(";
+      if(em[0] == nullptr){
+        std::cout << "0";
+      } else {
+        std::cout << em[0]->get_id();
+      }
+      std::cout << "->";
+      if(em[1] == nullptr){
+        std::cout << "0";
+      } else {
+        std::cout << em[1]->get_id();
+      }
+      std::cout << ")" << std::endl;
+  }
+}
 
+// TODO comment
+template<class _node = node, class _costs = costs<_node>>
+std::vector<std::array<node*, 2> > compute_edit_mapping (node* r1, node* r2,
+  _costs c = _costs())
+{
   tr_post1 = generate_postorder(r1);
   tr_post2 = generate_postorder(r2);
 
   td.resize(tr_post1->size() + 1);
-  for (unsigned int i = 0; i < tr_post1->size() + 1; ++i) {
-    td[i].resize(tr_post2->size() + 1);
+  for (unsigned int i = 0; i < td.size(); ++i) {
+    td.at(i).resize(tr_post2->size() + 1);
   }
 
-  lm1.reserve(tr_post1->size() + 1);
-  lm2.reserve(tr_post2->size() + 1);
+  // is there any reason to use reserve instead? (reserve was used before)
+  // however, reserve only increases the capacity of the vector, not the size
+  // capacity = the space allocated for the vector (e.g. if push_back is used)
+  // size = the number of actual elements stores in the vector
+  lm1.resize(tr_post1->size() + 1);
+  lm2.resize(tr_post2->size() + 1);
+ 
+  // initialization (to zero)
+  std::fill(lm1.begin(), lm1.end(), 0);
+  std::fill(lm2.begin(), lm2.end(), 0);
 
-  for (unsigned i = 0; i < tr_post1->size(); ++i) {
-    lm1[i] = 0;
-    lm2[i] = 0;
-  }
-
-  int max = ((tr_post1->size() < tr_post2->size()) ? tr_post1->size() + 1 :
-    tr_post2->size() + 1);
+  int max = std::max(tr_post1->size(), tr_post2->size()) + 1;
 
   fd.resize(max);
   for (int i = 0; i < max; ++i) {
-    fd[i].resize(max);
+    fd.at(i).resize(max);
   }
 
-  for (int i = 0; i < max; ++i) {
-    for (int j = 0; j < max; ++j) {
-      td[i][j] = 0;
-    }
+  // TODO: outsource this into a utils.h/common.h
+  for ( std::vector<std::vector<double>>::iterator it = td.begin();
+        it != td.end(); ++it)
+  {
+    std::fill(it->begin(), it->end(), 0);
   }
 
-  for (int i = 0; i < max; ++i) {
-    for (int j = 0; j < max; ++j) {
-      fd[i][j] = 0;
-    }
+  for ( std::vector<std::vector<double>>::iterator it = fd.begin();
+        it != fd.end(); ++it)
+  {
+    std::fill(it->begin(), it->end(), 0);
   }
 
   make_leaves(r1, r2);
@@ -186,14 +205,18 @@ std::vector<std::array<int, 2> > compute_edit_mapping(node* r1, node* r2, _costs
   kr2 = kr(lm2, leaves_t2.size());
 
   //compute the distance
-  for (unsigned int x = 1; x < kr1.size(); ++x) {
-    for (unsigned int y = 1; y < kr2.size(); ++y) {
-      forest_dist(kr1[x], kr2[y],c);
+  for ( std::vector<int>::iterator kr1_it = std::next(kr1.begin());
+        kr1_it != kr1.end(); ++kr1_it)
+  {
+    for ( std::vector<int>::iterator kr2_it = std::next(kr2.begin());
+          kr2_it != kr2.end(); ++kr2_it)
+    {
+      forest_dist(*kr1_it, *kr2_it, c);
     }
   }
-  
+ 
   std::vector<std::array<int, 2> > tree_pairs;
-  std::vector<std::array<int, 2> > edit_mapping;
+  std::vector<std::array<node*, 2> > edit_mapping;
   tree_pairs.push_back({ r1->get_subtree_size(), r2->get_subtree_size() });  
   std::array<int, 2> tree_pair;
   bool root_node_pair = true;
@@ -202,16 +225,16 @@ std::vector<std::array<int, 2> > compute_edit_mapping(node* r1, node* r2, _costs
     tree_pair = tree_pairs.back();
     tree_pairs.pop_back();
 
-    int last_row = tree_pair[0];
-    int last_col = tree_pair[1];
+    int last_row = tree_pair.at(0);
+    int last_col = tree_pair.at(1);
 
     if (!root_node_pair) {
       forest_dist(last_row, last_col, c);
     }
     root_node_pair = false;
 
-    int first_row = lm1[last_row] - 1;
-    int first_col = lm2[last_col] - 1;
+    int first_row = lm1.at(last_row) - 1;
+    int first_col = lm2.at(last_col) - 1;
     int row = last_row;
     int col = last_col;
 
@@ -219,30 +242,33 @@ std::vector<std::array<int, 2> > compute_edit_mapping(node* r1, node* r2, _costs
       int cost_delete = c.del();
       int cost_insert = c.ins();
 
-      if ((row > first_row) && (fd[row - 1][col] + cost_delete == fd[row][col]))
+      if ((row > first_row) && (fd.at(row - 1).at(col) + cost_delete == fd.at(row).at(col)))
       {
-        edit_mapping.push_back({ row, 0 });
+        edit_mapping.push_back({ tr_post1->at(row-1), nullptr });
         --row;
       } else if ( (col > first_col)
-                  && (fd[row][col - 1] + cost_insert == fd[row][col]))
+                  && (fd.at(row).at(col - 1) + cost_insert == fd.at(row).at(col)))
       {
-        edit_mapping.push_back({ 0, col });
+        edit_mapping.push_back({ nullptr, tr_post2->at(col-1) });
         --col;
       } else {
-        if (lm1[row]== lm1[last_row]
-            && lm2[col] == lm2[last_col])
+        if (lm1.at(row) == lm1.at(last_row)
+            && lm2.at(col) == lm2.at(last_col))
         {  
-          edit_mapping.push_back({ row, col });
+          edit_mapping.push_back({ tr_post1->at(row-1), tr_post2->at(col-1) });
           --row;
           --col;
         } else {
           tree_pairs.push_back({ row, col });
-          row = lm1[row] - 1;
-          col = lm2[col] - 1;
+          row = lm1.at(row) - 1;
+          col = lm2.at(col) - 1;
         }
       }
     }
   }
+
+  delete tr_post1;
+  delete tr_post2;
 
   return edit_mapping;
 }
@@ -257,36 +283,39 @@ double compute_zhang_shasha (_node* t1, _node* t2, _costs c = _costs()) {
   tr_post2 = generate_postorder(t2);
 
   td.resize(tr_post1->size() + 1);
-  for (unsigned int i = 0; i < tr_post1->size() + 1; ++i) {
-    td[i].resize(tr_post2->size() + 1);
+  for (unsigned int i = 0; i < td.size(); ++i) {
+    td.at(i).resize(tr_post2->size() + 1);
   }
 
-  lm1.reserve(tr_post1->size() + 1);
-  lm2.reserve(tr_post2->size() + 1);
+  // is there any reason to use reserve instead? (reserve was used before)
+  // however, reserve only increases the capacity of the vector, not the size
+  // capacity = the space allocated for the vector (e.g. if push_back is used)
+  // size = the number of actual elements stores in the vector
+  lm1.resize(tr_post1->size() + 1);
+  lm2.resize(tr_post2->size() + 1);
 
-  for (unsigned i = 0; i < tr_post1->size(); ++i) {
-    lm1[i] = 0;
-    lm2[i] = 0;
-  }
+  // initialization (to zero)
+  std::fill(lm1.begin(), lm1.end(), 0);
+  std::fill(lm2.begin(), lm2.end(), 0);
 
-  int max = ((tr_post1->size() < tr_post2->size()) ? tr_post1->size() + 1 :
-    tr_post2->size() + 1);
+  int max = std::max(tr_post1->size(), tr_post2->size()) + 1;
 
   fd.resize(max);
   for (int i = 0; i < max; ++i) {
-    fd[i].resize(max);
+    fd.at(i).resize(max);
   }
 
-  for (int i = 0; i < max; ++i) {
-    for (int j = 0; j < max; ++j) {
-      td[i][j] = 0;
-    }
+  // TODO: outsource this into a utils.h/common.h
+  for ( std::vector<std::vector<double>>::iterator it = td.begin();
+        it != td.end(); ++it)
+  {
+    std::fill(it->begin(), it->end(), 0);
   }
 
-  for (int i = 0; i < max; ++i) {
-    for (int j = 0; j < max; ++j) {
-      fd[i][j] = 0;
-    }
+  for ( std::vector<std::vector<double>>::iterator it = fd.begin();
+        it != fd.end(); ++it)
+  {
+    std::fill(it->begin(), it->end(), 0);
   }
 
   make_leaves(t1, t2);
@@ -300,13 +329,17 @@ double compute_zhang_shasha (_node* t1, _node* t2, _costs c = _costs()) {
   kr2 = kr(lm2, leaves_t2.size());
 
   //compute the distance
-  for (unsigned int x = 1; x < kr1.size(); ++x) {
-    for (unsigned int y = 1; y < kr2.size(); ++y) {
-      forest_dist(kr1[x], kr2[y], c);
+  for ( std::vector<int>::iterator kr1_it = std::next(kr1.begin());
+        kr1_it != kr1.end(); ++kr1_it)
+  {
+    for ( std::vector<int>::iterator kr2_it = std::next(kr2.begin());
+          kr2_it != kr2.end(); ++kr2_it)
+    {
+      forest_dist(*kr1_it, *kr2_it, c);
     }
   }
 
-  double ted = td[tr_post1->size()][tr_post2->size()];
+  double ted = td.at(tr_post1->size()).at(tr_post2->size());
   delete tr_post1;
   delete tr_post2;
 

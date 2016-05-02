@@ -25,14 +25,18 @@ public:
   // Constructors
   node (int id, int label_id, int children_number)
     : id(id), label_id(label_id), children_number(children_number)
-  { }
+  {
+    // make sure to initalize ALL fields
+    id_t1 = 0;
+    id_t2 = 0;
+  }
 
   node (int label_id)
-    : label_id(label_id)
+    : node(0, label_id)
   { }
 
   node (int id, int label_id)
-    : id(id), label_id(label_id)
+    : node(id, label_id, 0)
   { }
 
   //node(node&);

@@ -1,4 +1,8 @@
+#ifndef PARSER_H
+#define PARSER_H
+
 typedef std::unordered_map<std::string, int> ht_ids;
+
 node* create_tree_from_string (char* str, ht_ids& hashtable, int& labelid) { 
   int length = std::strlen(str);
   int scope = -1;
@@ -23,6 +27,7 @@ node* create_tree_from_string (char* str, ht_ids& hashtable, int& labelid) {
           //std::cout << label << ".parent_id:" << tmp->get_label_id() << " scope: " << scope << std::endl;
           tmp->add_child(tmpnode);
         } else {
+          delete root;
           root = tmpnode;
           //std::cout << label << ".parent_id:/" << " scope: " << scope << std::endl;
         }
@@ -43,6 +48,7 @@ node* create_tree_from_string (char* str, ht_ids& hashtable, int& labelid) {
           //std::cout << label << ".parent_id:" << tmp->get_label_id() << " scope: " << scope << std::endl;
           tmp->add_child(tmpnode);
         } else {
+          delete root;
           root = tmpnode;
           //std::cout << label << ".parent_id:/" << " scope: " << scope << std::endl;
         }
@@ -54,6 +60,7 @@ node* create_tree_from_string (char* str, ht_ids& hashtable, int& labelid) {
       label += str[i];
     }
   }
-  std::cout << "ok" << std::endl;
   return root;
 }
+
+#endif // PARSER_H

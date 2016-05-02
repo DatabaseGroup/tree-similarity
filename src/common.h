@@ -1,3 +1,8 @@
+#ifndef COMMON_H
+#define COMMON_H
+
+typedef std::unordered_map<int, std::string> ht_labels;
+
 // Recursively traverses the subtree rooted at a given root.
 //
 // Params:  root            The root node of the subtree to be traversed in
@@ -111,13 +116,6 @@ void print_tree_labels (node* n) {
   std::cout << n->get_label_id() << std::endl;
 }
 
-void get_parents (node* root, int arr[]) {
-  for(int i = 0; i < root->get_children_number(); i++){
-    arr[root->get_child(i)->get_id()] = root->get_id();
-    get_parents(root->get_child(i), arr);
-  }
-}
-
 // TODO replace hashtable with a custom node class that supp. strings as labels
 // Creates a json string for the given node
 // e.g.: the json string for the entire tree, recursively
@@ -126,7 +124,6 @@ void get_parents (node* root, int arr[]) {
 //          level   the int level for this level
 //
 // Return: a string in json format
-typedef std::unordered_map<int, std::string> ht_labels;
 int get_json_tree (node* root, int level, ht_labels hashtable) {
   if (root) {
     // traverse children first
@@ -150,9 +147,18 @@ int get_json_tree (node* root, int level, ht_labels hashtable) {
     }
     std::cout << "}";
   }
-return 0;
+
+  return 0;
 }
 
+void get_parents (node* root, int arr[]) {
+  for(int i = 0; i < root->get_children_number(); i++){
+    arr[root->get_child(i)->get_id()] = root->get_id();
+    get_parents(root->get_child(i), arr);
+  }
+}
+
+// TODO update since edm has been updated
 // Creates a hybrid tree based on the given edit mapping and the two trees
 // (tree 2 will be taken and modified based on the edit mapping)
 // (direction of the edit mapping is important)
@@ -195,9 +201,15 @@ node* create_hybrid_tree (node* r1, node* r2, std::vector<std::array<int, 2> > e
         post_hybrid->at(em[1]-1)->set_id_t1(em[0]);
     }
   }
+  
   std::cout << "-_-_-_-" << std::endl;
-
   std::cout << std::endl;
+
+  // free everything not needed after the function call
+  delete post_hybrid;
+  delete post_r1;
 
   return hybrid;
 }
+
+#endif // COMMON_H
