@@ -1,6 +1,6 @@
 # Table of Contents
 
-- [General](#general)
+- [General (Must-Read)](#general)
 - [Building Process](#building-process)
     - [Prerequisites](#prerequisites)
         - [Remarks](#remarks)
@@ -36,9 +36,12 @@ complete the following sentence with your commit message:
     `When applied, this commit will: <commit-message>`
 
     For instance, `When applied, this commit will Add links to CMake FAQs`.
-* Use `make check` to run several checks (by now only one - `valgrind` - is
-executed). However, if one of the checks reports some error, resolve them before
-continue writing new code (and potentially introducing additional errors).
+* Use `make check` heavily. It runs several checks (utilizing `valgrind` and
+`cppcheck`, as of yet). However, if one of the checks reports some error, resolve
+them before continue writing new code (and potentially introducing additional
+errors) or make sure that it is not necessary to resolve them due to some
+rational reason (e.g., `The scope of the variable 'x' can be reduced` may be
+ignored if the variable scope is chosen on purpose).
 
 # Building Process
 

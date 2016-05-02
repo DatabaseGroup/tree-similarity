@@ -38,6 +38,7 @@ int main (int argc, char* argv[]) {
   // compute distance using basic nodes and basic cost model
   // no need to generate basic cost model since it is set as default template
   // parameter
+  std::cout << std::endl;
   std::cout << "Distance (basic tree, basic cost model, Zhang Shasha): " << "\t"
     << zs::compute_zhang_shasha<node, costs<node>>(t1, t2)
     << std::endl;
@@ -65,8 +66,9 @@ int main (int argc, char* argv[]) {
   std::cout << "[end] edit mapping" << std::endl;
 
   std::cout << "hashtable_label_to_id contains:";
-  for ( auto it = hashtable_label_to_id.begin(); it != hashtable_label_to_id.end(); ++it )
+  for ( auto it = hashtable_label_to_id.begin(); it != hashtable_label_to_id.end(); ++it ) {
     std::cout << " " << it->first << ":" << it->second;
+  }
   std::cout << std::endl;
 
   delete t1;
