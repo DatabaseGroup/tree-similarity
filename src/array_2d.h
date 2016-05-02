@@ -3,6 +3,7 @@
 
 // size_t
 #include <memory>
+#include <algorithm>
 
 /**
  * Encapsulates a two dimensional array of a given type (generic).
@@ -30,6 +31,13 @@ public:
   {
     // allocate array
     data = new double[rows * columns];
+  }
+
+  // Copy constructor
+  array_2d (const array_2d& other)
+    : array_2d(other.get_rows(), other.get_columns)
+  {
+    std::copy(other.data, other.data + (rows * columns), data);
   }
 
   // Destructor
