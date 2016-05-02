@@ -42,5 +42,5 @@ add_executable(tree_similarity ${tree_similarity_sources})
 #-------------------------------------------------------------------------------
 # works:        "./tree_similarity" "'{a{b{g}}{c{f}}}'" "'{a{c{f}{g}}{d}}'"
 add_custom_target(execute
-  "./tree_similarity" "'{a{b{g{del}}}{c{f}}}'" "'{a{b{g}}{c{f}}}'"
+  "./tree_similarity" "'{a{b{g}}{c{f}}}'" "'{a{c{f}{g}}{d}}'"
 )

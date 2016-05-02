@@ -111,6 +111,13 @@ void print_tree_labels (node* n) {
   std::cout << n->get_label_id() << std::endl;
 }
 
+void get_parents (node* root, int arr[]) {
+  for(int i = 0; i < root->get_children_number(); i++){
+    arr[root->get_child(i)->get_id()] = root->get_id();
+    get_parents(root->get_child(i), arr);
+  }
+}
+
 // TODO replace hashtable with a custom node class that supp. strings as labels
 // Creates a json string for the given node
 // e.g.: the json string for the entire tree, recursively
@@ -163,8 +170,14 @@ node* create_hybrid_tree (node* r1, node* r2, std::vector<std::array<int, 2> > e
   std::vector<node*>* post_r1 = generate_postorder(r1);
   std::cout << "post_hybrid: " << post_hybrid->size() << std::endl;
   //set_tree_id(hybrid,2);
-  
-  // TODO 
+
+  int* parents_r1 = new int[r1->get_subtree_size()+1];
+  get_parents(r1, parents_r1);
+  for(int i = 1; i < r1->get_subtree_size()+1; i++){
+    std::cout << "parent(" << i << "): " << parents_r1[i] << std::endl;
+  }
+
+  // TODO
   // figure out a way how to get the mapping to show in the json-string / tree
   // / node / whatever;
   std::array<int, 2> em;
@@ -177,13 +190,12 @@ node* create_hybrid_tree (node* r1, node* r2, std::vector<std::array<int, 2> > e
     } else if(em[1]==0){
       // so i dont get unused var
       std::cout << "del: " << post_r1->at(em[0]-1)->get_id() << std::endl;
-      //insert_node_into_tree(r
+      //insert_node_into_tree(em[0],r1,hybrid);
     } else {
         post_hybrid->at(em[1]-1)->set_id_t1(em[0]);
     }
   }
   std::cout << "-_-_-_-" << std::endl;
-
 
   std::cout << std::endl;
 
