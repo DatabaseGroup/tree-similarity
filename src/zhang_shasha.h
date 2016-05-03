@@ -125,7 +125,9 @@ void forest_dist(int i, int j, _costs c = _costs()) {
   }
 }
 
-// TODO comment2
+// Prints the given edit mapping
+//
+// Params:  edm     the edit mapping
 template<class _node = node>
 void print_pretty_edit_mapping (
   std::vector<std::array<node*, 2> > edm)
@@ -149,7 +151,42 @@ void print_pretty_edit_mapping (
   }
 }
 
-// TODO comment
+// "Returns"/Fills a two dimensional integer array for the given edit mapping
+//                 array size: 2 x max(nodes_t1, nodes_t2)+1 or 2 x edm.size();
+//
+// Params:  edm     the edit mapping
+//
+// "Returns"/Fills: a two dimensional integer array, where arr[0][id] is the mapping for
+//          a the node in the first tree (depends on the mapping !) 
+template<class _node = node>
+void get_edit_mapping_int_array (
+  std::vector<std::array<node*, 2> > edm, int **arr)
+{
+  std::array<node*, 2> em;
+  for(std::vector<std::array<node*, 2> >::iterator it = --edm.end(); it >= edm.begin(); --it) {
+      em = *it;
+      if(em[0] == nullptr){
+        // insert
+        arr[1][em[1]->get_id()] = 0;
+      } else if(em[1] == nullptr){
+         // delete
+        arr[0][em[0]->get_id()] = 0;
+      } else {
+        arr[0][em[0]->get_id()] = em[1]->get_id();
+        arr[1][em[1]->get_id()] = em[0]->get_id();
+      }
+  }
+}
+
+// Computes the edit mapping for two trees (optional: custom costs)
+//
+// Params:  r1      the root of the first tree
+//          r2      the root of the second tree
+//
+// Returns: a vector of node* arrays, which shows the mapping for each node,
+//          e.g.: node_in_t1  -> node_in_t2   mapping or rename operation
+//                nullptr     -> node_in_t2   insert operation
+//                node_in_t1  -> nullptr      delete operation
 template<class _node = node, class _costs = costs<_node>>
 std::vector<std::array<node*, 2> > compute_edit_mapping (node* r1, node* r2,
   _costs c = _costs())

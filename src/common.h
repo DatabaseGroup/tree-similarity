@@ -42,18 +42,6 @@ std::vector<node*>* generate_postorder (node* root) {
   return tr_post;
 }
 
-// sets the tree id for the tree rooted at the given node
-void set_tree_id (node* root, int tx) {
-  for(int i = 0; i < root->get_children_number(); i++){
-    set_tree_id(root->get_child(i),tx);
-  }
-  if(tx==1){
-    root->set_id_t1(root->get_id());
-  } else {
-    root->set_id_t2(root->get_id());
-  }
-}
-
 // Generate a simple tree recursively.
 // Each path has length equal to depth.
 // Each node has a random fanout between 1 and max_fanout.
@@ -124,19 +112,22 @@ void print_tree_labels (node* n) {
 //          level   the int level for this level
 //
 // Return: a string in json format
-int get_json_tree (node* root, int level, ht_labels hashtable) {
+void get_json_tree (node* root, int level, ht_labels hashtable, int* map = nullptr, int tree = 0) {
   if (root) {
-    // traverse children first
     std::cout << "{\"scope\":\"" << level << "\"";
     std::cout << ",\"label\":\"" << hashtable[root->get_label_id()] << "\"";
-    std::cout << ",\"id_t1\":\"" << root->get_id_t1() << "\"";
-    std::cout << ",\"id_t2\":\"" << root->get_id_t2() << "\"";
+    if(tree != 0){
+      std::cout << ",\"tree\":" << tree << "";
+    }
+    if(map!=nullptr){
+      std::cout << ",\"mappedTo\":" << map[root->get_id()] << "";
+    }
     std::cout << ",\"children\":";
 
     if (root->get_children_number() > 0) {
       std::cout << "[";
       for (int i = 0; i < root->get_children_number(); ++i) {
-        get_json_tree(root->get_child(i), (level + 1), hashtable);
+        get_json_tree(root->get_child(i), (level + 1), hashtable, map, tree);
         if((i + 1) < root->get_children_number()){
           std::cout << ",";
         }
@@ -147,10 +138,12 @@ int get_json_tree (node* root, int level, ht_labels hashtable) {
     }
     std::cout << "}";
   }
-
-  return 0;
 }
 
+// Fills the array with the ids of the parents,
+// 
+// Params:  root    the parent for its children
+//          arr     the array which gets filled with (e.g.: postorder) ids (int)
 void get_parents (node* root, int arr[]) {
   for(int i = 0; i < root->get_children_number(); i++){
     arr[root->get_child(i)->get_id()] = root->get_id();
@@ -168,7 +161,7 @@ void get_parents (node* root, int arr[]) {
 //          edm     the edit mapping array (a->b)
 //
 // ignore for now: Return: a string in json format (why json? ids would get mixed up)
-node* create_hybrid_tree (node* r1, node* r2, std::vector<std::array<int, 2> > edm) {
+node* create_hybrid_tree (node* r1, node* r2, std::vector<std::array<node*, 2> > edm) {
 
   node* hybrid = new node(r2->get_id(), r2->get_label_id());
   copy_tree(r2, hybrid);
@@ -186,29 +179,11 @@ node* create_hybrid_tree (node* r1, node* r2, std::vector<std::array<int, 2> > e
   // TODO
   // figure out a way how to get the mapping to show in the json-string / tree
   // / node / whatever;
-  std::array<int, 2> em;
-  for(std::vector<std::array<int, 2> >::iterator it = --edm.end(); it >= edm.begin(); --it) {
-      em = *it;
-      std::cout << "(" << em[0] << "->" << em[1] << ")" << std::endl;
-    if(em[0]==0){
-      // so i dont get unused var
-      post_hybrid->at(em[1]-1)->set_id_t1(em[0]);
-    } else if(em[1]==0){
-      // so i dont get unused var
-      std::cout << "del: " << post_r1->at(em[0]-1)->get_id() << std::endl;
-      //insert_node_into_tree(em[0],r1,hybrid);
-    } else {
-        post_hybrid->at(em[1]-1)->set_id_t1(em[0]);
-    }
-  }
-  
-  std::cout << "-_-_-_-" << std::endl;
-  std::cout << std::endl;
 
-  // free everything not needed after the function call
+  // free everything not needed after the function call - ok
   delete post_hybrid;
   delete post_r1;
-
+  delete parents_r1;
   return hybrid;
 }
 

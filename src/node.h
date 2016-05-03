@@ -18,18 +18,12 @@ private:
   // A vector of pointers to child nodes
   std::vector<node*> children;
   int children_number;
-  int id_t1;
-  int id_t2;
 
 public:
   // Constructors
   node (int id, int label_id, int children_number)
     : id(id), label_id(label_id), children_number(children_number)
-  {
-    // make sure to initalize ALL fields
-    id_t1 = 0;
-    id_t2 = 0;
-  }
+  { }
 
   explicit node (int label_id)
     : node(0, label_id)
@@ -78,22 +72,6 @@ public:
   int get_children_number () const {
     //return children_number;
     return children.size();
-  }
-
-  void set_id_t1 (int t) {
-    id_t1 = t;
-  }
-
-  void set_id_t2 (int t) {
-    id_t2 = t;
-  }
-
-  int get_id_t1 () {
-    return id_t1;
-  }
-
-  int get_id_t2 () {
-    return id_t2;
   }
 
   // Add a child at last position.

@@ -8,12 +8,11 @@
 #include "upper_bound.h"
 #include "string_edit_distance.h"
 #include "zhang_shasha.h"
-
+// TODO: tobi: put everything in a method e.g. called get_sbs_fs(node* t1, node* t2)
 int main (int argc, char* argv[]) {
   if(argc != 3) {
     return 0;
   }
-
   // TODO replace hashtable with a custom node class that sup. strings as labels
   std::unordered_map<std::string, int> hashtable_label_to_id;
   std::unordered_map<int, std::string> hashtable_id_to_label;
@@ -28,12 +27,11 @@ int main (int argc, char* argv[]) {
   std::vector<node*>* post1 = generate_postorder(t1);
   std::vector<node*>* post2 = generate_postorder(t2);
 
-/*
   get_json_tree(t1, 0, hashtable_id_to_label);
-  std::cout << "\n-" << std::endl;
+  std::cout << "\n" << std::endl;
   get_json_tree(t2, 0, hashtable_id_to_label);
   std::cout << std::endl;
-*/
+
   // Zhang and Shasha cost = 1 (insert), 1 (delete), 1 (rename)
   // compute distance using basic nodes and basic cost model
   // no need to generate basic cost model since it is set as default template
@@ -55,6 +53,31 @@ int main (int argc, char* argv[]) {
   zs::print_pretty_edit_mapping<node>(edm);
   std::cout << "[end] edit mapping pretty (int)" << std::endl;  
 
+  std::cout << "[beg] get edit mapping int array" << std::endl;
+  int *edm_int_arr[2];
+  int max_nodes = std::max(t1->get_subtree_size(),t2->get_subtree_size());
+  edm_int_arr[0] = new int[max_nodes + 1];
+  edm_int_arr[1] = new int[max_nodes + 1];
+  for(int i = 0; i<2; i++){
+    for(int j = 0; j <= max_nodes; j++){
+      edm_int_arr[i][j] = 0;
+    }
+  }
+  zs::get_edit_mapping_int_array<node>(edm, edm_int_arr);
+  for(int i = 0; i<2; i++){
+    for(int j = 0; j <= max_nodes; j++){
+      std::cout << i << "," << j << ": " << edm_int_arr[i][j] << std::endl;
+    }
+    std::cout << std::endl;
+  }
+  std::cout << "[end] get edit mapping int array" << std::endl;
+  
+  std::cout << "[beg] json tree\n[";
+  get_json_tree(t1,0,hashtable_id_to_label, edm_int_arr[0],1);
+  std::cout << ",";
+  get_json_tree(t2,0,hashtable_id_to_label, edm_int_arr[1],2);
+  std::cout << "]\n[end] json tree" << std::endl;
+
   std::array<node*, 2> em;
   std::cout << "[beg] edit mapping" << std::endl;
   while (!edm.empty())
@@ -75,6 +98,9 @@ int main (int argc, char* argv[]) {
   delete t2;
   delete post1;
   delete post2;
+  for(int i = 0; i<2; i++){
+    delete[] edm_int_arr[i];
+  }
   //delete hybrid;
 
 	return 0;
