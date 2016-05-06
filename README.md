@@ -20,6 +20,7 @@ to write code to the best of his/her knowledge (regarding this document).
     - [Execution](#execution)
 - [Coding Style](#coding-style)
     - [Naming](#naming)
+        - [Exceptions/Additions](#exceptionsadditions)
     - [Programming Style](#programming-style)
 - [References](#references)
     
