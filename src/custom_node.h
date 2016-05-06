@@ -10,24 +10,24 @@
 class CustomNode {
 private:
   // custom label
-  std::vector<std::string> label;
-  std::vector<CustomNode*> children;
+  std::vector<std::string> label_;
+  std::vector<CustomNode*> children_;
 
 public:
   // Basic constructor
   CustomNode (std::vector<std::string> label,
     std::vector<CustomNode*> children)
-    : label(label), children(children)
+    : label_(label), children_(children)
   { }
 
   // Getter label
   std::vector<std::string> get_label () const {
-    return label;
+    return label_;
   }
 
   // Getter children
   std::vector<CustomNode*> get_children () const {
-    return children;
+    return children_;
   }
 };
 

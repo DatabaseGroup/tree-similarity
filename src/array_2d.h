@@ -19,41 +19,41 @@ template<class _type>
 class Array2D {
 private:
   // consecutive allocated memory: rows * columns
-  size_t rows;
-  size_t columns;
+  size_t rows_;
+  size_t columns_;
   // consecutive allocated row containing the array elements
-  _type* data;
+  _type* data_;
 
 public:
   // Constructor
   Array2D (size_t rows, size_t columns)
-    : rows(rows), columns(columns), data(nullptr)
+    : rows_(rows), columns_(columns), data_(nullptr)
   {
     // allocate array
-    data = new double[rows * columns];
+    data_ = new double[rows_ * columns_];
   }
 
   // Copy constructor
   Array2D (const Array2D& other)
-    : Array2D(other.get_rows(), other.get_columns)
+    : Array2D(other.get_rows(), other.get_columns())
   {
-    std::copy(other.data, other.data + (rows * columns), data);
+    std::copy(other.data, other.data + (rows_ * columns_), data_);
   }
 
   // Destructor
   ~Array2D () {
     // deallocate array
-    delete[] data;
+    delete[] data_;
   }
 
   // Get number of rows
   size_t get_rows () const {
-    return rows;
+    return rows_;
   }
 
   // Get number of columns
   size_t get_columns () const {
-    return columns;
+    return columns_;
   }
 
   // Enable access as usual using the [][] notation.
@@ -62,7 +62,7 @@ public:
   //
   // Return:  A pointer to the beginning of the row to be accessed
   _type* operator[] (size_t row) {
-    return data + row * columns;
+    return data_ + row * columns_;
   }
 };
 

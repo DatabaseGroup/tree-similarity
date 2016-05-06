@@ -13,16 +13,16 @@
 // are stored in an array of pointers to nodes.
 class Node {
 private:
-  int id;
-  int label_id;
+  int id_;
+  int label_id_;
   // A vector of pointers to child nodes
-  std::vector<Node*> children;
-  int children_number;
+  std::vector<Node*> children_;
+  int children_number_;
 
 public:
   // Constructors
   Node (int id, int label_id, int children_number)
-    : id(id), label_id(label_id), children_number(children_number)
+    : id_(id), label_id_(label_id), children_number_(children_number)
   { }
 
   explicit Node (int label_id)
@@ -38,40 +38,40 @@ public:
   // Destructor
   ~Node () {
     // delete all children nodes
-    for ( std::vector<Node*>::iterator node_it = children.begin();
-          node_it != children.end(); ++node_it)
+    for ( std::vector<Node*>::iterator node_it = children_.begin();
+          node_it != children_.end(); ++node_it)
     {
       delete *node_it;
     }
 
     // clear vector to avoid dangling pointers
-    children.clear();
+    children_.clear();
   }
 
-  void copy_node(Node *n) {
+  void copy_node(Node *node) {
     Node tmp = *this;
-    *n = tmp;
+    *node = tmp;
   }
 
   // Get id
   int get_id () const {
-    return id;
+    return id_;
   }
 
   // Get label_id
   int get_label_id () const {
-    return label_id;
+    return label_id_;
   }
 
   // Get children
   std::vector<Node*> get_children () const {
-    return children;
+    return children_;
   }
 
   // Get children_number
   int get_children_number () const {
     //return children_number;
-    return children.size();
+    return children_.size();
   }
 
   // Add a child at last position.
@@ -80,7 +80,7 @@ public:
   //
   // Return:  None
   void add_child (Node* child) {
-    children.push_back(child);
+    children_.push_back(child);
     //++children_number;
   }
 
@@ -90,24 +90,24 @@ public:
   int get_subtree_size () const {
     int descendants_sum = 1;
     // Sum up sizes of subtrees rooted at child nodes (number of descendants)
-    for ( std::vector<Node*>::const_iterator node_it = children.cbegin();
-          node_it != children.cend(); ++node_it)
+    for ( std::vector<Node*>::const_iterator node_it = children_.cbegin();
+          node_it != children_.cend(); ++node_it)
     {
       descendants_sum = descendants_sum + (*node_it)->get_subtree_size();
     }
+
     // Add this node to subtree size.
     return descendants_sum;
-
   }
 
   // Setter id
   void set_id (int id) {
-    this->id = id;
+    id_ = id;
   }
 
   // Setter label_id
   void set_label_id(int id) {
-    this->label_id = id;
+    label_id_ = id;
   }
 
   // Get a pointer to a child at a given position.
@@ -117,7 +117,7 @@ public:
   // Return:  A pointer to the child at position i if it exists or nullptr
   //          otherwise
   Node* get_child (int position) const {
-    return children[position];
+    return children_[position];
   }
 };
 
