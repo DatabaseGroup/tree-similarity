@@ -62,17 +62,17 @@ repository, i.e. `tree_similarity/`.
 
 ## Prerequisites
 
-* A C++ compiler (preferably [`clang`](http://clang.llvm.org/) in version >=
+- A C++ compiler (preferably [`clang`](#references) in version >=
 3.4.0)
-* [`CMake`](https://cmake.org/) in version >= 2.8
-* [`valgrind`](http://valgrind.org/) in version >= 3.10.1 (to be able to use
+- [`CMake`](#references) in version >= 2.8
+- [`valgrind`](#references) in version >= 3.10.1 (to be able to use
 `make check-dynamic` or `make check`)
-* [`cppcheck`](https://github.com/danmar/cppcheck) in version >= 1.74 (to be able
+- [`cppcheck`](#references) in version >= 1.74 (to be able
 to use `make check-static` or `make check`)
 
 ### Remarks
 
-#### Installing [`cppcheck`](https://github.com/danmar/cppcheck) from Source
+#### Installing [`cppcheck`](#references) from Source
 
 ~~~
 git clone git@github.com:danmar/cppcheck.git && cd cppcheck
@@ -116,7 +116,7 @@ cd build/ && ./tree_similarity '<first-tree>' '<second-tree>'
 Since the whole project is still under development, please be aware that also
 the coding style may be extended (by introducing rules overruling one or more
 rules in the
-[Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)).
+[Google C++ Style Guide](#references)).
 Therefore, please check if the coding style has been updated since your last
 contribution. For the sake of simplicity, it would be very nice to notify all
 active developers if the coding style was updated (if done consistently, this
@@ -130,11 +130,22 @@ If there are some exceptions/additions, they are specified in the following
 subsection. However, it is important to mention that these exceptions/additions
 **overrule** conflicting/inconsistent rules from Google's C++ style guide.
 
+### Exceptions/Additions
+
+- We consider the following abbreviations *well-known* (hence, one is allowed
+to use them):
+  - `temp`, `tmp`, `str`
+  - `lml` *(leftmost leaf)*
+  - `td` *(tree edit distances in the [Zhang & Shasha algorithm](#references))*
+  - `fd` *(forest distances in the [Zhang & Shasha algorithm](#references))*
+  - `l1` and `l2` *(leftmost leaf descendants of tree `1` and `2` in the [Zhang & Shasha algorithm](#references))*
+  - `kr1` and `kr2` *(key root nodes of tree `1` and `2` in the [Zhang & Shasha algorithm](#references))*
+
 ## Programming Style
 
 Regarding the programming style (i.e., how to use C++11 features), we do not fully
 comply to
-[Google's C++ Style Guide](https://google.github.io/styleguide/cppguide.html). This
+[Google's C++ Style Guide](#references). This
 is due to its restrictiveness in some aspects (e.g., disallowing exceptions
 completely). We summarize some aspects regarding the programming style in the
 following listing. Also here it holds that the rules in this listing **overrules**
@@ -157,5 +168,11 @@ does not.
 
 # References
 
-* [C++ Reference [1]](http://www.cplusplus.com/reference/)
-* [C++ Reference [2]](http://en.cppreference.com/w/cpp)
+- [C++ Reference [1]](http://www.cplusplus.com/reference/)
+- [C++ Reference [2]](http://en.cppreference.com/w/cpp)
+- [`clang`](http://clang.llvm.org/)
+- [`CMake`](https://cmake.org/)
+- [`valgrind`](http://valgrind.org/)
+- [`cppcheck`](https://github.com/danmar/cppcheck)
+- [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
+- [Zhang & Shasha algorithm](http://www.inf.unibz.it/dis/teaching/SS/ss05-handout-1x1.pdf)
