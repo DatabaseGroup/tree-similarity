@@ -1,7 +1,13 @@
 This file is supposed to summarize all important information about the
-`Tree Similarity` project and is - at least to some extend - a **must-read** for
+`Tree Similarity` project.
+
+At least to some extend, this is a **`MUST-READ`** for
 anybody using the framework (e.g., the [building process](#building-process)) or
-actively developing it (e.g., the [coding style](#coding-style)).
+actively developing it (e.g., the [coding style](#coding-style)). The time reading
+this document is definitely well spent since it reduces the effort for everybody
+involved (just imagine one would have to reformat for instance 2'000 poorly
+written lines of code - *nobody wants to do this*). Hence, we encourage everyone
+to write code to the best of his/her knowledge (regarding this document).
 
 # Table of Contents
 
@@ -107,11 +113,20 @@ cd build/ && ./tree_similarity '<first-tree>' '<second-tree>'
 
 # Coding Style
 
+Since the whole project is still under development, please be aware that also
+the coding style may be extended (by introducing rules overruling one or more
+rules in the
+[Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)).
+Therefore, please check if the coding style has been updated since your last
+contribution. For the sake of simplicity, it would be very nice to notify all
+active developers if the coding style was updated (if done consistently, this
+removes the necessity to check the `README.md` regularly).
+
 ## Naming
 
 Regarding naming, see
-[Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html). If
-there are some exceptions/additions, they are specified in the following
+[Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html#Naming).
+If there are some exceptions/additions, they are specified in the following
 subsection. However, it is important to mention that these exceptions/additions
 **overrule** conflicting/inconsistent rules from Google's C++ style guide.
 
