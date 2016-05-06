@@ -5,7 +5,7 @@ At least to some extend, this is a **`MUST-READ`** for
 anybody using the framework (e.g., the [building process](#building-process)) or
 actively developing it (e.g., the [coding style](#coding-style)). The time reading
 this document is definitely well spent since it reduces the effort for everybody
-involved (just imagine one would have to reformat for instance 2'000 poorly
+involved (just imagine one would have to rewrite for instance 2'000 poorly
 written lines of code - *nobody wants to do this*). Hence, we encourage everyone
 to write code to the best of his/her knowledge (regarding this document).
 
