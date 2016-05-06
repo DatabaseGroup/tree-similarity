@@ -13,13 +13,13 @@ namespace sed {
 // cost model. Each tree is represented by its respective root node. A root node
 // type is specified as first template parameter, the cost model type as second
 // template parameter.
-template<class _node = node, class _costs = costs<_node>>
+template<class _node = Node, class _costs = Costs<_node>>
 int compute_string_edit_distance (_node* t1, _node* t2, _costs c = _costs()) {
   std::vector<int> s1, s2;
   int c0 = 0, temp = 0;
 
   //check if input is a string
-  node* temp_node = t1;
+  Node* temp_node = t1;
   while (temp_node->get_children_number() == 1) {
     s1.push_back(temp_node->get_label_id());
     temp_node = temp_node->get_child(0);
@@ -48,7 +48,7 @@ int compute_string_edit_distance (_node* t1, _node* t2, _costs c = _costs()) {
   }
 
   //calculate string edit distance
-  array_2d<double> result(t1->get_subtree_size(), t2->get_subtree_size());
+  Array2D<double> result(t1->get_subtree_size(), t2->get_subtree_size());
 
 //Costs for deleting of all characters of the left-hand string (assuming that the right-hand-string is a empty string)
   for (int i = 0; i < t1->get_subtree_size(); ++i) {

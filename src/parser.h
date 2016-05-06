@@ -1,17 +1,21 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-typedef std::unordered_map<std::string, int> ht_ids;
+namespace parser {
 
-node* create_tree_from_string (char* str, ht_ids& hashtable, int& labelid) { 
+typedef std::unordered_map<std::string, int> LabelIDMap;
+
+Node* create_tree_from_string (char* str, LabelIDMap& hashtable,
+  int& labelid)
+{ 
   int length = std::strlen(str);
   int scope = -1;
    
-  std::vector<node*> scopeParentList;
-  std::vector<node*>::const_iterator it;
+  std::vector<Node*> scopeParentList;
+  std::vector<Node*>::const_iterator it;
   std::string label = "";
     
-  node* root = new node(1, 1);
+  Node* root = new Node(1, 1);
   for (int i = 0; i < length; i++) {
     if (i != 0 && scope <= -1) {
       break;
@@ -22,11 +26,11 @@ node* create_tree_from_string (char* str, ht_ids& hashtable, int& labelid) {
         if (!hashtable.count(label)) {
           hashtable.emplace(label, labelid++);
         }
-        node* tmpnode = new node(hashtable[label]);
+        Node* tmpnode = new Node(hashtable[label]);
         scopeParentList.push_back(tmpnode);
         if (scope > 0) {
           it = scopeParentList.begin() + scopeParentList.size() - 2;
-          node* tmp = *it;
+          Node* tmp = *it;
           //std::cout << label << ".parent_id:" << tmp->get_label_id() << " scope: " << scope << std::endl;
           tmp->add_child(tmpnode);
         } else {
@@ -42,11 +46,11 @@ node* create_tree_from_string (char* str, ht_ids& hashtable, int& labelid) {
         if (!hashtable.count(label)) {
           hashtable.emplace(label, labelid++);
         }
-        node* tmpnode = new node(hashtable[label]);
+        Node* tmpnode = new Node(hashtable[label]);
         scopeParentList.push_back(tmpnode);
         if (scope > 0 && scopeParentList.size() > 1) {
           it = scopeParentList.begin() + scopeParentList.size() - 2;
-          node* tmp = *it;
+          Node* tmp = *it;
           //std::cout << label << ".parent_id:" << tmp->get_label_id() << " scope: " << scope << std::endl;
           tmp->add_child(tmpnode);
         } else {
@@ -64,5 +68,7 @@ node* create_tree_from_string (char* str, ht_ids& hashtable, int& labelid) {
   }
   return root;
 }
+
+};
 
 #endif // PARSER_H

@@ -11,34 +11,34 @@
 
 // Represents a node in a tree. A node label is a string and the children
 // are stored in an array of pointers to nodes.
-class node {
+class Node {
 private:
   int id;
   int label_id;
   // A vector of pointers to child nodes
-  std::vector<node*> children;
+  std::vector<Node*> children;
   int children_number;
 
 public:
   // Constructors
-  node (int id, int label_id, int children_number)
+  Node (int id, int label_id, int children_number)
     : id(id), label_id(label_id), children_number(children_number)
   { }
 
-  explicit node (int label_id)
-    : node(0, label_id)
+  explicit Node (int label_id)
+    : Node(0, label_id)
   { }
 
-  node (int id, int label_id)
-    : node(id, label_id, 0)
+  Node (int id, int label_id)
+    : Node(id, label_id, 0)
   { }
 
-  //node(node&);
+  //Node (Node&);
 
   // Destructor
-  ~node () {
+  ~Node () {
     // delete all children nodes
-    for ( std::vector<node*>::iterator node_it = children.begin();
+    for ( std::vector<Node*>::iterator node_it = children.begin();
           node_it != children.end(); ++node_it)
     {
       delete *node_it;
@@ -48,8 +48,8 @@ public:
     children.clear();
   }
 
-  void copy_node(node *n) {
-    node tmp = *this;
+  void copy_node(Node *n) {
+    Node tmp = *this;
     *n = tmp;
   }
 
@@ -64,7 +64,7 @@ public:
   }
 
   // Get children
-  std::vector<node*> get_children () const {
+  std::vector<Node*> get_children () const {
     return children;
   }
 
@@ -79,7 +79,7 @@ public:
   // Params:  child A pointer to the node to be added
   //
   // Return:  None
-  void add_child (node* child) {
+  void add_child (Node* child) {
     children.push_back(child);
     //++children_number;
   }
@@ -90,7 +90,7 @@ public:
   int get_subtree_size () const {
     int descendants_sum = 1;
     // Sum up sizes of subtrees rooted at child nodes (number of descendants)
-    for ( std::vector<node*>::const_iterator node_it = children.cbegin();
+    for ( std::vector<Node*>::const_iterator node_it = children.cbegin();
           node_it != children.cend(); ++node_it)
     {
       descendants_sum = descendants_sum + (*node_it)->get_subtree_size();
@@ -116,7 +116,7 @@ public:
   //
   // Return:  A pointer to the child at position i if it exists or nullptr
   //          otherwise
-  node* get_child (int position) const {
+  Node* get_child (int position) const {
     return children[position];
   }
 };
@@ -129,7 +129,7 @@ public:
 //  - ins(n) for insertion costs of a node n
 // All three cost functions must return an integer.
 template<class _node>
-struct costs {
+struct Costs {
   // Basic rename cost function
   //
   // Params:  n1  The node to be renamed
@@ -159,7 +159,7 @@ struct costs {
 };
 
 template<class _node>
-struct costs2 {
+struct Costs2 {
   // Basic rename cost function
   //
   // Params:  n1  The node to be renamed

@@ -7,16 +7,16 @@
 // Example of a class representing a custom node in a tree to show how to use
 // the framework with custom nodes. In this example, a nodelabel is a vector of
 // strings. Children are again stored in an array of pointers to custom nodes.
-class custom_node {
+class CustomNode {
 private:
   // custom label
   std::vector<std::string> label;
-  std::vector<custom_node*> children;
+  std::vector<CustomNode*> children;
 
 public:
   // Basic constructor
-  custom_node (std::vector<std::string> label,
-    std::vector<custom_node*> children)
+  CustomNode (std::vector<std::string> label,
+    std::vector<CustomNode*> children)
     : label(label), children(children)
   { }
 
@@ -26,7 +26,7 @@ public:
   }
 
   // Getter children
-  std::vector<custom_node*> get_children () const {
+  std::vector<CustomNode*> get_children () const {
     return children;
   }
 };
@@ -36,7 +36,7 @@ public:
 // functions. Also these custom costs need to be generic for different node
 // classes.
 template<class _node>
-struct custom_costs {
+struct CustomCosts {
   // Basic rename cost function
   //
   // Params:  n1  The node to be renamed

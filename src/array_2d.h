@@ -16,7 +16,7 @@
  * actual access.
  */
 template<class _type>
-class array_2d {
+class Array2D {
 private:
   // consecutive allocated memory: rows * columns
   size_t rows;
@@ -26,7 +26,7 @@ private:
 
 public:
   // Constructor
-  array_2d (size_t rows, size_t columns)
+  Array2D (size_t rows, size_t columns)
     : rows(rows), columns(columns), data(nullptr)
   {
     // allocate array
@@ -34,14 +34,14 @@ public:
   }
 
   // Copy constructor
-  array_2d (const array_2d& other)
-    : array_2d(other.get_rows(), other.get_columns)
+  Array2D (const Array2D& other)
+    : Array2D(other.get_rows(), other.get_columns)
   {
     std::copy(other.data, other.data + (rows * columns), data);
   }
 
   // Destructor
-  ~array_2d () {
+  ~Array2D () {
     // deallocate array
     delete[] data;
   }

@@ -1,7 +1,9 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-typedef std::unordered_map<int, std::string> ht_labels;
+namespace common {
+
+typedef std::unordered_map<int, std::string> IDLabelMap;
 
 // Recursively traverses the subtree rooted at a given root.
 //
@@ -13,7 +15,7 @@ typedef std::unordered_map<int, std::string> ht_labels;
 //                          time a node is added to the resulting vector
 //
 // Return:  None (the result is stored in tr_post, which is altered)
-void postorder(node* root, std::vector<node*>* tr_post, int* node_id_counter) {
+void postorder(Node* root, std::vector<Node*>* tr_post, int* node_id_counter) {
   if (root) {
     // traverse children first
     if (root->get_children_number() > 0) {
@@ -32,10 +34,10 @@ void postorder(node* root, std::vector<node*>* tr_post, int* node_id_counter) {
 // Params:  root  The root node of the tree to be 'postorderified'
 //
 // Return:  A pointer to a vector of node pointers of the 'postorderified' tree
-std::vector<node*>* generate_postorder (node* root) {
+std::vector<Node*>* generate_postorder (Node* root) {
   int node_id_counter = 1;
   // Heap allocation
-  std::vector<node*>* tr_post = new std::vector<node*>();
+  std::vector<Node*>* tr_post = new std::vector<Node*>();
 
   // Recursively traverse tree in postorder
   postorder(root, tr_post, &node_id_counter);
@@ -52,7 +54,7 @@ std::vector<node*>* generate_postorder (node* root) {
 //          max_fanout  Maximum fanout
 //
 // Return:  None
-void generate_full_tree (node *root, int fixed_depth, int max_fanout) {
+void generate_full_tree (Node *root, int fixed_depth, int max_fanout) {
   // If we reached the maximum depth, terminate this branch.
   if (fixed_depth == 0)
     return;
@@ -70,7 +72,7 @@ void generate_full_tree (node *root, int fixed_depth, int max_fanout) {
     // Create new node.
     // We have to use 'new' here. Otherwise as soon as we get out of this
     // method's scope, the object gets deleted.
-    node* new_node = new node(random_label); // modified by stefan
+    Node* new_node = new Node(random_label); // modified by stefan
     // Add node as a child of root.
     root->add_child(new_node);
     // Recursively generate consecutive levels.
@@ -78,9 +80,9 @@ void generate_full_tree (node *root, int fixed_depth, int max_fanout) {
   }
 }
 
-void copy_tree(node* t, node* copy_t) {
+void copy_tree(Node* t, Node* copy_t) {
   for(int i = 0; i < t->get_children_number(); i++){
-    node* temp = new node(t->get_child(i)->get_label_id());
+    Node* temp = new Node(t->get_child(i)->get_label_id());
     copy_t->add_child(temp);
     copy_tree(t->get_child(i), temp);
   }
@@ -92,11 +94,11 @@ void copy_tree(node* t, node* copy_t) {
 // Params:  node  The root node of the labels to be printed
 //
 // Return:  None
-void print_tree_labels (node* n) {
+void print_tree_labels (Node* n) {
   // Print the label of node.
   // Recursively print labels of all descendants of node.
-  std::vector<node*> children = n->get_children();
-  for ( std::vector<node*>::const_iterator node_it = children.cbegin();
+  std::vector<Node*> children = n->get_children();
+  for ( std::vector<Node*>::const_iterator node_it = children.cbegin();
         node_it != children.cend(); ++node_it)
   {
     print_tree_labels(*node_it);
@@ -112,14 +114,18 @@ void print_tree_labels (node* n) {
 //          level   the int level for this level
 //
 // Return: a string in json format
-void get_json_tree (node* root, int level, ht_labels hashtable, int* map = nullptr, int tree = 0) {
+void get_json_tree (Node* root, int level, IDLabelMap hashtable,
+  int* map = nullptr, int tree = 0)
+{
   if (root) {
     std::cout << "{\"scope\":\"" << level << "\"";
     std::cout << ",\"label\":\"" << hashtable[root->get_label_id()] << "\"";
-    if(tree != 0){
+    
+    if (tree != 0) {
       std::cout << ",\"tree\":" << tree << "";
     }
-    if(map!=nullptr){
+
+    if (map != nullptr) {
       std::cout << ",\"mappedTo\":" << map[root->get_id()] << "";
     }
     std::cout << ",\"children\":";
@@ -144,7 +150,7 @@ void get_json_tree (node* root, int level, ht_labels hashtable, int* map = nullp
 // 
 // Params:  root    the parent for its children
 //          arr     the array which gets filled with (e.g.: postorder) ids (int)
-void get_parents (node* root, int arr[]) {
+void get_parents (Node* root, int arr[]) {
   for(int i = 0; i < root->get_children_number(); i++){
     arr[root->get_child(i)->get_id()] = root->get_id();
     get_parents(root->get_child(i), arr);
@@ -161,12 +167,14 @@ void get_parents (node* root, int arr[]) {
 //          edm     the edit mapping array (a->b)
 //
 // ignore for now: Return: a string in json format (why json? ids would get mixed up)
-node* create_hybrid_tree (node* r1, node* r2, std::vector<std::array<node*, 2> > edm) {
+Node* create_hybrid_tree (Node* r1, Node* r2,
+  std::vector<std::array<Node*, 2> > edm)
+{
 
-  node* hybrid = new node(r2->get_id(), r2->get_label_id());
+  Node* hybrid = new Node(r2->get_id(), r2->get_label_id());
   copy_tree(r2, hybrid);
-  std::vector<node*>* post_hybrid = generate_postorder(hybrid);
-  std::vector<node*>* post_r1 = generate_postorder(r1);
+  std::vector<Node*>* post_hybrid = generate_postorder(hybrid);
+  std::vector<Node*>* post_r1 = generate_postorder(r1);
   std::cout << "post_hybrid: " << post_hybrid->size() << std::endl;
   //set_tree_id(hybrid,2);
 
@@ -186,5 +194,7 @@ node* create_hybrid_tree (node* r1, node* r2, std::vector<std::array<node*, 2> >
   delete parents_r1;
   return hybrid;
 }
+
+};
 
 #endif // COMMON_H

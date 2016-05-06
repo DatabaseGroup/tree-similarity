@@ -7,19 +7,19 @@
 
 namespace zs {
 
-std::vector<node*>* tr_post1; //postorder of tree 1
-std::vector<node*>* tr_post2; //postorder of tree 2
+std::vector<Node*>* tr_post1; //postorder of tree 1
+std::vector<Node*>* tr_post2; //postorder of tree 2
 std::vector<std::vector<double> > td; //stores the tree-edit-distances
 std::vector<std::vector<double> > fd; //stores the forest-distances
 std::vector<int> lm1; //stores the left-most-leaf-descendants of tree 1
 std::vector<int> lm2; //stores the left-most-leaf-descendants of tree 2
-std::vector<node*> leaves_t1; //stores the leaves of tree 2
-std::vector<node*> leaves_t2; //stores the leaves of tree 2
+std::vector<Node*> leaves_t1; //stores the leaves of tree 2
+std::vector<Node*> leaves_t2; //stores the leaves of tree 2
 
 //Computes the left most leaf descendant for all subtrees of the input tree
 //
 //Param: root of the tree, a vector which stores the left most leaf descendant for each subtree
-void lmld (node* root, std::vector<int>& lm) {
+void lmld (Node* root, std::vector<int>& lm) {
   // call lmld recursively and compute the left-most-leaf descendants
   for (int i = 1; i <= root->get_children_number(); ++i) {
     lmld(root->get_children().at(i - 1), lm);
@@ -55,7 +55,7 @@ std::vector<int> kr (std::vector<int>& l, int leaf_count) {
   return kr;
 }
 
-void set_leaves (node* root, int whichTree) {
+void set_leaves (Node* root, int whichTree) {
   if (whichTree == 1) {
     if (root) {
       if (root->get_children_number() > 0) {
@@ -80,7 +80,7 @@ void set_leaves (node* root, int whichTree) {
 //Computes for each input-tree a vector consisting of all leaves of the specific tree.
 //
 //Parameters: left-hand tree, right-hand tree
-void make_leaves (node* t1, node* t2) {
+void make_leaves (Node* t1, Node* t2) {
   set_leaves(t1, 1);
   set_leaves(t2, 2);
 }
@@ -90,7 +90,7 @@ void make_leaves (node* t1, node* t2) {
 // T2[l(j)...dj], where dj is element of desc(T2[j])
 //
 //Param: i, j defined as above and a optional cost-model
-template<class _node = node, class _costs = costs<_node>>
+template<class _node = Node, class _costs = Costs<_node>>
 void forest_dist(int i, int j, _costs c = _costs()) {
   int cost_rename;
 
@@ -128,26 +128,26 @@ void forest_dist(int i, int j, _costs c = _costs()) {
 // Prints the given edit mapping
 //
 // Params:  edm     the edit mapping
-template<class _node = node>
-void print_pretty_edit_mapping (
-  std::vector<std::array<node*, 2> > edm)
-{
-  std::array<node*, 2> em;
-  for(std::vector<std::array<node*, 2> >::iterator it = --edm.end(); it >= edm.begin(); --it) {
-      em = *it;
-      std::cout << "(";
-      if(em[0] == nullptr){
-        std::cout << "0";
-      } else {
-        std::cout << em[0]->get_id();
-      }
-      std::cout << "->";
-      if(em[1] == nullptr){
-        std::cout << "0";
-      } else {
-        std::cout << em[1]->get_id();
-      }
-      std::cout << ")" << std::endl;
+template<class _node = Node>
+void print_pretty_edit_mapping (std::vector<std::array<Node*, 2> > edm) {
+  std::array<Node*, 2> em;
+  for ( std::vector<std::array<Node*, 2> >::iterator it = --edm.end();
+        it >= edm.begin(); --it)
+  {
+    em = *it;
+    std::cout << "(";
+    if (em[0] == nullptr) {
+      std::cout << "0";
+    } else {
+      std::cout << em[0]->get_id();
+    }
+    std::cout << "->";
+    if (em[1] == nullptr) {
+      std::cout << "0";
+    } else {
+      std::cout << em[1]->get_id();
+    }
+    std::cout << ")" << std::endl;
   }
 }
 
@@ -158,23 +158,25 @@ void print_pretty_edit_mapping (
 //
 // "Returns"/Fills: a two dimensional integer array, where arr[0][id] is the mapping for
 //          a the node in the first tree (depends on the mapping !) 
-template<class _node = node>
-void get_edit_mapping_int_array (
-  std::vector<std::array<node*, 2> > edm, int **arr)
+template<class _node = Node>
+void get_edit_mapping_int_array (std::vector<std::array<Node*, 2> > edm,
+  int** arr)
 {
-  std::array<node*, 2> em;
-  for(std::vector<std::array<node*, 2> >::iterator it = --edm.end(); it >= edm.begin(); --it) {
-      em = *it;
-      if(em[0] == nullptr){
-        // insert
-        arr[1][em[1]->get_id()] = 0;
-      } else if(em[1] == nullptr){
-         // delete
-        arr[0][em[0]->get_id()] = 0;
-      } else {
-        arr[0][em[0]->get_id()] = em[1]->get_id();
-        arr[1][em[1]->get_id()] = em[0]->get_id();
-      }
+  std::array<Node*, 2> em;
+  for ( std::vector<std::array<Node*, 2> >::iterator it = --edm.end();
+        it >= edm.begin(); --it)
+  {
+    em = *it;
+    if (em[0] == nullptr) {
+      // insert
+      arr[1][em[1]->get_id()] = 0;
+    } else if (em[1] == nullptr) {
+      // delete
+      arr[0][em[0]->get_id()] = 0;
+    } else {
+      arr[0][em[0]->get_id()] = em[1]->get_id();
+      arr[1][em[1]->get_id()] = em[0]->get_id();
+    }
   }
 }
 
@@ -187,12 +189,12 @@ void get_edit_mapping_int_array (
 //          e.g.: node_in_t1  -> node_in_t2   mapping or rename operation
 //                nullptr     -> node_in_t2   insert operation
 //                node_in_t1  -> nullptr      delete operation
-template<class _node = node, class _costs = costs<_node>>
-std::vector<std::array<node*, 2> > compute_edit_mapping (node* r1, node* r2,
+template<class _node = Node, class _costs = Costs<_node>>
+std::vector<std::array<Node*, 2> > compute_edit_mapping (Node* r1, Node* r2,
   _costs c = _costs())
 {
-  tr_post1 = generate_postorder(r1);
-  tr_post2 = generate_postorder(r2);
+  tr_post1 = common::generate_postorder(r1);
+  tr_post2 = common::generate_postorder(r2);
 
   td.resize(tr_post1->size() + 1);
   for (unsigned int i = 0; i < td.size(); ++i) {
@@ -252,7 +254,7 @@ std::vector<std::array<node*, 2> > compute_edit_mapping (node* r1, node* r2,
   }
  
   std::vector<std::array<int, 2> > tree_pairs;
-  std::vector<std::array<node*, 2> > edit_mapping;
+  std::vector<std::array<Node*, 2> > edit_mapping;
   tree_pairs.push_back({ r1->get_subtree_size(), r2->get_subtree_size() });  
   std::array<int, 2> tree_pair;
   bool root_node_pair = true;
@@ -313,10 +315,10 @@ std::vector<std::array<node*, 2> > compute_edit_mapping (node* r1, node* r2,
 // cost model. Each tree is represented by its respective root node. A root node
 // type is specified as first template parameter, the cost model type as second
 // template parameter.
-template<class _node = node, class _costs = costs<_node>>
+template<class _node = Node, class _costs = Costs<_node>>
 double compute_zhang_shasha (_node* t1, _node* t2, _costs c = _costs()) {
-  tr_post1 = generate_postorder(t1);
-  tr_post2 = generate_postorder(t2);
+  tr_post1 = common::generate_postorder(t1);
+  tr_post2 = common::generate_postorder(t2);
 
   td.resize(tr_post1->size() + 1);
   for (unsigned int i = 0; i < td.size(); ++i) {
@@ -379,8 +381,8 @@ double compute_zhang_shasha (_node* t1, _node* t2, _costs c = _costs()) {
   delete tr_post1;
   delete tr_post2;
 
-  std::vector<node*>().swap(leaves_t1);
-  std::vector<node*>().swap(leaves_t2);
+  std::vector<Node*>().swap(leaves_t1);
+  std::vector<Node*>().swap(leaves_t2);
   std::vector<int>().swap(lm1);
   std::vector<int>().swap(lm2);
   std::vector<int>().swap(kr1);
