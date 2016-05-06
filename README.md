@@ -1,6 +1,11 @@
+This file is supposed to summarize all important information about the
+`Tree Similarity` project and is - at least to some extend - a **must-read** for
+anybody using the framework (e.g., the [building process](#building-process)) or
+actively developing it (e.g., the [coding style](#coding-style)).
+
 # Table of Contents
 
-- [General (Must-Read)](#general)
+- [General](#general)
 - [Building Process](#building-process)
     - [Prerequisites](#prerequisites)
         - [Remarks](#remarks)
@@ -8,8 +13,9 @@
     - [Compilation](#compilation)
     - [Execution](#execution)
 - [Coding Style](#coding-style)
-    - [Exceptions](#exceptions)
-    - [Additions](#additions)
+    - [Naming](#naming)
+    - [Programming Style](#programming-style)
+- [References](#references)
     
 
 # General
@@ -101,21 +107,28 @@ cd build/ && ./tree_similarity '<first-tree>' '<second-tree>'
 
 # Coding Style
 
-See [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
-as well as the exceptions/additions/rules in the following section.
+## Naming
 
-It is important to mentioned that these exceptions/additions/rules **overrule**
-conflicting/inconsistent rules from 
-[Google's C++ Style Guide](https://google.github.io/styleguide/cppguide.html).
+Regarding naming, see
+[Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html). If
+there are some exceptions/additions, they are specified in the following
+subsection. However, it is important to mention that these exceptions/additions
+**overrule** conflicting/inconsistent rules from Google's C++ style guide.
 
-## Exceptions
+## Programming Style
 
-* We **declare AND define** all functions/classes in the `.h` files. This is due
+Regarding the programming style (i.e., how to use C++11 features), we do not fully
+comply to
+[Google's C++ Style Guide](https://google.github.io/styleguide/cppguide.html). This
+is due to its restrictiveness in some aspects (e.g., disallowing exceptions
+completely). We summarize some aspects regarding the programming style in the
+following listing. Also here it holds that the rules in this listing **overrules**
+conflicting/inconsistent rules from Google's style guide. However, if any rules
+is inconsistent/unclear, please just ask and we will discuss it.
+
+1. We **declare AND define** all functions/classes in the `.h` files. This is due
 to the fact that template functions/classes are used in almost every `.h` file.
-
-## Additions
-
-* We **always** use the
+2. We **always** use the
 [`at`](http://www.cplusplus.com/reference/vector/vector/at/) member of the
 [`std::vector`](http://www.cplusplus.com/reference/vector/) container when we
 want to access an element. As a consequence, we try to avoid the
@@ -126,3 +139,8 @@ want to access an element. As a consequence, we try to avoid the
 check, whereas the 
 [`[]`](http://www.cplusplus.com/reference/vector/vector/operator%5B%5D/) operator
 does not.
+
+# References
+
+* [C++ Reference [1]](http://www.cplusplus.com/reference/)
+* [C++ Reference [2]](http://en.cppreference.com/w/cpp)
