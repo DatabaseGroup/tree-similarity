@@ -135,7 +135,7 @@ subsection. However, it is important to mention that these exceptions/additions
 
 - We consider the following abbreviations *well-known* (hence, one is allowed
 to use them):
-    - `temp`, `tmp`, `str`, `it`
+    - `temp`, `tmp`, `str`, `it`, `min`, `max`
     - All abbreviations used in the [Zhang & Shasha algorithm](#references) (e.g.,
         `lml`, `td`, `fd`, `l1`, `l2`, `kr1`,`kr2`, ...)
 
