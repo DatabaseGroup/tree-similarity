@@ -133,11 +133,14 @@ subsection. However, it is important to mention that these exceptions/additions
 
 ### Exceptions/Additions
 
-- We consider the following abbreviations *well-known* (hence, one is allowed
-to use them):
+- **Abbreviations**: We consider the following abbreviations *well-known* (hence,
+    one is allowed to use them):
     - `temp`, `tmp`, `str`, `it`, `min`, `max`
     - All abbreviations used in the [Zhang & Shasha algorithm](#references) (e.g.,
         `lml`, `td`, `fd`, `l1`, `l2`, `kr1`,`kr2`, ...)
+- **Function Names**: We use the *lower case with underscore* notation for **all**
+    functions/methods, i.e., `this_is_a_function_name` - regardless of their
+    scope and cost.
 
 ## Programming Style
 
