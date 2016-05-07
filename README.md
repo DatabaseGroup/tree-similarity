@@ -135,12 +135,9 @@ subsection. However, it is important to mention that these exceptions/additions
 
 - We consider the following abbreviations *well-known* (hence, one is allowed
 to use them):
-  - `temp`, `tmp`, `str`
-  - `lml` *(leftmost leaf)*
-  - `td` *(tree edit distances in the [Zhang & Shasha algorithm](#references))*
-  - `fd` *(forest distances in the [Zhang & Shasha algorithm](#references))*
-  - `l1` and `l2` *(leftmost leaf descendants of tree `1` and `2` in the [Zhang & Shasha algorithm](#references))*
-  - `kr1` and `kr2` *(key root nodes of tree `1` and `2` in the [Zhang & Shasha algorithm](#references))*
+    - `temp`, `tmp`, `str`
+    - All abbreviations used in the [Zhang & Shasha algorithm](#references) (e.g.,
+        `lml`, `td`, `fd`, `l1`, `l2`, `kr1`,`kr2`, ...)
 
 ## Programming Style
 
