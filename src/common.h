@@ -37,11 +37,11 @@ void postorder(Node* root, std::vector<Node*>* tr_post, int* node_id_counter) {
 std::vector<Node*>* generate_postorder (Node* root) {
   int node_id_counter = 1;
   // Heap allocation
-  std::vector<Node*>* postorder_tree = new std::vector<Node*>();
+  std::vector<Node*>* tree_postorder = new std::vector<Node*>();
 
   // Recursively traverse tree in postorder
-  postorder(root, postorder_tree, &node_id_counter);
-  return postorder_tree;
+  postorder(root, tree_postorder, &node_id_counter);
+  return tree_postorder;
 }
 
 // Generate a simple tree recursively.
