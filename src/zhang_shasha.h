@@ -185,8 +185,8 @@ void get_edit_mapping_int_array (std::vector<std::array<Node*, 2> > edit_mapping
 
 // Computes the edit mapping for two trees (optional: custom costs)
 //
-// Params:  r1      the root of the first tree
-//          r2      the root of the second tree
+// Params:  tree1      the root of the first tree
+//          tree2      the root of the second tree
 //
 // Returns: a vector of node* arrays, which shows the mapping for each node,
 //          e.g.: node_in_t1  -> node_in_t2   mapping or rename operation

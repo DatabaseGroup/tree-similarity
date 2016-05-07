@@ -39,25 +39,25 @@ template<class _node>
 struct CustomCosts {
   // Basic rename cost function
   //
-  // Params:  n1  The node to be renamed
-  //          n2  The node having the desired name
+  // Params:  node1  The node to be renamed
+  //          node2  The node having the desired name
   //
-  // Return:  The cost of renaming n1 to n2
-  int ren (_node n1, _node n2) { return 2; }
+  // Return:  The cost of renaming node1 to node2
+  int ren (_node node1, _node node2) { return 2; }
 
   // Basic delete cost function
   //
-  // Params:  n The node to be deleted
+  // Params:  node The node to be deleted
   //
-  // Return:  The cost of deleting n
-  int del (_node n) { return 2; }
+  // Return:  The cost of deleting node
+  int del (_node node) { return 2; }
 
   // Basic insert cost function
   //
-  // Params:  n The node to be inserted
+  // Params:  node The node to be inserted
   //
-  // Return:  The cost of inserting n
-  int ins (_node n) { return 2; }
+  // Return:  The cost of inserting node
+  int ins (_node node) { return 2; }
 
   // Dummy methods
   int ren () { return 2; }
