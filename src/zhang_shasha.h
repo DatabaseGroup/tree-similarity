@@ -7,29 +7,29 @@
 
 namespace zs {
 
-std::vector<Node*>* tr_post1; //postorder of tree 1
-std::vector<Node*>* tr_post2; //postorder of tree 2
+std::vector<Node*>* tree1_postorder; //postorder of tree 1
+std::vector<Node*>* tree2_postorder; //postorder of tree 2
 std::vector<std::vector<double> > td; //stores the tree-edit-distances
 std::vector<std::vector<double> > fd; //stores the forest-distances
-std::vector<int> lm1; //stores the left-most-leaf-descendants of tree 1
-std::vector<int> lm2; //stores the left-most-leaf-descendants of tree 2
-std::vector<Node*> leaves_t1; //stores the leaves of tree 2
-std::vector<Node*> leaves_t2; //stores the leaves of tree 2
+std::vector<int> l1; //stores the left-most-leaf-descendants of tree 1
+std::vector<int> l2; //stores the left-most-leaf-descendants of tree 2
+std::vector<Node*> leaves_tree1; //stores the leaves of tree 2
+std::vector<Node*> leaves_tree2; //stores the leaves of tree 2
 
 //Computes the left most leaf descendant for all subtrees of the input tree
 //
 //Param: root of the tree, a vector which stores the left most leaf descendant for each subtree
-void lmld (Node* root, std::vector<int>& lm) {
+void lmld (Node* root, std::vector<int>& l) {
   // call lmld recursively and compute the left-most-leaf descendants
   for (int i = 1; i <= root->get_children_number(); ++i) {
-    lmld(root->get_children().at(i - 1), lm);
+    lmld(root->get_children().at(i - 1), l);
   }
 
   if (root->get_children_number() == 0) {
     // is leaf
-    lm.at(root->get_id()) = root->get_id();
+    l.at(root->get_id()) = root->get_id();
   } else {
-    lm.at(root->get_id()) = lm.at(root->get_children().at(0)->get_id());
+    l.at(root->get_id()) = l.at(root->get_children().at(0)->get_id());
   }
 }
 
@@ -55,15 +55,15 @@ std::vector<int> kr (std::vector<int>& l, int leaf_count) {
   return kr;
 }
 
-void set_leaves (Node* root, int whichTree) {
-  if (whichTree == 1) {
+void set_leaves (Node* root, int which_tree) {
+  if (which_tree == 1) {
     if (root) {
       if (root->get_children_number() > 0) {
         for (int i = 0; i < root->get_children_number(); ++i) {
           set_leaves(root->get_child(i), 1);
         }
       } else {
-        leaves_t1.push_back(root);
+        leaves_tree1.push_back(root);
       }
     }
   } else {
@@ -72,53 +72,55 @@ void set_leaves (Node* root, int whichTree) {
         set_leaves(root->get_child(i), 2);
       }
     } else {
-      leaves_t2.push_back(root);
+      leaves_tree2.push_back(root);
     }
   }
 }
 
-//Computes for each input-tree a vector consisting of all leaves of the specific tree.
+// Computes for each input-tree a vector consisting of all leaves of the specific
+// tree.
 //
-//Parameters: left-hand tree, right-hand tree
-void make_leaves (Node* t1, Node* t2) {
-  set_leaves(t1, 1);
-  set_leaves(t2, 2);
+// Parameters: left-hand tree, right-hand tree
+void make_leaves (Node* tree1, Node* tree2) {
+  set_leaves(tree1, 1);
+  set_leaves(tree2, 2);
 }
 
-//computes the forest-distance of:
+// Computes the forest-distance of:
 // T1[l(i)...di], where di is element of desc(T1[i]) and
 // T2[l(j)...dj], where dj is element of desc(T2[j])
 //
-//Param: i, j defined as above and a optional cost-model
+// Param: i, j defined as above and a optional cost-model
 template<class _node = Node, class _costs = Costs<_node>>
-void forest_dist(int i, int j, _costs c = _costs()) {
+void forest_dist(int i, int j, _costs costs = _costs()) {
   int cost_rename;
 
-  fd.at(lm1.at(i) - 1).at(lm2.at(j) - 1) = 0;
+  fd.at(l1.at(i) - 1).at(l2.at(j) - 1) = 0;
 
-  for (int di = lm1.at(i); di <= i; ++di) {
-    fd.at(di).at(lm2.at(j) - 1) = fd.at(di - 1).at(lm2.at(j) - 1) + c.del();
+  int di = 0, dj = 0;
+  for (di = l1.at(i); di <= i; ++di) {
+    fd.at(di).at(l2.at(j) - 1) = fd.at(di - 1).at(l2.at(j) - 1) + costs.del();
   }
  
-  for (int dj = lm2.at(j); dj <= j; ++dj) {
-    fd.at(lm1.at(i) - 1).at(dj) = fd.at(lm1.at(i) - 1).at(dj - 1) + c.ins();
+  for (dj = l2.at(j); dj <= j; ++dj) {
+    fd.at(l1.at(i) - 1).at(dj) = fd.at(l1.at(i) - 1).at(dj - 1) + costs.ins();
   }
 
-  for (int di = lm1.at(i); di <= i; ++di) {
-    for (int dj = lm2.at(j); dj <= j; ++dj) {
-      if (lm1.at(di) == lm1.at(i) && lm2.at(dj) == lm2.at(j)) {
-        cost_rename = ((*tr_post1).at(di - 1)->get_label_id() == (*tr_post2).at(dj - 1)->get_label_id())
-          ? 0 : c.ren();
+  for (di = l1.at(i); di <= i; ++di) {
+    for (dj = l2.at(j); dj <= j; ++dj) {
+      if (l1.at(di) == l1.at(i) && l2.at(dj) == l2.at(j)) {
+        cost_rename = ((*tree1_postorder).at(di - 1)->get_label_id() == (*tree2_postorder).at(dj - 1)->get_label_id())
+          ? 0 : costs.ren();
         fd.at(di).at(dj) = std::min(
-          std::min(fd.at(di - 1).at(dj) + c.del(), fd.at(di).at(dj - 1) + c.ins()),
+          std::min(fd.at(di - 1).at(dj) + costs.del(), fd.at(di).at(dj - 1) + costs.ins()),
           fd.at(di - 1).at(dj - 1) + cost_rename
         );
 
         td.at(di).at(dj) = fd.at(di).at(dj);
       } else {
         fd.at(di).at(dj) = std::min(
-          std::min(fd.at(di - 1).at(dj) + c.del(), fd.at(di).at(dj - 1) + c.ins()),
-          fd.at(lm1.at(di) - 1).at(lm2.at(dj) - 1) + td.at(di).at(dj)
+          std::min(fd.at(di - 1).at(dj) + costs.del(), fd.at(di).at(dj - 1) + costs.ins()),
+          fd.at(l1.at(di) - 1).at(l2.at(dj) - 1) + td.at(di).at(dj)
         );
       }
     }
@@ -129,10 +131,11 @@ void forest_dist(int i, int j, _costs c = _costs()) {
 //
 // Params:  edm     the edit mapping
 template<class _node = Node>
-void print_pretty_edit_mapping (std::vector<std::array<Node*, 2> > edm) {
+void print_pretty_edit_mapping (std::vector<std::array<Node*, 2>> edit_mapping)
+{
   std::array<Node*, 2> em;
-  for ( std::vector<std::array<Node*, 2> >::iterator it = --edm.end();
-        it >= edm.begin(); --it)
+  for ( std::vector<std::array<Node*, 2> >::iterator it = --edit_mapping.end();
+        it >= edit_mapping.begin(); --it)
   {
     em = *it;
     std::cout << "(";
@@ -156,26 +159,26 @@ void print_pretty_edit_mapping (std::vector<std::array<Node*, 2> > edm) {
 //
 // Params:  edm     the edit mapping
 //
-// "Returns"/Fills: a two dimensional integer array, where arr[0][id] is the mapping for
-//          a the node in the first tree (depends on the mapping !) 
+// "Returns"/Fills: a two dimensional integer array, where arr[0][id] is the
+//          mapping for a the node in the first tree (depends on the mapping !)
 template<class _node = Node>
-void get_edit_mapping_int_array (std::vector<std::array<Node*, 2> > edm,
-  int** arr)
+void get_edit_mapping_int_array (std::vector<std::array<Node*, 2> > edit_mapping,
+  int** array_to_fill)
 {
   std::array<Node*, 2> em;
-  for ( std::vector<std::array<Node*, 2> >::iterator it = --edm.end();
-        it >= edm.begin(); --it)
+  for ( std::vector<std::array<Node*, 2> >::iterator it = --edit_mapping.end();
+        it >= edit_mapping.begin(); --it)
   {
     em = *it;
     if (em[0] == nullptr) {
       // insert
-      arr[1][em[1]->get_id()] = 0;
+      array_to_fill[1][em[1]->get_id()] = 0;
     } else if (em[1] == nullptr) {
       // delete
-      arr[0][em[0]->get_id()] = 0;
+      array_to_fill[0][em[0]->get_id()] = 0;
     } else {
-      arr[0][em[0]->get_id()] = em[1]->get_id();
-      arr[1][em[1]->get_id()] = em[0]->get_id();
+      array_to_fill[0][em[0]->get_id()] = em[1]->get_id();
+      array_to_fill[1][em[1]->get_id()] = em[0]->get_id();
     }
   }
 }
@@ -190,29 +193,29 @@ void get_edit_mapping_int_array (std::vector<std::array<Node*, 2> > edm,
 //                nullptr     -> node_in_t2   insert operation
 //                node_in_t1  -> nullptr      delete operation
 template<class _node = Node, class _costs = Costs<_node>>
-std::vector<std::array<Node*, 2> > compute_edit_mapping (Node* r1, Node* r2,
-  _costs c = _costs())
+std::vector<std::array<Node*, 2> > compute_edit_mapping (Node* tree1,
+  Node* tree2, _costs costs = _costs())
 {
-  tr_post1 = common::generate_postorder(r1);
-  tr_post2 = common::generate_postorder(r2);
+  tree1_postorder = common::generate_postorder(tree1);
+  tree2_postorder = common::generate_postorder(tree2);
 
-  td.resize(tr_post1->size() + 1);
+  td.resize(tree1_postorder->size() + 1);
   for (unsigned int i = 0; i < td.size(); ++i) {
-    td.at(i).resize(tr_post2->size() + 1);
+    td.at(i).resize(tree2_postorder->size() + 1);
   }
 
   // is there any reason to use reserve instead? (reserve was used before)
   // however, reserve only increases the capacity of the vector, not the size
   // capacity = the space allocated for the vector (e.g. if push_back is used)
   // size = the number of actual elements stores in the vector
-  lm1.resize(tr_post1->size() + 1);
-  lm2.resize(tr_post2->size() + 1);
+  l1.resize(tree1_postorder->size() + 1);
+  l2.resize(tree2_postorder->size() + 1);
  
   // initialization (to zero)
-  std::fill(lm1.begin(), lm1.end(), 0);
-  std::fill(lm2.begin(), lm2.end(), 0);
+  std::fill(l1.begin(), l1.end(), 0);
+  std::fill(l2.begin(), l2.end(), 0);
 
-  int max = std::max(tr_post1->size(), tr_post2->size()) + 1;
+  int max = std::max(tree1_postorder->size(), tree2_postorder->size()) + 1;
 
   fd.resize(max);
   for (int i = 0; i < max; ++i) {
@@ -232,15 +235,15 @@ std::vector<std::array<Node*, 2> > compute_edit_mapping (Node* r1, Node* r2,
     std::fill(it->begin(), it->end(), 0);
   }
 
-  make_leaves(r1, r2);
+  make_leaves(tree1, tree2);
 
-  lmld(r1, lm1);
-  lmld(r2, lm2);
+  lmld(tree1, l1);
+  lmld(tree2, l2);
 
   std::vector<int> kr1;
   std::vector<int> kr2;
-  kr1 = kr(lm1, leaves_t1.size());
-  kr2 = kr(lm2, leaves_t2.size());
+  kr1 = kr(l1, leaves_tree1.size());
+  kr2 = kr(l2, leaves_tree2.size());
 
   //compute the distance
   for ( std::vector<int>::iterator kr1_it = std::next(kr1.begin());
@@ -249,13 +252,13 @@ std::vector<std::array<Node*, 2> > compute_edit_mapping (Node* r1, Node* r2,
     for ( std::vector<int>::iterator kr2_it = std::next(kr2.begin());
           kr2_it != kr2.end(); ++kr2_it)
     {
-      forest_dist(*kr1_it, *kr2_it, c);
+      forest_dist(*kr1_it, *kr2_it, costs);
     }
   }
  
   std::vector<std::array<int, 2> > tree_pairs;
   std::vector<std::array<Node*, 2> > edit_mapping;
-  tree_pairs.push_back({ r1->get_subtree_size(), r2->get_subtree_size() });  
+  tree_pairs.push_back({ tree1->get_subtree_size(), tree2->get_subtree_size() });
   std::array<int, 2> tree_pair;
   bool root_node_pair = true;
 
@@ -267,46 +270,48 @@ std::vector<std::array<Node*, 2> > compute_edit_mapping (Node* r1, Node* r2,
     int last_col = tree_pair.at(1);
 
     if (!root_node_pair) {
-      forest_dist(last_row, last_col, c);
+      forest_dist(last_row, last_col, costs);
     }
     root_node_pair = false;
 
-    int first_row = lm1.at(last_row) - 1;
-    int first_col = lm2.at(last_col) - 1;
+    int first_row = l1.at(last_row) - 1;
+    int first_col = l2.at(last_col) - 1;
     int row = last_row;
     int col = last_col;
 
     while ((row > first_row) || (col > first_col)) {
-      int cost_delete = c.del();
-      int cost_insert = c.ins();
+      int cost_delete = costs.del();
+      int cost_insert = costs.ins();
 
       if ((row > first_row) && (fd.at(row - 1).at(col) + cost_delete == fd.at(row).at(col)))
       {
-        edit_mapping.push_back({ tr_post1->at(row-1), nullptr });
+        edit_mapping.push_back({ tree1_postorder->at(row-1), nullptr });
         --row;
       } else if ( (col > first_col)
                   && (fd.at(row).at(col - 1) + cost_insert == fd.at(row).at(col)))
       {
-        edit_mapping.push_back({ nullptr, tr_post2->at(col-1) });
+        edit_mapping.push_back({ nullptr, tree2_postorder->at(col - 1) });
         --col;
       } else {
-        if (lm1.at(row) == lm1.at(last_row)
-            && lm2.at(col) == lm2.at(last_col))
+        if (l1.at(row) == l1.at(last_row)
+            && l2.at(col) == l2.at(last_col))
         {  
-          edit_mapping.push_back({ tr_post1->at(row-1), tr_post2->at(col-1) });
+          edit_mapping.push_back(
+            { tree1_postorder->at(row - 1), tree2_postorder->at(col - 1) }
+          );
           --row;
           --col;
         } else {
           tree_pairs.push_back({ row, col });
-          row = lm1.at(row) - 1;
-          col = lm2.at(col) - 1;
+          row = l1.at(row) - 1;
+          col = l2.at(col) - 1;
         }
       }
     }
   }
 
-  delete tr_post1;
-  delete tr_post2;
+  delete tree1_postorder;
+  delete tree2_postorder;
 
   return edit_mapping;
 }
@@ -316,27 +321,27 @@ std::vector<std::array<Node*, 2> > compute_edit_mapping (Node* r1, Node* r2,
 // type is specified as first template parameter, the cost model type as second
 // template parameter.
 template<class _node = Node, class _costs = Costs<_node>>
-double compute_zhang_shasha (_node* t1, _node* t2, _costs c = _costs()) {
-  tr_post1 = common::generate_postorder(t1);
-  tr_post2 = common::generate_postorder(t2);
+double compute_zhang_shasha (_node* tree1, _node* tree2, _costs costs = _costs()) {
+  tree1_postorder = common::generate_postorder(tree1);
+  tree2_postorder = common::generate_postorder(tree2);
 
-  td.resize(tr_post1->size() + 1);
+  td.resize(tree1_postorder->size() + 1);
   for (unsigned int i = 0; i < td.size(); ++i) {
-    td.at(i).resize(tr_post2->size() + 1);
+    td.at(i).resize(tree2_postorder->size() + 1);
   }
 
   // is there any reason to use reserve instead? (reserve was used before)
   // however, reserve only increases the capacity of the vector, not the size
   // capacity = the space allocated for the vector (e.g. if push_back is used)
   // size = the number of actual elements stores in the vector
-  lm1.resize(tr_post1->size() + 1);
-  lm2.resize(tr_post2->size() + 1);
+  l1.resize(tree1_postorder->size() + 1);
+  l2.resize(tree2_postorder->size() + 1);
 
   // initialization (to zero)
-  std::fill(lm1.begin(), lm1.end(), 0);
-  std::fill(lm2.begin(), lm2.end(), 0);
+  std::fill(l1.begin(), l1.end(), 0);
+  std::fill(l2.begin(), l2.end(), 0);
 
-  int max = std::max(tr_post1->size(), tr_post2->size()) + 1;
+  int max = std::max(tree1_postorder->size(), tree2_postorder->size()) + 1;
 
   fd.resize(max);
   for (int i = 0; i < max; ++i) {
@@ -356,15 +361,15 @@ double compute_zhang_shasha (_node* t1, _node* t2, _costs c = _costs()) {
     std::fill(it->begin(), it->end(), 0);
   }
 
-  make_leaves(t1, t2);
+  make_leaves(tree1, tree2);
 
-  lmld(t1, lm1);
-  lmld(t2, lm2);
+  lmld(tree1, l1);
+  lmld(tree2, l2);
 
   std::vector<int> kr1;
   std::vector<int> kr2;
-  kr1 = kr(lm1, leaves_t1.size());
-  kr2 = kr(lm2, leaves_t2.size());
+  kr1 = kr(l1, leaves_tree1.size());
+  kr2 = kr(l2, leaves_tree2.size());
 
   //compute the distance
   for ( std::vector<int>::iterator kr1_it = std::next(kr1.begin());
@@ -373,18 +378,18 @@ double compute_zhang_shasha (_node* t1, _node* t2, _costs c = _costs()) {
     for ( std::vector<int>::iterator kr2_it = std::next(kr2.begin());
           kr2_it != kr2.end(); ++kr2_it)
     {
-      forest_dist(*kr1_it, *kr2_it, c);
+      forest_dist(*kr1_it, *kr2_it, costs);
     }
   }
 
-  double ted = td.at(tr_post1->size()).at(tr_post2->size());
-  delete tr_post1;
-  delete tr_post2;
+  double ted = td.at(tree1_postorder->size()).at(tree2_postorder->size());
+  delete tree1_postorder;
+  delete tree2_postorder;
 
-  std::vector<Node*>().swap(leaves_t1);
-  std::vector<Node*>().swap(leaves_t2);
-  std::vector<int>().swap(lm1);
-  std::vector<int>().swap(lm2);
+  std::vector<Node*>().swap(leaves_tree1);
+  std::vector<Node*>().swap(leaves_tree2);
+  std::vector<int>().swap(l1);
+  std::vector<int>().swap(l2);
   std::vector<int>().swap(kr1);
   std::vector<int>().swap(kr2);
   std::vector<std::vector<double> >().swap(td);

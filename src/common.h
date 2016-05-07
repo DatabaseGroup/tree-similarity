@@ -37,11 +37,11 @@ void postorder(Node* root, std::vector<Node*>* tr_post, int* node_id_counter) {
 std::vector<Node*>* generate_postorder (Node* root) {
   int node_id_counter = 1;
   // Heap allocation
-  std::vector<Node*>* tr_post = new std::vector<Node*>();
+  std::vector<Node*>* postorder_tree = new std::vector<Node*>();
 
   // Recursively traverse tree in postorder
-  postorder(root, tr_post, &node_id_counter);
-  return tr_post;
+  postorder(root, postorder_tree, &node_id_counter);
+  return postorder_tree;
 }
 
 // Generate a simple tree recursively.
@@ -56,14 +56,16 @@ std::vector<Node*>* generate_postorder (Node* root) {
 // Return:  None
 void generate_full_tree (Node *root, int fixed_depth, int max_fanout) {
   // If we reached the maximum depth, terminate this branch.
-  if (fixed_depth == 0)
+  if (fixed_depth == 0) {
     return;
+  }
+
   // Seed the random generator.
   // time(NULL) returns seconds, thus each sibling has the same fanout. This is
   // also true for each node in small trees which are generated in less than a second.
   std::srand(std::time(NULL));
   // Generate a random fanout between 1 and max_fanout.
-  int random_fanout = 1 + ( std::rand() % ( max_fanout - 1 + 1 ) );
+  int random_fanout = 1 + (std::rand() % (max_fanout - 1 + 1));
   int random_label = 0;
   // Add as many children to root as random_fanout.
   for (int i = 0; i < random_fanout; ++i) {
@@ -80,11 +82,11 @@ void generate_full_tree (Node *root, int fixed_depth, int max_fanout) {
   }
 }
 
-void copy_tree(Node* t, Node* copy_t) {
-  for(int i = 0; i < t->get_children_number(); i++){
-    Node* temp = new Node(t->get_child(i)->get_label_id());
-    copy_t->add_child(temp);
-    copy_tree(t->get_child(i), temp);
+void copy_tree(Node* original, Node* copy) {
+  for(int i = 0; i < original->get_children_number(); i++){
+    Node* temp = new Node(original->get_child(i)->get_label_id());
+    copy->add_child(temp);
+    copy_tree(original->get_child(i), temp);
   }
 }
 
@@ -94,16 +96,16 @@ void copy_tree(Node* t, Node* copy_t) {
 // Params:  node  The root node of the labels to be printed
 //
 // Return:  None
-void print_tree_labels (Node* n) {
+void print_tree_labels (Node* node) {
   // Print the label of node.
   // Recursively print labels of all descendants of node.
-  std::vector<Node*> children = n->get_children();
+  std::vector<Node*> children = node->get_children();
   for ( std::vector<Node*>::const_iterator node_it = children.cbegin();
         node_it != children.cend(); ++node_it)
   {
     print_tree_labels(*node_it);
   }
-  std::cout << n->get_label_id() << std::endl;
+  std::cout << node->get_label_id() << std::endl;
 }
 
 // TODO replace hashtable with a custom node class that supp. strings as labels
@@ -134,7 +136,7 @@ void get_json_tree (Node* root, int level, IDLabelMap hashtable,
       std::cout << "[";
       for (int i = 0; i < root->get_children_number(); ++i) {
         get_json_tree(root->get_child(i), (level + 1), hashtable, map, tree);
-        if((i + 1) < root->get_children_number()){
+        if ((i + 1) < root->get_children_number()) {
           std::cout << ",";
         }
       }
@@ -150,10 +152,10 @@ void get_json_tree (Node* root, int level, IDLabelMap hashtable,
 // 
 // Params:  root    the parent for its children
 //          arr     the array which gets filled with (e.g.: postorder) ids (int)
-void get_parents (Node* root, int arr[]) {
+void get_parents (Node* root, int* array_to_fill) {
   for(int i = 0; i < root->get_children_number(); i++){
-    arr[root->get_child(i)->get_id()] = root->get_id();
-    get_parents(root->get_child(i), arr);
+    array_to_fill[root->get_child(i)->get_id()] = root->get_id();
+    get_parents(root->get_child(i), array_to_fill);
   }
 }
 
@@ -162,26 +164,26 @@ void get_parents (Node* root, int arr[]) {
 // (tree 2 will be taken and modified based on the edit mapping)
 // (direction of the edit mapping is important)
 //
-// Params:  r1      the root of the first tree
-//          r2      the root of the second tree
-//          edm     the edit mapping array (a->b)
+// Params:  tree1      the root of the first tree
+//          tree2      the root of the second tree
+//          edit_mapping     the edit mapping array (a->b)
 //
 // ignore for now: Return: a string in json format (why json? ids would get mixed up)
-Node* create_hybrid_tree (Node* r1, Node* r2,
-  std::vector<std::array<Node*, 2> > edm)
+Node* create_hybrid_tree (Node* tree1, Node* tree2,
+  std::vector<std::array<Node*, 2> > edit_mapping)
 {
 
-  Node* hybrid = new Node(r2->get_id(), r2->get_label_id());
-  copy_tree(r2, hybrid);
-  std::vector<Node*>* post_hybrid = generate_postorder(hybrid);
-  std::vector<Node*>* post_r1 = generate_postorder(r1);
-  std::cout << "post_hybrid: " << post_hybrid->size() << std::endl;
-  //set_tree_id(hybrid,2);
+  Node* hybrid_tree = new Node(tree2->get_id(), tree2->get_label_id());
+  copy_tree(tree2, hybrid_tree);
+  std::vector<Node*>* hybrid_tree_postorder = generate_postorder(hybrid_tree);
+  std::vector<Node*>* tree1_postorder = generate_postorder(tree1);
+  std::cout << "post_hybrid: " << hybrid_tree_postorder->size() << std::endl;
+  //set_tree_id(hybrid_tree, 2);
 
-  int* parents_r1 = new int[r1->get_subtree_size()+1];
-  get_parents(r1, parents_r1);
-  for(int i = 1; i < r1->get_subtree_size()+1; i++){
-    std::cout << "parent(" << i << "): " << parents_r1[i] << std::endl;
+  int* parents_tree1 = new int[tree1->get_subtree_size() + 1];
+  get_parents(tree1, parents_tree1);
+  for (int i = 1; i < tree1->get_subtree_size() + 1; ++i) {
+    std::cout << "parent(" << i << "): " << parents_tree1[i] << std::endl;
   }
 
   // TODO
@@ -189,10 +191,10 @@ Node* create_hybrid_tree (Node* r1, Node* r2,
   // / node / whatever;
 
   // free everything not needed after the function call - ok
-  delete post_hybrid;
-  delete post_r1;
-  delete parents_r1;
-  return hybrid;
+  delete hybrid_tree_postorder;
+  delete tree1_postorder;
+  delete parents_tree1;
+  return hybrid_tree;
 }
 
 };

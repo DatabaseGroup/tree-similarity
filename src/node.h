@@ -49,8 +49,7 @@ public:
   }
 
   void copy_node(Node *node) {
-    Node tmp = *this;
-    *node = tmp;
+    *node = *this;
   }
 
   // Get id

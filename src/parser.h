@@ -11,7 +11,7 @@ Node* create_tree_from_string (char* str, LabelIDMap& hashtable,
   int length = std::strlen(str);
   int scope = -1;
    
-  std::vector<Node*> scopeParentList;
+  std::vector<Node*> scope_parent_list;
   std::vector<Node*>::const_iterator it;
   std::string label = "";
     
@@ -26,41 +26,49 @@ Node* create_tree_from_string (char* str, LabelIDMap& hashtable,
         if (!hashtable.count(label)) {
           hashtable.emplace(label, labelid++);
         }
-        Node* tmpnode = new Node(hashtable[label]);
-        scopeParentList.push_back(tmpnode);
+        
+        Node* tmp_node = new Node(hashtable[label]);
+        scope_parent_list.push_back(tmp_node);
+        
         if (scope > 0) {
-          it = scopeParentList.begin() + scopeParentList.size() - 2;
-          Node* tmp = *it;
+          it = scope_parent_list.begin() + scope_parent_list.size() - 2;
+          //Node* tmp = *it;
           //std::cout << label << ".parent_id:" << tmp->get_label_id() << " scope: " << scope << std::endl;
-          tmp->add_child(tmpnode);
+          //tmp->add_child(tmp_node);
+          (*it)->add_child(tmp_node);
         } else {
           delete root;
-          root = tmpnode;
+          root = tmp_node;
           //std::cout << label << ".parent_id:/" << " scope: " << scope << std::endl;
         }
+        
         label = "";
       }
-      scope++;
+      ++scope;
     } else if (str[i] == '}') {
-      if(label.length() != 0){
+      if (label.length() != 0) {
         if (!hashtable.count(label)) {
           hashtable.emplace(label, labelid++);
         }
-        Node* tmpnode = new Node(hashtable[label]);
-        scopeParentList.push_back(tmpnode);
-        if (scope > 0 && scopeParentList.size() > 1) {
-          it = scopeParentList.begin() + scopeParentList.size() - 2;
-          Node* tmp = *it;
+
+        Node* tmp_node = new Node(hashtable[label]);
+        scope_parent_list.push_back(tmp_node);
+        
+        if (scope > 0 && scope_parent_list.size() > 1) {
+          it = scope_parent_list.begin() + scope_parent_list.size() - 2;
+          //Node* tmp = *it;
           //std::cout << label << ".parent_id:" << tmp->get_label_id() << " scope: " << scope << std::endl;
-          tmp->add_child(tmpnode);
+          //tmp->add_child(tmpnode);
+          (*it)->add_child(tmp_node);
         } else {
           delete root;
-          root = tmpnode;
+          root = tmp_node;
           //std::cout << label << ".parent_id:/" << " scope: " << scope << std::endl;
         }
+        
         label = "";
       }
-      scopeParentList.resize(scope);
+      scope_parent_list.resize(scope);
       --scope;
     } else {
       label += str[i];
