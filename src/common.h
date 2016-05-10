@@ -120,7 +120,7 @@ void get_json_tree (Node* root, int level, IDLabelMap hashtable,
   int* map = nullptr, int tree = 0)
 {
   if (root) {
-    std::cout << "{\"scope\":\"" << level << "\"";
+    std::cout << "{\"scope\":" << level << "";
     std::cout << ",\"label\":\"" << hashtable[root->get_label_id()] << "\"";
     
     if (tree != 0) {
