@@ -1,5 +1,6 @@
 #ifndef COMMON_H
 #define COMMON_H
+#include <sstream>
 
 namespace common {
 
@@ -116,36 +117,55 @@ void print_tree_labels (Node* node) {
 //          level   the int level for this level
 //
 // Return: a string in json format
-void get_json_tree (Node* root, int level, IDLabelMap hashtable,
+std::string get_json_tree (Node* root, int level, IDLabelMap hashtable,
   int* map = nullptr, int tree = 0)
 {
+  std::stringstream str;
   if (root) {
-    std::cout << "{\"scope\":" << level << "";
-    std::cout << ",\"label\":\"" << hashtable[root->get_label_id()] << "\"";
-    
+    str << "{\"scope\":" << level;
+    str << ",\"label\":\"" << hashtable[root->get_label_id()] << "\"";
+
     if (tree != 0) {
-      std::cout << ",\"tree\":" << tree << "";
+      str << ",\"tree\":" << tree << "";
     }
 
     if (map != nullptr) {
-      std::cout << ",\"mappedTo\":" << map[root->get_id()] << "";
+      str << ",\"mappedTo\":" << map[root->get_id()] << "";
     }
-    std::cout << ",\"children\":";
+    str << ",\"children\":";
 
     if (root->get_children_number() > 0) {
-      std::cout << "[";
+      str << "[";
       for (int i = 0; i < root->get_children_number(); ++i) {
-        get_json_tree(root->get_child(i), (level + 1), hashtable, map, tree);
+        str << get_json_tree(root->get_child(i), (level + 1), hashtable, map, tree);
         if ((i + 1) < root->get_children_number()) {
-          std::cout << ",";
+          str << ",";
         }
       }
-      std::cout << "]";
+      str << "]";
     } else {
-      std::cout << " null ";
+      str << " null ";
     }
-    std::cout << "}";
+    str << "}";
   }
+  // is this ok? or should it be passed differently?
+  return str.str();
+}
+
+std::string get_json_side_by_side(Node* tree1, Node* tree2, 
+  IDLabelMap hashtable_id_to_label, int** edit_mapping_int_array = nullptr)
+{
+  std::string sbs = "[";
+  sbs += common::get_json_tree(tree1, 0, hashtable_id_to_label,
+    edit_mapping_int_array[0], 1
+  );
+  sbs += ",";
+  sbs += common::get_json_tree(tree2, 0, hashtable_id_to_label,
+    edit_mapping_int_array[1], 2
+  );
+  sbs += "]";
+
+  return sbs;
 }
 
 // Fills the array with the ids of the parents,
@@ -178,7 +198,6 @@ Node* create_hybrid_tree (Node* tree1, Node* tree2,
   std::vector<Node*>* hybrid_tree_postorder = generate_postorder(hybrid_tree);
   std::vector<Node*>* tree1_postorder = generate_postorder(tree1);
   std::cout << "post_hybrid: " << hybrid_tree_postorder->size() << std::endl;
-  //set_tree_id(hybrid_tree, 2);
 
   int* parents_tree1 = new int[tree1->get_subtree_size() + 1];
   get_parents(tree1, parents_tree1);
@@ -190,10 +209,10 @@ Node* create_hybrid_tree (Node* tree1, Node* tree2,
   // figure out a way how to get the mapping to show in the json-string / tree
   // / node / whatever;
 
-  // free everything not needed after the function call - ok
   delete hybrid_tree_postorder;
   delete tree1_postorder;
   delete parents_tree1;
+
   return hybrid_tree;
 }
 
