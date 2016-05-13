@@ -171,10 +171,13 @@ following listing. Also here it holds that the rules in this listing **overrules
 conflicting/inconsistent rules from Google's style guide. However, if any rules
 is inconsistent/unclear, please just ask and we will discuss it.
 
-1. We **declare AND define** all functions/classes in the `.h` files. This is due
-to the fact that template functions/classes are used in almost every `.h` file.
-2. We **always** use the *safer* method if there are multiple methods achieving
-the same result.
+1. **We *declare AND define* all functions/classes in the `.h` files.**
+
+    This is due to the fact that template functions/classes are used in almost
+    every `.h` file.
+    
+2. **We *always* use the *safer* method if there are multiple methods achieving
+the same result.**
 
     A good example is the
 [`std::vector`](http://www.cplusplus.com/reference/vector/) container for which
@@ -188,6 +191,13 @@ reason is that
 check, whereas the 
 [`[]`](http://www.cplusplus.com/reference/vector/vector/operator%5B%5D/) operator
 does not.
+
+3. **We use exceptions in order to make the library more error prone. Further, we
+do not allow any call to a function which terminates the library (e.g., `exit`).**
+
+    This is due to the fact that we cannot anticipate if a termination is desired
+in case of, e.g., an eception (the program which uses the library should catch
+the exception(s) and decide whether it wants to terminate or not).
 
 # References
 
