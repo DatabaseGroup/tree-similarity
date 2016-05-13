@@ -184,7 +184,7 @@ the same result.**
 there are multiple possibilities to access an element (i.e., the
 [`at`](http://www.cplusplus.com/reference/vector/vector/at/) member or the
 [`[]`](http://www.cplusplus.com/reference/vector/vector/operator%5B%5D/)
-operator). In this example, we **always** use the
+operator). In this example, we *always* use the
 [`at`](http://www.cplusplus.com/reference/vector/vector/at/) member. The main
 reason is that
 [`at`](http://www.cplusplus.com/reference/vector/vector/at/) performs a range
@@ -196,7 +196,7 @@ does not.
 do not allow any call to a function which terminates the library (e.g., `exit`).**
 
     This is due to the fact that we cannot anticipate if a termination is desired
-in case of, e.g., an eception (the program which uses the library should catch
+in case of, e.g., an exception (the program which uses the library should catch
 the exception(s) and decide whether it wants to terminate or not).
 
 # References
