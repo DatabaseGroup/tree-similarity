@@ -173,13 +173,17 @@ is inconsistent/unclear, please just ask and we will discuss it.
 
 1. We **declare AND define** all functions/classes in the `.h` files. This is due
 to the fact that template functions/classes are used in almost every `.h` file.
-2. We **always** use the
-[`at`](http://www.cplusplus.com/reference/vector/vector/at/) member of the
-[`std::vector`](http://www.cplusplus.com/reference/vector/) container when we
-want to access an element. As a consequence, we try to avoid the
-[`[]`](http://www.cplusplus.com/reference/vector/vector/operator%5B%5D/) operator.
+2. We **always** use the *safer* method if there are multiple methods achieving
+the same result.
 
-    The main reason is that
+    A good example is the
+[`std::vector`](http://www.cplusplus.com/reference/vector/) container for which
+there are multiple possibilities to access an element (i.e., the
+[`at`](http://www.cplusplus.com/reference/vector/vector/at/) member or the
+[`[]`](http://www.cplusplus.com/reference/vector/vector/operator%5B%5D/)
+operator). In this example, we **always** use the
+[`at`](http://www.cplusplus.com/reference/vector/vector/at/) member. The main
+reason is that
 [`at`](http://www.cplusplus.com/reference/vector/vector/at/) performs a range
 check, whereas the 
 [`[]`](http://www.cplusplus.com/reference/vector/vector/operator%5B%5D/) operator
