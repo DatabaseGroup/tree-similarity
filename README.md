@@ -75,8 +75,23 @@ to use `make check-static` or `make check`)
 
 #### Installing [`cppcheck`](#references) from Source
 
+If you have set an SSH key for your GitHub account, start by using
+
 ~~~
-git clone git@github.com:danmar/cppcheck.git && cd cppcheck
+git clone git@github.com:danmar/cppcheck.git
+~~~
+
+If you have not set such an SSH key, start by using
+
+~~~
+git clone https://github.com/danmar/cppcheck.git
+~~~
+
+The remaining operations are supposed to work independent of whether an SSH key
+is set or not.
+
+~~~
+cd cppcheck
 make SRCDIR=build CFGDIR=/usr/bin/cfg HAVE_RULES=yes
 sudo make install CFGDIR=/usr/bin/cfg
 ~~~
