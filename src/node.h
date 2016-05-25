@@ -1,6 +1,7 @@
 #ifndef NODE_H
 #define NODE_H
 
+#include <algorithm>
 #include <iostream>
 #include <random>
 #include <vector>
@@ -83,6 +84,11 @@ public:
     //++children_number;
   }
 
+  void add_child_at(Node* child, int position) {
+    std::vector<Node*>::iterator it = children_.begin();
+    children_.insert(it + position, child);
+  }
+
   // Get subtree size rooted at this node.
   //
   // Return:  The size of the subtree rooted at this node (including this node)
@@ -118,6 +124,31 @@ public:
   Node* get_child (int position) const {
     return children_[position];
   }
+
+  void remove_child (int position) {
+    children_.erase(children_.begin() + position);
+  }
+
+  void remove_child (Node* n) {
+    std::vector<Node*>::iterator it = std::find(children_.begin(), children_.end(), n);
+    if (it != children_.end()){
+      children_.erase(it);
+    }
+  }
+
+  int get_child_position (Node* n) {
+    std::vector<Node*>::iterator it = std::find(children_.begin(), children_.end(), n);
+    if(it!=children_.end()){
+      return (it - children_.begin());
+    } else {
+      return -1;
+    }
+  }
+
+  void swap_children (int pos, int currpos) {
+    iter_swap(children_.begin() + pos, children_.begin() + currpos);
+  }
+
 };
 
 // Represents the cost functions to be used for the distance computation.

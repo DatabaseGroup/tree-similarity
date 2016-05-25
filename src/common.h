@@ -1,10 +1,12 @@
 #ifndef COMMON_H
 #define COMMON_H
 #include <sstream>
+#include <map>
 
 namespace common {
 
 typedef std::unordered_map<int, std::string> IDLabelMap;
+typedef std::map<int, Node*, std::greater<int>> IDMappedNode;
 
 // Recursively traverses the subtree rooted at a given root.
 //
@@ -179,7 +181,43 @@ void get_parents (Node* root, int* array_to_fill) {
   }
 }
 
-// TODO update since edm has been updated
+Node* append_node_hybrid (Node* child, Node* parent, int pos) 
+{
+  Node* node = new Node(child->get_id(),child->get_label_id());
+  if(pos!=-1 && pos <= parent->get_children_number()){
+    parent->add_child_at(node, pos);
+  } else {
+    parent->add_child(node);
+  }  
+  return node;
+}
+
+// worked with:
+// ./tree_similarity "{a{b{ba{bb}}}{c}{d}}" "{a{b}{c{ca}}{d}}" -hybrid
+// ./tree_similarity "{a{x{y{b}{c{z}}{d}}}}" "{a{b}{c}{d}}" -hybrid
+// ./tree_similarity "{a{x{y{b}{c{z}}{d}}}}" "{a{b}{c}}" -hybrid
+// ./tree_similarity "{a{b{c{d{e{f{g}}}}}}}" "{a}" -hybrid
+//
+// worked, also with the position !! (didnt work before)
+// ./tree_similarity "{a{b{ba{bb}{bc}}}{c{ca{cb}}}{d{da{db}{dc}}}}" "{a{ba}{c{cb}}{da{dd}}}" -hybrid
+// ./tree_similarity "{a{b{ba{baa}{bab}{bac}}{bb{bba}{bbb}{bbc}}{bc{bca}{bcb}{bcc}}}{c{ca}{cb{cba}{cbb}{cbc}}{cc}}{d{da}{db}{dc}}{e{ea}{eb}{ec}}}" "{a{b{ba{bab}{bac}}{bb{bba}{bbc}}{bc{bca}{bcb}}}{ca}{cb{cba}{cbc}}{cc}{d{da}{db}{dc}}{e{ea}{eb}{ec}}}" -hybrid
+//
+// root deleted + pos:
+// ./tree_similarity "{x{a{b}{c}{d}}}" "{a{b}{c}{d}}" -hybrid
+// ./tree_similarity "{x{a{a{b}{c}{d}}{b}{c}{asdf}{gggg}{d}{last}}" "{a{b}{c}{d}{d}}" -hybrid
+
+// Mateusz's tree1: {13{4{1}{3{2}}}{10{5}{9{8{6}{7}}}}{12{11}}} (note: postorder_id as label)
+// Mateusz's tree2: {13{1}{2}{8{7{3}{6{4}{5}}}}{12{10{9}}{11}}} (same)
+// mapping should be: 1,1 2,2 5,3 6,4 7,5 8,6 10,8 11,9 12,12 13,13 (just mapping, no ins/dels)
+// mapping is nearly correct, adjust: 10,7 to (10->8); 11,11 to (11->9);
+
+// {13{4{1}{3{2}}}{same{5}{9{8{6}{7}}}}{12{same}}}
+// {13{1}{2}{same{7{3}{6{4}{5}}}}{12{10{same}}{11}}}
+// ./tree_similarity "{13{4{1}{3{2}}}{same{5}{9{8{6}{7}}}}{12{same}}}" "{13{1}{2}{same{7{3}{6{4}{5}}}}{12{10{same}}{11}}}" -hybrid
+// output correct?:
+// {"scope":0,"label":"13","children":[{"scope":1,"label":"4","children":[{"scope":2,"label":"1","children": null },{"scope":2,"label":"3","children":[{"scope":3,"label":"2","children": null }]}]},{"scope":1,"label":"same","children":[{"scope":2,"label":"7","children":[{"scope":3,"label":"3","children": null }]},{"scope":2,"label":"9","children":[{"scope":3,"label":"6","children":[{"scope":4,"label":"4","children": null },{"scope":4,"label":"5","children": null }]}]}]},{"scope":1,"label":"12","children":[{"scope":2,"label":"10","children":[{"scope":3,"label":"same","children": null }]},{"scope":2,"label":"11","children": null }]}]}
+
+// TODO insert node in the right place / position
 // Creates a hybrid tree based on the given edit mapping and the two trees
 // (tree 2 will be taken and modified based on the edit mapping)
 // (direction of the edit mapping is important)
@@ -188,31 +226,133 @@ void get_parents (Node* root, int* array_to_fill) {
 //          tree2      the root of the second tree
 //          edit_mapping     the edit mapping array (a->b)
 //
-// ignore for now: Return: a string in json format (why json? ids would get mixed up)
 Node* create_hybrid_tree (Node* tree1, Node* tree2,
   std::vector<std::array<Node*, 2> > edit_mapping)
 {
-
   Node* hybrid_tree = new Node(tree2->get_id(), tree2->get_label_id());
   copy_tree(tree2, hybrid_tree);
   std::vector<Node*>* hybrid_tree_postorder = generate_postorder(hybrid_tree);
   std::vector<Node*>* tree1_postorder = generate_postorder(tree1);
-  std::cout << "post_hybrid: " << hybrid_tree_postorder->size() << std::endl;
+  std::cout << "beg:post_hybrid: " << hybrid_tree_postorder->size() << std::endl;
 
   int* parents_tree1 = new int[tree1->get_subtree_size() + 1];
+  parents_tree1[tree1->get_id()]=0;
   get_parents(tree1, parents_tree1);
-  for (int i = 1; i < tree1->get_subtree_size() + 1; ++i) {
-    std::cout << "parent(" << i << "): " << parents_tree1[i] << std::endl;
+
+  int* parents_hybrid = new int[hybrid_tree->get_subtree_size() + 1];
+  get_parents(hybrid_tree, parents_hybrid);
+  parents_hybrid[hybrid_tree->get_id()] = 0;
+
+  IDMappedNode ht_id_to_node;
+  IDMappedNode ht_id_to_node_old;
+  std::array<Node*, 2> em;
+  while (!edit_mapping.empty())
+  {
+    em = edit_mapping.back();
+    edit_mapping.pop_back();
+    if(em[0]!=nullptr){
+      if(em[1]!=nullptr){
+        ht_id_to_node.emplace(em[0]->get_id(), 
+          hybrid_tree_postorder->at(em[1]->get_id()-1));
+      } else {
+        ht_id_to_node.emplace(em[0]->get_id(), em[1]);
+      }
+    }
+  }
+  ht_id_to_node_old = ht_id_to_node;
+  // important: must be descending // IDMappedNode is descending
+  for ( auto it = ht_id_to_node.begin();
+        it != ht_id_to_node.end(); ++it )
+  {
+    if(it->first == 0) { break; }
+    if(it->second==nullptr){
+      Node* node_in_t1 = tree1_postorder->at(it->first-1);
+      if(ht_id_to_node[parents_tree1[it->first]] != nullptr){
+        int pos = -1;
+        for(int i = 0; i<node_in_t1->get_children_number(); i++){
+          Node* tmp_child = ht_id_to_node[node_in_t1->get_child(i)->get_id()];
+          if(tmp_child!=nullptr){
+            pos = ht_id_to_node[parents_tree1[it->first]]
+              ->get_child_position(tmp_child);
+            if(pos!=-1){
+              break;
+            }
+          }
+        }
+        if(pos==-1){
+          pos = tree1_postorder->at(parents_tree1[it->first]-1)
+            ->get_child_position(node_in_t1);
+        }
+        Node* n = append_node_hybrid(node_in_t1, 
+          ht_id_to_node[parents_tree1[it->first]], pos);
+        ht_id_to_node[it->first] = n;
+        if(node_in_t1->get_children_number() > 0){
+          for(int i = 0; i<node_in_t1->get_children_number(); i++){
+            Node* child_mapped = ht_id_to_node[node_in_t1->get_child(i)->get_id()];
+            if(child_mapped != nullptr){
+              Node* parent_child_mapped = hybrid_tree_postorder
+                ->at(parents_hybrid[child_mapped->get_id()] - 1);
+              parent_child_mapped->remove_child(child_mapped);
+              n->add_child(child_mapped);
+            }
+          }
+        }
+
+      } else { // ht_id_to_node[parents_tree1[it->first]] != nullptr
+        std::cout << "parent is nullptr --> must be the root" << std::endl;
+        Node* tmp = hybrid_tree;
+        hybrid_tree = new Node(tmp->get_id()+1, node_in_t1->get_label_id());
+        hybrid_tree->add_child(tmp);
+        ht_id_to_node[it->first] = hybrid_tree;
+        hybrid_tree_postorder = generate_postorder(hybrid_tree);
+        parents_hybrid = new int[hybrid_tree->get_subtree_size() + 1];
+        get_parents(hybrid_tree, parents_hybrid);
+      }
+      
+    }
+    std::cout << "[end] node: " << it->first << std::endl;
   }
 
-  // TODO
-  // figure out a way how to get the mapping to show in the json-string / tree
-  // / node / whatever;
+  hybrid_tree_postorder = generate_postorder(hybrid_tree);
+  parents_hybrid = new int[hybrid_tree->get_subtree_size() + 1];
+  get_parents(hybrid_tree, parents_hybrid);
+  parents_hybrid[hybrid_tree->get_id()] = 0;
+
+  for(int i = 0; i <= tree1->get_subtree_size(); i++) {
+    std::cout << i << ": " << parents_tree1[i] << std::endl;
+  }
+
+  std::cout << "preserve order" << std::endl;
+  // preserve order
+  for ( auto it = ht_id_to_node_old.begin();
+      it != ht_id_to_node_old.end(); ++it )
+  {
+    if(it->first != 0 && it->second == nullptr && parents_tree1[it->first] != 0){
+      std::cout << it->first << std::endl;
+      Node* node_in_t1 = tree1_postorder->at(it->first-1);
+      int pos = tree1_postorder->at(parents_tree1[it->first]-1)
+        ->get_child_position(node_in_t1);
+      int currpos = hybrid_tree_postorder->at(parents_hybrid[ht_id_to_node[it->first]
+        ->get_id()]-1)->get_child_position(ht_id_to_node[it->first]);
+      int childrennumberhybrid = hybrid_tree_postorder->at(parents_hybrid[ht_id_to_node[it->first]
+        ->get_id()]-1)->get_children_number();
+      if(pos!=currpos && pos!=-1 && currpos!=-1 && pos <= childrennumberhybrid &&
+          currpos <= childrennumberhybrid) {
+        std::cout << "child# " << childrennumberhybrid << " swap " << it->first << " new: " << ht_id_to_node[it->first]->get_id() << " from " << currpos << " to " << pos << std::endl;
+        hybrid_tree_postorder->at(parents_hybrid[ht_id_to_node[it->first]->get_id()]-1)
+          ->swap_children(pos, currpos);
+      }
+      
+    }
+  }
+  std::cout << "preserve order finished" << std::endl;
 
   delete hybrid_tree_postorder;
   delete tree1_postorder;
   delete parents_tree1;
-
+  delete parents_hybrid; 
+  
+    std::cout << "return" << std::endl;
   return hybrid_tree;
 }
 
