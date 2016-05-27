@@ -19,9 +19,7 @@ int main (int argc, char* argv[]) {
   }
 
   // TODO replace hashtable with a custom node class that sup. strings as labels
-  //std::unordered_map<std::string, int> hashtable_label_to_id;
   parser::LabelIDMap hashtable_label_to_id;
-  //std::unordered_map<int, std::string> hashtable_id_to_label;
   common::IDLabelMap hashtable_id_to_label;
   int node_id_counter = 1;
   Node* tree1 = parser::create_tree_from_string(argv[1], hashtable_label_to_id,
@@ -44,7 +42,6 @@ int main (int argc, char* argv[]) {
   // compute distance using basic nodes and basic cost model
   // no need to generate basic cost model since it is set as default template
   // parameter
-  //std::cout << std::endl;
   std::cout << "Distance (basic tree, basic cost model, Zhang Shasha): " << "\t"
     << zs::compute_zhang_shasha<Node, Costs<Node>>(tree1, tree2)
     << std::endl;
@@ -52,7 +49,7 @@ int main (int argc, char* argv[]) {
   std::vector<std::array<Node*, 2> > edit_mapping =
     zs::compute_edit_mapping<Node, Costs<Node>>(tree1, tree2);
 
-  if(argc >= 3) {
+  if(argc > 3) {
     std::string output;
     std::cout << "'" << argv[3] << "'" << std::endl;
     if(argv[3] == std::string("-hybrid")){
@@ -79,7 +76,6 @@ int main (int argc, char* argv[]) {
           delete[] edit_mapping_int_array[i];
         }
     }
-
     std::cout << output << std::endl;
     if(argc>=6 && (strcmp(argv[4],"-f") == 0)){
       std::fstream out;
