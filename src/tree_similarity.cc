@@ -53,8 +53,13 @@ int main (int argc, char* argv[]) {
     std::string output;
     std::cout << "'" << argv[3] << "'" << std::endl;
     if(argv[3] == std::string("-hybrid")){
-      Node* hybrid = common::create_hybrid_tree(tree1, tree2, edit_mapping);
-      output = common::get_json_tree(hybrid, 0, hashtable_id_to_label);
+      std::vector<int> edm;
+      Node* hybrid = common::create_hybrid_tree(tree1, tree2, edit_mapping, edm);
+      output = common::get_json_hybrid_tree(hybrid, 0, hashtable_id_to_label, edm);
+      
+      for(int i = 0; i < hybrid->get_subtree_size() + 1; i++){
+        std::cout << i << ": " << edm[i] << std::endl;
+      }
 
     } else if(strcmp(argv[3],"-sbs_fs")==0){
       std::cout << "sbs" << std::endl;

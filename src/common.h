@@ -170,6 +170,64 @@ std::string get_json_side_by_side(Node* tree1, Node* tree2,
   return sbs;
 }
 
+// TODO replace hashtable with a custom node class that supp. strings as labels
+// Creates a json string for the given node
+// e.g.: the json string for the entire tree, recursively
+//
+// Params:  r1      the root of the (sub)tree
+//          level   the int level for this level
+//
+// Return: a string in json format
+std::string get_json_hybrid_tree (Node* root, int level, IDLabelMap hashtable,
+  std::vector<int> edm)
+{
+  std::stringstream str;
+  if (root) {
+    str << "{\"scope\":" << level;
+    str << ",\"label\":\"" << hashtable[root->get_label_id()] << "\"";
+
+    if (edm[root->get_id()] == 0) {
+      str << ",\"tree\":2";
+    } else {
+      str << ",\"tree\":1";
+    }
+
+    str << ",\"op\":";
+    if(edm[root->get_id()] > 0){
+      str << "\"r\"";
+      str << ",\"oldlabel\":\"" << hashtable[edm[root->get_id()]] << "\"";
+    } else {
+      if(edm[root->get_id()] == 0) {
+        str << "\"i\"";
+      } else if(edm[root->get_id()] == -1) {
+        str << "\"m\"";
+      } else if(edm[root->get_id()] == -2) {
+        str << "\"d\"";
+      } else {
+        str << "\"unknown\"";
+      }
+    }
+    
+    str << ",\"children\":";
+
+    if (root->get_children_number() > 0) {
+      str << "[";
+      for (int i = 0; i < root->get_children_number(); ++i) {
+        str << get_json_hybrid_tree(root->get_child(i), (level + 1), hashtable, edm);
+        if ((i + 1) < root->get_children_number()) {
+          str << ",";
+        }
+      }
+      str << "]";
+    } else {
+      str << " null ";
+    }
+    str << "}";
+  }
+  // is this ok? or should it be passed differently?
+  return str.str();
+}
+
 // Fills the array with the ids of the parents,
 // 
 // Params:  root    the parent for its children
@@ -227,13 +285,12 @@ Node* append_node_hybrid (Node* child, Node* parent, int pos)
 //          edit_mapping     the edit mapping array (a->b)
 //
 Node* create_hybrid_tree (Node* tree1, Node* tree2,
-  std::vector<std::array<Node*, 2> > edit_mapping)
+  std::vector<std::array<Node*, 2> > edit_mapping, std::vector<int>& operations)
 {
   Node* hybrid_tree = new Node(tree2->get_id(), tree2->get_label_id());
   copy_tree(tree2, hybrid_tree);
   std::vector<Node*>* hybrid_tree_postorder = generate_postorder(hybrid_tree);
   std::vector<Node*>* tree1_postorder = generate_postorder(tree1);
-  std::cout << "beg:post_hybrid: " << hybrid_tree_postorder->size() << std::endl;
 
   int* parents_tree1 = new int[tree1->get_subtree_size() + 1];
   parents_tree1[tree1->get_id()]=0;
@@ -310,7 +367,6 @@ Node* create_hybrid_tree (Node* tree1, Node* tree2,
       }
       
     }
-    std::cout << "[end] node: " << it->first << std::endl;
   }
 
   hybrid_tree_postorder = generate_postorder(hybrid_tree);
@@ -318,17 +374,12 @@ Node* create_hybrid_tree (Node* tree1, Node* tree2,
   get_parents(hybrid_tree, parents_hybrid);
   parents_hybrid[hybrid_tree->get_id()] = 0;
 
-  for(int i = 0; i <= tree1->get_subtree_size(); i++) {
-    std::cout << i << ": " << parents_tree1[i] << std::endl;
-  }
-
   std::cout << "preserve order" << std::endl;
   // preserve order
   for ( auto it = ht_id_to_node_old.begin();
       it != ht_id_to_node_old.end(); ++it )
   {
     if(it->first != 0 && it->second == nullptr && parents_tree1[it->first] != 0){
-      std::cout << it->first << std::endl;
       Node* node_in_t1 = tree1_postorder->at(it->first-1);
       int pos = tree1_postorder->at(parents_tree1[it->first]-1)
         ->get_child_position(node_in_t1);
@@ -341,18 +392,44 @@ Node* create_hybrid_tree (Node* tree1, Node* tree2,
         std::cout << "child# " << childrennumberhybrid << " swap " << it->first << " new: " << ht_id_to_node[it->first]->get_id() << " from " << currpos << " to " << pos << std::endl;
         hybrid_tree_postorder->at(parents_hybrid[ht_id_to_node[it->first]->get_id()]-1)
           ->swap_children(pos, currpos);
+          hybrid_tree_postorder = generate_postorder(hybrid_tree);
+          parents_hybrid = new int[hybrid_tree->get_subtree_size() + 1];
+          get_parents(hybrid_tree, parents_hybrid);
+          parents_hybrid[hybrid_tree->get_id()] = 0;
       }
       
     }
   }
-  std::cout << "preserve order finished" << std::endl;
+
+  operations.resize(hybrid_tree->get_subtree_size() + 1);
+  for(int i = 0; i < hybrid_tree->get_subtree_size() + 1; i++){
+    operations[i] = 0;
+    operations[i] = 0;
+  }
+
+  for ( auto it = ht_id_to_node_old.begin();
+      it != ht_id_to_node_old.end(); ++it )
+  {
+    if(it->second == nullptr){
+      operations[ht_id_to_node[it->first]->get_id()] = -2; // del
+    } else if(tree1_postorder->at(it->first - 1)->get_label_id() == it->second->get_label_id()){
+      operations[ht_id_to_node[it->first]->get_id()] = -1; // map
+    } else {
+      operations[ht_id_to_node[it->first]->get_id()] = it->first; // ren
+    }
+    // 0 = ins --> standard
+  }
+
+  for(int i = 0; i < hybrid_tree->get_subtree_size() + 1; i++){
+    std::cout << i << ": " << operations[i] << std::endl;
+  }
+  std::cout << std::endl;
 
   delete hybrid_tree_postorder;
   delete tree1_postorder;
   delete parents_tree1;
   delete parents_hybrid; 
   
-    std::cout << "return" << std::endl;
   return hybrid_tree;
 }
 
