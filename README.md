@@ -73,7 +73,7 @@ to use `make check-static` or `make check`)
 
 ### Remarks
 
-#### Installing [`cppcheck`](#references) from Source
+#### Installing [`cppcheck`](#references) from Source [optional]
 
 If you have set an SSH key for your GitHub account, start by using
 
@@ -104,6 +104,7 @@ The path supplied to `CFGDIR` can be adjusted to a custom path (e.g.,
 
 The following commands perform an out-of-source building (see the
 [CMake FAQs](https://cmake.org/Wiki/CMake_FAQ#Out-of-source_build_trees)).
+It has to be issued in the root directory of the repository.
 
 ~~~
 mkdir build && cd build/ && CXX=clang++ cmake ../src && make
