@@ -201,11 +201,18 @@ the exception(s) and decide whether it wants to terminate or not).
 
 # References
 
-[1] [C++ Reference (1)](http://www.cplusplus.com/reference/)
-[2] [C++ Reference (2)](http://en.cppreference.com/w/cpp)
+[1] [C++ Reference [1]](http://www.cplusplus.com/reference/)
+
+[2] [C++ Reference [2]](http://en.cppreference.com/w/cpp)
+
 [3] [`clang`](http://clang.llvm.org/)
+
 [4] [`CMake`](https://cmake.org/)
+
 [5] [`valgrind`](http://valgrind.org/)
+
 [6] [`cppcheck`](https://github.com/danmar/cppcheck)
+
 [7] [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
+
 [8] [Zhang & Shasha algorithm](http://www.inf.unibz.it/dis/teaching/SS/ss05-handout-1x1.pdf)
