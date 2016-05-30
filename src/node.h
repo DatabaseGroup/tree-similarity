@@ -136,6 +136,10 @@ public:
     }
   }
 
+  void remove_all_children() {
+    children_.clear();
+  }
+
   int get_child_position (Node* n) {
     std::vector<Node*>::iterator it = std::find(children_.begin(), children_.end(), n);
     if(it!=children_.end()){
@@ -147,6 +151,22 @@ public:
 
   void swap_children (int pos, int currpos) {
     iter_swap(children_.begin() + pos, children_.begin() + currpos);
+  }
+
+  // deleting in terms of removing and this node (=parent) inherits its children
+  void delete_child (int pos) {
+    Node* n = get_child(pos);
+    for(int i = 0; i < n->get_children_number(); i++){
+      this->add_child_at(n->get_child(i), (pos + i));
+    }
+    // might this be useless, since the child is deleted anyway?
+    n->remove_all_children();
+    remove_child(n);
+  }
+
+  void delete_child (Node* n) {
+    int pos = get_child_position(n);
+    delete_child(pos);
   }
 
 };

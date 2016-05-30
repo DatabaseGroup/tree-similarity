@@ -81,6 +81,7 @@ int main (int argc, char* argv[]) {
           delete[] edit_mapping_int_array[i];
         }
     }
+    
     std::cout << output << std::endl;
     if(argc>=6 && (strcmp(argv[4],"-f") == 0)){
       std::fstream out;
