@@ -15,7 +15,7 @@ to write code to the best of his/her knowledge (regarding this document).
 - [Building Process](#building-process)
     - [Prerequisites](#prerequisites)
         - [Remarks](#remarks)
-            - [Installing `cppcheck` from Source](#installing-cppcheck-from-source)
+            - [Installing `cppcheck` from Source](#installing-cppcheck-from-source-optional)
     - [Compilation](#compilation)
     - [Execution](#execution)
 - [Coding Style](#coding-style)
