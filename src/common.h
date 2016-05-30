@@ -370,6 +370,7 @@ Node* create_hybrid_tree (Node* tree1, Node* tree2,
   }
 
   hybrid_tree_postorder = generate_postorder(hybrid_tree);
+  delete[] parents_hybrid; // resolves memory leak but may be removed to improve performance
   parents_hybrid = new int[hybrid_tree->get_subtree_size() + 1];
   get_parents(hybrid_tree, parents_hybrid);
   parents_hybrid[hybrid_tree->get_id()] = 0;
@@ -427,8 +428,8 @@ Node* create_hybrid_tree (Node* tree1, Node* tree2,
 
   delete hybrid_tree_postorder;
   delete tree1_postorder;
-  delete parents_tree1;
-  delete parents_hybrid; 
+  delete[] parents_tree1;
+  delete[] parents_hybrid; 
   
   return hybrid_tree;
 }

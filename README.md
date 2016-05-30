@@ -15,7 +15,7 @@ to write code to the best of his/her knowledge (regarding this document).
 - [Building Process](#building-process)
     - [Prerequisites](#prerequisites)
         - [Remarks](#remarks)
-            - [Installing `cppcheck` from Source](#installing-cppcheck-from-source)
+            - [Installing `cppcheck` from Source](#installing-cppcheck-from-source-optional)
     - [Compilation](#compilation)
     - [Execution](#execution)
 - [Coding Style](#coding-style)
@@ -73,7 +73,7 @@ to use `make check-static` or `make check`)
 
 ### Remarks
 
-#### Installing [`cppcheck`](#references) from Source
+#### Installing [`cppcheck`](#references) from Source [optional]
 
 If you have set an SSH key for your GitHub account, start by using
 
@@ -104,6 +104,7 @@ The path supplied to `CFGDIR` can be adjusted to a custom path (e.g.,
 
 The following commands perform an out-of-source building (see the
 [CMake FAQs](https://cmake.org/Wiki/CMake_FAQ#Out-of-source_build_trees)).
+It has to be issued in the root directory of the repository.
 
 ~~~
 mkdir build && cd build/ && CXX=clang++ cmake ../src && make
@@ -201,11 +202,18 @@ the exception(s) and decide whether it wants to terminate or not).
 
 # References
 
-- [C++ Reference [1]](http://www.cplusplus.com/reference/)
-- [C++ Reference [2]](http://en.cppreference.com/w/cpp)
-- [`clang`](http://clang.llvm.org/)
-- [`CMake`](https://cmake.org/)
-- [`valgrind`](http://valgrind.org/)
-- [`cppcheck`](https://github.com/danmar/cppcheck)
-- [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
-- [Zhang & Shasha algorithm](http://www.inf.unibz.it/dis/teaching/SS/ss05-handout-1x1.pdf)
+[1] [C++ Reference [1]](http://www.cplusplus.com/reference/)
+
+[2] [C++ Reference [2]](http://en.cppreference.com/w/cpp)
+
+[3] [`clang`](http://clang.llvm.org/)
+
+[4] [`CMake`](https://cmake.org/)
+
+[5] [`valgrind`](http://valgrind.org/)
+
+[6] [`cppcheck`](https://github.com/danmar/cppcheck)
+
+[7] [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
+
+[8] [Zhang & Shasha algorithm](http://www.inf.unibz.it/dis/teaching/SS/ss05-handout-1x1.pdf)
