@@ -17,7 +17,7 @@ int main (int argc, char* argv[]) {
     std::cout << "TODO print a help message" << std::endl;
     return 0;
   }
-
+  std::cout << argv[1] << " " << argv[2] << std::endl;
   // TODO replace hashtable with a custom node class that sup. strings as labels
   parser::LabelIDMap hashtable_label_to_id;
   common::IDLabelMap hashtable_id_to_label;
@@ -51,16 +51,12 @@ int main (int argc, char* argv[]) {
 
   if(argc > 3) {
     std::string output;
-    std::cout << "'" << argv[3] << "'" << std::endl;
+    //std::cout << "'" << argv[3] << "'" << std::endl;
     if(argv[3] == std::string("-hybrid")){
       std::vector<int> edm;
-      Node* hybrid = common::create_hybrid_tree(tree1, tree2, edit_mapping, edm);
-      output = common::get_json_hybrid_tree(hybrid, 0, hashtable_id_to_label, edm);
-      
-      for(int i = 0; i < hybrid->get_subtree_size() + 1; i++){
-        std::cout << i << ": " << edm[i] << std::endl;
-      }
-
+      Node* hybrid = common::create_hybrid_graph(tree1, tree2, edit_mapping, edm, hashtable_id_to_label);
+      output = common::get_json_hybrid_graph(hybrid, hashtable_id_to_label);
+      //delete hybrid;
     } else if(strcmp(argv[3],"-sbs_fs")==0){
       std::cout << "sbs" << std::endl;
       int *edit_mapping_int_array[2];
@@ -81,8 +77,9 @@ int main (int argc, char* argv[]) {
           delete[] edit_mapping_int_array[i];
         }
     }
-    
+
     std::cout << output << std::endl;
+    std::cout << "output check" << std::endl;
     if(argc>=6 && (strcmp(argv[4],"-f") == 0)){
       std::fstream out;
       std::string filename = argv[5];
@@ -97,11 +94,11 @@ int main (int argc, char* argv[]) {
     }
 
   }
-
+/*
   delete tree1;
   delete tree2;
   delete tree1_postorder;
   delete tree2_postorder;
-
+*/
 	return 0;
 }

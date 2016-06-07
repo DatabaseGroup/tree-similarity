@@ -16,9 +16,12 @@ class Node {
 private:
   int id_;
   int label_id_;
+  int level = 0;
   // A vector of pointers to child nodes
   std::vector<Node*> children_;
   int children_number_;
+  std::vector<char> edges_;
+  char colour_;
 
 public:
   // Constructors
@@ -169,6 +172,51 @@ public:
     delete_child(pos);
   }
 
+  void add_edge (char colour) {
+    edges_.push_back(colour);
+  }
+
+  void add_edge_at(char colour, int position) {
+    std::vector<char>::iterator it = edges_.begin();
+    edges_.insert(it + position, colour);
+  }
+
+  void remove_edge (int position) {
+    edges_.erase(edges_.begin() + position);
+  }
+
+  void set_edge_colour (int position, char colour) {
+    edges_[position] = colour;
+  }
+
+  char get_edge_colour (int position) {
+    return edges_[position];
+  }
+
+  int get_edge_colours_count (char first, char second) {
+    int counter = 0;    
+    for(std::vector<char>::iterator it = edges_.begin(); it != edges_.end(); ++it) {
+      char tmp = *it;
+      if(tmp==first || tmp==second) { counter++; }
+    }
+    return counter;
+  }
+
+  void set_colour (char colour) {
+    colour_ = colour;
+  }
+
+  char get_colour () {
+    return colour_;
+  }
+
+  void set_level (int l) {
+    level = l;
+  }
+
+  int get_level () {
+    return level;
+  }
 };
 
 // Represents the cost functions to be used for the distance computation.

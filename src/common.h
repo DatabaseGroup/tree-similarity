@@ -2,6 +2,7 @@
 #define COMMON_H
 #include <sstream>
 #include <map>
+#include <set>
 
 namespace common {
 
@@ -93,6 +94,16 @@ void copy_tree(Node* original, Node* copy) {
   }
 }
 
+void copy_tree_with_colour(Node* original, Node* copy, char colour) {
+  copy->set_colour(colour);
+  for(int i = 0; i < original->get_children_number(); i++){
+    Node* temp = new Node(original->get_child(i)->get_label_id());
+    copy->add_child(temp);
+    copy->add_edge(colour);
+    copy_tree_with_colour(original->get_child(i), temp, colour);
+  }
+}
+
 // Print recursively the labels of all descendants of node, including node.
 // Each label is printed in a separate line.
 //
@@ -170,268 +181,299 @@ std::string get_json_side_by_side(Node* tree1, Node* tree2,
   return sbs;
 }
 
-// TODO replace hashtable with a custom node class that supp. strings as labels
-// Creates a json string for the given node
-// e.g.: the json string for the entire tree, recursively
-//
-// Params:  r1      the root of the (sub)tree
-//          level   the int level for this level
-//
-// Return: a string in json format
-std::string get_json_hybrid_tree (Node* root, int level, IDLabelMap hashtable,
-  std::vector<int> edm)
-{
+std::string gather_links_nodes_hybrid_graph(Node* root, std::set<Node*>& visited, int& id_counter, IDLabelMap ht) {
   std::stringstream str;
-  if (root) {
-    str << "{\"scope\":" << level;
-    str << ",\"label\":\"" << hashtable[root->get_label_id()] << "\"";
-
-    if (edm[root->get_id()] == 0) {
-      str << ",\"tree\":2";
-    } else {
-      str << ",\"tree\":1";
-    }
-
-    str << ",\"op\":";
-    if(edm[root->get_id()] > 0){
-      str << "\"r\"";
-      str << ",\"oldlabel\":\"" << hashtable[edm[root->get_id()]] << "\"";
-    } else {
-      if(edm[root->get_id()] == 0) {
-        str << "\"i\"";
-      } else if(edm[root->get_id()] == -1) {
-        str << "\"m\"";
-      } else if(edm[root->get_id()] == -2) {
-        str << "\"d\"";
-      } else {
-        str << "\"unknown\"";
+  if(visited.find(root) == visited.end()){
+    visited.insert(root);
+    root->set_id(id_counter);
+    id_counter++;
+    for(int i = 0; i < root->get_children_number(); i++){
+      Node* tmp_c = root->get_child(i);
+      if(tmp_c->get_level() < (root->get_level()+1)){
+        tmp_c->set_level(root->get_level()+1);
       }
+      str << gather_links_nodes_hybrid_graph(tmp_c, visited, id_counter, ht);
+      str << "{\"source\": " << root->get_id() << ", \"target\": " << tmp_c->get_id() << ", \"colour\": \"" << root->get_edge_colour(i) << "\"}";
+      if(root->get_level()!=0 || i+1!=root->get_children_number()){ str << ","; }
     }
-    
-    str << ",\"children\":";
-
-    if (root->get_children_number() > 0) {
-      str << "[";
-      for (int i = 0; i < root->get_children_number(); ++i) {
-        str << get_json_hybrid_tree(root->get_child(i), (level + 1), hashtable, edm);
-        if ((i + 1) < root->get_children_number()) {
-          str << ",";
-        }
-      }
-      str << "]";
-    } else {
-      str << " null ";
-    }
-    str << "}";
   }
-  // is this ok? or should it be passed differently?
+
   return str.str();
 }
+
+std::string get_json_hybrid_graph (Node* root, IDLabelMap ht)
+{
+  std::stringstream str;
+
+  int id_counter = 1;
+  std::set<Node* > visited;
+  root->set_level(0);
+  char separator = ' ';
+  str << "{\"links\": [" << gather_links_nodes_hybrid_graph(root, visited, id_counter, ht) << "]";
+  str << ", \"nodes\": [";
+  for (std::set<Node*>::iterator it = visited.begin(); it != visited.end(); ++it)
+  {
+    Node* n = *it;
+    str << separator << "{\"name\": \"" << ht[n->get_label_id()] << "\", \"id\":" << n->get_id() << ", \"scope\":\"" << n->get_level() << "\", \"colour\":\"" << n->get_colour() << "\"}";
+    separator = ',';  
+  }
+  str << "]}";
+  return str.str();
+}
+
+
 
 // Fills the array with the ids of the parents,
 // 
 // Params:  root    the parent for its children
 //          arr     the array which gets filled with (e.g.: postorder) ids (int)
-void get_parents (Node* root, int* array_to_fill) {
+void get_parents (Node* root, int* array_to_fill, char colour = char(0)) {
   for(int i = 0; i < root->get_children_number(); i++){
-    array_to_fill[root->get_child(i)->get_id()] = root->get_id();
-    get_parents(root->get_child(i), array_to_fill);
+    if(colour == char(0)){
+      array_to_fill[root->get_child(i)->get_id()] = root->get_id();
+      get_parents(root->get_child(i), array_to_fill, colour);
+    } else if(root->get_edge_colour(i) == colour || root->get_edge_colour(i) == 'm'){
+      array_to_fill[root->get_child(i)->get_id()] = root->get_id();
+      get_parents(root->get_child(i), array_to_fill, colour);
+    }
   }
 }
 
-Node* append_node_hybrid (Node* child, Node* parent, int pos) 
+// check if two trees are the same (speaking of labels & structure)
+bool check_if_same_trees(Node* t1, Node* t2){
+  bool result = false;
+
+  if(t1->get_label_id() == t2->get_label_id()){
+    if(t1->get_children_number() == t2->get_children_number()){
+      for(int i = 0; i < t1->get_children_number(); i++){
+        result = check_if_same_trees(t1->get_child(i), t2->get_child(i));
+        if(!result) { return false; }
+      }
+      result = true;
+    } else {
+      std::cout << "diff: children at: " << t1->get_id() << std::endl;
+    }
+  } else {
+    std::cout << "diff: label at: " << t1->get_id() << std::endl;
+  }
+  
+  return result;
+}
+
+bool check_if_same_trees(Node* t1, Node* t2, char colour){
+  bool result = false;
+
+  if(t1->get_label_id() == t2->get_label_id()){
+    if(t1->get_colour() == 'm' || t1->get_colour() == t2->get_colour()){
+      int t1_edges = t1->get_edge_colours_count(colour, 'm');
+      int t2_edges = t2->get_edge_colours_count(colour, 'm');
+      if(t1_edges == t2_edges){
+        int j = 0;
+        for(int i = 0; i < t1->get_children_number(); i++){
+          if(t1->get_edge_colour(i) == colour || t1->get_edge_colour(i) == 'm'){
+            if(t1->get_edge_colour(i) == 'm' || t1->get_edge_colour(i) == t2->get_edge_colour(j)){
+              result = check_if_same_trees(t1->get_child(i), t2->get_child(j), colour);
+            } else {
+              std::cout << "diff: edge colour at: " << t1->get_id() << "; edge nr.: " << i << std::endl;
+              return false;
+            }
+            j++;          
+            if(!result) { return false; }
+          }
+        }
+        result = true;
+      } else {
+        std::cout << "diff: children at: " << t1->get_id() << ": " << t1_edges << "(/" << t1->get_children_number() << ") <-> " << t2_edges << std::endl;
+        for(int i = 0; i < t1->get_children_number(); i++){
+          if(t1->get_edge_colour(i) == colour || t1->get_edge_colour(i) == 'm'){
+            std::cout << "src: " << t1->get_id() << "; target: " << t1->get_child(i)->get_id() << "; " << t1->get_edge_colour(i) << std::endl;
+          }
+        }
+        std::cout << "t1 / t2" << std::endl;
+        for(int i = 0; i < t2->get_children_number(); i++){
+          std::cout << "src: " << t2->get_id() << "; target: " << t2->get_child(i)->get_id() << "; " << t2->get_edge_colour(i) << std::endl;
+        }
+      }
+    } else {
+      std::cout << "diff: colour at: " << t1->get_id() << std::endl;
+      std::cout << " - t1: " << t1->get_colour() << "; t2: " << t2->get_colour() << std::endl;
+    }
+  } else {
+    std::cout << "diff: label at: " << t1->get_id() << std::endl;
+  }
+  
+  return result;
+}
+
+void print_tree_intended(Node* n, int level, IDLabelMap hashtable_id_to_label){
+  for(int i = 0; i < level; i++){
+    std::cout << ".";
+  }
+  std::cout << hashtable_id_to_label[n->get_label_id()] << " (id: "
+    << n->get_id() << ")" << std::endl;
+  for(int i = 0; i < n->get_children_number(); i++){
+    print_tree_intended(n->get_child(i), (level+1),hashtable_id_to_label);
+  }
+}
+
+void print_tree_intended(Node* n, int level, IDLabelMap hashtable_id_to_label, char colour){
+  if(n->get_colour() == 'm' || n->get_colour() == colour){
+    for(int i = 0; i < level; i++){
+      std::cout << ".";
+    }
+    std::cout << hashtable_id_to_label[n->get_label_id()] << " (id: "
+      << n->get_id() << ") (c: " << n->get_colour() << ")" << std::endl;
+    for(int i = 0; i < n->get_children_number(); i++){
+      if(n->get_edge_colour(i) == 'm' || n->get_edge_colour(i) == colour){
+        print_tree_intended(n->get_child(i), (level+1),hashtable_id_to_label, colour);
+      }
+    }
+  }
+}
+
+Node* append_node_hybrid (Node* child, Node* parent, int pos, char colour) 
 {
-  Node* node = new Node(child->get_id(),child->get_label_id());
+  // child->get_id()
+  Node* node = new Node(0,child->get_label_id());
+  node->set_colour(colour);
   if(pos!=-1 && pos <= parent->get_children_number()){
     parent->add_child_at(node, pos);
+    parent->add_edge_at(colour, pos);
   } else {
     parent->add_child(node);
+    parent->add_edge(colour);
   }  
   return node;
 }
 
-// worked with:
-// ./tree_similarity "{a{b{ba{bb}}}{c}{d}}" "{a{b}{c{ca}}{d}}" -hybrid
-// ./tree_similarity "{a{x{y{b}{c{z}}{d}}}}" "{a{b}{c}{d}}" -hybrid
-// ./tree_similarity "{a{x{y{b}{c{z}}{d}}}}" "{a{b}{c}}" -hybrid
-// ./tree_similarity "{a{b{c{d{e{f{g}}}}}}}" "{a}" -hybrid
-//
-// worked, also with the position !! (didnt work before)
-// ./tree_similarity "{a{b{ba{bb}{bc}}}{c{ca{cb}}}{d{da{db}{dc}}}}" "{a{ba}{c{cb}}{da{dd}}}" -hybrid
-// ./tree_similarity "{a{b{ba{baa}{bab}{bac}}{bb{bba}{bbb}{bbc}}{bc{bca}{bcb}{bcc}}}{c{ca}{cb{cba}{cbb}{cbc}}{cc}}{d{da}{db}{dc}}{e{ea}{eb}{ec}}}" "{a{b{ba{bab}{bac}}{bb{bba}{bbc}}{bc{bca}{bcb}}}{ca}{cb{cba}{cbc}}{cc}{d{da}{db}{dc}}{e{ea}{eb}{ec}}}" -hybrid
-//
-// root deleted + pos:
-// ./tree_similarity "{x{a{b}{c}{d}}}" "{a{b}{c}{d}}" -hybrid
-// ./tree_similarity "{x{a{a{b}{c}{d}}{b}{c}{asdf}{gggg}{d}{last}}" "{a{b}{c}{d}{d}}" -hybrid
-
-// Mateusz's tree1: {13{4{1}{3{2}}}{10{5}{9{8{6}{7}}}}{12{11}}} (note: postorder_id as label)
-// Mateusz's tree2: {13{1}{2}{8{7{3}{6{4}{5}}}}{12{10{9}}{11}}} (same)
-// mapping should be: 1,1 2,2 5,3 6,4 7,5 8,6 10,8 11,9 12,12 13,13 (just mapping, no ins/dels)
-// mapping is nearly correct, adjust: 10,7 to (10->8); 11,11 to (11->9);
-
-// {13{4{1}{3{2}}}{same{5}{9{8{6}{7}}}}{12{same}}}
-// {13{1}{2}{same{7{3}{6{4}{5}}}}{12{10{same}}{11}}}
-// ./tree_similarity "{13{4{1}{3{2}}}{same{5}{9{8{6}{7}}}}{12{same}}}" "{13{1}{2}{same{7{3}{6{4}{5}}}}{12{10{same}}{11}}}" -hybrid
-// output correct?:
-// {"scope":0,"label":"13","children":[{"scope":1,"label":"4","children":[{"scope":2,"label":"1","children": null },{"scope":2,"label":"3","children":[{"scope":3,"label":"2","children": null }]}]},{"scope":1,"label":"same","children":[{"scope":2,"label":"7","children":[{"scope":3,"label":"3","children": null }]},{"scope":2,"label":"9","children":[{"scope":3,"label":"6","children":[{"scope":4,"label":"4","children": null },{"scope":4,"label":"5","children": null }]}]}]},{"scope":1,"label":"12","children":[{"scope":2,"label":"10","children":[{"scope":3,"label":"same","children": null }]},{"scope":2,"label":"11","children": null }]}]}
-
-// TODO insert node in the right place / position
-// Creates a hybrid tree based on the given edit mapping and the two trees
-// (tree 2 will be taken and modified based on the edit mapping)
-// (direction of the edit mapping is important)
-//
-// Params:  tree1      the root of the first tree
-//          tree2      the root of the second tree
-//          edit_mapping     the edit mapping array (a->b)
-//
-Node* create_hybrid_tree (Node* tree1, Node* tree2,
-  std::vector<std::array<Node*, 2> > edit_mapping, std::vector<int>& operations)
-{
-  Node* hybrid_tree = new Node(tree2->get_id(), tree2->get_label_id());
-  copy_tree(tree2, hybrid_tree);
-  std::vector<Node*>* hybrid_tree_postorder = generate_postorder(hybrid_tree);
-  std::vector<Node*>* tree1_postorder = generate_postorder(tree1);
-
-  int* parents_tree1 = new int[tree1->get_subtree_size() + 1];
-  parents_tree1[tree1->get_id()]=0;
-  get_parents(tree1, parents_tree1);
-
-  int* parents_hybrid = new int[hybrid_tree->get_subtree_size() + 1];
-  get_parents(hybrid_tree, parents_hybrid);
-  parents_hybrid[hybrid_tree->get_id()] = 0;
-
-  IDMappedNode ht_id_to_node;
-  IDMappedNode ht_id_to_node_old;
-  std::array<Node*, 2> em;
-  while (!edit_mapping.empty())
-  {
-    em = edit_mapping.back();
-    edit_mapping.pop_back();
-    if(em[0]!=nullptr){
-      if(em[1]!=nullptr){
-        ht_id_to_node.emplace(em[0]->get_id(), 
-          hybrid_tree_postorder->at(em[1]->get_id()-1));
+void colour_hybrid_graph(Node*& hybrid, Node* t2, IDMappedNode& ht_t2_to_h, int* parents_h, int* parents_t2, IDLabelMap ht, std::vector<Node*>* postorder_h, std::vector<Node*>* postorder_t2) {
+  //std::cout << "--------->" << ht[t2->get_label_id()] << std::endl;
+  if(ht_t2_to_h[t2->get_id()]!=nullptr){
+    // mapped: colour black (m = black ...)
+    ht_t2_to_h[t2->get_id()]->set_colour('m');
+    if(parents_t2[t2->get_id()]!=0 && parents_h[ht_t2_to_h[t2->get_id()]->get_id()] != 0){
+      //std::cout << ht_t2_to_h[parents_t2[t2->get_id()]]->get_id() << " & " << postorder_h->at(parents_h[ht_t2_to_h[t2->get_id()]->get_id()]-1)->get_id() << std::endl;
+      if(ht_t2_to_h[parents_t2[t2->get_id()]]->get_id() == postorder_h->at(parents_h[ht_t2_to_h[t2->get_id()]->get_id()]-1)->get_id()){
+        int position = ht_t2_to_h[parents_t2[t2->get_id()]]->get_child_position(ht_t2_to_h[t2->get_id()]);
+        ht_t2_to_h[parents_t2[t2->get_id()]]->set_edge_colour(position, 'm');
+        //std::cout << ht[ht_t2_to_h[parents_t2[t2->get_id()]]->get_label_id()] << "->set_edge_colour(" << position << "," << "\"m\"" << ")" << std::endl;
       } else {
-        ht_id_to_node.emplace(em[0]->get_id(), em[1]);
+        //std::cout << ht[ht_t2_to_h[parents_t2[t2->get_id()]]->get_label_id()] << "->add_child(" << ht[ht_t2_to_h[t2->get_id()]->get_label_id()] << ")" << std::endl;
+        ht_t2_to_h[parents_t2[t2->get_id()]]->add_child(ht_t2_to_h[t2->get_id()]);
+        ht_t2_to_h[parents_t2[t2->get_id()]]->add_edge('b');
       }
-    }
-  }
-  ht_id_to_node_old = ht_id_to_node;
-  // important: must be descending // IDMappedNode is descending
-  for ( auto it = ht_id_to_node.begin();
-        it != ht_id_to_node.end(); ++it )
-  {
-    if(it->first == 0) { break; }
-    if(it->second==nullptr){
-      Node* node_in_t1 = tree1_postorder->at(it->first-1);
-      if(ht_id_to_node[parents_tree1[it->first]] != nullptr){
-        int pos = -1;
-        for(int i = 0; i<node_in_t1->get_children_number(); i++){
-          Node* tmp_child = ht_id_to_node[node_in_t1->get_child(i)->get_id()];
-          if(tmp_child!=nullptr){
-            pos = ht_id_to_node[parents_tree1[it->first]]
-              ->get_child_position(tmp_child);
-            if(pos!=-1){
-              break;
-            }
-          }
-        }
-        if(pos==-1){
-          pos = tree1_postorder->at(parents_tree1[it->first]-1)
-            ->get_child_position(node_in_t1);
-        }
-        Node* n = append_node_hybrid(node_in_t1, 
-          ht_id_to_node[parents_tree1[it->first]], pos);
-        ht_id_to_node[it->first] = n;
-        if(node_in_t1->get_children_number() > 0){
-          for(int i = 0; i<node_in_t1->get_children_number(); i++){
-            Node* child_mapped = ht_id_to_node[node_in_t1->get_child(i)->get_id()];
-            if(child_mapped != nullptr){
-              Node* parent_child_mapped = hybrid_tree_postorder
-                ->at(parents_hybrid[child_mapped->get_id()] - 1);
-              parent_child_mapped->remove_child(child_mapped);
-              n->add_child(child_mapped);
-            }
-          }
-        }
-
-      } else { // ht_id_to_node[parents_tree1[it->first]] != nullptr
-        std::cout << "parent is nullptr --> must be the root" << std::endl;
-        Node* tmp = hybrid_tree;
-        hybrid_tree = new Node(tmp->get_id()+1, node_in_t1->get_label_id());
-        hybrid_tree->add_child(tmp);
-        ht_id_to_node[it->first] = hybrid_tree;
-        hybrid_tree_postorder = generate_postorder(hybrid_tree);
-        parents_hybrid = new int[hybrid_tree->get_subtree_size() + 1];
-        get_parents(hybrid_tree, parents_hybrid);
-      }
-      
-    }
-  }
-
-  hybrid_tree_postorder = generate_postorder(hybrid_tree);
-  delete[] parents_hybrid; // resolves memory leak but may be removed to improve performance
-  parents_hybrid = new int[hybrid_tree->get_subtree_size() + 1];
-  get_parents(hybrid_tree, parents_hybrid);
-  parents_hybrid[hybrid_tree->get_id()] = 0;
-
-  std::cout << "preserve order" << std::endl;
-  // preserve order
-  for ( auto it = ht_id_to_node_old.begin();
-      it != ht_id_to_node_old.end(); ++it )
-  {
-    if(it->first != 0 && it->second == nullptr && parents_tree1[it->first] != 0){
-      Node* node_in_t1 = tree1_postorder->at(it->first-1);
-      int pos = tree1_postorder->at(parents_tree1[it->first]-1)
-        ->get_child_position(node_in_t1);
-      int currpos = hybrid_tree_postorder->at(parents_hybrid[ht_id_to_node[it->first]
-        ->get_id()]-1)->get_child_position(ht_id_to_node[it->first]);
-      int childrennumberhybrid = hybrid_tree_postorder->at(parents_hybrid[ht_id_to_node[it->first]
-        ->get_id()]-1)->get_children_number();
-      if(pos!=currpos && pos!=-1 && currpos!=-1 && pos <= childrennumberhybrid &&
-          currpos <= childrennumberhybrid) {
-        std::cout << "child# " << childrennumberhybrid << " swap " << it->first << " new: " << ht_id_to_node[it->first]->get_id() << " from " << currpos << " to " << pos << std::endl;
-        hybrid_tree_postorder->at(parents_hybrid[ht_id_to_node[it->first]->get_id()]-1)
-          ->swap_children(pos, currpos);
-          hybrid_tree_postorder = generate_postorder(hybrid_tree);
-          parents_hybrid = new int[hybrid_tree->get_subtree_size() + 1];
-          get_parents(hybrid_tree, parents_hybrid);
-          parents_hybrid[hybrid_tree->get_id()] = 0;
-      }
-      
-    }
-  }
-
-  operations.resize(hybrid_tree->get_subtree_size() + 1);
-  for(int i = 0; i < hybrid_tree->get_subtree_size() + 1; i++){
-    operations[i] = 0;
-    operations[i] = 0;
-  }
-
-  for ( auto it = ht_id_to_node_old.begin();
-      it != ht_id_to_node_old.end(); ++it )
-  {
-    if(it->second == nullptr){
-      operations[ht_id_to_node[it->first]->get_id()] = -2; // del
-    } else if(tree1_postorder->at(it->first - 1)->get_label_id() == it->second->get_label_id()){
-      operations[ht_id_to_node[it->first]->get_id()] = -1; // map
     } else {
-      operations[ht_id_to_node[it->first]->get_id()] = it->first; // ren
+      //std::cout << parents_t2[t2->get_id()] << " and " << parents_h[ht_t2_to_h[t2->get_id()]->get_id()] << "!!!!!!!!!!!!!!!" << std::endl;
     }
-    // 0 = ins --> standard
+  } else {
+    if(parents_t2[t2->get_id()] != 0){
+      int position = postorder_t2->at(parents_t2[t2->get_id()]-1)->get_child_position(t2);
+      Node* n = append_node_hybrid(t2, ht_t2_to_h[parents_t2[t2->get_id()]], position, 'b');
+      ht_t2_to_h[t2->get_id()] = n;
+      //std::cout << "insert: " << ht[t2->get_label_id()] << std::endl;
+      //ht_t2_to_h[parents_t2[t2->get_id()]]->add_edge('b');
+    } else {
+      Node* tmp = hybrid;
+      hybrid = new Node(0, t2->get_label_id());
+      hybrid->add_child(tmp);
+      hybrid->add_edge('b');
+      hybrid->set_colour('b');
+      ht_t2_to_h[t2->get_id()] = hybrid;
+      //std::cout << "root inserted: " << ht[hybrid->get_label_id()] << ", " << hybrid->get_children_number() << ": " << ht[hybrid->get_child(0)->get_label_id()] << ", ec: " << hybrid->get_edge_colour(0) << std::endl;
+    }
   }
 
-  for(int i = 0; i < hybrid_tree->get_subtree_size() + 1; i++){
-    std::cout << i << ": " << operations[i] << std::endl;
+  for(int i = 0; i < t2->get_children_number(); i++){
+    colour_hybrid_graph(hybrid, t2->get_child(i), ht_t2_to_h, parents_h, parents_t2, ht, postorder_h, postorder_t2);
   }
-  std::cout << std::endl;
+}
 
-  delete hybrid_tree_postorder;
-  delete tree1_postorder;
-  delete[] parents_tree1;
-  delete[] parents_hybrid; 
-  
-  return hybrid_tree;
+Node* create_hybrid_graph (Node* tree1, Node* tree2,
+  std::vector<std::array<Node*, 2> > edit_mapping, std::vector<int>& operations,
+  IDLabelMap hashtable_id_to_label)
+{
+  IDMappedNode ht_t2_to_h;
+  std::vector<Node*>* postorder_t1 = generate_postorder(tree1);
+  std::vector<Node*>* postorder_t2 = generate_postorder(tree2);
+
+  Node* hybrid = new Node(tree1->get_id(), tree1->get_label_id());
+  copy_tree_with_colour(tree1, hybrid, 'r');
+  std::vector<Node*>* postorder_hybrid = generate_postorder(hybrid);
+
+  std::vector<std::array<Node*,2> >::iterator it;
+  std::array<Node*, 2> em;
+  int inserted = 0;
+  for(it=edit_mapping.begin() ; it < edit_mapping.end(); it++) {
+    em = *it;
+    if(em[1] != nullptr){
+      
+      if(em[0] == nullptr){
+        inserted++;
+        ht_t2_to_h.emplace(em[1]->get_id(), nullptr);
+        //std::cout << hashtable_id_to_label[em[1]->get_label_id()] << " -> " << em[0] << std::endl;
+      } else {
+        ht_t2_to_h.emplace(em[1]->get_id(), postorder_hybrid->at(em[0]->get_id()-1));
+        //std::cout << hashtable_id_to_label[em[1]->get_label_id()] << " -> " << hashtable_id_to_label[em[0]->get_label_id()] << std::endl;
+      }
+    }
+  }
+
+  int* parents_h = new int[hybrid->get_subtree_size() + 1];
+  parents_h[0] = 0;
+  get_parents(hybrid, parents_h, 'r');
+  parents_h[hybrid->get_id()] = 0;
+
+  int* parents_t2 = new int[tree2->get_subtree_size() + 1];
+  parents_t2[0] = 0;
+  get_parents(tree2, parents_t2);
+  parents_t2[tree2->get_id()] = 0;
+
+  hybrid->set_id(tree1->get_subtree_size() + inserted);
+  colour_hybrid_graph(hybrid, tree2, ht_t2_to_h, parents_h, parents_t2, hashtable_id_to_label, postorder_hybrid, postorder_t2); 
+
+  Node* tree1_r = new Node(tree1->get_id(), tree1->get_label_id());
+  copy_tree_with_colour(tree1, tree1_r, 'r');
+
+  Node* tree2_b = new Node(tree2->get_id(), tree2->get_label_id());
+  copy_tree_with_colour(tree2, tree2_b, 'b');
+
+  bool check_t1 = check_if_same_trees(hybrid, tree1_r, 'r');
+  if(!check_t1){
+    print_tree_intended(hybrid, 0, hashtable_id_to_label, 'r');
+    std::cout << "hybrid end\n" << std::endl;
+    print_tree_intended(tree1_r, 0, hashtable_id_to_label, 'r');
+    std::cout << "tree1_r end\n" << std::endl;
+  }
+  // rename here, or else we'd have to re-rename (=undo before t1 check)
+  // and rename again for final hybrid graph and t2 check
+  for(it=edit_mapping.begin() ; it < edit_mapping.end(); it++) {
+    em = *it;
+    if(em[0] != nullptr && em[1] != nullptr){
+      postorder_hybrid->at(em[0]->get_id()-1)->set_label_id(em[1]->get_label_id());
+    }
+  }
+  bool check_t2 = check_if_same_trees(hybrid, tree2_b, 'b');
+
+  if(!check_t2){
+    print_tree_intended(hybrid, 0, hashtable_id_to_label, 'b');
+    std::cout << "hybrid end\n" << std::endl;
+    print_tree_intended(tree2_b, 0, hashtable_id_to_label, 'b');
+    std::cout << "tree2_b end\n" << std::endl;
+  }
+
+  if(check_t1 && check_t2){
+    std::cout << "ok!" << std::endl;
+  } else {
+    std::cout << "NOT ok !!" << std::endl;
+  }
+
+  delete postorder_hybrid;
+  delete postorder_t1;
+  delete postorder_t2;
+  delete[] parents_h;
+  delete[] parents_t2;
+
+  return hybrid;
 }
 
 };
