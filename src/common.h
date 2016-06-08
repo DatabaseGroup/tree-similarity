@@ -358,7 +358,8 @@ void colour_hybrid_graph(Node*& hybrid, Node* t2, IDMappedNode& ht_t2_to_h, int*
         ht_t2_to_h[parents_t2[t2->get_id()]]->set_edge_colour(position, 'm');
         //std::cout << ht[ht_t2_to_h[parents_t2[t2->get_id()]]->get_label_id()] << "->set_edge_colour(" << position << "," << "\"m\"" << ")" << std::endl;
       } else {
-        //std::cout << ht[ht_t2_to_h[parents_t2[t2->get_id()]]->get_label_id()] << "->add_child(" << ht[ht_t2_to_h[t2->get_id()]->get_label_id()] << ")" << std::endl;
+        std::cout << ht[ht_t2_to_h[parents_t2[t2->get_id()]]->get_label_id()] << "->add_child(" << ht[ht_t2_to_h[t2->get_id()]->get_label_id()] << ")" << std::endl;
+        //ht_t2_to_h[parents_t2[t2->get_id()]]
         ht_t2_to_h[parents_t2[t2->get_id()]]->add_child(ht_t2_to_h[t2->get_id()]);
         ht_t2_to_h[parents_t2[t2->get_id()]]->add_edge('b');
       }
@@ -367,10 +368,20 @@ void colour_hybrid_graph(Node*& hybrid, Node* t2, IDMappedNode& ht_t2_to_h, int*
     }
   } else {
     if(parents_t2[t2->get_id()] != 0){
-      int position = postorder_t2->at(parents_t2[t2->get_id()]-1)->get_child_position(t2);
-      Node* n = append_node_hybrid(t2, ht_t2_to_h[parents_t2[t2->get_id()]], position, 'b');
+      Node* par_h = ht_t2_to_h[parents_t2[t2->get_id()]];
+      Node* par_t2 = postorder_t2->at(parents_t2[t2->get_id()]-1);
+      int position = par_t2->get_child_position(t2);
+      if(position != 0) {
+        Node* left_sib = ht_t2_to_h[par_t2->get_child(position-1)->get_id()];
+        int position_l_sib = par_h->get_child_position(left_sib);
+        if(position_l_sib != -1 && position_l_sib >= position){
+          position = position_l_sib + 1;
+        }
+      }
+      Node* n = append_node_hybrid(t2, par_h, position, 'b');
       ht_t2_to_h[t2->get_id()] = n;
-      //std::cout << "insert: " << ht[t2->get_label_id()] << std::endl;
+      //std::cout << "insert: " << ht[t2->get_label_id()] << " at: " << position <<  std::endl;
+
       //ht_t2_to_h[parents_t2[t2->get_id()]]->add_edge('b');
     } else {
       Node* tmp = hybrid;
