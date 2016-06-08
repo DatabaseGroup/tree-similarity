@@ -42,9 +42,9 @@ int main (int argc, char* argv[]) {
   // compute distance using basic nodes and basic cost model
   // no need to generate basic cost model since it is set as default template
   // parameter
-  std::cout << "Distance (basic tree, basic cost model, Zhang Shasha): " << "\t"
-    << zs::compute_zhang_shasha<Node, Costs<Node>>(tree1, tree2)
-    << std::endl;
+  //std::cout << "Distance (basic tree, basic cost model, Zhang Shasha): " << "\t"
+    /*<<*/ zs::compute_zhang_shasha<Node, Costs<Node>>(tree1, tree2);
+    //<< std::endl;
 
   std::vector<std::array<Node*, 2> > edit_mapping =
     zs::compute_edit_mapping<Node, Costs<Node>>(tree1, tree2);
@@ -54,7 +54,7 @@ int main (int argc, char* argv[]) {
     //std::cout << "'" << argv[3] << "'" << std::endl;
     if(argv[3] == std::string("-hybrid")){
       std::vector<int> edm;
-      Node* hybrid = common::create_hybrid_graph(tree1, tree2, edit_mapping, edm, hashtable_id_to_label);
+      Node* hybrid = common::create_hybrid_graph(tree1, tree2, edit_mapping, hashtable_id_to_label);
       output = common::get_json_hybrid_graph(hybrid, hashtable_id_to_label);
       //delete hybrid;
     } else if(strcmp(argv[3],"-sbs_fs")==0){
@@ -78,8 +78,8 @@ int main (int argc, char* argv[]) {
         }
     }
 
-    std::cout << output << std::endl;
-    std::cout << "output check" << std::endl;
+    //std::cout << output << std::endl;
+    //std::cout << "output check" << std::endl;
     if(argc>=6 && (strcmp(argv[4],"-f") == 0)){
       std::fstream out;
       std::string filename = argv[5];

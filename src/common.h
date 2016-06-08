@@ -306,18 +306,20 @@ bool check_if_same_trees(Node* t1, Node* t2, char colour){
   return result;
 }
 
-void print_tree_intended(Node* n, int level, IDLabelMap hashtable_id_to_label){
+// prints the given tree indented using dots
+void print_tree_indented(Node* n, int level, IDLabelMap hashtable_id_to_label){
   for(int i = 0; i < level; i++){
     std::cout << ".";
   }
   std::cout << hashtable_id_to_label[n->get_label_id()] << " (id: "
     << n->get_id() << ")" << std::endl;
   for(int i = 0; i < n->get_children_number(); i++){
-    print_tree_intended(n->get_child(i), (level+1),hashtable_id_to_label);
+    print_tree_indented(n->get_child(i), (level+1),hashtable_id_to_label);
   }
 }
 
-void print_tree_intended(Node* n, int level, IDLabelMap hashtable_id_to_label, char colour){
+// prints the given tree indented using dots and respects the given colour
+void print_tree_indented(Node* n, int level, IDLabelMap hashtable_id_to_label, char colour){
   if(n->get_colour() == 'm' || n->get_colour() == colour){
     for(int i = 0; i < level; i++){
       std::cout << ".";
@@ -326,12 +328,13 @@ void print_tree_intended(Node* n, int level, IDLabelMap hashtable_id_to_label, c
       << n->get_id() << ") (c: " << n->get_colour() << ")" << std::endl;
     for(int i = 0; i < n->get_children_number(); i++){
       if(n->get_edge_colour(i) == 'm' || n->get_edge_colour(i) == colour){
-        print_tree_intended(n->get_child(i), (level+1),hashtable_id_to_label, colour);
+        print_tree_indented(n->get_child(i), (level+1),hashtable_id_to_label, colour);
       }
     }
   }
 }
 
+// append a node to the hybrid graph at a given pos and a colour
 Node* append_node_hybrid (Node* child, Node* parent, int pos, char colour) 
 {
   // child->get_id()
@@ -347,28 +350,64 @@ Node* append_node_hybrid (Node* child, Node* parent, int pos, char colour)
   return node;
 }
 
-void colour_hybrid_graph(Node*& hybrid, Node* t2, IDMappedNode& ht_t2_to_h, int* parents_h, int* parents_t2, IDLabelMap ht, std::vector<Node*>* postorder_h, std::vector<Node*>* postorder_t2) {
-  //std::cout << "--------->" << ht[t2->get_label_id()] << std::endl;
+// creates a hybrid graph, based on two trees and their given edit mapping
+// colors each node and edge according to the operation:
+// 'm' = mapped (=black)
+// 'r' = red (tree1)
+// 'b' = blue (tree2)
+void colour_hybrid_graph(Node*& hybrid, Node* t2, IDMappedNode& ht_t2_to_h, 
+  int* parents_h, int* parents_t2, std::vector<Node*>* postorder_h,
+  std::vector<Node*>* postorder_t2)
+{
+
   if(ht_t2_to_h[t2->get_id()]!=nullptr){
-    // mapped: colour black (m = black ...)
+    // Node is mapped, therefore mark it as black / mapped / 'm'
+
     ht_t2_to_h[t2->get_id()]->set_colour('m');
-    if(parents_t2[t2->get_id()]!=0 && parents_h[ht_t2_to_h[t2->get_id()]->get_id()] != 0){
-      //std::cout << ht_t2_to_h[parents_t2[t2->get_id()]]->get_id() << " & " << postorder_h->at(parents_h[ht_t2_to_h[t2->get_id()]->get_id()]-1)->get_id() << std::endl;
-      if(ht_t2_to_h[parents_t2[t2->get_id()]]->get_id() == postorder_h->at(parents_h[ht_t2_to_h[t2->get_id()]->get_id()]-1)->get_id()){
-        int position = ht_t2_to_h[parents_t2[t2->get_id()]]->get_child_position(ht_t2_to_h[t2->get_id()]);
+    if(parents_t2[t2->get_id()]!=0 && 
+      parents_h[ht_t2_to_h[t2->get_id()]->get_id()] != 0)
+    {
+      if(ht_t2_to_h[parents_t2[t2->get_id()]]->get_id() == 
+        postorder_h->at(parents_h[ht_t2_to_h[t2->get_id()]->get_id()]-1)->get_id())
+      {
+        // Node is mapped to the same parent --> colour the edge black (='m')
+
+        int position = ht_t2_to_h[parents_t2[t2->get_id()]]
+          ->get_child_position(ht_t2_to_h[t2->get_id()]);
         ht_t2_to_h[parents_t2[t2->get_id()]]->set_edge_colour(position, 'm');
-        //std::cout << ht[ht_t2_to_h[parents_t2[t2->get_id()]]->get_label_id()] << "->set_edge_colour(" << position << "," << "\"m\"" << ")" << std::endl;
+
       } else {
-        std::cout << ht[ht_t2_to_h[parents_t2[t2->get_id()]]->get_label_id()] << "->add_child(" << ht[ht_t2_to_h[t2->get_id()]->get_label_id()] << ")" << std::endl;
-        //ht_t2_to_h[parents_t2[t2->get_id()]]
-        ht_t2_to_h[parents_t2[t2->get_id()]]->add_child(ht_t2_to_h[t2->get_id()]);
-        ht_t2_to_h[parents_t2[t2->get_id()]]->add_edge('b');
+        // Node is mapped to a different parent --> add blue edge to b parent
+        // the edge to the red parent stays red
+
+        // get the position of its (if any) left sibling,
+        // so we get the positioning right
+        Node* par_h = ht_t2_to_h[parents_t2[t2->get_id()]];
+        Node* par_t2 = postorder_t2->at(parents_t2[t2->get_id()]-1);
+        int position = par_t2->get_child_position(t2);
+        if(position != 0) {
+          Node* left_sib = ht_t2_to_h[par_t2->get_child(position-1)->get_id()];
+          int position_l_sib = par_h->get_child_position(left_sib);
+          if(position_l_sib != -1 && position_l_sib >= position){
+            position = position_l_sib + 1;
+          }
+        }
+        ht_t2_to_h[parents_t2[t2->get_id()]]
+          ->add_child_at(ht_t2_to_h[t2->get_id()], position);
+        ht_t2_to_h[parents_t2[t2->get_id()]]->add_edge_at('b', position);
+      
       }
-    } else {
-      //std::cout << parents_t2[t2->get_id()] << " and " << parents_h[ht_t2_to_h[t2->get_id()]->get_id()] << "!!!!!!!!!!!!!!!" << std::endl;
+
     }
+
   } else {
+    // Node is not mapped
+    
     if(parents_t2[t2->get_id()] != 0){
+      // insert the node --> blue; edge to parent: blue
+
+      // get the position of its (if any) left sibling,
+      // so we get the positioning right
       Node* par_h = ht_t2_to_h[parents_t2[t2->get_id()]];
       Node* par_t2 = postorder_t2->at(parents_t2[t2->get_id()]-1);
       int position = par_t2->get_child_position(t2);
@@ -381,27 +420,30 @@ void colour_hybrid_graph(Node*& hybrid, Node* t2, IDMappedNode& ht_t2_to_h, int*
       }
       Node* n = append_node_hybrid(t2, par_h, position, 'b');
       ht_t2_to_h[t2->get_id()] = n;
-      //std::cout << "insert: " << ht[t2->get_label_id()] << " at: " << position <<  std::endl;
 
-      //ht_t2_to_h[parents_t2[t2->get_id()]]->add_edge('b');
     } else {
+      // root gets inserted
       Node* tmp = hybrid;
       hybrid = new Node(0, t2->get_label_id());
       hybrid->add_child(tmp);
       hybrid->add_edge('b');
       hybrid->set_colour('b');
       ht_t2_to_h[t2->get_id()] = hybrid;
-      //std::cout << "root inserted: " << ht[hybrid->get_label_id()] << ", " << hybrid->get_children_number() << ": " << ht[hybrid->get_child(0)->get_label_id()] << ", ec: " << hybrid->get_edge_colour(0) << std::endl;
+
     }
+
   }
 
   for(int i = 0; i < t2->get_children_number(); i++){
-    colour_hybrid_graph(hybrid, t2->get_child(i), ht_t2_to_h, parents_h, parents_t2, ht, postorder_h, postorder_t2);
+    colour_hybrid_graph(hybrid, t2->get_child(i), ht_t2_to_h, parents_h, 
+      parents_t2, postorder_h, postorder_t2);
   }
 }
 
+
+// creates a hybrid graph, based on two trees and their given edit mapping
 Node* create_hybrid_graph (Node* tree1, Node* tree2,
-  std::vector<std::array<Node*, 2> > edit_mapping, std::vector<int>& operations,
+  std::vector<std::array<Node*, 2> > edit_mapping,
   IDLabelMap hashtable_id_to_label)
 {
   IDMappedNode ht_t2_to_h;
@@ -411,6 +453,7 @@ Node* create_hybrid_graph (Node* tree1, Node* tree2,
   Node* hybrid = new Node(tree1->get_id(), tree1->get_label_id());
   copy_tree_with_colour(tree1, hybrid, 'r');
   std::vector<Node*>* postorder_hybrid = generate_postorder(hybrid);
+  Node* hybrid_check_t1 = hybrid;
 
   std::vector<std::array<Node*,2> >::iterator it;
   std::array<Node*, 2> em;
@@ -422,10 +465,9 @@ Node* create_hybrid_graph (Node* tree1, Node* tree2,
       if(em[0] == nullptr){
         inserted++;
         ht_t2_to_h.emplace(em[1]->get_id(), nullptr);
-        //std::cout << hashtable_id_to_label[em[1]->get_label_id()] << " -> " << em[0] << std::endl;
       } else {
-        ht_t2_to_h.emplace(em[1]->get_id(), postorder_hybrid->at(em[0]->get_id()-1));
-        //std::cout << hashtable_id_to_label[em[1]->get_label_id()] << " -> " << hashtable_id_to_label[em[0]->get_label_id()] << std::endl;
+        ht_t2_to_h.emplace(em[1]->get_id(), 
+          postorder_hybrid->at(em[0]->get_id()-1));
       }
     }
   }
@@ -440,8 +482,10 @@ Node* create_hybrid_graph (Node* tree1, Node* tree2,
   get_parents(tree2, parents_t2);
   parents_t2[tree2->get_id()] = 0;
 
+  // create the hybrid graph and colour the nodes and edges
   hybrid->set_id(tree1->get_subtree_size() + inserted);
-  colour_hybrid_graph(hybrid, tree2, ht_t2_to_h, parents_h, parents_t2, hashtable_id_to_label, postorder_hybrid, postorder_t2); 
+  colour_hybrid_graph(hybrid, tree2, ht_t2_to_h, parents_h, parents_t2,
+    postorder_hybrid, postorder_t2);
 
   Node* tree1_r = new Node(tree1->get_id(), tree1->get_label_id());
   copy_tree_with_colour(tree1, tree1_r, 'r');
@@ -449,27 +493,34 @@ Node* create_hybrid_graph (Node* tree1, Node* tree2,
   Node* tree2_b = new Node(tree2->get_id(), tree2->get_label_id());
   copy_tree_with_colour(tree2, tree2_b, 'b');
 
-  bool check_t1 = check_if_same_trees(hybrid, tree1_r, 'r');
+  // check with the mapped node --> maybe the root of T2 got inserted
+  bool check_t1 = check_if_same_trees(hybrid_check_t1, tree1_r, 'r');
   if(!check_t1){
-    print_tree_intended(hybrid, 0, hashtable_id_to_label, 'r');
+    print_tree_indented(hybrid, 0, hashtable_id_to_label, 'r');
     std::cout << "hybrid end\n" << std::endl;
-    print_tree_intended(tree1_r, 0, hashtable_id_to_label, 'r');
+    print_tree_indented(tree1_r, 0, hashtable_id_to_label, 'r');
     std::cout << "tree1_r end\n" << std::endl;
   }
+
   // rename here, or else we'd have to re-rename (=undo before t1 check)
   // and rename again for final hybrid graph and t2 check
   for(it=edit_mapping.begin() ; it < edit_mapping.end(); it++) {
     em = *it;
     if(em[0] != nullptr && em[1] != nullptr){
-      postorder_hybrid->at(em[0]->get_id()-1)->set_label_id(em[1]->get_label_id());
+      postorder_hybrid->at(em[0]->get_id()-1)
+        ->set_label_id(em[1]->get_label_id());
     }
   }
-  bool check_t2 = check_if_same_trees(hybrid, tree2_b, 'b');
+  
+  // check with the mapped node --> maybe the root of T1 got deleted
+  bool check_t2 = check_if_same_trees(ht_t2_to_h[tree2->get_id()], tree2_b,
+    'b');
 
   if(!check_t2){
-    print_tree_intended(hybrid, 0, hashtable_id_to_label, 'b');
+    print_tree_indented(ht_t2_to_h[tree2->get_id()], 0, hashtable_id_to_label,
+      'b');
     std::cout << "hybrid end\n" << std::endl;
-    print_tree_intended(tree2_b, 0, hashtable_id_to_label, 'b');
+    print_tree_indented(tree2_b, 0, hashtable_id_to_label, 'b');
     std::cout << "tree2_b end\n" << std::endl;
   }
 
