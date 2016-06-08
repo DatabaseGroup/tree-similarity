@@ -3,6 +3,7 @@
 #include <sstream>
 #include <map>
 #include <set>
+#include <array>
 
 namespace common {
 
