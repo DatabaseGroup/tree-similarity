@@ -78,7 +78,7 @@ int main (int argc, char* argv[]) {
         }
     }
 
-    //std::cout << output << std::endl;
+    std::cout << output << std::endl;
     //std::cout << "output check" << std::endl;
     if(argc>=6 && (strcmp(argv[4],"-f") == 0)){
       std::fstream out;

@@ -151,7 +151,7 @@ std::string get_json_tree (Node* root, int level, IDLabelMap hashtable,
     if (root->get_children_number() > 0) {
       str << "[";
       for (int i = 0; i < root->get_children_number(); ++i) {
-        str << get_json_tree(root->get_child(i), (level + 1), hashtable, map, tree);
+        str << get_json_tree(root->get_child(i), (level+1), hashtable, map, tree);
         if ((i + 1) < root->get_children_number()) {
           str << ",";
         }
@@ -182,7 +182,9 @@ std::string get_json_side_by_side(Node* tree1, Node* tree2,
   return sbs;
 }
 
-std::string gather_links_nodes_hybrid_graph(Node* root, std::set<Node*>& visited, int& id_counter, IDLabelMap ht) {
+std::string gather_links_nodes_hybrid_graph(Node* root, 
+  std::set<Node*>& visited, int& id_counter, IDLabelMap ht) 
+{
   std::stringstream str;
   if(visited.find(root) == visited.end()){
     visited.insert(root);
@@ -190,15 +192,14 @@ std::string gather_links_nodes_hybrid_graph(Node* root, std::set<Node*>& visited
     id_counter++;
     for(int i = 0; i < root->get_children_number(); i++){
       Node* tmp_c = root->get_child(i);
-      if(tmp_c->get_level() < (root->get_level()+1)){
-        tmp_c->set_level(root->get_level()+1);
-      }
       str << gather_links_nodes_hybrid_graph(tmp_c, visited, id_counter, ht);
-      str << "{\"source\": " << root->get_id() << ", \"target\": " << tmp_c->get_id() << ", \"colour\": \"" << root->get_edge_colour(i) << "\"}";
-      if(root->get_level()!=0 || i+1!=root->get_children_number()){ str << ","; }
+      str << "{\"source\": " << root->get_id() << ",\"target\": " << tmp_c->get_id()
+      << ",\"colour\":\"" << root->get_edge_colour(i) << "\"}";
+      if(root->get_id()!=1 || (i+1)!=root->get_children_number()) {
+        str << ",";
+      }
     }
   }
-
   return str.str();
 }
 
@@ -210,15 +211,31 @@ std::string get_json_hybrid_graph (Node* root, IDLabelMap ht)
   std::set<Node* > visited;
   root->set_level(0);
   char separator = ' ';
-  str << "{\"links\": [" << gather_links_nodes_hybrid_graph(root, visited, id_counter, ht) << "]";
+  str << "{\"links\": [" << gather_links_nodes_hybrid_graph(root, visited,
+    id_counter, ht) << "]";
   str << ", \"nodes\": [";
-  for (std::set<Node*>::iterator it = visited.begin(); it != visited.end(); ++it)
+  for(std::set<Node*>::iterator it = visited.begin(); it != visited.end(); ++it)
   {
     Node* n = *it;
-    str << separator << "{\"name\": \"" << ht[n->get_label_id()] << "\", \"id\":" << n->get_id() << ", \"scope\":\"" << n->get_level() << "\", \"colour\":\"" << n->get_colour() << "\"}";
+    str << separator << "{\"name\": \"" << ht[n->get_label_id()] << 
+      "\", \"id\": " << n->get_id() << ", \"colour\": \"" << n->get_colour() << "\",\"scope\":1, \"children\":";
+    if(n->get_children_number() != 0){
+      str << "\"";
+      for(int i = 0; i < n->get_children_number(); i++){
+        str << n->get_child(i)->get_id();
+        if(i+1!=n->get_children_number()){
+           str << ".";
+        }
+      }
+      str << "\"";
+    } else {
+      str << "null";
+    }
+    str << "}";
     separator = ',';  
   }
   str << "]}";
+  std::cout << "end" << std::endl;
   return str.str();
 }
 
@@ -284,20 +301,27 @@ bool check_if_same_trees(Node* t1, Node* t2, char colour){
         }
         result = true;
       } else {
-        std::cout << "diff: children at: " << t1->get_id() << ": " << t1_edges << "(/" << t1->get_children_number() << ") <-> " << t2_edges << std::endl;
+        std::cout << "diff: children at: " << t1->get_id() << ": " 
+          << t1_edges << "(/" << t1->get_children_number() << ") <-> " 
+          << t2_edges << std::endl;
         for(int i = 0; i < t1->get_children_number(); i++){
           if(t1->get_edge_colour(i) == colour || t1->get_edge_colour(i) == 'm'){
-            std::cout << "src: " << t1->get_id() << "; target: " << t1->get_child(i)->get_id() << "; " << t1->get_edge_colour(i) << std::endl;
+            std::cout << "src: " << t1->get_id() << "; target: "
+              << t1->get_child(i)->get_id() << "; " <<
+              t1->get_edge_colour(i) << std::endl;
           }
         }
         std::cout << "t1 / t2" << std::endl;
         for(int i = 0; i < t2->get_children_number(); i++){
-          std::cout << "src: " << t2->get_id() << "; target: " << t2->get_child(i)->get_id() << "; " << t2->get_edge_colour(i) << std::endl;
+          std::cout << "src: " << t2->get_id() << "; target: " <<
+            t2->get_child(i)->get_id() << "; " << t2->get_edge_colour(i)
+            << std::endl;
         }
       }
     } else {
       std::cout << "diff: colour at: " << t1->get_id() << std::endl;
-      std::cout << " - t1: " << t1->get_colour() << "; t2: " << t2->get_colour() << std::endl;
+      std::cout << " - t1: " << t1->get_colour() << "; t2: "
+        << t2->get_colour() << std::endl;
     }
   } else {
     std::cout << "diff: label at: " << t1->get_id() << std::endl;
@@ -319,7 +343,9 @@ void print_tree_indented(Node* n, int level, IDLabelMap hashtable_id_to_label){
 }
 
 // prints the given tree indented using dots and respects the given colour
-void print_tree_indented(Node* n, int level, IDLabelMap hashtable_id_to_label, char colour){
+void print_tree_indented(Node* n, int level,
+  IDLabelMap hashtable_id_to_label, char colour)
+{
   if(n->get_colour() == 'm' || n->get_colour() == colour){
     for(int i = 0; i < level; i++){
       std::cout << ".";
