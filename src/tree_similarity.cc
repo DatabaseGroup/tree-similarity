@@ -55,7 +55,7 @@ int main (int argc, char* argv[]) {
     if(argv[3] == std::string("-hybrid")){
       std::vector<int> edm;
       Node* hybrid = common::create_hybrid_graph(tree1, tree2, edit_mapping, hashtable_id_to_label);
-      output = common::get_json_hybrid_graph(hybrid, hashtable_id_to_label);
+      output = common::get_json_hybrid_graph_tree(hybrid, hashtable_id_to_label);
       //delete hybrid;
     } else if(strcmp(argv[3],"-sbs_fs")==0){
       std::cout << "sbs" << std::endl;
