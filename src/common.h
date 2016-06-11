@@ -250,35 +250,37 @@ std::string get_json_hybrid_graph (Node* root, IDLabelMap ht)
   return str.str();
 }
 
-std::string get_json_hybrid_tree(Node* root, IDLabelMap ht, std::set<Node*>& is_child, int& id_counter, int pos, std::vector<std::string>& edges){
+std::string get_json_hybrid_tree(Node* root, IDLabelMap ht, std::set<Node*>& is_child, int pos, std::vector<std::string>& edges, char edgecolour = ' '){
   std::stringstream str;
-  root->set_id(id_counter);
-  id_counter++;
-  std::cout << "n: " << root->get_children_number() << std::endl;
-  str << "{\"label\":\""<< ht[root->get_label_id()] << "\"," 
+  str << "{\"label\":\""<< ht[root->get_label_id()] << "\","
       << "\"id\":" << root->get_id() << ",\"pos\":" << pos << ",\"colour\":\"" << root->get_colour() << "\"";
+  if(edgecolour!=' '){
+    str << ",\"ec\":\""<< edgecolour << "\""; // ec = edge colour
+  }
   if(root->get_children_number()>0){
     bool empty = true;
     std::stringstream str_tmp;
     for(int i = 0; i<root->get_children_number(); i++){
       Node* tmp_c = root->get_child(i);
-      std::cout << "cs: " << root->get_child(i)->get_level() << std::endl;
-      if(tmp_c->get_level() == (root->get_level()+1)){
+      if(tmp_c->get_level() == (root->get_level()+1)){ // maybe consider an array here instead of a set
         if(is_child.find(tmp_c) == is_child.end()){
           is_child.insert(tmp_c);
           if(i != 0 && !empty || !empty && (i+1)!= root->get_children_number()){
             str_tmp << ",";
           }
-          str_tmp << get_json_hybrid_tree(tmp_c, ht, is_child, id_counter, i, edges);
+          str_tmp << get_json_hybrid_tree(tmp_c, ht, is_child, i, edges, root->get_edge_colour(i));
           empty = false;
         } else {
           std::stringstream k; k << "{\"sourceid\":" << root->get_id() << ", \"targetid\":" << tmp_c->get_id() << ",\"colour\":\""<< root->get_edge_colour(i)<<"\"}";
+          std::cout << "{\"sourceid\":" << ht[root->get_label_id()] << ", \"targetid\":" << ht[tmp_c->get_label_id()] << ",\"colour\":\""<< root->get_edge_colour(i)<<"\"}";
           edges.push_back(k.str());
         }
       } else {
         std::stringstream k; k << "{\"sourceid\":" << root->get_id() << ", \"targetid\":" << tmp_c->get_id() << ",\"colour\":\""<< root->get_edge_colour(i)<<"\"}";
+        std::cout << "{\"sourceid\":" << ht[root->get_label_id()] << ", \"targetid\":" << ht[tmp_c->get_label_id()] << ",\"colour\":\""<< root->get_edge_colour(i)<<"\"}";
         edges.push_back(k.str());
       }
+      std::cout << ht[root->get_label_id()] << " : " << ht[root->get_child(i)->get_label_id()] << std::endl;
     }
     if(!empty) {
       str << ",\"children\": [" << str_tmp.str() << "]";
@@ -295,18 +297,20 @@ std::string get_json_hybrid_graph_tree (Node* root, IDLabelMap ht)
   std::stringstream str;
   std::vector<std::string> edges;
 
-  int id_counter = 1;
   std::set<Node* > is_child;
   root->set_level(0);
   increase_scope(root);
   char separator = ' ';
-  str << get_json_hybrid_tree(root, ht, is_child, id_counter,0,edges);
+  str << "{\"tree\": [";
+  str << get_json_hybrid_tree(root, ht, is_child, 0,edges);
+  str << "], \"addlinks\": [";
   for(std::vector<std::string>::iterator it = edges.begin(); it != edges.end(); ++it)
   {
     std::string e = *it;
-    std::cout << separator << e ;
+    str << separator << e ;
     separator = ',';
   }
+  str << "]}";
   
   return str.str();
 }
@@ -515,12 +519,13 @@ void colour_hybrid_graph(Node*& hybrid, Node* t2, IDMappedNode& ht_t2_to_h,
         }
       }
       Node* n = append_node_hybrid(t2, par_h, position, 'b');
+      n->set_id(hybrid->get_id() + t2->get_id());
       ht_t2_to_h[t2->get_id()] = n;
 
     } else {
       // root gets inserted
       Node* tmp = hybrid;
-      hybrid = new Node(0, t2->get_label_id());
+      hybrid = new Node(hybrid->get_id() + t2->get_id(), t2->get_label_id());
       hybrid->add_child(tmp);
       hybrid->add_edge('b');
       hybrid->set_colour('b');
