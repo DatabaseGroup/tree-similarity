@@ -93,33 +93,29 @@ void make_leaves (Node* tree1, Node* tree2) {
 // Param: i, j defined as above and a optional cost-model
 template<class _node = Node, class _costs = Costs<_node>>
 void forest_dist(int i, int j, _costs costs = _costs()) {
-  int cost_rename;
-
   fd.at(l1.at(i) - 1).at(l2.at(j) - 1) = 0;
 
   int di = 0, dj = 0;
   for (di = l1.at(i); di <= i; ++di) {
-    fd.at(di).at(l2.at(j) - 1) = fd.at(di - 1).at(l2.at(j) - 1) + costs.del();
+    fd.at(di).at(l2.at(j) - 1) = fd.at(di - 1).at(l2.at(j) - 1) + costs.del(); // TODO replace del()
   }
  
   for (dj = l2.at(j); dj <= j; ++dj) {
-    fd.at(l1.at(i) - 1).at(dj) = fd.at(l1.at(i) - 1).at(dj - 1) + costs.ins();
+    fd.at(l1.at(i) - 1).at(dj) = fd.at(l1.at(i) - 1).at(dj - 1) + costs.ins(); // TODO replace ins()
   }
 
   for (di = l1.at(i); di <= i; ++di) {
     for (dj = l2.at(j); dj <= j; ++dj) {
       if (l1.at(di) == l1.at(i) && l2.at(dj) == l2.at(j)) {
-        cost_rename = ((*tree1_postorder).at(di - 1)->get_label_id() == (*tree2_postorder).at(dj - 1)->get_label_id())
-          ? 0 : costs.ren();
         fd.at(di).at(dj) = std::min(
-          std::min(fd.at(di - 1).at(dj) + costs.del(), fd.at(di).at(dj - 1) + costs.ins()),
-          fd.at(di - 1).at(dj - 1) + cost_rename
+          std::min(fd.at(di - 1).at(dj) + costs.del(), fd.at(di).at(dj - 1) + costs.ins()), // TODO replace del(), ins()
+          fd.at(di - 1).at(dj - 1) + costs.ren(tree1_postorder->at(di - 1), tree2_postorder->at(dj - 1))
         );
 
         td.at(di).at(dj) = fd.at(di).at(dj);
       } else {
         fd.at(di).at(dj) = std::min(
-          std::min(fd.at(di - 1).at(dj) + costs.del(), fd.at(di).at(dj - 1) + costs.ins()),
+          std::min(fd.at(di - 1).at(dj) + costs.del(), fd.at(di).at(dj - 1) + costs.ins()), // TODO replace del(), ins()
           fd.at(l1.at(di) - 1).at(l2.at(dj) - 1) + td.at(di).at(dj)
         );
       }
@@ -280,8 +276,8 @@ std::vector<std::array<Node*, 2> > compute_edit_mapping (Node* tree1,
     int col = last_col;
 
     while ((row > first_row) || (col > first_col)) {
-      int cost_delete = costs.del();
-      int cost_insert = costs.ins();
+      int cost_delete = costs.del(); // TODO replace del()
+      int cost_insert = costs.ins(); // TODO replace ins()
 
       if ((row > first_row) && (fd.at(row - 1).at(col) + cost_delete == fd.at(row).at(col)))
       {

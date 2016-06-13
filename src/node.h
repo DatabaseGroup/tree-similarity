@@ -234,7 +234,13 @@ struct Costs {
   //          node2  The node having the desired name
   //
   // Return:  The cost of renaming node1 to node2
-  int ren (_node node1, _node node2) { return 1; }
+  int ren (_node* node1, _node* node2) {
+    if (node1->get_label_id() == node2->get_label_id()) {
+      return 0;
+    }
+
+    return 1;
+  }
 
   // Basic delete cost function
   //
