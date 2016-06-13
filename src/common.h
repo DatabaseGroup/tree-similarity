@@ -265,7 +265,7 @@ std::string get_json_hybrid_tree(Node* root, IDLabelMap ht, std::set<Node*>& is_
       if(tmp_c->get_level() == (root->get_level()+1)){ // maybe consider an array here instead of a set
         if(is_child.find(tmp_c) == is_child.end()){
           is_child.insert(tmp_c);
-          if(i != 0 && !empty || !empty && (i+1)!= root->get_children_number()){
+          if((i != 0 && !empty) || (!empty && (i+1) != root->get_children_number())){
             str_tmp << ",";
           }
           str_tmp << get_json_hybrid_tree(tmp_c, ht, is_child, i, edges, root->get_edge_colour(i));
