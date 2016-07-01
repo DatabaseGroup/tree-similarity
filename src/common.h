@@ -20,7 +20,8 @@ typedef std::map<int, Node*, std::greater<int>> IDMappedNode;
 //                          time a node is added to the resulting vector
 //
 // Return:  None (the result is stored in tr_post, which is altered)
-void postorder(Node* root, std::vector<Node*>* tr_post, int* node_id_counter) {
+template<class _node = Node>
+void postorder(_node* root, std::vector<_node*>* tr_post, int* node_id_counter) {
   if (root) {
     // traverse children first
     if (root->get_children_number() > 0) {
@@ -39,10 +40,11 @@ void postorder(Node* root, std::vector<Node*>* tr_post, int* node_id_counter) {
 // Params:  root  The root node of the tree to be 'postorderified'
 //
 // Return:  A pointer to a vector of node pointers of the 'postorderified' tree
-std::vector<Node*>* generate_postorder (Node* root) {
+template<class _node = Node>
+std::vector<_node*>* generate_postorder (_node* root) {
   int node_id_counter = 1;
   // Heap allocation
-  std::vector<Node*>* tree_postorder = new std::vector<Node*>();
+  std::vector<_node*>* tree_postorder = new std::vector<_node*>();
 
   // Recursively traverse tree in postorder
   postorder(root, tree_postorder, &node_id_counter);

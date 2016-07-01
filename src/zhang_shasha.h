@@ -7,22 +7,19 @@
 
 namespace zs {
 
-std::vector<Node*>* tree1_postorder; //postorder of tree 1
-std::vector<Node*>* tree2_postorder; //postorder of tree 2
 std::vector<std::vector<double> > td; //stores the tree-edit-distances
 std::vector<std::vector<double> > fd; //stores the forest-distances
 std::vector<int> l1; //stores the left-most-leaf-descendants of tree 1
 std::vector<int> l2; //stores the left-most-leaf-descendants of tree 2
-std::vector<Node*> leaves_tree1; //stores the leaves of tree 2
-std::vector<Node*> leaves_tree2; //stores the leaves of tree 2
 
 //Computes the left most leaf descendant for all subtrees of the input tree
 //
 //Param: root of the tree, a vector which stores the left most leaf descendant for each subtree
-void lmld (Node* root, std::vector<int>& l) {
+template<class _node = Node>
+void lmld (_node* root, std::vector<int>& l) {
   // call lmld recursively and compute the left-most-leaf descendants
   for (int i = 1; i <= root->get_children_number(); ++i) {
-    lmld(root->get_children().at(i - 1), l);
+    lmld<_node>(root->get_children().at(i - 1), l);
   }
 
   if (root->get_children_number() == 0) {
@@ -55,24 +52,27 @@ std::vector<int> kr (std::vector<int>& l, int leaf_count) {
   return kr;
 }
 
-void set_leaves (Node* root, int which_tree) {
+template<class _node = Node>
+void set_leaves (std::vector<_node*>* leaves_tree1,
+  std::vector<_node*>* leaves_tree2, _node* root, int which_tree)
+{  
   if (which_tree == 1) {
     if (root) {
       if (root->get_children_number() > 0) {
         for (int i = 0; i < root->get_children_number(); ++i) {
-          set_leaves(root->get_child(i), 1);
+          set_leaves<_node>(leaves_tree1, leaves_tree2, root->get_child(i), 1);
         }
       } else {
-        leaves_tree1.push_back(root);
+        leaves_tree1->push_back(root);
       }
     }
   } else {
     if (root->get_children_number() > 0) {
       for (int i = 0; i < root->get_children_number(); ++i) {
-        set_leaves(root->get_child(i), 2);
+        set_leaves<_node>(leaves_tree1, leaves_tree2, root->get_child(i), 2);
       }
     } else {
-      leaves_tree2.push_back(root);
+      leaves_tree2->push_back(root);
     }
   }
 }
@@ -81,9 +81,13 @@ void set_leaves (Node* root, int which_tree) {
 // tree.
 //
 // Parameters: left-hand tree, right-hand tree
-void make_leaves (Node* tree1, Node* tree2) {
-  set_leaves(tree1, 1);
-  set_leaves(tree2, 2);
+template<class _node = Node>
+void make_leaves (std::vector<_node*>* leaves_tree1,
+  std::vector<_node*>* leaves_tree2, _node* tree1, _node* tree2)
+{
+  // TODO: remove which_tree from set_leaves
+  set_leaves<_node>(leaves_tree1, leaves_tree2, tree1, 1);
+  set_leaves<_node>(leaves_tree1, leaves_tree2, tree2, 2);
 }
 
 // Computes the forest-distance of:
@@ -92,7 +96,9 @@ void make_leaves (Node* tree1, Node* tree2) {
 //
 // Param: i, j defined as above and a optional cost-model
 template<class _node = Node, class _costs = Costs<_node>>
-void forest_dist(int i, int j, _costs costs = _costs()) {
+void forest_dist(std::vector<_node*>* tree1_postorder,
+  std::vector<_node*>* tree2_postorder, int i, int j, _costs costs = _costs())
+{
   fd.at(l1.at(i) - 1).at(l2.at(j) - 1) = 0;
 
   int di = 0, dj = 0;
@@ -192,8 +198,11 @@ template<class _node = Node, class _costs = Costs<_node>>
 std::vector<std::array<Node*, 2> > compute_edit_mapping (Node* tree1,
   Node* tree2, _costs costs = _costs())
 {
-  tree1_postorder = common::generate_postorder(tree1);
-  tree2_postorder = common::generate_postorder(tree2);
+  std::vector<_node*>* tree1_postorder = common::generate_postorder(tree1);
+  std::vector<_node*>* tree2_postorder = common::generate_postorder(tree2);
+
+  std::vector<_node*> leaves_tree1; //stores the leaves of tree 2
+  std::vector<_node*> leaves_tree2; //stores the leaves of tree 2
 
   td.resize(tree1_postorder->size() + 1);
   for (unsigned int i = 0; i < td.size(); ++i) {
@@ -231,10 +240,10 @@ std::vector<std::array<Node*, 2> > compute_edit_mapping (Node* tree1,
     std::fill(it->begin(), it->end(), 0);
   }
 
-  make_leaves(tree1, tree2);
+  make_leaves<_node>(&leaves_tree1, &leaves_tree2, tree1, tree2);
 
-  lmld(tree1, l1);
-  lmld(tree2, l2);
+  lmld<_node>(tree1, l1);
+  lmld<_node>(tree2, l2);
 
   std::vector<int> kr1;
   std::vector<int> kr2;
@@ -248,7 +257,7 @@ std::vector<std::array<Node*, 2> > compute_edit_mapping (Node* tree1,
     for ( std::vector<int>::iterator kr2_it = std::next(kr2.begin());
           kr2_it != kr2.end(); ++kr2_it)
     {
-      forest_dist(*kr1_it, *kr2_it, costs);
+      forest_dist<_node, _costs>(tree1_postorder, tree2_postorder, *kr1_it, *kr2_it, costs);
     }
   }
  
@@ -266,7 +275,7 @@ std::vector<std::array<Node*, 2> > compute_edit_mapping (Node* tree1,
     int last_col = tree_pair.at(1);
 
     if (!root_node_pair) {
-      forest_dist(last_row, last_col, costs);
+      forest_dist(tree1_postorder, tree2_postorder, last_row, last_col, costs);
     }
     root_node_pair = false;
 
@@ -317,9 +326,13 @@ std::vector<std::array<Node*, 2> > compute_edit_mapping (Node* tree1,
 // type is specified as first template parameter, the cost model type as second
 // template parameter.
 template<class _node = Node, class _costs = Costs<_node>>
-double compute_zhang_shasha (_node* tree1, _node* tree2, _costs costs = _costs()) {
-  tree1_postorder = common::generate_postorder(tree1);
-  tree2_postorder = common::generate_postorder(tree2);
+double compute_zhang_shasha (_node* tree1, _node* tree2, _costs costs = _costs())
+{
+  std::vector<_node*>* tree1_postorder = common::generate_postorder<_node>(tree1);
+  std::vector<_node*>* tree2_postorder = common::generate_postorder<_node>(tree2);
+
+  std::vector<_node*> leaves_tree1; //stores the leaves of tree 2
+  std::vector<_node*> leaves_tree2; //stores the leaves of tree 2
 
   td.resize(tree1_postorder->size() + 1);
   for (unsigned int i = 0; i < td.size(); ++i) {
@@ -357,10 +370,10 @@ double compute_zhang_shasha (_node* tree1, _node* tree2, _costs costs = _costs()
     std::fill(it->begin(), it->end(), 0);
   }
 
-  make_leaves(tree1, tree2);
+  make_leaves<_node>(&leaves_tree1, &leaves_tree2, tree1, tree2);
 
-  lmld(tree1, l1);
-  lmld(tree2, l2);
+  lmld<_node>(tree1, l1);
+  lmld<_node>(tree2, l2);
 
   std::vector<int> kr1;
   std::vector<int> kr2;
@@ -374,7 +387,7 @@ double compute_zhang_shasha (_node* tree1, _node* tree2, _costs costs = _costs()
     for ( std::vector<int>::iterator kr2_it = std::next(kr2.begin());
           kr2_it != kr2.end(); ++kr2_it)
     {
-      forest_dist(*kr1_it, *kr2_it, costs);
+      forest_dist<_node, _costs>(tree1_postorder, tree2_postorder, *kr1_it, *kr2_it, costs);
     }
   }
 
@@ -382,8 +395,8 @@ double compute_zhang_shasha (_node* tree1, _node* tree2, _costs costs = _costs()
   delete tree1_postorder;
   delete tree2_postorder;
 
-  std::vector<Node*>().swap(leaves_tree1);
-  std::vector<Node*>().swap(leaves_tree2);
+  std::vector<_node*>().swap(leaves_tree1);
+  std::vector<_node*>().swap(leaves_tree2);
   std::vector<int>().swap(l1);
   std::vector<int>().swap(l2);
   std::vector<int>().swap(kr1);

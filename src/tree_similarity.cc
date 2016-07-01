@@ -4,15 +4,16 @@
 #include <fstream>
 
 #include "node.h"
+#include "string_node.h"
 #include "common.h"
 #include "parser.h"
 #include "upper_bound.h"
 #include "string_edit_distance.h"
 #include "zhang_shasha.h"
+
 // TODO: tobi: put everything in a method e.g. called get_sbs_fs(node* t1, node* t2)
 //
 int main (int argc, char* argv[]) {
-
   if(argc != 3 && argc != 4 && argc != 6) {
     std::cout << "TODO print a help message" << std::endl;
     return 0;
@@ -42,10 +43,35 @@ int main (int argc, char* argv[]) {
   // compute distance using basic nodes and basic cost model
   // no need to generate basic cost model since it is set as default template
   // parameter
-  //std::cout << "Distance (basic tree, basic cost model, Zhang Shasha): " << "\t"
-    /*<<*/ zs::compute_zhang_shasha<Node, Costs<Node>>(tree1, tree2);
-    //<< std::endl;
+  
+  StringNode* a1 = new StringNode("a");
+  StringNode* b1 = new StringNode("b");
+  StringNode* c1 = new StringNode("c");
+  StringNode* d1 = new StringNode("d");
+  StringNode* e1 = new StringNode("e");
+  StringNode* f1 = new StringNode("f");
+  
+  StringNode* stree1 = a1;
+  stree1->add_child(b1);
+  stree1->add_child(c1);
+  stree1->add_child(d1);
+  c1->add_child(e1);
+  c1->add_child(f1);
 
+  StringNode* a2 = new StringNode("a");
+  StringNode* b2 = new StringNode("b");
+  StringNode* c2 = new StringNode("c");
+
+  StringNode* stree2 = a2;
+  stree2->add_child(b2);
+  stree2->add_child(c2);
+  
+  std::cout
+    << "Distance (string-labeled tree, string-labeled cost model, Zhang Shasha):\t"
+    << zs::compute_zhang_shasha<StringNode, StringCosts<StringNode>>(stree1, stree2)
+    << std::endl;
+
+  /*
   std::vector<std::array<Node*, 2> > edit_mapping =
     zs::compute_edit_mapping<Node, Costs<Node>>(tree1, tree2);
 
@@ -94,7 +120,7 @@ int main (int argc, char* argv[]) {
     }
 
   }
-/*
+
   delete tree1;
   delete tree2;
   delete tree1_postorder;
