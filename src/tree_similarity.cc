@@ -45,27 +45,31 @@ int main (int argc, char* argv[]) {
   // parameter
   
   StringNode* a1 = new StringNode("a");
-  StringNode* b1 = new StringNode("b");
-  StringNode* c1 = new StringNode("c");
+  StringNode* r1 = new StringNode("r");
   StringNode* d1 = new StringNode("d");
-  StringNode* e1 = new StringNode("e");
-  StringNode* f1 = new StringNode("f");
+  StringNode* e1 = new StringNode("d");
+  StringNode* i1 = new StringNode("i");
+  StringNode* l1 = new StringNode("l");
+  StringNode* t1 = new StringNode("t");
+  StringNode* k1 = new StringNode("k");
+  StringNode* g1 = new StringNode("g");
+  StringNode* h1 = new StringNode("h");
   
   StringNode* stree1 = a1;
-  stree1->add_child(b1);
-  stree1->add_child(c1);
+  stree1->add_child(r1);
   stree1->add_child(d1);
-  c1->add_child(e1);
-  c1->add_child(f1);
+  stree1->add_child(e1);
+  e1->add_child(i1);
+  e1->add_child(l1);
+  e1->add_child(t1);
+  t1->add_child(k1);
+  t1->add_child(g1);
+  t1->add_child(h1);
 
-  StringNode* a2 = new StringNode("a");
-  StringNode* b2 = new StringNode("b");
-  StringNode* c2 = new StringNode("c");
+  StringNode* x2 = new StringNode("x");
+  StringNode* stree2 = x2;
 
-  StringNode* stree2 = a2;
-  stree2->add_child(b2);
-  stree2->add_child(c2);
-  
+  // distance between stree1 and stree2 should be 20 (using StringCosts)
   std::cout
     << "Distance (string-labeled tree, string-labeled cost model, Zhang Shasha):\t"
     << zs::compute_zhang_shasha<StringNode, StringCosts<StringNode>>(stree1, stree2)
