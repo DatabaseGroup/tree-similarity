@@ -26,6 +26,7 @@ set(tree_similarity_sources
   string_edit_distance.h
   upper_bound.h
   zhang_shasha.h
+  string_node.h
 )
 
 # build executable
