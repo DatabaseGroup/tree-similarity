@@ -178,37 +178,41 @@ is inconsistent/unclear, please just ask and we will discuss it.
     every `.h` file. Nevertheless we separate definition and declaration as
     much as possible. One possible way to do this is shown in the following
     example code (*by now, we do it like this*):
-    
-        template<typename Type>
-        class TestContainer {
-        private:
-          Type* data_;
-        
-        public:
-          TestContainer (Type* data);
-          ~TestContainer ();
-        
-          Type* get_data () const;
-          void set_data (Type* data);
-        };
-        
-        template<typename Type>
-        TestContainer<Type>::TestContainer (Type* data) : data_(data) {};
-        
-        template<typename Type>
-        TestContainer<Type>::~TestContainer () {
-            delete[] data_;
-        }
-        
-        template<typename Type>
-        Type* TestContainer<Type>::get_data () const {
-          return data_;
-        }
 
-        template<typename Type>
-        void TestContainer<Type>::set_data (Type* data) {
-          data_ = data;
-        }
+    ```c++    
+    // declaration
+    template<typename Type>
+    class TestContainer {
+    private:
+      Type* data_;
+    
+    public:
+      TestContainer (Type* data);
+      ~TestContainer ();
+    
+      Type* get_data () const;
+      void set_data (Type* data);
+    };
+            
+    // definition
+    template<typename Type>
+    TestContainer<Type>::TestContainer (Type* data) : data_(data) {};
+    
+    template<typename Type>
+    TestContainer<Type>::~TestContainer () {
+        delete[] data_;
+    }
+    
+    template<typename Type>
+    Type* TestContainer<Type>::get_data () const {
+      return data_;
+    }
+    
+    template<typename Type>
+    void TestContainer<Type>::set_data (Type* data) {
+      data_ = data;
+    }
+    ```
 
     Another approach would be to keep declaration and definition in separate
     files, e.g. `my_class.h` and `my_class_impl.h`. Then the last 9 lines of the
