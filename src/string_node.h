@@ -16,35 +16,23 @@ private:
 
 public:
   // Basic constructor
-  StringNode (std::string label)
-    : label_(label)
-  { }
+  StringNode (std::string label);
 
   // Getter label
-  std::string get_label () const {
-    return label_;
-  }
+  std::string get_label () const;
 
   // Getter children
-  std::vector<StringNode*> get_children () const {
-    return children_;
-  }
+  std::vector<StringNode*> get_children () const;
 
   // Add a child at last position.
   //
   // Params:  child A pointer to the node to be added
   //
   // Return:  None
-  void add_child (StringNode* child) {
-    children_.push_back(child);
-    //++children_number;
-  }
+  void add_child (StringNode* child);
 
   // Get children_number
-  int get_children_number () const {
-    //return children_number;
-    return children_.size();
-  }
+  int get_children_number () const;
 
   // Get a pointer to a child at a given position.
   //
@@ -52,20 +40,46 @@ public:
   //
   // Return:  A pointer to the child at position i if it exists or nullptr
   //          otherwise
-  StringNode* get_child (int position) const {
-    return children_[position];
-  }
+  StringNode* get_child (int position) const;
 
   // Get id
-  int get_id () const {
-    return id_;
-  }
+  int get_id () const;
 
   // Setter id
-  void set_id (int id) {
-    id_ = id;
-  }
+  void set_id (int id);
 };
+
+StringNode::StringNode (std::string label) : label_(label) {}
+
+std::string StringNode::get_label () const {
+  return label_;
+}
+
+std::vector<StringNode*> StringNode::get_children () const {
+  return children_;
+}
+
+void StringNode::add_child (StringNode* child) {
+  children_.push_back(child);
+  //++children_number;
+}
+
+int StringNode::get_children_number () const {
+  //return children_number;
+  return children_.size();
+}
+
+StringNode* StringNode::get_child (int position) const {
+  return children_[position];
+}
+
+int StringNode::get_id () const {
+  return id_;
+}
+
+void StringNode::set_id (int id) {
+  id_ = id;
+}
 
 // Example of a struct representing custom cost functions to be used for the
 // distance computation. This shows how to use the framework with custom cost
