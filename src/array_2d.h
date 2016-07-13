@@ -1,7 +1,6 @@
 #ifndef ARRAY_2D_H
 #define ARRAY_2D_H
 
-// size_t
 #include <memory>
 #include <algorithm>
 
@@ -15,55 +14,71 @@
  * As a result, lots of cache misses happen, in general. This slows down the
  * actual access.
  */
-template<class _type>
+template<typename Type>
 class Array2D {
 private:
   // consecutive allocated memory: rows * columns
   size_t rows_;
   size_t columns_;
   // consecutive allocated row containing the array elements
-  _type* data_;
+  Type* data_;
 
 public:
-  // Constructor
-  Array2D (size_t rows, size_t columns)
-    : rows_(rows), columns_(columns), data_(nullptr)
-  {
-    // allocate array
-    data_ = new double[rows_ * columns_];
-  }
-
-  // Copy constructor
-  Array2D (const Array2D& other)
-    : Array2D(other.get_rows(), other.get_columns())
-  {
-    std::copy(other.data, other.data + (rows_ * columns_), data_);
-  }
+  // Constructor(s)
+  Array2D (size_t rows, size_t columns);
+  Array2D (const Array2D& other);
 
   // Destructor
-  ~Array2D () {
-    // deallocate array
-    delete[] data_;
-  }
+  ~Array2D ();
 
   // Get number of rows
-  size_t get_rows () const {
-    return rows_;
-  }
+  size_t get_rows () const;
 
   // Get number of columns
-  size_t get_columns () const {
-    return columns_;
-  }
+  size_t get_columns () const;
 
   // Enable access as usual using the [][] notation.
   //
   // Params:  row the row to be accessed
   //
   // Return:  A pointer to the beginning of the row to be accessed
-  _type* operator[] (size_t row) {
-    return data_ + row * columns_;
-  }
+  Type* operator[] (size_t row);
 };
+
+template<typename Type>
+Array2D<Type>::Array2D (size_t rows, size_t columns)
+  : rows_(rows), columns_(columns), data_(nullptr)
+{
+  // allocate array
+  data_ = new double[rows_ * columns_];
+}
+
+template<typename Type>
+Array2D<Type>::Array2D (const Array2D& other)
+  : Array2D(other.get_rows(), other.get_columns())
+{
+  std::copy(other.data, other.data + (rows_ * columns_), data_);
+}
+
+template<typename Type>
+Array2D<Type>::~Array2D () {
+  // deallocate array
+  delete[] data_;
+}
+
+template<typename Type>
+size_t Array2D<Type>::get_rows () const {
+  return rows_;
+}
+
+template<typename Type>
+size_t Array2D<Type>::get_columns () const {
+  return columns_;
+}
+
+template<typename Type>
+Type* Array2D<Type>::operator[] (size_t row) {
+  return data_ + row * columns_;
+}
 
 #endif // ARRAY_2D_H
