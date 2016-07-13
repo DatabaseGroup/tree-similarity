@@ -175,7 +175,38 @@ is inconsistent/unclear, please just ask and we will discuss it.
 1. **We *declare AND define* all functions/classes in the `.h` files.**
 
     This is due to the fact that template functions/classes are used in almost
-    every `.h` file.
+    every `.h` file. Nevertheless we separate definition and declaration as
+    much as possible. One possible way to do this is shown in the following
+    example code (*by now, we do it like this*):
+    
+        template<typename Type>
+        class TestContainer {
+        private:
+          Type* data_;
+        
+        public:
+          TestContainer (Type* data) : data_(data) {};
+          ~TestContainer () { delete[] data_; }
+        
+          Type* get_data () const;
+          void set_data (Type* data);
+        };
+        
+        template<typename Type>
+        Type* TestContainer<Type>::get_data () const {
+          return data_;
+        }
+
+        template<typename Type>
+        void TestContainer<Type>::set_data (Type* data) {
+          data_ = data;
+        }
+
+    Another approach would be to keep declaration and definition in separate
+    files, e.g. `my_class.h` and `my_class_impl.h`. Then the last 9 lines of the
+    above example would be located in `my_class_impl.h`. The rest would remain
+    in `my_class.h`. One then needs to include `my_class_impl.h` after the
+    declarative part.
     
 2. **We *always* use the *safer* method if there are multiple methods achieving
 the same result.**
@@ -198,7 +229,9 @@ do not allow any call to a function which terminates the library (e.g., `exit`).
 
     This is due to the fact that we cannot anticipate if a termination is desired
 in case of, e.g., an exception (the program which uses the library should catch
-the exception(s) and decide whether it wants to terminate or not).
+the exception(s) and decide whether it wants to terminate or not). The only point
+in the code where a call to the `exit` function is allowed, is - of course - in
+the `tree_similarity.cc`.
 
 # References
 
