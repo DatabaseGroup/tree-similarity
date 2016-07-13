@@ -16,26 +16,31 @@ private:
 public:
   // Basic constructor
   CustomNode (std::vector<std::string> label,
-    std::vector<CustomNode*> children)
-    : label_(label), children_(children)
-  { }
+    std::vector<CustomNode*> children);
 
   // Getter label
-  std::vector<std::string> get_label () const {
-    return label_;
-  }
+  std::vector<std::string> get_label () const;
 
   // Getter children
-  std::vector<CustomNode*> get_children () const {
-    return children_;
-  }
+  std::vector<CustomNode*> get_children () const;
 };
+
+CustomNode::CustomNode (std::vector<std::string> label,
+  std::vector<CustomNode*> children) : label_(label), children_(children) {}
+
+std::vector<std::string> CustomNode::get_label () const {
+  return label_;
+}
+
+std::vector<CustomNode*> CustomNode::get_children () const {
+  return children_;
+}
 
 // Example of a struct representing custom cost functions to be used for the
 // distance computation. This shows how to use the framework with custom cost
 // functions. Also these custom costs need to be generic for different node
 // classes.
-template<class _node>
+template<class _Node>
 struct CustomCosts {
   // Basic rename cost function
   //
@@ -43,26 +48,56 @@ struct CustomCosts {
   //          node2  The node having the desired name
   //
   // Return:  The cost of renaming node1 to node2
-  int ren (_node node1, _node node2) { return 2; }
+  int ren (_Node node1, _Node node2);
 
   // Basic delete cost function
   //
   // Params:  node The node to be deleted
   //
   // Return:  The cost of deleting node
-  int del (_node node) { return 2; }
+  int del (_Node node);
 
   // Basic insert cost function
   //
   // Params:  node The node to be inserted
   //
   // Return:  The cost of inserting node
-  int ins (_node node) { return 2; }
+  int ins (_Node node);
 
   // Dummy methods
-  int ren () { return 2; }
-  int del () { return 2; }
-  int ins () { return 2; }
+  int ren ();
+  int del ();
+  int ins ();
 };
+
+template<typename _Node>
+int CustomCosts<_Node>::ren (_Node node1, _Node node2) {
+  return 2;
+}
+
+template<typename _Node>
+int del (_Node node) {
+  return 2;
+}
+
+template<typename _Node>
+int ins (_Node node) {
+  return 2;
+}
+
+template<typename _Node>
+int ren () {
+  return 2;
+}
+
+template<typename _Node>
+int del () {
+  return 2;
+}
+
+template<typename _Node>
+int ins () {
+  return 2;
+}
 
 #endif // CUSTOM_NODE_H
