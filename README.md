@@ -185,12 +185,20 @@ is inconsistent/unclear, please just ask and we will discuss it.
           Type* data_;
         
         public:
-          TestContainer (Type* data) : data_(data) {};
-          ~TestContainer () { delete[] data_; }
+          TestContainer (Type* data);
+          ~TestContainer ();
         
           Type* get_data () const;
           void set_data (Type* data);
         };
+        
+        template<typename Type>
+        TestContainer<Type>::TestContainer (Type* data) : data_(data) {};
+        
+        template<typename Type>
+        TestContainer<Type>::~TestContainer () {
+            delete[] data_;
+        }
         
         template<typename Type>
         Type* TestContainer<Type>::get_data () const {
