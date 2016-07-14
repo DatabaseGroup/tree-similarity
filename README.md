@@ -245,6 +245,31 @@ the exception(s) and decide whether it wants to terminate or not). The only poin
 in the code where a call to the `exit` function is allowed, is - of course - in
 the `tree_similarity.cc`.
 
+4. **Function/Method declaration/definition if they do not fit on a single line:**
+
+We fit as many arguments into a single line as possible. Further, if there is a
+line break in a function/method definition, we put the curly brace into the next
+line to emphasize the beginning of the implementational part. The same rule is
+applied if there is a line break in loops, if statements, et cetera. In the
+following, the example from [Google's C++ Style Guide](#references) is adapted
+accordingly.
+
+```c++
+ReturnType ClassName::ReallyLongFunctionName(Type par_name1, Type par_name2,
+    Type par_name3) // 2 space indentation
+{
+    DoSomething();
+    ...
+}
+
+ReturnType LongClassName::ReallyReallyReallyLongFunctionName(
+    Type par_name1, Type par_name2, Type par_name3) // 2 space indent
+{
+    DoSomething();  // 2 space indent
+    ...
+}
+```
+
 # References
 
 [1] [C++ Reference [1]](http://www.cplusplus.com/reference/)
