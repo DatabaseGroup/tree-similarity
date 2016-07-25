@@ -66,10 +66,10 @@ repository, i.e. `tree_similarity/`.
 - A C++ compiler (preferably [`clang`](#references) in version >=
 3.4.0)
 - [`CMake`](#references) in version >= 2.8
-- [`valgrind`](#references) in version >= 3.10.1 (to be able to use
-`make check-dynamic` or `make check`)
-- [`cppcheck`](#references) in version >= 1.74 (to be able
-to use `make check-static` or `make check`)
+- [`valgrind`](#references) in version >= 3.10.1 (**not obligatory** but required if one wants to use
+`make check-dynamic`/`make check`)
+- [`cppcheck`](#references) in version >= 1.74 (**not obligatory** but required if one wants to use
+`make check-static`/`make check`)
 
 ### Remarks
 
