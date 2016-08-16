@@ -27,6 +27,8 @@ set(tree_similarity_sources
   upper_bound.h
   zhang_shasha.h
   string_node.h
+  tasm/ring_buffer.h
+  tasm/tasm.h
 )
 
 # build executable
@@ -34,7 +36,8 @@ add_executable(${PROJECT_NAME} ${tree_similarity_sources})
 
 # uncomment if Boost is used
 #target_link_libraries(tree_similarity ${Boost_LIBRARIES})
-  
+ 
+# OLD: 
 # exec error:   "./tree_similarity" "'{a}'" "'{a{b}{c}}'"
 # "-"           "./tree_similarity" "'{a{b{g}}{c{f}}{del}}'" "'{a{b{g}}{c{f}}}'"
 # "-"           "./tree_similarity" "'{a{b{g}}{del}{c{f}}}'" "'{a{b{g}}{c{f}}}'"
