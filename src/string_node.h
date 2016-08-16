@@ -16,6 +16,7 @@ private:
 
 public:
   // Basic constructor
+  StringNode ();
   StringNode (std::string label);
 
   // Getter label
@@ -47,7 +48,14 @@ public:
 
   // Setter id
   void set_id (int id);
+
+  // Get subtree size rooted at this node.
+  //
+  // Return:  The size of the subtree rooted at this node (including this node)
+  int get_subtree_size () const;
 };
+
+StringNode::StringNode () {}
 
 StringNode::StringNode (std::string label) : label_(label) {}
 
@@ -79,6 +87,19 @@ int StringNode::get_id () const {
 
 void StringNode::set_id (int id) {
   id_ = id;
+}
+
+int StringNode::get_subtree_size () const {
+  int descendants_sum = 1;
+  // Sum up sizes of subtrees rooted at child nodes (number of descendants)
+  for ( std::vector<StringNode*>::const_iterator node_it = children_.cbegin();
+        node_it != children_.cend(); ++node_it)
+  {
+    descendants_sum = descendants_sum + (*node_it)->get_subtree_size();
+  }
+
+  // Add this node to subtree size.
+  return descendants_sum;
 }
 
 // Example of a struct representing custom cost functions to be used for the
