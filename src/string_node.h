@@ -53,6 +53,9 @@ public:
   //
   // Return:  The size of the subtree rooted at this node (including this node)
   int get_subtree_size () const;
+
+  bool operator<(const StringNode& other) const;
+  bool operator==(const StringNode& other) const;
 };
 
 StringNode::StringNode () {}
@@ -100,6 +103,14 @@ int StringNode::get_subtree_size () const {
 
   // Add this node to subtree size.
   return descendants_sum;
+}
+
+bool StringNode::operator<(const StringNode& other) const {
+  return (label_.compare(other.get_label()) < 0); // TODO: modify to have distance comparison
+}
+
+bool StringNode::operator==(const StringNode& other) const {
+  return (label_.compare(other.get_label()) == 0);
 }
 
 // Example of a struct representing custom cost functions to be used for the
