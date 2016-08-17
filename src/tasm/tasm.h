@@ -32,7 +32,8 @@ std::vector<_node> prb_pruning (std::queue<_node>& postorder_queue,
   );
 
   while (start != end) {
-    candidates.push_back(ring_buffer[start]);
+    std::cout << "Add " << ring_buffer[prefix_array[start] % buffer_size].get_label() << " to candidates" << std::endl;
+    candidates.push_back(ring_buffer[prefix_array[start] % buffer_size]);
     start = ((prefix_array[start] + 1) % buffer_size);
     prb_next(ring_buffer, prefix_array, start, end, appended, postorder_queue,
       threshold
@@ -55,18 +56,16 @@ void prb_next (RingBuffer<_node>& ring_buffer, RingBuffer<size_t>& prefix_array,
     if (!postorder_queue.empty()) {
       dequeued_element = postorder_queue.front();
       postorder_queue.pop();
-      
-      // debug
-      //std::cout << "subtree size = " << dequeued_element.get_subtree_size() << std::endl;
 
       ring_buffer[end] = dequeued_element;   
-      prefix_array[end] = (++appended) - dequeued_element.get_subtree_size();
+      prefix_array[end] = (++appended) - dequeued_element.get_subtree_size() + 1;
 
       if (dequeued_element.get_subtree_size() <= threshold) {
         prefix_array[prefix_array[end] % buffer_size] = appended;
       }
 
       // debug
+      /*
       std::cout << "start = " << start << ", end = " << end <<
         ", appended = " << appended << std::endl;
       std::cout << prefix_array[end] << " mod " << buffer_size << " = " <<
@@ -85,6 +84,7 @@ void prb_next (RingBuffer<_node>& ring_buffer, RingBuffer<size_t>& prefix_array,
         std::cout << " | ";
       }
       std::cout << std::endl << std::endl;
+      */
       // debug
 
       end = ((end + 1) % buffer_size);
