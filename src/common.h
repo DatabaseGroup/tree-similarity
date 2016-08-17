@@ -1,5 +1,6 @@
 #ifndef COMMON_H
 #define COMMON_H
+
 #include <sstream>
 #include <map>
 #include <set>
@@ -41,7 +42,7 @@ void postorder(_node* root, std::vector<_node*>* tr_post, int* node_id_counter) 
 //
 // Return:  A pointer to a vector of node pointers of the 'postorderified' tree
 template<class _node = Node>
-std::vector<_node*>* generate_postorder (_node* root) {
+std::vector<_node*>* generate_postorder (_node* root) { // TODO: rename to create_postorder
   int node_id_counter = 1;
   // Heap allocation
   std::vector<_node*>* tree_postorder = new std::vector<_node*>();
