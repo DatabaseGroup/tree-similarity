@@ -27,6 +27,8 @@ set(tree_similarity_sources
   upper_bound.h
   zhang_shasha.h
   string_node.h
+  k_heap.h
+  node_distance_pair.h
   tasm/ring_buffer.h
   tasm/tasm.h
 )
