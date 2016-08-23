@@ -10,125 +10,123 @@
 #include "upper_bound.h"
 #include "string_edit_distance.h"
 #include "zhang_shasha.h"
+#include "k_heap.h"
 
-// TODO: tobi: put everything in a method e.g. called get_sbs_fs(node* t1, node* t2)
-//
+#include "tasm/tasm.h"
+
 int main (int argc, char* argv[]) {
-  if(argc != 3 && argc != 4 && argc != 6) {
-    std::cout << "TODO print a help message" << std::endl;
-    return 0;
-  }
-  std::cout << argv[1] << " " << argv[2] << std::endl;
-  // TODO replace hashtable with a custom node class that sup. strings as labels
-  parser::LabelIDMap hashtable_label_to_id;
-  common::IDLabelMap hashtable_id_to_label;
-  int node_id_counter = 1;
-  Node* tree1 = parser::create_tree_from_string(argv[1], hashtable_label_to_id,
-    node_id_counter
-  );
-  Node* tree2 = parser::create_tree_from_string(argv[2], hashtable_label_to_id,
-    node_id_counter
-  );
-
-  for ( auto it = hashtable_label_to_id.begin();
-        it != hashtable_label_to_id.end(); ++it )
-  {
-    hashtable_id_to_label.emplace(it->second, it->first);
-  }
-
-  std::vector<Node*>* tree1_postorder = common::generate_postorder(tree1);
-  std::vector<Node*>* tree2_postorder = common::generate_postorder(tree2);
-
-  // Zhang and Shasha cost = 1 (insert), 1 (delete), 1 (rename)
-  // compute distance using basic nodes and basic cost model
-  // no need to generate basic cost model since it is set as default template
-  // parameter
+  StringNode* d1 = new StringNode("John");
+  StringNode* d2 = new StringNode("auth");
+  StringNode* d3 = new StringNode("X1");
+  StringNode* d4 = new StringNode("title");
+  StringNode* d5 = new StringNode("article");
+  StringNode* d6 = new StringNode("VLDB");
+  StringNode* d7 = new StringNode("conf");
+  StringNode* d8 = new StringNode("Peter");
+  StringNode* d9 = new StringNode("auth");
+  StringNode* d10 = new StringNode("X3");
+  StringNode* d11 = new StringNode("title");
+  StringNode* d12 = new StringNode("article");
+  StringNode* d13 = new StringNode("Mike");
+  StringNode* d14 = new StringNode("auth");
+  StringNode* d15 = new StringNode("X4");
+  StringNode* d16 = new StringNode("title");
+  StringNode* d17 = new StringNode("article");
+  StringNode* d18 = new StringNode("proceedings");
+  StringNode* d19 = new StringNode("X2");
+  StringNode* d20 = new StringNode("title");
+  StringNode* d21 = new StringNode("book");
+  StringNode* d22 = new StringNode("dblp");
   
-  StringNode* a1 = new StringNode("a");
-  StringNode* r1 = new StringNode("r");
-  StringNode* d1 = new StringNode("d");
-  StringNode* e1 = new StringNode("d");
-  StringNode* i1 = new StringNode("i");
-  StringNode* l1 = new StringNode("l");
-  StringNode* t1 = new StringNode("t");
-  StringNode* k1 = new StringNode("k");
-  StringNode* g1 = new StringNode("g");
-  StringNode* h1 = new StringNode("h");
-  
-  StringNode* stree1 = a1;
-  stree1->add_child(r1);
-  stree1->add_child(d1);
-  stree1->add_child(e1);
-  e1->add_child(i1);
-  e1->add_child(l1);
-  e1->add_child(t1);
-  t1->add_child(k1);
-  t1->add_child(g1);
-  t1->add_child(h1);
+  d22->add_child(d5);
+  d22->add_child(d18);
+  d22->add_child(d21);
+  d5->add_child(d2);
+  d5->add_child(d4);
+  d18->add_child(d7);
+  d18->add_child(d12);
+  d18->add_child(d17);
+  d21->add_child(d20);
+  d2->add_child(d1);
+  d4->add_child(d3);
+  d7->add_child(d6);
+  d12->add_child(d9);
+  d12->add_child(d11);
+  d17->add_child(d14);
+  d17->add_child(d16);
+  d20->add_child(d19);
+  d9->add_child(d8);
+  d11->add_child(d10);
+  d14->add_child(d13);
+  d16->add_child(d15);
 
-  StringNode* x2 = new StringNode("x");
-  StringNode* stree2 = x2;
+  StringNode* query = new StringNode("book");
+  StringNode* title = new StringNode("title");
+  StringNode* x2 = new StringNode("X2");
 
-  // distance between stree1 and stree2 should be 20 (using StringCosts)
-  std::cout
-    << "Distance (string-labeled tree, string-labeled cost model, Zhang Shasha):\t"
-    << zs::compute_zhang_shasha<StringNode, StringCosts<StringNode>>(stree1, stree2)
-    << std::endl;
+  query->add_child(title);
+  title->add_child(x2);
+
+  std::queue<StringNode> postorder_queue;
+  postorder_queue.push(*d1);
+  postorder_queue.push(*d2);
+  postorder_queue.push(*d3);
+  postorder_queue.push(*d4);
+  postorder_queue.push(*d5);
+  postorder_queue.push(*d6);
+  postorder_queue.push(*d7);
+  postorder_queue.push(*d8);
+  postorder_queue.push(*d9);
+  postorder_queue.push(*d10);
+  postorder_queue.push(*d11);
+  postorder_queue.push(*d12);
+  postorder_queue.push(*d13);
+  postorder_queue.push(*d14);
+  postorder_queue.push(*d15);
+  postorder_queue.push(*d16);
+  postorder_queue.push(*d17);
+  postorder_queue.push(*d18);
+  postorder_queue.push(*d19);
+  postorder_queue.push(*d20);
+  postorder_queue.push(*d21);
+  postorder_queue.push(*d22);
+
+  std::vector<StringNode> result = tasm::prb_pruning<StringNode>(postorder_queue, 6);
+
+  std::cout << "prb-pruning result:" << std::endl;
+  for (StringNode& s: result) {
+    std::cout << s.get_label() << std::endl;
+  }
+
+  KHeap<NodeDistancePair<StringNode>> ranking =
+    tasm::naive<StringNode, StringCosts<StringNode>>(*query, *d22, 6);
+  std::cout << "ranking:" << std::endl;
+  ranking.print_array();
+
+  while (!ranking.empty()) {
+    const NodeDistancePair<StringNode>& p = ranking.front();
+    ranking.erase_front();
+    std::cout << "[" << p.get_node().get_label() << ", " << p.get_distance() << "]" << std::endl;
+  }
 
   /*
-  std::vector<std::array<Node*, 2> > edit_mapping =
-    zs::compute_edit_mapping<Node, Costs<Node>>(tree1, tree2);
+  KHeap<int> maxheap(6);
 
-  if(argc > 3) {
-    std::string output;
-    //std::cout << "'" << argv[3] << "'" << std::endl;
-    if(argv[3] == std::string("-hybrid")){
-      std::vector<int> edm;
-      Node* hybrid = common::create_hybrid_graph(tree1, tree2, edit_mapping, hashtable_id_to_label);
-      output = common::get_json_hybrid_graph_tree(hybrid, hashtable_id_to_label);
-      //delete hybrid;
-    } else if(strcmp(argv[3],"-sbs_fs")==0){
-      std::cout << "sbs" << std::endl;
-      int *edit_mapping_int_array[2];
-      int max_nodes = std::max(tree1->get_subtree_size(), tree2->get_subtree_size());
-     
-      edit_mapping_int_array[0] = new int[max_nodes + 1];
-      edit_mapping_int_array[1] = new int[max_nodes + 1];
-      for (int i = 0; i < 2; ++i) {
-        for (int j = 0; j <= max_nodes; ++j) {
-          edit_mapping_int_array[i][j] = 0;
-        }
-      }
-      zs::get_edit_mapping_int_array<Node>(edit_mapping, edit_mapping_int_array);
-      
-      output = common::get_json_side_by_side(tree1, tree2, 
-        hashtable_id_to_label, edit_mapping_int_array);
-        for (int i = 0; i < 2; ++i){
-          delete[] edit_mapping_int_array[i];
-        }
-    }
+  maxheap.insert(16);
+  maxheap.insert(17);
+  maxheap.insert(18);
+  maxheap.insert(13);
+  maxheap.insert(15);
+  maxheap.insert(19);
 
-    std::cout << output << std::endl;
-    //std::cout << "output check" << std::endl;
-    if(argc>=6 && (strcmp(argv[4],"-f") == 0)){
-      std::fstream out;
-      std::string filename = argv[5];
-      filename += ".tree";
-      out.open(filename, std::fstream::in | std::fstream::out | std::fstream::trunc);
-      if (out.is_open()){
-        out << output << std::endl;
-        std::cout << "writing to the file: " << filename << std::endl;
-      }
-      out.close();
-      output.clear();
-    }
+  std::cout << "MAX-HEAP:" << std::endl;
+  maxheap.print_array();
 
-  }
+  maxheap.replace_front(6);
 
-  delete tree1;
-  delete tree2;
-  delete tree1_postorder;
-  delete tree2_postorder;
-*/
+  std::cout << "MAX-HEAP:" << std::endl;
+  maxheap.print_array();
+  */
+
 	return 0;
 }
