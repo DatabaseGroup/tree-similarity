@@ -152,9 +152,9 @@ subsection. However, it is important to mention that these exceptions/additions
 - **Abbreviations**: We consider the following abbreviations *well-known* (hence,
     one is allowed to use them):
     - `temp`, `tmp`, `str`, `it`, `min`, `max`
-    - `ren` *(rename)*
-    - `ins` *(insert)*
-    - `del` *(delete)*
+    - `ren`, `ins`, `del` *(rename, insert, delete)*
+    - `ed`, `ted`, `sed` *(edit distance, tree edit distance, string edit distance)*
+    - `tasm` *(top-k approximate subtree matching)*
     - All abbreviations used in the [Zhang & Shasha algorithm](#references) (e.g.,
         `lml`, `td`, `fd`, `l1`, `l2`, `kr1`,`kr2`, ...)
 - **Function Names**: We use the *lower case with underscore* notation for **all**
