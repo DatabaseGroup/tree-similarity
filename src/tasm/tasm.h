@@ -2,9 +2,14 @@
 #define TASM_TASM_H
 
 #include "ring_buffer.h"
+#include "../common.h"
+#include "../zhang_shasha.h"
+#include "../k_heap.h"
+#include "../node_distance_pair.h"
 
 #include <vector>
 #include <queue>
+#include <utility>
 
 #include <iomanip> // setw
 
@@ -32,7 +37,7 @@ std::vector<_node> prb_pruning (std::queue<_node>& postorder_queue,
   );
 
   while (start != end) {
-    std::cout << "Add " << ring_buffer[prefix_array[start] % buffer_size].get_label() << " to candidates" << std::endl;
+    //std::cout << "Add " << ring_buffer[prefix_array[start] % buffer_size].get_label() << " to candidates" << std::endl;
     candidates.push_back(ring_buffer[prefix_array[start] % buffer_size]);
     start = ((prefix_array[start] + 1) % buffer_size);
     prb_next(ring_buffer, prefix_array, start, end, appended, postorder_queue,
@@ -98,6 +103,36 @@ void prb_next (RingBuffer<_node>& ring_buffer, RingBuffer<size_t>& prefix_array,
       }
     }
   }
+}
+
+// Computes the distance between the query and every subtree in the document.
+// Requires n distance computations, thus requiring O(m^2*n^2) time and O(m*n)
+// space (m ... size of the query tree, n ... size of the document)
+template<class _node = Node, class _costs = Costs<_node>>
+KHeap<NodeDistancePair<_node>> naive (_node& query, _node& document, const int& k) {
+  //std::priority_queue<std::pair<_node, double>> ranking;
+  KHeap<NodeDistancePair<_node>> ranking(k);
+  
+  if (k == 0) {
+    return ranking;
+  }
+
+  double ted = 0.0;
+  std::vector<_node*>* postorder_document = common::generate_postorder(&document);
+
+  for (_node* subtree: *postorder_document) {
+    ted = zs::compute_zhang_shasha<_node, _costs>(&query, subtree);
+    std::cout << "ted: " << ted << " - " << subtree->get_label() << std::endl;
+    if (ranking.size() < k || ted < ranking.front().get_distance()) {
+      NodeDistancePair<_node> in_ranking(*subtree, ted);
+      if (!ranking.insert(in_ranking)) {
+        std::cout << "Replacing front with " << in_ranking.get_node().get_label() << " : " << in_ranking.get_distance() << std::endl;
+        ranking.replace_front(in_ranking);
+      }
+    }
+  }
+
+  return ranking;
 }
 
 }
