@@ -14,7 +14,7 @@ namespace sed {
 // type is specified as first template parameter, the cost model type as second
 // template parameter.
 template<class _node = nodes::Node, class _costs = nodes::Costs<_node>>
-int compute_string_edit_distance (_node* tree1, _node* tree2, _costs costs = _costs())
+int compute_string_edit_distance(_node* tree1, _node* tree2, _costs costs = _costs())
 {
   std::vector<int> string1, string2;
   int rename_cost = 0, temp = 0;

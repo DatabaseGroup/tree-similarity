@@ -10,71 +10,71 @@ private:
   size_t size_;
   Type* data_;
 
-  void shift_up (const size_t& start_position);
-  void shift_down (const size_t& start_position);
+  void shift_up(const size_t& start_position);
+  void shift_down(const size_t& start_position);
 
 public:
-  KHeap (const int& max_size = 10);
-  ~KHeap ();
+  KHeap(const int& max_size = 10);
+  ~KHeap();
 
-  const bool empty () const;
-  const bool full () const;
-  const size_t size () const;
-  const size_t max_size () const;
+  const bool empty() const;
+  const bool full() const;
+  const size_t size() const;
+  const size_t max_size() const;
 
-  const Type& front () const;
-  const Type& back () const;
-  bool insert (Type element);
-  const Type& erase_front ();
-  const Type replace_front (Type replacement);
+  Type const& front() const;
+  Type const& back() const;
+  bool insert(Type element);
+  const Type& erase_front();
+  const Type replace_front(Type replacement);
 
-  void print_array () const;
+  void print_array() const;
 
 };
 
 template<class Type>
-KHeap<Type>::KHeap (const int& max_size) : max_size_(max_size) {
+KHeap<Type>::KHeap(const int& max_size) : max_size_(max_size) {
   data_ = new Type[max_size_];
   size_ = 0;
 }
 
 template<class Type>
-KHeap<Type>::~KHeap () {
+KHeap<Type>::~KHeap() {
   delete[] data_;
 }
 
 template<class Type>
-const bool KHeap<Type>::empty () const {
+const bool KHeap<Type>::empty() const {
   return (size_ == 0);
 }
 
 template<class Type>
-const bool KHeap<Type>::full () const {
+const bool KHeap<Type>::full() const {
   return (size_ == max_size_);
 }
 
 template<class Type>
-const size_t KHeap<Type>::size () const {
+const size_t KHeap<Type>::size() const {
   return size_;
 }
 
 template<class Type>
-const size_t KHeap<Type>::max_size () const {
+const size_t KHeap<Type>::max_size() const {
   return max_size_;
 }
 
 template<class Type>
-const Type& KHeap<Type>::front () const {
+Type const& KHeap<Type>::front() const {
   return data_[0];
 }
 
 template<class Type>
-const Type& KHeap<Type>::back () const {
+Type const& KHeap<Type>::back() const {
   return data_[size_];
 }
 
 template<class Type>
-bool KHeap<Type>::insert (Type element) {
+bool KHeap<Type>::insert(Type element) {
   if (size_ == max_size_) {
     return false;
   }
@@ -86,15 +86,17 @@ bool KHeap<Type>::insert (Type element) {
 }
 
 template<class Type>
-const Type& KHeap<Type>::erase_front () {
+const Type& KHeap<Type>::erase_front() {
   Type& root = data_[0];
+
   data_[0] = data_[--size_];
   shift_down(0);
+
   return root;
 }
 
 template<class Type>
-const Type KHeap<Type>::replace_front (Type replacement) {
+const Type KHeap<Type>::replace_front(Type replacement) {
   Type root = data_[0];
   data_[0] = replacement;
   
@@ -106,16 +108,16 @@ const Type KHeap<Type>::replace_front (Type replacement) {
 }
 
 template<class Type>
-void KHeap<Type>::print_array () const {
+void KHeap<Type>::print_array() const {
   std::cout << max_size_ << "-Heap: | ";
   for (int i = 0; i < size_; ++i) {
-    std::cout << data_[i]/*.get_node().get_label()*/ << " | ";
+    std::cout << data_[i].get_node().get_label() << "_" << data_[i].get_node().get_id() << ", " << data_[i].get_distance() << " | ";
   }
   std::cout << std::endl;
 }
 
 template<class Type>
-void KHeap<Type>::shift_up (const size_t& start_position) {
+void KHeap<Type>::shift_up(const size_t& start_position) {
   const Type back = this->back();
   size_t parent_position = ((start_position - 1) / 2);
 
@@ -130,7 +132,7 @@ void KHeap<Type>::shift_up (const size_t& start_position) {
 }
 
 template<class Type>
-void KHeap<Type>::shift_down (const size_t& start_position) {
+void KHeap<Type>::shift_down(const size_t& start_position) {
   const Type front = this->front();
   size_t left_position = 0, right_position = 0, swap_position = 0;
 

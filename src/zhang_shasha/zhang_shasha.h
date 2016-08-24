@@ -17,7 +17,7 @@ std::vector<int> l2; //stores the left-most-leaf-descendants of tree 2
 //
 //Param: root of the tree, a vector which stores the left most leaf descendant for each subtree
 template<class _node = nodes::Node>
-void lmld (_node* root, std::vector<int>& l) {
+void lmld(_node* root, std::vector<int>& l) {
   // call lmld recursively and compute the left-most-leaf descendants
   for (int i = 1; i <= root->get_children_number(); ++i) {
     lmld<_node>(root->get_children().at(i - 1), l);
@@ -36,7 +36,7 @@ void lmld (_node* root, std::vector<int>& l) {
 //Param: the left-most leaf descendats for all subtrees of the input-tree, the number of leaves of the input-tree
 //
 //Return: A vector storing all key-roots of the input-tree
-std::vector<int> kr (std::vector<int>& l, int leaf_count) {
+std::vector<int> kr(std::vector<int>& l, int leaf_count) {
   std::vector<int> kr(leaf_count + 1);
   std::vector<int> visit(l.size(), 0); // was node visited
 
@@ -54,7 +54,7 @@ std::vector<int> kr (std::vector<int>& l, int leaf_count) {
 }
 
 template<class _node = nodes::Node>
-void set_leaves (std::vector<_node*>* leaves_tree1,
+void set_leaves(std::vector<_node*>* leaves_tree1,
   std::vector<_node*>* leaves_tree2, _node* root, int which_tree)
 {  
   if (which_tree == 1) {
@@ -83,7 +83,7 @@ void set_leaves (std::vector<_node*>* leaves_tree1,
 //
 // Parameters: left-hand tree, right-hand tree
 template<class _node = nodes::Node>
-void make_leaves (std::vector<_node*>* leaves_tree1,
+void make_leaves(std::vector<_node*>* leaves_tree1,
   std::vector<_node*>* leaves_tree2, _node* tree1, _node* tree2)
 {
   // TODO: remove which_tree from set_leaves
@@ -134,7 +134,7 @@ void forest_dist(std::vector<_node*>* tree1_postorder,
 //
 // Params:  edm     the edit mapping
 template<class _node = nodes::Node>
-void print_pretty_edit_mapping (std::vector<std::array<nodes::Node*, 2>> edit_mapping)
+void print_pretty_edit_mapping(std::vector<std::array<nodes::Node*, 2>> edit_mapping)
 {
   std::array<nodes::Node*, 2> em;
   for ( std::vector<std::array<nodes::Node*, 2> >::iterator it = --edit_mapping.end();
@@ -165,7 +165,7 @@ void print_pretty_edit_mapping (std::vector<std::array<nodes::Node*, 2>> edit_ma
 // "Returns"/Fills: a two dimensional integer array, where arr[0][id] is the
 //          mapping for a the node in the first tree (depends on the mapping !)
 template<class _node = nodes::Node>
-void get_edit_mapping_int_array (std::vector<std::array<nodes::Node*, 2> > edit_mapping,
+void get_edit_mapping_int_array(std::vector<std::array<nodes::Node*, 2> > edit_mapping,
   int** array_to_fill)
 {
   std::array<nodes::Node*, 2> em;
@@ -196,7 +196,7 @@ void get_edit_mapping_int_array (std::vector<std::array<nodes::Node*, 2> > edit_
 //                nullptr     -> node_in_t2   insert operation
 //                node_in_t1  -> nullptr      delete operation
 template<class _node = nodes::Node, class _costs = nodes::Costs<_node>>
-std::vector<std::array<nodes::Node*, 2> > compute_edit_mapping (nodes::Node* tree1,
+std::vector<std::array<nodes::Node*, 2> > compute_edit_mapping(nodes::Node* tree1,
   nodes::Node* tree2, _costs costs = _costs())
 {
   std::vector<_node*>* tree1_postorder = common::generate_postorder(tree1);
@@ -327,7 +327,7 @@ std::vector<std::array<nodes::Node*, 2> > compute_edit_mapping (nodes::Node* tre
 // type is specified as first template parameter, the cost model type as second
 // template parameter.
 template<class _node = nodes::Node, class _costs = nodes::Costs<_node>>
-double compute_zhang_shasha (_node* tree1, _node* tree2, _costs costs = _costs())
+double compute_zhang_shasha(_node* tree1, _node* tree2, _costs costs = _costs())
 {
   std::vector<_node*>* tree1_postorder = common::generate_postorder<_node>(tree1);
   std::vector<_node*>* tree2_postorder = common::generate_postorder<_node>(tree2);

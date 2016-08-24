@@ -12,66 +12,66 @@ private:
   double distance_;
 
 public:
-  NodeDistancePair ();
-  NodeDistancePair (const NodeType node, double distance);
-  ~NodeDistancePair ();
+  NodeDistancePair();
+  NodeDistancePair(const NodeType node, double distance);
+  ~NodeDistancePair();
 
-  double get_distance () const;
-  const NodeType get_node () const;
+  double get_distance() const;
+  const NodeType get_node() const;
 
-  bool operator< (const NodeDistancePair& other) const;
-  bool operator> (const NodeDistancePair& other) const;
-  bool operator== (const NodeDistancePair& other) const;
-  bool operator>= (const NodeDistancePair& other) const;
-  bool operator<= (const NodeDistancePair& other) const;
+  bool operator<(const NodeDistancePair& other) const;
+  bool operator>(const NodeDistancePair& other) const;
+  bool operator==(const NodeDistancePair& other) const;
+  bool operator>=(const NodeDistancePair& other) const;
+  bool operator<=(const NodeDistancePair& other) const;
 };
 
 template<class NodeType>
-NodeDistancePair<NodeType>::NodeDistancePair () { }
+NodeDistancePair<NodeType>::NodeDistancePair() { }
 
 template<class NodeType>
-NodeDistancePair<NodeType>::NodeDistancePair (const NodeType node,
+NodeDistancePair<NodeType>::NodeDistancePair(const NodeType node,
   double distance) : node_(node), distance_(distance) { }
 
 template<class NodeType>
-NodeDistancePair<NodeType>::~NodeDistancePair () { }
+NodeDistancePair<NodeType>::~NodeDistancePair() { }
 
 template<class NodeType>
-double NodeDistancePair<NodeType>::get_distance () const {
+double NodeDistancePair<NodeType>::get_distance() const {
   return distance_;
 }
 
 template<class NodeType>
-const NodeType NodeDistancePair<NodeType>::get_node () const {
+const NodeType NodeDistancePair<NodeType>::get_node() const {
   return node_;
 }
 
 template<class NodeType>
-bool NodeDistancePair<NodeType>::operator< (const NodeDistancePair& other) const
+bool NodeDistancePair<NodeType>::operator<(const NodeDistancePair& other) const
 {
   return (distance_ < other.get_distance());
 }
 
 template<class NodeType>
-bool NodeDistancePair<NodeType>::operator> (const NodeDistancePair& other) const
+bool NodeDistancePair<NodeType>::operator>(const NodeDistancePair& other) const
 {
   return (distance_ > other.get_distance());
 }
 
 template<class NodeType>
-bool NodeDistancePair<NodeType>::operator== (const NodeDistancePair& other) const
+bool NodeDistancePair<NodeType>::operator==(const NodeDistancePair& other) const
 {
   return (distance_ == other.get_distance());
 }
 
 template<class NodeType>
-bool NodeDistancePair<NodeType>::operator>= (const NodeDistancePair& other) const
+bool NodeDistancePair<NodeType>::operator>=(const NodeDistancePair& other) const
 {
   return ((*this > other) || (*this == other));
 }
 
 template<class NodeType>
-bool NodeDistancePair<NodeType>::operator<= (const NodeDistancePair& other) const
+bool NodeDistancePair<NodeType>::operator<=(const NodeDistancePair& other) const
 {
   return ((*this < other) || (*this == other));
 }

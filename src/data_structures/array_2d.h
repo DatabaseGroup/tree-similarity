@@ -28,28 +28,28 @@ private:
 
 public:
   // Constructor(s)
-  Array2D (size_t rows, size_t columns);
-  Array2D (const Array2D& other);
+  Array2D(size_t rows, size_t columns);
+  Array2D(const Array2D& other);
 
   // Destructor
-  ~Array2D ();
+  ~Array2D();
 
   // Get number of rows
-  size_t get_rows () const;
+  size_t get_rows() const;
 
   // Get number of columns
-  size_t get_columns () const;
+  size_t get_columns() const;
 
   // Enable access as usual using the [][] notation.
   //
   // Params:  row the row to be accessed
   //
   // Return:  A pointer to the beginning of the row to be accessed
-  Type* operator[] (size_t row);
+  Type* operator[](size_t row);
 };
 
 template<typename Type>
-Array2D<Type>::Array2D (size_t rows, size_t columns)
+Array2D<Type>::Array2D(size_t rows, size_t columns)
   : rows_(rows), columns_(columns), data_(nullptr)
 {
   // allocate array
@@ -57,30 +57,30 @@ Array2D<Type>::Array2D (size_t rows, size_t columns)
 }
 
 template<typename Type>
-Array2D<Type>::Array2D (const Array2D& other)
+Array2D<Type>::Array2D(const Array2D& other)
   : Array2D(other.get_rows(), other.get_columns())
 {
   std::copy(other.data, other.data + (rows_ * columns_), data_);
 }
 
 template<typename Type>
-Array2D<Type>::~Array2D () {
+Array2D<Type>::~Array2D() {
   // deallocate array
   delete[] data_;
 }
 
 template<typename Type>
-size_t Array2D<Type>::get_rows () const {
+size_t Array2D<Type>::get_rows() const {
   return rows_;
 }
 
 template<typename Type>
-size_t Array2D<Type>::get_columns () const {
+size_t Array2D<Type>::get_columns() const {
   return columns_;
 }
 
 template<typename Type>
-Type* Array2D<Type>::operator[] (size_t row) {
+Type* Array2D<Type>::operator[](size_t row) {
   return data_ + row * columns_;
 }
 

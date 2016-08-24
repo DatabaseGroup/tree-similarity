@@ -5,7 +5,7 @@ namespace parser {
 
 typedef std::unordered_map<std::string, int> LabelIDMap;
 
-nodes::Node* create_tree_from_string (char* str, LabelIDMap& hashtable,
+nodes::Node* create_tree_from_string(char* str, LabelIDMap& hashtable,
   int& labelid)
 { 
   int length = std::strlen(str);
@@ -77,6 +77,6 @@ nodes::Node* create_tree_from_string (char* str, LabelIDMap& hashtable,
   return root;
 }
 
-};
+} // namespace parser
 
 #endif // PARSER_H

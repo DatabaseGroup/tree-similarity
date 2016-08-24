@@ -44,7 +44,11 @@ void postorder(_node* root, std::vector<_node*>* tr_post, int* node_id_counter) 
 //
 // Return:  A pointer to a vector of node pointers of the 'postorderified' tree
 template<class _node = nodes::Node>
-std::vector<_node*>* generate_postorder (_node* root) { // TODO: rename to create_postorder
+std::vector<_node*>* generate_postorder(_node* root) {
+
+// TODO: rename to create_postorder
+// TODISCUSS: this function modifies the id of the node object. is this correct?
+
   int node_id_counter = 1;
   // Heap allocation
   std::vector<_node*>* tree_postorder = new std::vector<_node*>();
@@ -64,7 +68,7 @@ std::vector<_node*>* generate_postorder (_node* root) { // TODO: rename to creat
 //          max_fanout  Maximum fanout
 //
 // Return:  None
-void generate_full_tree (nodes::Node *root, int fixed_depth, int max_fanout) {
+void generate_full_tree(nodes::Node *root, int fixed_depth, int max_fanout) {
   // If we reached the maximum depth, terminate this branch.
   if (fixed_depth == 0) {
     return;
@@ -116,7 +120,7 @@ void copy_tree_with_colour(nodes::Node* original, nodes::Node* copy, char colour
 // Params:  node  The root node of the labels to be printed
 //
 // Return:  None
-void print_tree_labels (nodes::Node* node) {
+void print_tree_labels(nodes::Node* node) {
   // Print the label of node.
   // Recursively print labels of all descendants of node.
   std::vector<nodes::Node*> children = node->get_children();
@@ -136,7 +140,7 @@ void print_tree_labels (nodes::Node* node) {
 //          level   the int level for this level
 //
 // Return: a string in json format
-std::string get_json_tree (nodes::Node* root, int level, IDLabelMap hashtable,
+std::string get_json_tree(nodes::Node* root, int level, IDLabelMap hashtable,
   int* map = nullptr, int tree = 0)
 {
   std::stringstream str;
@@ -209,7 +213,7 @@ std::string gather_links_nodes_hybrid_graph(nodes::Node* root,
 }
 
 
-void increase_scope (nodes::Node* n) {
+void increase_scope(nodes::Node* n) {
   for(int i = 0; i < n->get_children_number(); i++){
     if(n->get_child(i)->get_level() <= n->get_level()){
       n->get_child(i)->set_level(n->get_level()+1);
@@ -218,7 +222,7 @@ void increase_scope (nodes::Node* n) {
   }
 }
 
-std::string get_json_hybrid_graph (nodes::Node* root, IDLabelMap ht)
+std::string get_json_hybrid_graph(nodes::Node* root, IDLabelMap ht)
 {
   std::stringstream str;
 
@@ -297,7 +301,7 @@ std::string get_json_hybrid_tree(nodes::Node* root, IDLabelMap ht, std::set<node
   return str.str();
 }
 
-std::string get_json_hybrid_graph_tree (nodes::Node* root, IDLabelMap ht)
+std::string get_json_hybrid_graph_tree(nodes::Node* root, IDLabelMap ht)
 {
   std::stringstream str;
   std::vector<std::string> edges;
@@ -324,7 +328,7 @@ std::string get_json_hybrid_graph_tree (nodes::Node* root, IDLabelMap ht)
 // 
 // Params:  root    the parent for its children
 //          arr     the array which gets filled with (e.g.: postorder) ids (int)
-void get_parents (nodes::Node* root, int* array_to_fill, char colour = char(0)) {
+void get_parents(nodes::Node* root, int* array_to_fill, char colour = char(0)) {
   for(int i = 0; i < root->get_children_number(); i++){
     if(colour == char(0)){
       array_to_fill[root->get_child(i)->get_id()] = root->get_id();
@@ -440,7 +444,7 @@ void print_tree_indented(nodes::Node* n, int level,
 }
 
 // append a node to the hybrid graph at a given pos and a colour
-nodes::Node* append_node_hybrid (nodes::Node* child, nodes::Node* parent, int pos, char colour) 
+nodes::Node* append_node_hybrid(nodes::Node* child, nodes::Node* parent, int pos, char colour) 
 {
   // child->get_id()
   nodes::Node* node = new nodes::Node(0,child->get_label_id());
@@ -548,7 +552,7 @@ void colour_hybrid_graph(nodes::Node*& hybrid, nodes::Node* t2, IDMappedNode& ht
 
 
 // creates a hybrid graph, based on two trees and their given edit mapping
-nodes::Node* create_hybrid_graph (nodes::Node* tree1, nodes::Node* tree2,
+nodes::Node* create_hybrid_graph(nodes::Node* tree1, nodes::Node* tree2,
   std::vector<std::array<nodes::Node*, 2> > edit_mapping,
   IDLabelMap hashtable_id_to_label)
 {

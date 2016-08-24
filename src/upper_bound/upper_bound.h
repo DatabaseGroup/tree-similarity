@@ -9,10 +9,10 @@ namespace upper_bound {
 class UpperBound {
 public:
   // Constructor(s)
-  UpperBound ();
+  UpperBound();
 
   // Destructor
-  ~UpperBound ();
+  ~UpperBound();
 
   // Computes a very simple upper bound by just adding the cost of deleting all
   // nodes of the left-hand-tree and the cost of insertion all nodes of the
@@ -23,16 +23,16 @@ public:
   //
   // Return: The simple upper bound for the two input-trees
   template<class _Node = nodes::Node, class _Costs = nodes::Costs<_Node>>
-  double compute_simple_upper_bound (_Node* tree1, _Node* tree2,
+  double compute_simple_upper_bound(_Node* tree1, _Node* tree2,
     _Costs costs = _Costs());
 };
 
-UpperBound::UpperBound () {}
+UpperBound::UpperBound() { }
 
-UpperBound::~UpperBound () {}
+UpperBound::~UpperBound() { }
 
 template<typename _Node, typename _Costs>
-double UpperBound::compute_simple_upper_bound (_Node* tree1, _Node* tree2,
+double UpperBound::compute_simple_upper_bound(_Node* tree1, _Node* tree2,
   _Costs costs)
 {
   return (tree1->get_subtree_size() * costs.del() +

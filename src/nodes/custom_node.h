@@ -17,24 +17,24 @@ private:
 
 public:
   // Basic constructor
-  CustomNode (std::vector<std::string> label,
+  CustomNode(std::vector<std::string> label,
     std::vector<CustomNode*> children);
 
   // Getter label
-  std::vector<std::string> get_label () const;
+  std::vector<std::string> get_label() const;
 
   // Getter children
-  std::vector<CustomNode*> get_children () const;
+  std::vector<CustomNode*> get_children() const;
 };
 
-CustomNode::CustomNode (std::vector<std::string> label,
+CustomNode::CustomNode(std::vector<std::string> label,
   std::vector<CustomNode*> children) : label_(label), children_(children) {}
 
-std::vector<std::string> CustomNode::get_label () const {
+std::vector<std::string> CustomNode::get_label() const {
   return label_;
 }
 
-std::vector<CustomNode*> CustomNode::get_children () const {
+std::vector<CustomNode*> CustomNode::get_children() const {
   return children_;
 }
 
@@ -50,55 +50,55 @@ struct CustomCosts {
   //          node2  The node having the desired name
   //
   // Return:  The cost of renaming node1 to node2
-  int ren (_Node node1, _Node node2);
+  int ren(_Node node1, _Node node2);
 
   // Basic delete cost function
   //
   // Params:  node The node to be deleted
   //
   // Return:  The cost of deleting node
-  int del (_Node node);
+  int del(_Node node);
 
   // Basic insert cost function
   //
   // Params:  node The node to be inserted
   //
   // Return:  The cost of inserting node
-  int ins (_Node node);
+  int ins(_Node node);
 
   // Dummy methods
-  int ren ();
-  int del ();
-  int ins ();
+  int ren();
+  int del();
+  int ins();
 };
 
 template<typename _Node>
-int CustomCosts<_Node>::ren (_Node node1, _Node node2) {
+int CustomCosts<_Node>::ren(_Node node1, _Node node2) {
   return 2;
 }
 
 template<typename _Node>
-int del (_Node node) {
+int del(_Node node) {
   return 2;
 }
 
 template<typename _Node>
-int ins (_Node node) {
+int ins(_Node node) {
   return 2;
 }
 
 template<typename _Node>
-int ren () {
+int ren() {
   return 2;
 }
 
 template<typename _Node>
-int del () {
+int del() {
   return 2;
 }
 
 template<typename _Node>
-int ins () {
+int ins() {
   return 2;
 }
 
