@@ -2,10 +2,10 @@
 #define TASM_TASM_H
 
 #include "ring_buffer.h"
-#include "../common.h"
-#include "../zhang_shasha.h"
-#include "../k_heap.h"
-#include "../node_distance_pair.h"
+#include "../common/common.h"
+#include "../zhang_shasha/zhang_shasha.h"
+#include "../data_structures/k_heap.h"
+#include "../wrappers/node_distance_pair.h"
 
 #include <vector>
 #include <queue>
@@ -19,7 +19,7 @@
 
 namespace tasm {
 
-template<class _node = Node, class _costs = Costs<_node>>
+template<class _node = nodes::Node, class _costs = nodes::Costs<_node>>
 std::vector<_node> prb_pruning (std::queue<_node>& postorder_queue,
   const int threshold)
 {
@@ -50,7 +50,7 @@ std::vector<_node> prb_pruning (std::queue<_node>& postorder_queue,
 
 // lbl = ring_buffer, pfx = prefix_array, s = start, e = end, c = appended
 // pq = postorder_queue, tau = threshold
-template<class _node = Node, class _costs = Costs<_node>>
+template<class _node = nodes::Node, class _costs = nodes::Costs<_node>>
 void prb_next (RingBuffer<_node>& ring_buffer, RingBuffer<size_t>& prefix_array,
   size_t& start, size_t& end, size_t& appended, std::queue<_node>& postorder_queue,
   const int threshold)
@@ -108,10 +108,10 @@ void prb_next (RingBuffer<_node>& ring_buffer, RingBuffer<size_t>& prefix_array,
 // Computes the distance between the query and every subtree in the document.
 // Requires n distance computations, thus requiring O(m^2*n^2) time and O(m*n)
 // space (m ... size of the query tree, n ... size of the document)
-template<class _node = Node, class _costs = Costs<_node>>
-KHeap<NodeDistancePair<_node>> naive (_node& query, _node& document, const int& k) {
+template<class _node = nodes::Node, class _costs = nodes::Costs<_node>>
+data_structures::KHeap<wrappers::NodeDistancePair<_node>> naive (_node& query, _node& document, const int& k) {
   //std::priority_queue<std::pair<_node, double>> ranking;
-  KHeap<NodeDistancePair<_node>> ranking(k);
+  data_structures::KHeap<wrappers::NodeDistancePair<_node>> ranking(k);
   
   if (k == 0) {
     return ranking;
@@ -121,10 +121,10 @@ KHeap<NodeDistancePair<_node>> naive (_node& query, _node& document, const int& 
   std::vector<_node*>* postorder_document = common::generate_postorder(&document);
 
   for (_node* subtree: *postorder_document) {
-    ted = zs::compute_zhang_shasha<_node, _costs>(&query, subtree);
+    ted = zhang_shasha::compute_zhang_shasha<_node, _costs>(&query, subtree);
     std::cout << "ted: " << ted << " - " << subtree->get_label() << std::endl;
     if (ranking.size() < k || ted < ranking.front().get_distance()) {
-      NodeDistancePair<_node> in_ranking(*subtree, ted);
+      wrappers::NodeDistancePair<_node> in_ranking(*subtree, ted);
       if (!ranking.insert(in_ranking)) {
         std::cout << "Replacing front with " << in_ranking.get_node().get_label() << " : " << in_ranking.get_distance() << std::endl;
         ranking.replace_front(in_ranking);
@@ -135,6 +135,6 @@ KHeap<NodeDistancePair<_node>> naive (_node& query, _node& document, const int& 
   return ranking;
 }
 
-}
+} // namespace tasm
 
 #endif // TASM_TASM_H
