@@ -3,40 +3,31 @@
 #include <unordered_map>
 #include <fstream>
 
-#include "node.h"
-#include "string_node.h"
-#include "common.h"
-#include "parser.h"
-#include "upper_bound.h"
-#include "string_edit_distance.h"
-#include "zhang_shasha.h"
-#include "k_heap.h"
-
-#include "tasm/tasm.h"
+#include "tree_similarity.h"
 
 int main (int argc, char* argv[]) {
-  StringNode* d1 = new StringNode("John");
-  StringNode* d2 = new StringNode("auth");
-  StringNode* d3 = new StringNode("X1");
-  StringNode* d4 = new StringNode("title");
-  StringNode* d5 = new StringNode("article");
-  StringNode* d6 = new StringNode("VLDB");
-  StringNode* d7 = new StringNode("conf");
-  StringNode* d8 = new StringNode("Peter");
-  StringNode* d9 = new StringNode("auth");
-  StringNode* d10 = new StringNode("X3");
-  StringNode* d11 = new StringNode("title");
-  StringNode* d12 = new StringNode("article");
-  StringNode* d13 = new StringNode("Mike");
-  StringNode* d14 = new StringNode("auth");
-  StringNode* d15 = new StringNode("X4");
-  StringNode* d16 = new StringNode("title");
-  StringNode* d17 = new StringNode("article");
-  StringNode* d18 = new StringNode("proceedings");
-  StringNode* d19 = new StringNode("X2");
-  StringNode* d20 = new StringNode("title");
-  StringNode* d21 = new StringNode("book");
-  StringNode* d22 = new StringNode("dblp");
+  nodes::StringNode* d1 = new nodes::StringNode("John");
+  nodes::StringNode* d2 = new nodes::StringNode("auth");
+  nodes::StringNode* d3 = new nodes::StringNode("X1");
+  nodes::StringNode* d4 = new nodes::StringNode("title");
+  nodes::StringNode* d5 = new nodes::StringNode("article");
+  nodes::StringNode* d6 = new nodes::StringNode("VLDB");
+  nodes::StringNode* d7 = new nodes::StringNode("conf");
+  nodes::StringNode* d8 = new nodes::StringNode("Peter");
+  nodes::StringNode* d9 = new nodes::StringNode("auth");
+  nodes::StringNode* d10 = new nodes::StringNode("X3");
+  nodes::StringNode* d11 = new nodes::StringNode("title");
+  nodes::StringNode* d12 = new nodes::StringNode("article");
+  nodes::StringNode* d13 = new nodes::StringNode("Mike");
+  nodes::StringNode* d14 = new nodes::StringNode("auth");
+  nodes::StringNode* d15 = new nodes::StringNode("X4");
+  nodes::StringNode* d16 = new nodes::StringNode("title");
+  nodes::StringNode* d17 = new nodes::StringNode("article");
+  nodes::StringNode* d18 = new nodes::StringNode("proceedings");
+  nodes::StringNode* d19 = new nodes::StringNode("X2");
+  nodes::StringNode* d20 = new nodes::StringNode("title");
+  nodes::StringNode* d21 = new nodes::StringNode("book");
+  nodes::StringNode* d22 = new nodes::StringNode("dblp");
   
   d22->add_child(d5);
   d22->add_child(d18);
@@ -60,14 +51,14 @@ int main (int argc, char* argv[]) {
   d14->add_child(d13);
   d16->add_child(d15);
 
-  StringNode* query = new StringNode("book");
-  StringNode* title = new StringNode("title");
-  StringNode* x2 = new StringNode("X2");
+  nodes::StringNode* query = new nodes::StringNode("book");
+  nodes::StringNode* title = new nodes::StringNode("title");
+  nodes::StringNode* x2 = new nodes::StringNode("X2");
 
   query->add_child(title);
   title->add_child(x2);
 
-  std::queue<StringNode> postorder_queue;
+  std::queue<nodes::StringNode> postorder_queue;
   postorder_queue.push(*d1);
   postorder_queue.push(*d2);
   postorder_queue.push(*d3);
@@ -91,26 +82,25 @@ int main (int argc, char* argv[]) {
   postorder_queue.push(*d21);
   postorder_queue.push(*d22);
 
-  std::vector<StringNode> result = tasm::prb_pruning<StringNode>(postorder_queue, 6);
+  std::vector<nodes::StringNode> result = tasm::prb_pruning<nodes::StringNode>(postorder_queue, 6);
 
-  std::cout << "prb-pruning result:" << std::endl;
-  for (StringNode& s: result) {
+  /*std::cout << "prb-pruning result:" << std::endl;
+  for (nodes::StringNode& s: result) {
     std::cout << s.get_label() << std::endl;
   }
 
-  KHeap<NodeDistancePair<StringNode>> ranking =
-    tasm::naive<StringNode, StringCosts<StringNode>>(*query, *d22, 6);
+  data_structures::KHeap<wrappers::NodeDistancePair<nodes::StringNode>> ranking =
+    tasm::naive<nodes::StringNode, StringCosts<StringNode>>(*query, *d22, 6);
   std::cout << "ranking:" << std::endl;
   ranking.print_array();
 
   while (!ranking.empty()) {
-    const NodeDistancePair<StringNode>& p = ranking.front();
+    const wrappers::NodeDistancePair<nodes::StringNode>& p = ranking.front();
     ranking.erase_front();
     std::cout << "[" << p.get_node().get_label() << ", " << p.get_distance() << "]" << std::endl;
-  }
+  }*/
 
-  /*
-  KHeap<int> maxheap(6);
+  data_structures::KHeap<int> maxheap(6);
 
   maxheap.insert(16);
   maxheap.insert(17);
@@ -126,7 +116,6 @@ int main (int argc, char* argv[]) {
 
   std::cout << "MAX-HEAP:" << std::endl;
   maxheap.print_array();
-  */
 
 	return 0;
 }
