@@ -111,7 +111,7 @@ template<class Type>
 void KHeap<Type>::print_array() const {
   std::cout << max_size_ << "-Heap: | ";
   for (int i = 0; i < size_; ++i) {
-    std::cout << data_[i].get_node().get_label() << "_" << data_[i].get_node().get_id() << ", " << data_[i].get_distance() << " | ";
+    std::cout << data_[i].get_node().get_label() /*<< "_" << data_[i].get_node().get_id()*/ << ", " << data_[i].get_distance() << " | ";
   }
   std::cout << std::endl;
 }
