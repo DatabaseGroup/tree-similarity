@@ -3,7 +3,7 @@
 
 namespace tasm {
 
-template<typename Type = Node>
+template<class Type = nodes::Node>
 class RingBuffer {
 private:
   size_t size_;
@@ -21,28 +21,28 @@ public:
   Type& operator[] (size_t position);
 };
 
-template<typename Type>
+template<class Type>
 RingBuffer<Type>::RingBuffer (size_t threshold) : size_(threshold + 1) {
   data_ = new Type[size_];
   start_ = data_;
   end_ = start_ + threshold;
 }
 
-template<typename Type>
+template<class Type>
 RingBuffer<Type>::~RingBuffer () {
   delete[] data_;
 }
 
-template<typename Type>
+template<class Type>
 const size_t RingBuffer<Type>::get_size () const {
   return size_;
 }
 
-template<typename Type>
+template<class Type>
 Type& RingBuffer<Type>::operator[] (size_t position) {
   return data_ [position];
 }
 
-}
+} // namespace tasm
 
 #endif // TASM_RING_BUFFER_H
