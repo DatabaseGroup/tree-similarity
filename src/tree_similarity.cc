@@ -5,7 +5,7 @@
 
 #include "tree_similarity.h"
 
-int main (int argc, char* argv[]) {
+int main(int argc, char* argv[]) {
   nodes::StringNode* d1 = new nodes::StringNode("John");
   nodes::StringNode* d2 = new nodes::StringNode("auth");
   nodes::StringNode* d3 = new nodes::StringNode("X1");
@@ -84,38 +84,27 @@ int main (int argc, char* argv[]) {
 
   std::vector<nodes::StringNode> result = tasm::prb_pruning<nodes::StringNode>(postorder_queue, 6);
 
-  /*std::cout << "prb-pruning result:" << std::endl;
+  std::cout << "prb-pruning result:" << std::endl;
   for (nodes::StringNode& s: result) {
     std::cout << s.get_label() << std::endl;
   }
 
   data_structures::KHeap<wrappers::NodeDistancePair<nodes::StringNode>> ranking =
-    tasm::naive<nodes::StringNode, StringCosts<StringNode>>(*query, *d22, 6);
-  std::cout << "ranking:" << std::endl;
+    tasm::naive<nodes::StringNode, nodes::StringCosts<nodes::StringNode>>(*query, *d22, 6);
+  std::cout << "ranking: ";
   ranking.print_array();
 
-  while (!ranking.empty()) {
+  /*while (!ranking.empty()) {
     const wrappers::NodeDistancePair<nodes::StringNode>& p = ranking.front();
+    ranking.print_array();
+    std::cout << "[" << p.get_node().get_label() << "_" << p.get_node().get_id() << ", " << p.get_distance() << "]" << std::endl;
     ranking.erase_front();
-    std::cout << "[" << p.get_node().get_label() << ", " << p.get_distance() << "]" << std::endl;
+    ranking.print_array();
+    std::cout << std::endl;
   }*/
 
-  data_structures::KHeap<int> maxheap(6);
-
-  maxheap.insert(16);
-  maxheap.insert(17);
-  maxheap.insert(18);
-  maxheap.insert(13);
-  maxheap.insert(15);
-  maxheap.insert(19);
-
-  std::cout << "MAX-HEAP:" << std::endl;
-  maxheap.print_array();
-
-  maxheap.replace_front(6);
-
-  std::cout << "MAX-HEAP:" << std::endl;
-  maxheap.print_array();
+  data_structures::KHeap<nodes::StringNode> heap(6);
+  tasm::tasm_dynamic(*query, *d22, 6, heap);
 
 	return 0;
 }
