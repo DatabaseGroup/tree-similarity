@@ -6,10 +6,12 @@
 #include <set>
 #include <array>
 
+#include "../nodes/node.h"
+
 namespace common {
 
 typedef std::unordered_map<int, std::string> IDLabelMap;
-typedef std::map<int, Node*, std::greater<int>> IDMappedNode;
+typedef std::map<int, nodes::Node*, std::greater<int>> IDMappedNode;
 
 // Recursively traverses the subtree rooted at a given root.
 //
@@ -21,7 +23,7 @@ typedef std::map<int, Node*, std::greater<int>> IDMappedNode;
 //                          time a node is added to the resulting vector
 //
 // Return:  None (the result is stored in tr_post, which is altered)
-template<class _node = Node>
+template<class _node = nodes::Node>
 void postorder(_node* root, std::vector<_node*>* tr_post, int* node_id_counter) {
   if (root) {
     // traverse children first
@@ -41,7 +43,7 @@ void postorder(_node* root, std::vector<_node*>* tr_post, int* node_id_counter) 
 // Params:  root  The root node of the tree to be 'postorderified'
 //
 // Return:  A pointer to a vector of node pointers of the 'postorderified' tree
-template<class _node = Node>
+template<class _node = nodes::Node>
 std::vector<_node*>* generate_postorder (_node* root) { // TODO: rename to create_postorder
   int node_id_counter = 1;
   // Heap allocation
@@ -62,7 +64,7 @@ std::vector<_node*>* generate_postorder (_node* root) { // TODO: rename to creat
 //          max_fanout  Maximum fanout
 //
 // Return:  None
-void generate_full_tree (Node *root, int fixed_depth, int max_fanout) {
+void generate_full_tree (nodes::Node *root, int fixed_depth, int max_fanout) {
   // If we reached the maximum depth, terminate this branch.
   if (fixed_depth == 0) {
     return;
@@ -82,7 +84,7 @@ void generate_full_tree (Node *root, int fixed_depth, int max_fanout) {
     // Create new node.
     // We have to use 'new' here. Otherwise as soon as we get out of this
     // method's scope, the object gets deleted.
-    Node* new_node = new Node(random_label); // modified by stefan
+    nodes::Node* new_node = new nodes::Node(random_label); // modified by stefan
     // Add node as a child of root.
     root->add_child(new_node);
     // Recursively generate consecutive levels.
@@ -90,18 +92,18 @@ void generate_full_tree (Node *root, int fixed_depth, int max_fanout) {
   }
 }
 
-void copy_tree(Node* original, Node* copy) {
+void copy_tree(nodes::Node* original, nodes::Node* copy) {
   for(int i = 0; i < original->get_children_number(); i++){
-    Node* temp = new Node(original->get_child(i)->get_label_id());
+    nodes::Node* temp = new nodes::Node(original->get_child(i)->get_label_id());
     copy->add_child(temp);
     copy_tree(original->get_child(i), temp);
   }
 }
 
-void copy_tree_with_colour(Node* original, Node* copy, char colour) {
+void copy_tree_with_colour(nodes::Node* original, nodes::Node* copy, char colour) {
   copy->set_colour(colour);
   for(int i = 0; i < original->get_children_number(); i++){
-    Node* temp = new Node(original->get_child(i)->get_label_id());
+    nodes::Node* temp = new nodes::Node(original->get_child(i)->get_label_id());
     copy->add_child(temp);
     copy->add_edge(colour);
     copy_tree_with_colour(original->get_child(i), temp, colour);
@@ -114,11 +116,11 @@ void copy_tree_with_colour(Node* original, Node* copy, char colour) {
 // Params:  node  The root node of the labels to be printed
 //
 // Return:  None
-void print_tree_labels (Node* node) {
+void print_tree_labels (nodes::Node* node) {
   // Print the label of node.
   // Recursively print labels of all descendants of node.
-  std::vector<Node*> children = node->get_children();
-  for ( std::vector<Node*>::const_iterator node_it = children.cbegin();
+  std::vector<nodes::Node*> children = node->get_children();
+  for ( std::vector<nodes::Node*>::const_iterator node_it = children.cbegin();
         node_it != children.cend(); ++node_it)
   {
     print_tree_labels(*node_it);
@@ -134,7 +136,7 @@ void print_tree_labels (Node* node) {
 //          level   the int level for this level
 //
 // Return: a string in json format
-std::string get_json_tree (Node* root, int level, IDLabelMap hashtable,
+std::string get_json_tree (nodes::Node* root, int level, IDLabelMap hashtable,
   int* map = nullptr, int tree = 0)
 {
   std::stringstream str;
@@ -169,7 +171,7 @@ std::string get_json_tree (Node* root, int level, IDLabelMap hashtable,
   return str.str();
 }
 
-std::string get_json_side_by_side(Node* tree1, Node* tree2, 
+std::string get_json_side_by_side(nodes::Node* tree1, nodes::Node* tree2, 
   IDLabelMap hashtable_id_to_label, int** edit_mapping_int_array = nullptr)
 {
   std::string sbs = "[";
@@ -185,8 +187,8 @@ std::string get_json_side_by_side(Node* tree1, Node* tree2,
   return sbs;
 }
 
-std::string gather_links_nodes_hybrid_graph(Node* root, 
-  std::set<Node*>& visited, int& id_counter, IDLabelMap ht) 
+std::string gather_links_nodes_hybrid_graph(nodes::Node* root, 
+  std::set<nodes::Node*>& visited, int& id_counter, IDLabelMap ht) 
 {
   std::stringstream str;
   if(visited.find(root) == visited.end()){
@@ -194,7 +196,7 @@ std::string gather_links_nodes_hybrid_graph(Node* root,
     root->set_id(id_counter);
     id_counter++;
     for(int i = 0; i < root->get_children_number(); i++){
-      Node* tmp_c = root->get_child(i);
+      nodes::Node* tmp_c = root->get_child(i);
       str << gather_links_nodes_hybrid_graph(tmp_c, visited, id_counter, ht);
       str << "{\"source\": " << root->get_id() << ",\"target\": " << tmp_c->get_id()
       << ",\"colour\":\"" << root->get_edge_colour(i) << "\"}";
@@ -207,7 +209,7 @@ std::string gather_links_nodes_hybrid_graph(Node* root,
 }
 
 
-void increase_scope (Node* n) {
+void increase_scope (nodes::Node* n) {
   for(int i = 0; i < n->get_children_number(); i++){
     if(n->get_child(i)->get_level() <= n->get_level()){
       n->get_child(i)->set_level(n->get_level()+1);
@@ -216,21 +218,21 @@ void increase_scope (Node* n) {
   }
 }
 
-std::string get_json_hybrid_graph (Node* root, IDLabelMap ht)
+std::string get_json_hybrid_graph (nodes::Node* root, IDLabelMap ht)
 {
   std::stringstream str;
 
   int id_counter = 1;
-  std::set<Node* > visited;
+  std::set<nodes::Node* > visited;
   root->set_level(0);
   increase_scope(root);
   char separator = ' ';
   str << "{\"links\": [" << gather_links_nodes_hybrid_graph(root, visited,
     id_counter, ht) << "]";
   str << ", \"nodes\": [";
-  for(std::set<Node*>::iterator it = visited.begin(); it != visited.end(); ++it)
+  for(std::set<nodes::Node*>::iterator it = visited.begin(); it != visited.end(); ++it)
   {
-    Node* n = *it;
+    nodes::Node* n = *it;
     str << separator << "{\"name\": \"" << ht[n->get_label_id()] << 
       "\", \"id\": " << n->get_id() << ", \"colour\": \"" << n->get_colour() << "\",\"scope\":"<< n->get_level() <<", \"children\":";
     if(n->get_children_number() != 0){
@@ -253,7 +255,7 @@ std::string get_json_hybrid_graph (Node* root, IDLabelMap ht)
   return str.str();
 }
 
-std::string get_json_hybrid_tree(Node* root, IDLabelMap ht, std::set<Node*>& is_child, int pos, std::vector<std::string>& edges, char edgecolour = ' '){
+std::string get_json_hybrid_tree(nodes::Node* root, IDLabelMap ht, std::set<nodes::Node*>& is_child, int pos, std::vector<std::string>& edges, char edgecolour = ' '){
   std::stringstream str;
   str << "{\"label\":\""<< ht[root->get_label_id()] << "\","
       << "\"id\":" << root->get_id() << ",\"pos\":" << pos << ",\"colour\":\"" << root->get_colour() << "\"";
@@ -264,7 +266,7 @@ std::string get_json_hybrid_tree(Node* root, IDLabelMap ht, std::set<Node*>& is_
     bool empty = true;
     std::stringstream str_tmp;
     for(int i = 0; i<root->get_children_number(); i++){
-      Node* tmp_c = root->get_child(i);
+      nodes::Node* tmp_c = root->get_child(i);
       if(tmp_c->get_level() == (root->get_level()+1)){ // maybe consider an array here instead of a set
         if(is_child.find(tmp_c) == is_child.end()){
           is_child.insert(tmp_c);
@@ -295,12 +297,12 @@ std::string get_json_hybrid_tree(Node* root, IDLabelMap ht, std::set<Node*>& is_
   return str.str();
 }
 
-std::string get_json_hybrid_graph_tree (Node* root, IDLabelMap ht)
+std::string get_json_hybrid_graph_tree (nodes::Node* root, IDLabelMap ht)
 {
   std::stringstream str;
   std::vector<std::string> edges;
 
-  std::set<Node* > is_child;
+  std::set<nodes::Node* > is_child;
   root->set_level(0);
   increase_scope(root);
   char separator = ' ';
@@ -322,7 +324,7 @@ std::string get_json_hybrid_graph_tree (Node* root, IDLabelMap ht)
 // 
 // Params:  root    the parent for its children
 //          arr     the array which gets filled with (e.g.: postorder) ids (int)
-void get_parents (Node* root, int* array_to_fill, char colour = char(0)) {
+void get_parents (nodes::Node* root, int* array_to_fill, char colour = char(0)) {
   for(int i = 0; i < root->get_children_number(); i++){
     if(colour == char(0)){
       array_to_fill[root->get_child(i)->get_id()] = root->get_id();
@@ -335,7 +337,7 @@ void get_parents (Node* root, int* array_to_fill, char colour = char(0)) {
 }
 
 // check if two trees are the same (speaking of labels & structure)
-bool check_if_same_trees(Node* t1, Node* t2){
+bool check_if_same_trees(nodes::Node* t1, nodes::Node* t2){
   bool result = false;
 
   if(t1->get_label_id() == t2->get_label_id()){
@@ -355,7 +357,7 @@ bool check_if_same_trees(Node* t1, Node* t2){
   return result;
 }
 
-bool check_if_same_trees(Node* t1, Node* t2, char colour){
+bool check_if_same_trees(nodes::Node* t1, nodes::Node* t2, char colour){
   bool result = false;
 
   if(t1->get_label_id() == t2->get_label_id()){
@@ -408,7 +410,7 @@ bool check_if_same_trees(Node* t1, Node* t2, char colour){
 }
 
 // prints the given tree indented using dots
-void print_tree_indented(Node* n, int level, IDLabelMap hashtable_id_to_label){
+void print_tree_indented(nodes::Node* n, int level, IDLabelMap hashtable_id_to_label){
   for(int i = 0; i < level; i++){
     std::cout << ".";
   }
@@ -420,7 +422,7 @@ void print_tree_indented(Node* n, int level, IDLabelMap hashtable_id_to_label){
 }
 
 // prints the given tree indented using dots and respects the given colour
-void print_tree_indented(Node* n, int level,
+void print_tree_indented(nodes::Node* n, int level,
   IDLabelMap hashtable_id_to_label, char colour)
 {
   if(n->get_colour() == 'm' || n->get_colour() == colour){
@@ -438,10 +440,10 @@ void print_tree_indented(Node* n, int level,
 }
 
 // append a node to the hybrid graph at a given pos and a colour
-Node* append_node_hybrid (Node* child, Node* parent, int pos, char colour) 
+nodes::Node* append_node_hybrid (nodes::Node* child, nodes::Node* parent, int pos, char colour) 
 {
   // child->get_id()
-  Node* node = new Node(0,child->get_label_id());
+  nodes::Node* node = new nodes::Node(0,child->get_label_id());
   node->set_colour(colour);
   if(pos!=-1 && pos <= parent->get_children_number()){
     parent->add_child_at(node, pos);
@@ -458,9 +460,9 @@ Node* append_node_hybrid (Node* child, Node* parent, int pos, char colour)
 // 'm' = mapped (=black)
 // 'r' = red (tree1)
 // 'b' = blue (tree2)
-void colour_hybrid_graph(Node*& hybrid, Node* t2, IDMappedNode& ht_t2_to_h, 
-  int* parents_h, int* parents_t2, std::vector<Node*>* postorder_h,
-  std::vector<Node*>* postorder_t2)
+void colour_hybrid_graph(nodes::Node*& hybrid, nodes::Node* t2, IDMappedNode& ht_t2_to_h, 
+  int* parents_h, int* parents_t2, std::vector<nodes::Node*>* postorder_h,
+  std::vector<nodes::Node*>* postorder_t2)
 {
 
   if(ht_t2_to_h[t2->get_id()]!=nullptr){
@@ -485,11 +487,11 @@ void colour_hybrid_graph(Node*& hybrid, Node* t2, IDMappedNode& ht_t2_to_h,
 
         // get the position of its (if any) left sibling,
         // so we get the positioning right
-        Node* par_h = ht_t2_to_h[parents_t2[t2->get_id()]];
-        Node* par_t2 = postorder_t2->at(parents_t2[t2->get_id()]-1);
+        nodes::Node* par_h = ht_t2_to_h[parents_t2[t2->get_id()]];
+        nodes::Node* par_t2 = postorder_t2->at(parents_t2[t2->get_id()]-1);
         int position = par_t2->get_child_position(t2);
         if(position != 0) {
-          Node* left_sib = ht_t2_to_h[par_t2->get_child(position-1)->get_id()];
+          nodes::Node* left_sib = ht_t2_to_h[par_t2->get_child(position-1)->get_id()];
           int position_l_sib = par_h->get_child_position(left_sib);
           if(position_l_sib != -1 && position_l_sib >= position){
             position = position_l_sib + 1;
@@ -511,24 +513,24 @@ void colour_hybrid_graph(Node*& hybrid, Node* t2, IDMappedNode& ht_t2_to_h,
 
       // get the position of its (if any) left sibling,
       // so we get the positioning right
-      Node* par_h = ht_t2_to_h[parents_t2[t2->get_id()]];
-      Node* par_t2 = postorder_t2->at(parents_t2[t2->get_id()]-1);
+      nodes::Node* par_h = ht_t2_to_h[parents_t2[t2->get_id()]];
+      nodes::Node* par_t2 = postorder_t2->at(parents_t2[t2->get_id()]-1);
       int position = par_t2->get_child_position(t2);
       if(position != 0) {
-        Node* left_sib = ht_t2_to_h[par_t2->get_child(position-1)->get_id()];
+        nodes::Node* left_sib = ht_t2_to_h[par_t2->get_child(position-1)->get_id()];
         int position_l_sib = par_h->get_child_position(left_sib);
         if(position_l_sib != -1 && position_l_sib >= position){
           position = position_l_sib + 1;
         }
       }
-      Node* n = append_node_hybrid(t2, par_h, position, 'b');
+      nodes::Node* n = append_node_hybrid(t2, par_h, position, 'b');
       n->set_id(hybrid->get_id() + t2->get_id());
       ht_t2_to_h[t2->get_id()] = n;
 
     } else {
       // root gets inserted
-      Node* tmp = hybrid;
-      hybrid = new Node(hybrid->get_id() + t2->get_id(), t2->get_label_id());
+      nodes::Node* tmp = hybrid;
+      hybrid = new nodes::Node(hybrid->get_id() + t2->get_id(), t2->get_label_id());
       hybrid->add_child(tmp);
       hybrid->add_edge('b');
       hybrid->set_colour('b');
@@ -546,21 +548,21 @@ void colour_hybrid_graph(Node*& hybrid, Node* t2, IDMappedNode& ht_t2_to_h,
 
 
 // creates a hybrid graph, based on two trees and their given edit mapping
-Node* create_hybrid_graph (Node* tree1, Node* tree2,
-  std::vector<std::array<Node*, 2> > edit_mapping,
+nodes::Node* create_hybrid_graph (nodes::Node* tree1, nodes::Node* tree2,
+  std::vector<std::array<nodes::Node*, 2> > edit_mapping,
   IDLabelMap hashtable_id_to_label)
 {
   IDMappedNode ht_t2_to_h;
-  std::vector<Node*>* postorder_t1 = generate_postorder(tree1);
-  std::vector<Node*>* postorder_t2 = generate_postorder(tree2);
+  std::vector<nodes::Node*>* postorder_t1 = generate_postorder(tree1);
+  std::vector<nodes::Node*>* postorder_t2 = generate_postorder(tree2);
 
-  Node* hybrid = new Node(tree1->get_id(), tree1->get_label_id());
+  nodes::Node* hybrid = new nodes::Node(tree1->get_id(), tree1->get_label_id());
   copy_tree_with_colour(tree1, hybrid, 'r');
-  std::vector<Node*>* postorder_hybrid = generate_postorder(hybrid);
-  Node* hybrid_check_t1 = hybrid;
+  std::vector<nodes::Node*>* postorder_hybrid = generate_postorder(hybrid);
+  nodes::Node* hybrid_check_t1 = hybrid;
 
-  std::vector<std::array<Node*,2> >::iterator it;
-  std::array<Node*, 2> em;
+  std::vector<std::array<nodes::Node*,2> >::iterator it;
+  std::array<nodes::Node*, 2> em;
   int inserted = 0;
   for(it=edit_mapping.begin() ; it < edit_mapping.end(); it++) {
     em = *it;
@@ -591,10 +593,10 @@ Node* create_hybrid_graph (Node* tree1, Node* tree2,
   colour_hybrid_graph(hybrid, tree2, ht_t2_to_h, parents_h, parents_t2,
     postorder_hybrid, postorder_t2);
 
-  Node* tree1_r = new Node(tree1->get_id(), tree1->get_label_id());
+  nodes::Node* tree1_r = new nodes::Node(tree1->get_id(), tree1->get_label_id());
   copy_tree_with_colour(tree1, tree1_r, 'r');
 
-  Node* tree2_b = new Node(tree2->get_id(), tree2->get_label_id());
+  nodes::Node* tree2_b = new nodes::Node(tree2->get_id(), tree2->get_label_id());
   copy_tree_with_colour(tree2, tree2_b, 'b');
 
   // check with the mapped node --> maybe the root of T2 got inserted
@@ -643,6 +645,6 @@ Node* create_hybrid_graph (Node* tree1, Node* tree2,
   return hybrid;
 }
 
-};
+} // namespace common
 
 #endif // COMMON_H
