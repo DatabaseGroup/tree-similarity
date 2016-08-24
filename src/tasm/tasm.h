@@ -6,6 +6,7 @@
 #include "../zhang_shasha/zhang_shasha.h"
 #include "../data_structures/k_heap.h"
 #include "../wrappers/node_distance_pair.h"
+#include "../wrappers/node_prefixes_pair.h"
 
 #include <vector>
 #include <queue>
@@ -16,6 +17,8 @@
 // TODO
 // -  Examine if movement of ring buffer stuff to RingBuffer class makes sense
 //    and if this is the case, do it (ring buffers share start, end, ...).
+// -  Change template parameters to uppercase, e.g. '_Node' instead of '_node'
+// -  Documentation (also KHeap)
 
 namespace tasm {
 
@@ -109,7 +112,9 @@ void prb_next(RingBuffer<_node>& ring_buffer, RingBuffer<size_t>& prefix_array,
 // Requires n distance computations, thus requiring O(m^2*n^2) time and O(m*n)
 // space (m ... size of the query tree, n ... size of the document)
 template<class _node = nodes::Node, class _costs = nodes::Costs<_node>>
-data_structures::KHeap<wrappers::NodeDistancePair<_node>> naive(_node& query, _node& document, const int& k) {
+data_structures::KHeap<wrappers::NodeDistancePair<_node>> naive(_node& query,
+  _node& document, const int& k)
+{
   //std::priority_queue<std::pair<_node, double>> ranking;
   data_structures::KHeap<wrappers::NodeDistancePair<_node>> ranking(k);
   
@@ -121,20 +126,81 @@ data_structures::KHeap<wrappers::NodeDistancePair<_node>> naive(_node& query, _n
   std::vector<_node*>* postorder_document = common::generate_postorder(&document);
 
   for (_node* subtree: *postorder_document) {
-    std::cout << "subtree: " << subtree->get_label() << "_" << subtree->get_id() << std::endl;
     ted = zhang_shasha::compute_zhang_shasha<_node, _costs>(&query, subtree);
-    std::cout << "ted: " << ted << " - " << subtree->get_label() << std::endl;
     if (ranking.size() < k || ted < ranking.front().get_distance()) {
       wrappers::NodeDistancePair<_node> in_ranking(*subtree, ted);
-      std::cout << "subtree: " << subtree->get_label() << "_" << subtree->get_id() << std::endl;
       if (!ranking.insert(in_ranking)) {
-        std::cout << "Replacing front with " << in_ranking.get_node().get_label() << "_" << in_ranking.get_node().get_id() << " : " << in_ranking.get_distance() << std::endl;
         ranking.replace_front(in_ranking);
       }
     }
   }
 
   return ranking;
+}
+
+template<class _node = nodes::Node, class _costs = nodes::Costs<_node>>
+data_structures::KHeap<wrappers::NodeDistancePair<_node>> tasm_postorder(
+  _node& query, std::queue<_node>& postorder_queue, const int& k)
+{
+  data_structures::KHeap<wrappers::NodeDistancePair<_node>> ranking(k);
+
+  // TODO
+
+  return ranking;
+}
+
+// TODO: optimize (avoid recomputation of prefixes, ...)
+template<class _node = nodes::Node>
+void prefixes(_node& subroot, std::vector<_node*>* postorder,
+  std::vector<wrappers::NodePrefixesPair<_node>*>& subtrees)
+{
+  subtrees.push_back(new wrappers::NodePrefixesPair<_node>(subroot));
+  for (int i = 0; i < subtrees.at(subroot.get_id() - 1)->get_root().get_id(); ++i) {
+    subtrees.at(subroot.get_id() - 1)->add_prefix(
+      new std::vector<_node*>(postorder->begin(), postorder->begin() + i + 1)
+    );
+  }
+}
+
+// get all subtrees (extended to only include relevant subtrees)
+// TODO: optimize (avoid recomputation, ...)
+template<class _node = nodes::Node>
+void decompose(_node& root,
+  std::vector<wrappers::NodePrefixesPair<_node>*>& subtrees)
+{
+  std::vector<_node*>* postorder_tree = common::generate_postorder(&root);
+  for (auto& node: *postorder_tree) {
+    prefixes<_node>(*node, postorder_tree, subtrees);
+  }
+}
+
+// ranking is modified during execution, therefore no return value
+template<class _node = nodes::Node, class _costs = nodes::Costs<_node>>
+void tasm_dynamic(_node& query, _node& document, const int& k,
+  data_structures::KHeap<_node>& ranking)
+{
+  const int query_size = query.get_subtree_size();
+  const int document_size = document.get_subtree_size();
+
+  data_structures::Array2D<int> td(query_size, document_size);
+  data_structures::Array2D<int> pd(query_size + 1, document_size + 1);
+
+  // compute all subtrees of the query/document and corresponding prefixes
+  std::vector<wrappers::NodePrefixesPair<_node>*> query_subtrees;
+  decompose<_node>(query, query_subtrees);
+  std::vector<wrappers::NodePrefixesPair<_node>*> document_subtrees;
+  decompose<_node>(document, document_subtrees);
+
+  // for all relevant subtrees of the query
+  for (auto& query_subtree: query_subtrees) { // TODO: only relevant
+    for(auto& document_subtree: document_subtrees) { // TODO: only relevant
+      pd[0][0] = 0;
+      std::vector<_node*>* document_nodes_asc = document_subtree->get_prefixes().at(document_subtree->get_prefixes().size() - 1);
+      for (auto& document_node: *document_nodes_asc) {
+        pd[0][document_node->get_id()] = pd[0][document_node->get_id()];
+      }
+    }
+  }
 }
 
 } // namespace tasm
