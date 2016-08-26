@@ -132,7 +132,7 @@ struct StringCosts {
       return 0;
     }
 
-    return 2; 
+    return ((del(node1) + ins(node2)) / 2);
   }
 
   // Basic delete cost function
@@ -140,7 +140,7 @@ struct StringCosts {
   // Params:  node The node to be deleted
   //
   // Return:  The cost of deleting node
-  int del(_node node) {
+  int del(_node* node) {
     return 2;
   }
 
@@ -149,7 +149,7 @@ struct StringCosts {
   // Params:  node The node to be inserted
   //
   // Return:  The cost of inserting node
-  int ins(_node node) {
+  int ins(_node* node) {
     return 2;
   }
 
@@ -158,6 +158,8 @@ struct StringCosts {
   int del() { return 2; }
   int ins() { return 2; }
 };
+
+StringNode empty_string_node("");
 
 } // namespace nodes
 
