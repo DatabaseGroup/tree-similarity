@@ -174,6 +174,23 @@ void decompose(_node& root,
   }
 }
 
+template<class _node = nodes::Node, class _costs = nodes::Costs<_node>>
+unsigned int node_alignment_costs(_node* query_node, _node* document_node,
+  _costs& costs)
+{
+  bool no_document_node = (document_node == &nodes::empty_string_node);
+  bool no_query_node = (query_node == &nodes::empty_string_node);
+  
+  if (no_document_node && !no_query_node) {
+    return costs.del(query_node);
+  } else if (!no_document_node && no_query_node) {
+    return costs.ins(document_node);
+  }
+
+  return costs.ren(query_node, document_node);
+}
+
+
 // ranking is modified during execution, therefore no return value
 template<class _node = nodes::Node, class _costs = nodes::Costs<_node>>
 void tasm_dynamic(_node& query, _node& document, const int& k,
@@ -191,15 +208,32 @@ void tasm_dynamic(_node& query, _node& document, const int& k,
   std::vector<wrappers::NodePrefixesPair<_node>*> document_subtrees;
   decompose<_node>(document, document_subtrees);
 
+  _costs costs;
+
   // for all relevant subtrees of the query
   for (auto& query_subtree: query_subtrees) { // TODO: only relevant
+    std::vector<_node*>* query_nodes_asc = query_subtree->get_prefixes().at(query_subtree->get_prefixes().size() - 1);
     for(auto& document_subtree: document_subtrees) { // TODO: only relevant
-      pd[0][0] = 0;
+      pd[0][0] = 0; // may be omitted since Array2D initializes all elements to zero
       std::vector<_node*>* document_nodes_asc = document_subtree->get_prefixes().at(document_subtree->get_prefixes().size() - 1);
       for (auto& document_node: *document_nodes_asc) {
-        pd[0][document_node->get_id()] = pd[0][document_node->get_id()];
+        pd[0][document_node->get_id()] = pd[0][document_node->get_id()] +
+          node_alignment_costs(&nodes::empty_string_node, document_node, costs);
+        for (auto& query_node: *query_nodes_asc) {
+          pd[query_node->get_id()][0] = pd[query_node->get_id()][0] +
+            node_alignment_costs(query_node, &nodes::empty_string_node, costs);
+        }
       }
     }
+  }
+
+  std::cout << "pd:" << std::endl;
+  for (int i = 0; i < pd.get_rows(); ++i) {
+    for (int j = 0; j < pd.get_columns(); ++j) {
+      std::cout << std::setw(5);
+      std::cout << pd[i][j];
+    }
+    std::cout << std::endl;
   }
 }
 
