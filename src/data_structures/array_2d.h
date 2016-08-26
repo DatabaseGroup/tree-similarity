@@ -52,8 +52,8 @@ template<typename Type>
 Array2D<Type>::Array2D(size_t rows, size_t columns)
   : rows_(rows), columns_(columns), data_(nullptr)
 {
-  // allocate array
-  data_ = new Type[rows_ * columns_];
+  // allocate array and initialize to zero
+  data_ = new Type[rows_ * columns_] { };
 }
 
 template<typename Type>
