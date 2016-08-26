@@ -22,6 +22,7 @@ public:
 
   const _Node get_root() const;
   const std::vector<std::vector<_Node*>*> get_prefixes() const;
+  const std::vector<_Node*>* get_prefix(_Node& subroot) const;
 
   void set_root(_Node& root);
 };
@@ -57,6 +58,11 @@ const std::vector<std::vector<_Node*>*> NodePrefixesPair<_Node>::get_prefixes() 
 template<class _Node>
 void NodePrefixesPair<_Node>::set_root(_Node& root) {
   root_ = root;
+}
+
+template<class _Node>
+const std::vector<_Node*>* NodePrefixesPair<_Node>::get_prefix(_Node& subroot) const {
+  
 }
 
 } // namespace wrappers
