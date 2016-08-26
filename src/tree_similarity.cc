@@ -104,7 +104,7 @@ int main(int argc, char* argv[]) {
   }*/
 
   data_structures::KHeap<nodes::StringNode> heap(6);
-  tasm::tasm_dynamic(*query, *d22, 6, heap);
+  tasm::tasm_dynamic<nodes::StringNode, nodes::StringCosts<nodes::StringNode>>(*query, *d22, 6, heap);
 
 	return 0;
 }
