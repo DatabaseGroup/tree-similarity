@@ -6,6 +6,7 @@
 #include "tree_similarity.h"
 
 int main(int argc, char* argv[]) {
+
   nodes::StringNode* d1 = new nodes::StringNode("John");
   nodes::StringNode* d2 = new nodes::StringNode("auth");
   nodes::StringNode* d3 = new nodes::StringNode("X1");
@@ -103,8 +104,10 @@ int main(int argc, char* argv[]) {
     std::cout << std::endl;
   }*/
 
+
   data_structures::KHeap<nodes::StringNode> heap(6);
   tasm::tasm_dynamic<nodes::StringNode, nodes::StringCosts<nodes::StringNode>>(*query, *d22, 6, heap);
+
 
 	return 0;
 }

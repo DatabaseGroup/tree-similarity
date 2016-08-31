@@ -134,10 +134,11 @@ void forest_dist(std::vector<_node*>* tree1_postorder,
 //
 // Params:  edm     the edit mapping
 template<class _node = nodes::Node>
-void print_pretty_edit_mapping(std::vector<std::array<nodes::Node*, 2>> edit_mapping)
+void print_pretty_edit_mapping(std::vector<std::array<_node*, 2>> edit_mapping)
 {
-  std::array<nodes::Node*, 2> em;
-  for ( std::vector<std::array<nodes::Node*, 2> >::iterator it = --edit_mapping.end();
+  typename std::array<_node*, 2> em;
+  typename std::vector<std::array<_node*, 2>>::iterator it;
+  for (it = --edit_mapping.end();
         it >= edit_mapping.begin(); --it)
   {
     em = *it;
@@ -165,11 +166,12 @@ void print_pretty_edit_mapping(std::vector<std::array<nodes::Node*, 2>> edit_map
 // "Returns"/Fills: a two dimensional integer array, where arr[0][id] is the
 //          mapping for a the node in the first tree (depends on the mapping !)
 template<class _node = nodes::Node>
-void get_edit_mapping_int_array(std::vector<std::array<nodes::Node*, 2> > edit_mapping,
+void get_edit_mapping_int_array(std::vector<std::array<_node*, 2> > edit_mapping,
   int** array_to_fill)
 {
-  std::array<nodes::Node*, 2> em;
-  for ( std::vector<std::array<nodes::Node*, 2> >::iterator it = --edit_mapping.end();
+  std::array<_node*, 2> em;
+  typename std::vector<std::array<_node*, 2> >::iterator it;
+  for (it = --edit_mapping.end();
         it >= edit_mapping.begin(); --it)
   {
     em = *it;
@@ -196,14 +198,16 @@ void get_edit_mapping_int_array(std::vector<std::array<nodes::Node*, 2> > edit_m
 //                nullptr     -> node_in_t2   insert operation
 //                node_in_t1  -> nullptr      delete operation
 template<class _node = nodes::Node, class _costs = nodes::Costs<_node>>
-std::vector<std::array<nodes::Node*, 2> > compute_edit_mapping(nodes::Node* tree1,
-  nodes::Node* tree2, _costs costs = _costs())
+std::vector<std::array<_node*, 2> > compute_edit_mapping(_node* tree1,
+  _node* tree2, _costs costs = _costs())
 {
-  std::vector<_node*>* tree1_postorder = common::generate_postorder(tree1);
-  std::vector<_node*>* tree2_postorder = common::generate_postorder(tree2);
+  typename std::vector<_node*>* tree1_postorder;
+  tree1_postorder = common::generate_postorder<_node>(tree1);
+  typename std::vector<_node*>* tree2_postorder;
+  tree2_postorder = common::generate_postorder<_node>(tree2);
 
-  std::vector<_node*> leaves_tree1; //stores the leaves of tree 2
-  std::vector<_node*> leaves_tree2; //stores the leaves of tree 2
+  typename std::vector<_node*> leaves_tree1; //stores the leaves of tree 2
+  typename std::vector<_node*> leaves_tree2; //stores the leaves of tree 2
 
   td.resize(tree1_postorder->size() + 1);
   for (unsigned int i = 0; i < td.size(); ++i) {
@@ -262,8 +266,8 @@ std::vector<std::array<nodes::Node*, 2> > compute_edit_mapping(nodes::Node* tree
     }
   }
  
-  std::vector<std::array<int, 2> > tree_pairs;
-  std::vector<std::array<nodes::Node*, 2> > edit_mapping;
+  typename std::vector<std::array<int, 2> > tree_pairs;
+  typename std::vector<std::array<_node*, 2> > edit_mapping;
   tree_pairs.push_back({ tree1->get_subtree_size(), tree2->get_subtree_size() });
   std::array<int, 2> tree_pair;
   bool root_node_pair = true;

@@ -1,5 +1,5 @@
-#ifndef NODE_H
-#define NODE_H
+#ifndef HYBRIDNODE_H
+#define HYBRIDNODE_H
 
 #include <algorithm>
 #include <iostream>
@@ -14,26 +14,29 @@ namespace nodes {
 
 // Represents a node in a tree. A node label is a string and the children
 // are stored in an array of pointers to nodes.
-class Node {
+class HybridNode {
 private:
   int id_;
   int label_id_;
+  int level = 0;
   // A vector of pointers to child nodes
-  std::vector<Node*> children_;
+  std::vector<HybridNode*> children_;
   int children_number_;
+  std::vector<char> edges_;
+  char colour_;
 
 public:
   // Constructors
-  Node(int id, int label_id, int children_number);
-  explicit Node(int label_id);
-  Node(int id, int label_id);
+  HybridNode(int id, int label_id, int children_number);
+  explicit HybridNode(int label_id);
+  HybridNode(int id, int label_id);
 
-  //Node(Node&);
+  //HybridNode(HybridNode&);
 
   // Destructor
-  ~Node();
+  ~HybridNode();
 
-  void copy_node(Node *node);
+  void copy_node(HybridNode *node);
 
   // Get id
   int get_id() const;
@@ -42,7 +45,7 @@ public:
   int get_label_id() const;
 
   // Get children
-  std::vector<Node*> get_children() const;
+  std::vector<HybridNode*> get_children() const;
 
   // Get children_number
   int get_children_number() const;
@@ -52,9 +55,9 @@ public:
   // Params:  child A pointer to the node to be added
   //
   // Return:  None
-  void add_child(Node* child);
+  void add_child(HybridNode* child);
 
-  void add_child_at(Node* child, int position);
+  void add_child_at(HybridNode* child, int position);
 
   // Get subtree size rooted at this node.
   //
@@ -73,34 +76,53 @@ public:
   //
   // Return:  A pointer to the child at position i if it exists or nullptr
   //          otherwise
-  Node* get_child(int position) const;
+  HybridNode* get_child(int position) const;
 
   void remove_child(int position);
 
-  void remove_child(Node* n);
+  void remove_child(HybridNode* n);
 
   void remove_all_children();
 
-  int get_child_position(Node* n);
+  int get_child_position(HybridNode* n);
 
   void swap_children(int pos, int currpos);
 
   // deleting in terms of removing and this node (=parent) inherits its children
   void delete_child(int pos);
 
-  void delete_child(Node* n);
+  void delete_child(HybridNode* n);
 
+  void add_edge(char colour);
+
+  void add_edge_at(char colour, int position);
+
+  void remove_edge(int position);
+
+  void set_edge_colour(int position, char colour);
+
+  char get_edge_colour(int position);
+
+  int get_edge_colours_count(char first, char second);
+
+  void set_colour(char colour);
+
+  char get_colour();
+
+  void set_level(int l);
+
+  int get_level();
 };
 
-Node::Node(int id, int label_id, int children_number)
+HybridNode::HybridNode(int id, int label_id, int children_number)
   : id_(id), label_id_(label_id), children_number_(children_number) { }
 
-Node::Node(int label_id) : Node(0, label_id) { }
-Node::Node(int id, int label_id) : Node(id, label_id, 0) { }
+HybridNode::HybridNode(int label_id) : HybridNode(0, label_id) { }
+HybridNode::HybridNode(int id, int label_id) : HybridNode(id, label_id, 0) { }
 
-Node::~Node() {
+HybridNode::~HybridNode() {
   // delete all children nodes
-  for ( std::vector<Node*>::iterator node_it = children_.begin();
+  for ( std::vector<HybridNode*>::iterator node_it = children_.begin();
         node_it != children_.end(); ++node_it)
   {
     delete *node_it;
@@ -110,41 +132,41 @@ Node::~Node() {
   children_.clear();
 }
 
-void Node::copy_node(Node *node) {
+void HybridNode::copy_node(HybridNode *node) {
   *node = *this;
 }
 
-int Node::get_id() const {
+int HybridNode::get_id() const {
   return id_;
 }
 
-int Node::get_label_id() const {
+int HybridNode::get_label_id() const {
   return label_id_;
 }
 
-std::vector<Node*> Node::get_children() const {
+std::vector<HybridNode*> HybridNode::get_children() const {
   return children_;
 }
 
-int Node::get_children_number() const {
+int HybridNode::get_children_number() const {
   //return children_number;
   return children_.size();
 }
 
-void Node::add_child(Node* child) {
+void HybridNode::add_child(HybridNode* child) {
   children_.push_back(child);
   //++children_number;
 }
 
-void Node::add_child_at(Node* child, int position) {
-  std::vector<Node*>::iterator it = children_.begin();
+void HybridNode::add_child_at(HybridNode* child, int position) {
+  std::vector<HybridNode*>::iterator it = children_.begin();
   children_.insert(it + position, child);
 }
 
-int Node::get_subtree_size() const {
+int HybridNode::get_subtree_size() const {
   int descendants_sum = 1;
   // Sum up sizes of subtrees rooted at child nodes (number of descendants)
-  for ( std::vector<Node*>::const_iterator node_it = children_.cbegin();
+  for ( std::vector<HybridNode*>::const_iterator node_it = children_.cbegin();
         node_it != children_.cend(); ++node_it)
   {
     descendants_sum = descendants_sum + (*node_it)->get_subtree_size();
@@ -154,35 +176,35 @@ int Node::get_subtree_size() const {
   return descendants_sum;
 }
 
-void Node::set_id(int id) {
+void HybridNode::set_id(int id) {
   id_ = id;
 }
 
-void Node::set_label_id(int id) {
+void HybridNode::set_label_id(int id) {
   label_id_ = id;
 }
 
-Node* Node::get_child(int position) const {
+HybridNode* HybridNode::get_child(int position) const {
   return children_[position];
 }
 
-void Node::remove_child(int position) {
+void HybridNode::remove_child(int position) {
   children_.erase(children_.begin() + position);
 }
 
-void Node::remove_child(Node* n) {
-  std::vector<Node*>::iterator it = std::find(children_.begin(), children_.end(), n);
+void HybridNode::remove_child(HybridNode* n) {
+  std::vector<HybridNode*>::iterator it = std::find(children_.begin(), children_.end(), n);
   if (it != children_.end()){
     children_.erase(it);
   }
 }
 
-void Node::remove_all_children() {
+void HybridNode::remove_all_children() {
   children_.clear();
 }
 
-int Node::get_child_position(Node* n) {
-  std::vector<Node*>::iterator it = std::find(children_.begin(), children_.end(), n);
+int HybridNode::get_child_position(HybridNode* n) {
+  std::vector<HybridNode*>::iterator it = std::find(children_.begin(), children_.end(), n);
   if(it!=children_.end()){
     return (it - children_.begin());
   } else {
@@ -190,12 +212,12 @@ int Node::get_child_position(Node* n) {
   }
 }
 
-void Node::swap_children(int pos, int currpos) {
+void HybridNode::swap_children(int pos, int currpos) {
   iter_swap(children_.begin() + pos, children_.begin() + currpos);
 }
 
-void Node::delete_child(int pos) {
-  Node* n = get_child(pos);
+void HybridNode::delete_child(int pos) {
+  HybridNode* n = get_child(pos);
   for(int i = 0; i < n->get_children_number(); i++){
     this->add_child_at(n->get_child(i), (pos + i));
   }
@@ -204,9 +226,55 @@ void Node::delete_child(int pos) {
   remove_child(n);
 }
 
-void Node::delete_child(Node* n) {
+void HybridNode::delete_child(HybridNode* n) {
   int pos = get_child_position(n);
   delete_child(pos);
+}
+
+void HybridNode::add_edge(char colour) {
+  edges_.push_back(colour);
+}
+
+void HybridNode::add_edge_at(char colour, int position) {
+  std::vector<char>::iterator it = edges_.begin();
+  edges_.insert(it + position, colour);
+}
+
+void HybridNode::remove_edge(int position) {
+  edges_.erase(edges_.begin() + position);
+}
+
+void HybridNode::set_edge_colour(int position, char colour) {
+  edges_[position] = colour;
+}
+
+char HybridNode::get_edge_colour(int position) {
+  return edges_[position];
+}
+
+int HybridNode::get_edge_colours_count(char first, char second) {
+  int counter = 0;    
+  for(std::vector<char>::iterator it = edges_.begin(); it != edges_.end(); ++it) {
+    char tmp = *it;
+    if(tmp==first || tmp==second) { counter++; }
+  }
+  return counter;
+}
+
+void HybridNode::set_colour(char colour) {
+  colour_ = colour;
+}
+
+char HybridNode::get_colour() {
+  return colour_;
+}
+
+void HybridNode::set_level(int l) {
+  level = l;
+}
+
+int HybridNode::get_level() {
+  return level;
 }
 
 // Represents the cost functions to be used for the distance computation.
@@ -217,7 +285,7 @@ void Node::delete_child(Node* n) {
 //  - ins(n) for insertion costs of a node n
 // All three cost functions must return an integer.
 template<typename _Node>
-struct Costs {
+struct HybridCosts {
   // Basic rename cost function
   //
   // Params:  node1  The node to be renamed
@@ -247,7 +315,7 @@ struct Costs {
 };
 
 template<typename _Node>
-int Costs<_Node>::ren(_Node* node1, _Node* node2) {
+int HybridCosts<_Node>::ren(_Node* node1, _Node* node2) {
   if (node1->get_label_id() == node2->get_label_id()) {
     return 0;
   }
@@ -256,32 +324,32 @@ int Costs<_Node>::ren(_Node* node1, _Node* node2) {
 }
 
 template<typename _Node>
-int Costs<_Node>::del(_Node node) {
+int HybridCosts<_Node>::del(_Node node) {
   return 1;
 }
 
 template<typename _Node>
-int Costs<_Node>::ins(_Node node) {
+int HybridCosts<_Node>::ins(_Node node) {
   return 1;
 }
 
 template<typename _Node>
-int Costs<_Node>::ren() {
+int HybridCosts<_Node>::ren() {
   return 1;
 }
 
 template<typename _Node>
-int Costs<_Node>::del() {
+int HybridCosts<_Node>::del() {
   return 1;
 }
 
 template<typename _Node>
-int Costs<_Node>::ins() {
+int HybridCosts<_Node>::ins() {
   return 1;
 }
 
 template<typename _Node>
-struct Costs2 {
+struct HybridCosts2 {
   // Basic rename cost function
   //
   // Params:  node1  The node to be renamed
@@ -311,32 +379,32 @@ struct Costs2 {
 };
 
 template<typename _Node>
-int Costs2<_Node>::ren(_Node* node1, _Node* node2) {
+int HybridCosts2<_Node>::ren(_Node* node1, _Node* node2) {
   return 2;
 }
 
 template<typename _Node>
-int Costs2<_Node>::del(_Node node) {
+int HybridCosts2<_Node>::del(_Node node) {
   return 2;
 }
 
 template<typename _Node>
-int Costs2<_Node>::ins(_Node node) {
+int HybridCosts2<_Node>::ins(_Node node) {
   return 2;
 }
 
 template<typename _Node>
-int Costs2<_Node>::ren() {
+int HybridCosts2<_Node>::ren() {
   return 2;
 }
 
 template<typename _Node>
-int Costs2<_Node>::del() {
+int HybridCosts2<_Node>::del() {
   return 2;
 }
 
 template<typename _Node>
-int Costs2<_Node>::ins() {
+int HybridCosts2<_Node>::ins() {
   return 2;
 }
 
