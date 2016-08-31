@@ -27,6 +27,8 @@ set(tree_similarity_sources
   upper_bound/upper_bound.h
   zhang_shasha/zhang_shasha.h
   nodes/string_node.h
+  nodes/hybrid_node.h
+  visualisation/visualisation.h
   data_structures/k_heap.h
   wrappers/node_distance_pair.h
   wrappers/node_prefixes_pair.h
