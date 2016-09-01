@@ -6,6 +6,9 @@
 
 #include "../nodes/node.h"
 
+//  TODO:
+//  - Update documentation (kr)
+
 namespace zhang_shasha {
 
 std::vector<std::vector<double> > td; //stores the tree-edit-distances
@@ -36,8 +39,7 @@ void lmld(_node* root, std::vector<int>& l) {
 //Param: the left-most leaf descendats for all subtrees of the input-tree, the number of leaves of the input-tree
 //
 //Return: A vector storing all key-roots of the input-tree
-std::vector<int> kr(std::vector<int>& l, int leaf_count) {
-  std::vector<int> kr(leaf_count + 1);
+void kr(std::vector<int>& l, std::vector<int>& kr) {
   std::vector<int> visit(l.size(), 0); // was node visited
 
   int k = kr.size() - 1;
@@ -49,8 +51,6 @@ std::vector<int> kr(std::vector<int>& l, int leaf_count) {
     }
     i -= 1;
   }
-  
-  return kr;
 }
 
 template<class _node = nodes::Node>
@@ -250,10 +250,10 @@ std::vector<std::array<_node*, 2> > compute_edit_mapping(_node* tree1,
   lmld<_node>(tree1, l1);
   lmld<_node>(tree2, l2);
 
-  std::vector<int> kr1;
-  std::vector<int> kr2;
-  kr1 = kr(l1, leaves_tree1.size());
-  kr2 = kr(l2, leaves_tree2.size());
+  std::vector<int> kr1(leaves_tree1.size() + 1);
+  std::vector<int> kr2(leaves_tree2.size() + 1);
+  kr(l1, kr1);
+  kr(l2, kr2);
 
   //compute the distance
   for ( std::vector<int>::iterator kr1_it = std::next(kr1.begin());
@@ -380,10 +380,10 @@ double compute_zhang_shasha(_node* tree1, _node* tree2, _costs costs = _costs())
   lmld<_node>(tree1, l1);
   lmld<_node>(tree2, l2);
 
-  std::vector<int> kr1;
-  std::vector<int> kr2;
-  kr1 = kr(l1, leaves_tree1.size());
-  kr2 = kr(l2, leaves_tree2.size());
+  std::vector<int> kr1(leaves_tree1.size() + 1);
+  std::vector<int> kr2(leaves_tree2.size() + 1);
+  kr(l1, kr1);
+  kr(l2, kr2);
 
   //compute the distance
   for ( std::vector<int>::iterator kr1_it = std::next(kr1.begin());
