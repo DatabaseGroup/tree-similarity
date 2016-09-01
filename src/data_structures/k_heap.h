@@ -3,32 +3,96 @@
 
 namespace data_structures {
 
+/**
+ * Encapsulates a maximum heap of a given type (generic) which only keeps the k
+ * smallest elements (wrt. the operator< of the specified type). This class is
+ * useful for a top-k ranking, e.g. in the TASM implementation.
+ */
 template<class Type>
 class KHeap {
 private:
+  // maximum and current size of the heap
   size_t max_size_;
   size_t size_;
+  // array to store the elements of the heap
   Type* data_;
 
+  // Shifts the element at the given position up to fulfill the heap condition.
+  //
+  // Params:  start_position  The position to start from
   void shift_up(const size_t& start_position);
+
+  // Shifts the element at the given position down to fulfill the heap condition.
+  //
+  // Params:  start_position  The position to start from
   void shift_down(const size_t& start_position);
 
 public:
+  // Constructor(s)
   KHeap(const int& max_size = 10);
+  // Destructor
   ~KHeap();
 
+  // Check if the heap is currently empty.
+  //
+  // Return:  True if the heap is empty, false otherwise
   const bool empty() const;
+
+  // Check if the heap is currently full.
+  //
+  // Return:  True if the heap is full, false otherwise
   const bool full() const;
+
+  // Get the current number of elements in the heap.
+  //
+  // Return:  The number of elements in the heap
   const size_t size() const;
+
+  // Get the maximum number of elements the heap can hold.
+  //
+  // Return:  The maximum number of elements the heap can store
   const size_t max_size() const;
 
+  // Get the top element of the heap (the root).
+  //
+  // Return:  A constant reference to the top element of the heap.
   Type const& front() const;
+
+  // Get the "last" element of the heap (the last element of the array).
+  //
+  // Return:  A constant referenceto the last element of the heap array.
   Type const& back() const;
+
+  // Insert a new element into the heap.
+  //
+  // Params:  element The element to be inserted
+  //
+  // Return:  True if the element was successfully inserted, false otherwise
   bool insert(Type element);
+
+  // Remove the top element of the heap while maintaining the heap state.
+  //
+  // Return:  A constant reference to the former top element of the heap
   const Type& erase_front();
+
+  // Replace the top element of the heap by another element while maintaining the
+  // heap state.
+  //
+  // Params:  replacement The element to replace the top element of the heap
+  //
+  // Return:  A constant reference to the former top element of the heap
   const Type replace_front(Type replacement);
+
+  // Replace the top element of the heap by another element only if the
+  // replacement element is acutally greater than the current top element.
+  //
+  // Params:  replacement The element to replace the top element of the heap
+  //
+  // Return:  A constant reference to the former top element of the heap if it
+  //          was replaced, the current top element otherwise
   const Type replace_front_if_greater(Type replacement);
 
+  // STL-typical iterators for range-based loops
   Type* begin() const;
   Type* end() const;
   // please notice: by now, the reverse iterator has to be DECREMENTED in the
