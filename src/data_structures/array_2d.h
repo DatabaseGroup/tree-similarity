@@ -4,6 +4,8 @@
 #include <memory>
 #include <algorithm>
 
+namespace data_structures {
+
 /**
  * Encapsulates a two dimensional array of a given type (generic).
  * Main reason: it gives better performance than the standard _type** approach
@@ -14,9 +16,6 @@
  * As a result, lots of cache misses happen, in general. This slows down the
  * actual access.
  */
-
-namespace data_structures {
-
 template<typename Type>
 class Array2D {
 private:
@@ -65,7 +64,6 @@ Array2D<Type>::Array2D(const Array2D& other)
 
 template<typename Type>
 Array2D<Type>::~Array2D() {
-  // deallocate array
   delete[] data_;
 }
 
