@@ -6,7 +6,7 @@ namespace data_structures {
 template<class Type>
 class KHeap {
 private:
-  const size_t max_size_;
+  size_t max_size_;
   size_t size_;
   Type* data_;
 
@@ -27,8 +27,10 @@ public:
   bool insert(Type element);
   const Type& erase_front();
   const Type replace_front(Type replacement);
+  const Type replace_front_if_greater(Type replacement);
 
   void print_array() const;
+  void rprint_array() const;
 
 };
 
@@ -108,10 +110,29 @@ const Type KHeap<Type>::replace_front(Type replacement) {
 }
 
 template<class Type>
+const Type KHeap<Type>::replace_front_if_greater(Type replacement) {
+  Type& root = data_[0];
+  if (root < replacement) {
+    return root;
+  }
+
+  return replace_front(replacement);
+}
+
+template<class Type>
 void KHeap<Type>::print_array() const {
   std::cout << max_size_ << "-Heap: | ";
   for (int i = 0; i < size_; ++i) {
-    std::cout << data_[i].get_node().get_label() /*<< "_" << data_[i].get_node().get_id()*/ << ", " << data_[i].get_distance() << " | ";
+    std::cout << data_[i].get_node().get_label() << ", " << data_[i].get_distance() << " | ";
+  }
+  std::cout << std::endl;
+}
+
+template<class Type>
+void KHeap<Type>::rprint_array() const {
+  std::cout << max_size_ << "-Heap: | ";
+  for (int i = (size_ - 1); i >= 0; --i) {
+    std::cout << data_[i].get_node().get_label() << ", " << data_[i].get_distance() << " | ";
   }
   std::cout << std::endl;
 }
