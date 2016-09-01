@@ -20,7 +20,7 @@
 
 namespace tasm {
 
-template<class _Node = nodes::Node, class _Costs = nodes::Costs<_Node>>
+template<class _Node = nodes::Node>
 std::vector<_Node> prb_pruning(std::queue<_Node>& postorder_queue,
   const int threshold)
 {
@@ -50,7 +50,7 @@ std::vector<_Node> prb_pruning(std::queue<_Node>& postorder_queue,
 
 // lbl = ring_buffer, pfx = prefix_array, s = start, e = end, c = appended
 // pq = postorder_queue, tau = threshold
-template<class _Node = nodes::Node, class _Costs = nodes::Costs<_Node>>
+template<class _Node = nodes::Node>
 void prb_next(RingBuffer<_Node>& ring_buffer, RingBuffer<size_t>& prefix_array,
   size_t& start, size_t& end, size_t& appended, std::queue<_Node>& postorder_queue,
   const int threshold)
