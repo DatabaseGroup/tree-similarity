@@ -247,7 +247,13 @@ void tasm_dynamic(_Node& query, _Node& document, const int& k,
           } else {
             ranking.insert(tmp);
           }
-          ranking.print_array();
+
+          // debug
+          std::cout << ranking.max_size() << "-Heap: | ";
+          for (auto it = ranking.begin(); it != ranking.end(); ++it) {
+            std::cout << it->get_node().get_label() << ", " << it->get_distance() <<" | ";
+          }
+          std::cout << std::endl;
         }
 
         ++j;
