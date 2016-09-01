@@ -2,6 +2,7 @@
 #define TREE_SIMILARITY_H
 
 #include "common/common.h"
+
 #include "visualisation/visualisation.h"
 
 #include "data_structures/k_heap.h"
@@ -16,7 +17,6 @@
 
 #include "sed/string_edit_distance.h"
 
-#include "tasm/ring_buffer.h"
 #include "tasm/tasm.h"
 
 #include "upper_bound/upper_bound.h"
