@@ -12,8 +12,6 @@
 #include <queue>
 #include <utility>
 
-#include <iomanip> // setw
-
 // TODO
 // -  Examine if movement of ring buffer stuff to RingBuffer class makes sense
 //    and if this is the case, do it (ring buffers share start, end, ...).
@@ -22,13 +20,13 @@
 
 namespace tasm {
 
-template<class _node = nodes::Node, class _costs = nodes::Costs<_node>>
-std::vector<_node> prb_pruning(std::queue<_node>& postorder_queue,
+template<class _Node = nodes::Node, class _Costs = nodes::Costs<_Node>>
+std::vector<_Node> prb_pruning(std::queue<_Node>& postorder_queue,
   const int threshold)
 {
-  std::vector<_node> candidates; // does this have to be a set?
+  std::vector<_Node> candidates; // does this have to be a set?
 
-  RingBuffer<_node> ring_buffer(threshold);
+  RingBuffer<_Node> ring_buffer(threshold);
   RingBuffer<size_t> prefix_array(threshold);
   size_t start = 1;
   size_t end = 1;
@@ -40,7 +38,6 @@ std::vector<_node> prb_pruning(std::queue<_node>& postorder_queue,
   );
 
   while (start != end) {
-    //std::cout << "Add " << ring_buffer[prefix_array[start] % buffer_size].get_label() << " to candidates" << std::endl;
     candidates.push_back(ring_buffer[prefix_array[start] % buffer_size]);
     start = ((prefix_array[start] + 1) % buffer_size);
     prb_next(ring_buffer, prefix_array, start, end, appended, postorder_queue,
@@ -53,13 +50,13 @@ std::vector<_node> prb_pruning(std::queue<_node>& postorder_queue,
 
 // lbl = ring_buffer, pfx = prefix_array, s = start, e = end, c = appended
 // pq = postorder_queue, tau = threshold
-template<class _node = nodes::Node, class _costs = nodes::Costs<_node>>
-void prb_next(RingBuffer<_node>& ring_buffer, RingBuffer<size_t>& prefix_array,
-  size_t& start, size_t& end, size_t& appended, std::queue<_node>& postorder_queue,
+template<class _Node = nodes::Node, class _Costs = nodes::Costs<_Node>>
+void prb_next(RingBuffer<_Node>& ring_buffer, RingBuffer<size_t>& prefix_array,
+  size_t& start, size_t& end, size_t& appended, std::queue<_Node>& postorder_queue,
   const int threshold)
 {
   const size_t buffer_size = ring_buffer.get_size();
-  _node dequeued_element;
+  _Node dequeued_element;
   while (!postorder_queue.empty() || start != end) {
     if (!postorder_queue.empty()) {
       dequeued_element = postorder_queue.front();
@@ -88,24 +85,23 @@ void prb_next(RingBuffer<_node>& ring_buffer, RingBuffer<size_t>& prefix_array,
 // Computes the distance between the query and every subtree in the document.
 // Requires n distance computations, thus requiring O(m^2*n^2) time and O(m*n)
 // space (m ... size of the query tree, n ... size of the document)
-template<class _node = nodes::Node, class _costs = nodes::Costs<_node>>
-data_structures::KHeap<wrappers::NodeDistancePair<_node>> naive(_node& query,
-  _node& document, const int& k)
+template<class _Node = nodes::Node, class _Costs = nodes::Costs<_Node>>
+data_structures::KHeap<wrappers::NodeDistancePair<_Node>> naive(_Node& query,
+  _Node& document, const int& k)
 {
-  //std::priority_queue<std::pair<_node, double>> ranking;
-  data_structures::KHeap<wrappers::NodeDistancePair<_node>> ranking(k);
+  data_structures::KHeap<wrappers::NodeDistancePair<_Node>> ranking(k);
   
   if (k == 0) {
     return ranking;
   }
 
   double ted = 0.0;
-  std::vector<_node*>* postorder_document = common::generate_postorder(&document);
+  std::vector<_Node*>* postorder_document = common::generate_postorder(&document);
 
-  for (_node* subtree: *postorder_document) {
-    ted = zhang_shasha::compute_zhang_shasha<_node, _costs>(&query, subtree);
+  for (_Node* subtree: *postorder_document) {
+    ted = zhang_shasha::compute_zhang_shasha<_Node, _Costs>(&query, subtree);
     if (ranking.size() < k || ted < ranking.front().get_distance()) {
-      wrappers::NodeDistancePair<_node> in_ranking(*subtree, ted);
+      wrappers::NodeDistancePair<_Node> in_ranking(*subtree, ted);
       if (!ranking.insert(in_ranking)) {
         ranking.replace_front(in_ranking);
       }
@@ -115,9 +111,9 @@ data_structures::KHeap<wrappers::NodeDistancePair<_node>> naive(_node& query,
   return ranking;
 }
 
-template<class _node = nodes::Node, class _costs = nodes::Costs<_node>>
-unsigned int node_alignment_costs(_node* query_node, _node* document_node,
-  _costs& costs)
+template<class _Node = nodes::Node, class _Costs = nodes::Costs<_Node>>
+unsigned int node_alignment_costs(_Node* query_node, _Node* document_node,
+  _Costs& costs)
 {
   bool no_document_node = (document_node == &nodes::empty_string_node);
   bool no_query_node = (query_node == &nodes::empty_string_node);
@@ -132,9 +128,9 @@ unsigned int node_alignment_costs(_node* query_node, _node* document_node,
 }
 
 // ranking is modified during execution, therefore no return value
-template<class _node = nodes::Node, class _costs = nodes::Costs<_node>>
-void tasm_dynamic(_node& query, _node& document, const int& k,
-  data_structures::KHeap<wrappers::NodeDistancePair<_node>>& ranking,
+template<class _Node = nodes::Node, class _Costs = nodes::Costs<_Node>>
+void tasm_dynamic(_Node& query, _Node& document, const int& k,
+  data_structures::KHeap<wrappers::NodeDistancePair<_Node>>& ranking,
   bool plus = false)
 {
   const int query_size = query.get_subtree_size();
@@ -143,29 +139,29 @@ void tasm_dynamic(_node& query, _node& document, const int& k,
   data_structures::Array2D<int> td(query_size, document_size);
   data_structures::Array2D<int> pd(query_size + 1, document_size + 1);
 
-  std::vector<_node*> query_leaves;
-  std::vector<_node*> document_leaves;
-  zhang_shasha::make_leaves<_node>(
+  std::vector<_Node*> query_leaves;
+  std::vector<_Node*> document_leaves;
+  zhang_shasha::make_leaves<_Node>(
     &query_leaves, &document_leaves, &query, &document
   );
 
-  std::vector<_node*>* query_postorder = common::generate_postorder(&query);
-  std::vector<_node*>* document_postorder = common::generate_postorder(&document);
+  std::vector<_Node*>* query_postorder = common::generate_postorder(&query);
+  std::vector<_Node*>* document_postorder = common::generate_postorder(&document);
 
   std::vector<int> query_lmld(query_postorder->size() + 1);
   std::vector<int> document_lmld(document_postorder->size() + 1);
-  zhang_shasha::lmld<_node>(&query, query_lmld);
-  zhang_shasha::lmld<_node>(&document, document_lmld);
+  zhang_shasha::lmld<_Node>(&query, query_lmld);
+  zhang_shasha::lmld<_Node>(&document, document_lmld);
 
   std::vector<int> query_kr;
   std::vector<int> document_kr;
   query_kr = zhang_shasha::kr(query_lmld, query_leaves.size());
   document_kr = zhang_shasha::kr(document_lmld, document_leaves.size());
 
-  _costs costs;
+  _Costs costs;
 
-  _node* query_subroot;
-  _node* document_subroot;
+  _Node* query_subroot;
+  _Node* document_subroot;
   int i = 0, j = 0;
   // compute all subtrees of the query/document and corresponding prefixes
   for ( std::vector<int>::const_iterator q_kr_cit = std::next(query_kr.cbegin());
@@ -175,7 +171,7 @@ void tasm_dynamic(_node& query, _node& document, const int& k,
     // get (sub)root of current relevant query subtree (Qm)
     query_subroot = query_postorder->at(*q_kr_cit - 1);
     // compute prefixes of query (sub)tree
-    wrappers::NodePrefixesPair<_node> query_prefixes(*query_subroot);
+    wrappers::NodePrefixesPair<_Node> query_prefixes(*query_subroot);
     query_prefixes.create_subtrees_prefixes();
 
     for ( std::vector<int>::const_iterator d_kr_cit = std::next(document_kr.cbegin());
@@ -187,7 +183,7 @@ void tasm_dynamic(_node& query, _node& document, const int& k,
       // get (sub)root of current relevant document subtree (Tn)
       document_subroot = document_postorder->at(*d_kr_cit - 1);
       // compute prefixes of document (sub)tree
-      wrappers::NodePrefixesPair<_node> document_prefixes(*document_subroot);
+      wrappers::NodePrefixesPair<_Node> document_prefixes(*document_subroot);
       document_prefixes.create_subtrees_prefixes();
 
       j = 1;
@@ -241,15 +237,15 @@ void tasm_dynamic(_node& query, _node& document, const int& k,
         if ((*query_subroot == query) &&
             (*document_prefixes.get_subtree(*document_node) == *(document_prefixes.get_prefix(*document_node))))
         {
-          wrappers::NodeDistancePair<_node> temp =
-            wrappers::NodeDistancePair<_node>(
+          wrappers::NodeDistancePair<_Node> tmp =
+            wrappers::NodeDistancePair<_Node>(
               *document_prefixes.get_subtree(*document_node)->back(),
               td[query_subroot->get_id() - 1][document_prefixes.get_subtree(*document_node)->back()->get_id() - 1]
             );
           if (ranking.full()) {
-            ranking.replace_front_if_greater(temp);
+            ranking.replace_front_if_greater(tmp);
           } else {
-            ranking.insert(temp);
+            ranking.insert(tmp);
           }
           ranking.print_array();
         }
@@ -258,25 +254,12 @@ void tasm_dynamic(_node& query, _node& document, const int& k,
       }
     }
   }
-
-  /*
-  // debug
-  std::cout << "td:" << std::endl;
-  for (int i = 0; i < td.get_rows(); ++i) {
-    for (int j = 0; j < td.get_columns(); ++j) {
-      std::cout << std::setw(5);
-      std::cout << td[i][j];
-    }
-    std::cout << std::endl;
-  }
-  std::cout << std::endl;
-  */
 }
 
-template<class _node = nodes::Node, class _costs = nodes::Costs<_node>>
-int compute_max_cost(_node& root, const int k = 0) {
-  _costs costs;
-  std::vector<_node*>* postorder = common::generate_postorder<_node>(&root, true);
+template<class _Node = nodes::Node, class _Costs = nodes::Costs<_Node>>
+int compute_max_cost(_Node& root, const int k = 0) {
+  _Costs costs;
+  std::vector<_Node*>* postorder = common::generate_postorder<_Node>(&root, true);
 
   // TODO: max cannot be rename when rename is assumed to be (ins() + del())/2
   int max = std::max(costs.ins(&root), costs.del(&root));
@@ -292,32 +275,32 @@ int compute_max_cost(_node& root, const int k = 0) {
 }
 
 // ranking is modified during execution, therefore no return value
-template<class _node = nodes::Node, class _costs = nodes::Costs<_node>>
-void tasm_dynamic_plus(_node& query, _node& document, const int& k,
-  data_structures::KHeap<wrappers::NodeDistancePair<_node>>& ranking)
+template<class _Node = nodes::Node, class _Costs = nodes::Costs<_Node>>
+void tasm_dynamic_plus(_Node& query, _Node& document, const int& k,
+  data_structures::KHeap<wrappers::NodeDistancePair<_Node>>& ranking)
 {
-  return tasm_dynamic<_node, _costs>(query, document, k, ranking, true);
+  return tasm_dynamic<_Node, _Costs>(query, document, k, ranking, true);
 }
 
-template<class _node = nodes::Node, class _costs = nodes::Costs<_node>>
-data_structures::KHeap<wrappers::NodeDistancePair<_node>> tasm_postorder(
-  _node& query, std::queue<_node>& postorder_queue, const int& k)
+template<class _Node = nodes::Node, class _Costs = nodes::Costs<_Node>>
+data_structures::KHeap<wrappers::NodeDistancePair<_Node>> tasm_postorder(
+  _Node& query, std::queue<_Node>& postorder_queue, const int& k)
 {
-  data_structures::KHeap<wrappers::NodeDistancePair<_node>> ranking(k);
+  data_structures::KHeap<wrappers::NodeDistancePair<_Node>> ranking(k);
 
   int tau = query.get_subtree_size() *
-    (compute_max_cost<_node, _costs>(query) + 1) +
-    k * compute_max_cost<_node, _costs>(postorder_queue.back(), k);
+    (compute_max_cost<_Node, _Costs>(query) + 1) +
+    k * compute_max_cost<_Node, _Costs>(postorder_queue.back(), k);
   int tau_adapted = tau;
 
-  RingBuffer<_node> ring_buffer(k);
+  RingBuffer<_Node> ring_buffer(k);
   RingBuffer<size_t> prefix_array(k);
   size_t start = 1;
   size_t end = 1;
   size_t appended = 0;
   size_t buffer_size = ring_buffer.get_size();
   size_t candidate_subroot;
-  _node subtree;
+  _Node subtree;
 
   prb_next(ring_buffer, prefix_array, start, end, appended, postorder_queue, tau);
   while (start != end) {
@@ -333,7 +316,7 @@ data_structures::KHeap<wrappers::NodeDistancePair<_node>> tasm_postorder(
       }
 
       if (!ranking.full() || (subtree.get_subtree_size() < tau_adapted)) {
-        tasm_dynamic_plus<_node, _costs>(query, subtree, k, ranking);
+        tasm_dynamic_plus<_Node, _Costs>(query, subtree, k, ranking);
         candidate_subroot = candidate_subroot - subtree.get_subtree_size();
       } else {
         ++candidate_subroot;
