@@ -139,42 +139,6 @@ data_structures::KHeap<wrappers::NodeDistancePair<_node>> naive(_node& query,
 }
 
 template<class _node = nodes::Node, class _costs = nodes::Costs<_node>>
-data_structures::KHeap<wrappers::NodeDistancePair<_node>> tasm_postorder(
-  _node& query, std::queue<_node>& postorder_queue, const int& k)
-{
-  data_structures::KHeap<wrappers::NodeDistancePair<_node>> ranking(k);
-
-  // TODO
-
-  return ranking;
-}
-
-// TODO: optimize (avoid recomputation of prefixes, ...)
-template<class _node = nodes::Node>
-void prefixes(_node& subroot, std::vector<_node*>* postorder,
-  std::vector<wrappers::NodePrefixesPair<_node>*>& subtrees)
-{
-  subtrees.push_back(new wrappers::NodePrefixesPair<_node>(subroot));
-  for (int i = 0; i < subtrees.at(subroot.get_id() - 1)->get_root().get_id(); ++i) {
-    subtrees.at(subroot.get_id() - 1)->add_prefix(
-      new std::vector<_node*>(postorder->begin(), postorder->begin() + i + 1)
-    );
-  }
-}
-
-// get all subtrees (extended to only include relevant subtrees)
-// TODO: optimize (avoid recomputation, ...)
-template<class _node = nodes::Node>
-void decompose(_node& root,
-  std::vector<wrappers::NodePrefixesPair<_node>*>& subtrees)
-{
-  std::vector<_node*>* postorder_tree = common::generate_postorder(&root);
-  for (auto& node: *postorder_tree) {
-    prefixes<_node>(*node, postorder_tree, subtrees);
-  }
-}
-
-template<class _node = nodes::Node, class _costs = nodes::Costs<_node>>
 unsigned int node_alignment_costs(_node* query_node, _node* document_node,
   _costs& costs)
 {
