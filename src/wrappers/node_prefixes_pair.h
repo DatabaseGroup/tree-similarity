@@ -38,7 +38,9 @@ public:
 };
 
 template<class _Node>
-NodePrefixesPair<_Node>::NodePrefixesPair(_Node& node) : node_(node) { }
+NodePrefixesPair<_Node>::NodePrefixesPair(_Node& node) : node_(node) {
+  create_subtrees_prefixes();
+}
 
 template<class _Node>
 NodePrefixesPair<_Node>::~NodePrefixesPair() {
