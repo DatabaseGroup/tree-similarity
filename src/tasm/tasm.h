@@ -72,29 +72,6 @@ void prb_next(RingBuffer<_node>& ring_buffer, RingBuffer<size_t>& prefix_array,
         prefix_array[prefix_array[end] % buffer_size] = appended;
       }
 
-      // debug
-      /*
-      std::cout << "start = " << start << ", end = " << end <<
-        ", appended = " << appended << std::endl;
-      std::cout << prefix_array[end] << " mod " << buffer_size << " = " <<
-        prefix_array[end] % buffer_size << std::endl;
-      std::cout << "lbl = | ";
-      for (int i = 0; i < buffer_size; ++i) {
-        std::cout << std::setw(12);
-        std::cout << ring_buffer[i].get_label();
-        std::cout << " | ";
-      }
-      std::cout << std::endl;
-      std::cout << "pfx = | ";
-      for (int i = 0; i < buffer_size; ++i) {
-        std::cout << std::setw(12);
-        std::cout << prefix_array[i];
-        std::cout << " | ";
-      }
-      std::cout << std::endl << std::endl;
-      */
-      // debug
-
       end = ((end + 1) % buffer_size);
     }
 
