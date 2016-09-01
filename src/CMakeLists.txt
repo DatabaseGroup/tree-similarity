@@ -32,7 +32,6 @@ set(tree_similarity_sources
   data_structures/k_heap.h
   wrappers/node_distance_pair.h
   wrappers/node_prefixes_pair.h
-  tasm/ring_buffer.h
   tasm/tasm.h
 )
 
