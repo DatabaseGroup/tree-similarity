@@ -18,10 +18,10 @@ int main (int argc, char* argv[]) {
   parser::LabelIDMap hashtable_label_to_id;
   common::IDLabelMap hashtable_id_to_label;
   int node_id_counter = 1;
-  Node* tree1 = parser::create_tree_from_string(argv[1], hashtable_label_to_id,
+  nodes::Node* tree1 = parser::create_tree_from_string(argv[1], hashtable_label_to_id,
     node_id_counter
   );
-  Node* tree2 = parser::create_tree_from_string(argv[2], hashtable_label_to_id,
+  nodes::Node* tree2 = parser::create_tree_from_string(argv[2], hashtable_label_to_id,
     node_id_counter
   );
 
@@ -31,26 +31,26 @@ int main (int argc, char* argv[]) {
     hashtable_id_to_label.emplace(it->second, it->first);
   }
 
-  std::vector<Node*>* tree1_postorder = common::generate_postorder(tree1);
-  std::vector<Node*>* tree2_postorder = common::generate_postorder(tree2);
+  std::vector<nodes::Node*>* tree1_postorder = common::generate_postorder(tree1);
+  std::vector<nodes::Node*>* tree2_postorder = common::generate_postorder(tree2);
 
   // Zhang and Shasha cost = 1 (insert), 1 (delete), 1 (rename)
   // compute distance using basic nodes and basic cost model
   // no need to generate basic cost model since it is set as default template
   // parameter
   
-  StringNode* a1 = new StringNode("a");
-  StringNode* r1 = new StringNode("r");
-  StringNode* d1 = new StringNode("d");
-  StringNode* e1 = new StringNode("d");
-  StringNode* i1 = new StringNode("i");
-  StringNode* l1 = new StringNode("l");
-  StringNode* t1 = new StringNode("t");
-  StringNode* k1 = new StringNode("k");
-  StringNode* g1 = new StringNode("g");
-  StringNode* h1 = new StringNode("h");
+  nodes::StringNode* a1 = new nodes::StringNode("a");
+  nodes::StringNode* r1 = new nodes::StringNode("r");
+  nodes::StringNode* d1 = new nodes::StringNode("d");
+  nodes::StringNode* e1 = new nodes::StringNode("d");
+  nodes::StringNode* i1 = new nodes::StringNode("i");
+  nodes::StringNode* l1 = new nodes::StringNode("l");
+  nodes::StringNode* t1 = new nodes::StringNode("t");
+  nodes::StringNode* k1 = new nodes::StringNode("k");
+  nodes::StringNode* g1 = new nodes::StringNode("g");
+  nodes::StringNode* h1 = new nodes::StringNode("h");
   
-  StringNode* stree1 = a1;
+  nodes::StringNode* stree1 = a1;
   stree1->add_child(r1);
   stree1->add_child(d1);
   stree1->add_child(e1);
@@ -61,24 +61,23 @@ int main (int argc, char* argv[]) {
   t1->add_child(g1);
   t1->add_child(h1);
 
-  StringNode* x2 = new StringNode("x");
-  StringNode* stree2 = x2;
+  nodes::StringNode* x2 = new nodes::StringNode("x");
+  nodes::StringNode* stree2 = x2;
 
-  // distance between stree1 and stree2 should be 20 (using StringCosts)
+  // distance between stree1 and stree2 should be 10 (using StringCosts)
   std::cout
     << "Distance (string-labeled tree, string-labeled cost model, Zhang Shasha):\t"
-    << zs::compute_zhang_shasha<StringNode, StringCosts<StringNode>>(stree1, stree2)
+    << zhang_shasha::compute_zhang_shasha<nodes::StringNode, nodes::StringCosts<nodes::StringNode>>(stree1, stree2)
     << std::endl;
 
-  
-  std::vector<std::array<Node*, 2> > edit_mapping =
-    zs::compute_edit_mapping<Node, Costs<Node>>(tree1, tree2);
+  std::vector<std::array<nodes::Node*, 2> > edit_mapping =
+    zs::compute_edit_mapping<nodes::Node, Costs<nodes::Node>>(tree1, tree2);
   if(argc > 3) {
     std::string output;
     //std::cout << "'" << argv[3] << "'" << std::endl;
     if(argv[3] == std::string("-hybrid")){
       std::vector<int> edm;
-      Node* hybrid = common::create_hybrid_graph(tree1, tree2, edit_mapping, hashtable_id_to_label);
+      nodes::Node* hybrid = common::create_hybrid_graph(tree1, tree2, edit_mapping, hashtable_id_to_label);
       output = common::get_json_hybrid_graph_tree(hybrid, hashtable_id_to_label);
       //delete hybrid;
     } else if(strcmp(argv[3],"-sbs_fs")==0){
@@ -93,7 +92,7 @@ int main (int argc, char* argv[]) {
           edit_mapping_int_array[i][j] = 0;
         }
       }
-      zs::get_edit_mapping_int_array<Node>(edit_mapping, edit_mapping_int_array);
+      zs::get_edit_mapping_int_array<nodes::Node>(edit_mapping, edit_mapping_int_array);
       
       output = common::get_json_side_by_side(tree1, tree2, 
         hashtable_id_to_label, edit_mapping_int_array);
@@ -116,11 +115,13 @@ int main (int argc, char* argv[]) {
       output.clear();
     }
   }
+  
   delete tree1;
   delete tree2;
   delete tree1_postorder;
   delete tree2_postorder;
-*/
+  */
+
   nodes::StringNode* d1 = new nodes::StringNode("John");
   nodes::StringNode* d2 = new nodes::StringNode("auth");
   nodes::StringNode* d3 = new nodes::StringNode("X1");
