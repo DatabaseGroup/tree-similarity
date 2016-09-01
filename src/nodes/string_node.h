@@ -112,7 +112,7 @@ bool StringNode::operator<(const StringNode& other) const {
 }
 
 bool StringNode::operator==(const StringNode& other) const {
-  return (label_.compare(other.get_label()) == 0);
+  return ((label_.compare(other.get_label()) == 0) && (id_ == other.get_id()));
 }
 
 // Example of a struct representing custom cost functions to be used for the
@@ -141,7 +141,7 @@ struct StringCosts {
   //
   // Return:  The cost of deleting node
   int del(_node* node) {
-    return 2;
+    return 1;
   }
 
   // Basic insert cost function
@@ -150,13 +150,13 @@ struct StringCosts {
   //
   // Return:  The cost of inserting node
   int ins(_node* node) {
-    return 2;
+    return 1;
   }
 
   // Dummy methods
-  int ren() { return 2; }
-  int del() { return 2; }
-  int ins() { return 2; }
+  int ren() { return 1; }
+  int del() { return 1; }
+  int ins() { return 1; }
 };
 
 StringNode empty_string_node("");
