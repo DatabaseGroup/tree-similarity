@@ -39,7 +39,7 @@ public:
 
 template<class Type>
 KHeap<Type>::KHeap(const int& max_size) : max_size_(max_size) {
-  data_ = new Type[max_size_];
+  data_ = new Type[max_size_] { };
   size_ = 0;
 }
 
@@ -129,12 +129,12 @@ Type* KHeap<Type>::begin() const {
 
 template<class Type>
 Type* KHeap<Type>::end() const {
-  return &(data_[max_size_]);
+  return &(data_[size_]); // data_[max_size_] for the complete array
 }
 
 template<class Type>
 Type* KHeap<Type>::rbegin() const {
-  return &(data_[max_size_ - 1]);
+  return &(data_[size_ - 1]); // data[max_size_ - 1] for the complete array
 }
 
 template<class Type>
