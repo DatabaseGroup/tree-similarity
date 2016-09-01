@@ -207,16 +207,11 @@ int main (int argc, char* argv[]) {
   data_structures::KHeap<wrappers::NodeDistancePair<nodes::StringNode>> ranking =
     tasm::naive<nodes::StringNode, nodes::StringCosts<nodes::StringNode>>(*query, *d22, 6);
   std::cout << "ranking: ";
-  ranking.print_array();
-
-  /*while (!ranking.empty()) {
-    const wrappers::NodeDistancePair<nodes::StringNode>& p = ranking.front();
-    ranking.print_array();
-    std::cout << "[" << p.get_node().get_label() << "_" << p.get_node().get_id() << ", " << p.get_distance() << "]" << std::endl;
-    ranking.erase_front();
-    ranking.print_array();
-    std::cout << std::endl;
-  }*/
+  std::cout << ranking.max_size() << "-Heap: | ";
+  for (auto it = ranking.begin(); it != ranking.end(); ++it) {
+    std::cout << it->get_node().get_label() << ", " << it->get_distance() <<" | ";
+  }
+  std::cout << std::endl;
 
   nodes::StringNode* g3 = new nodes::StringNode("a");
   nodes::StringNode* g2 = new nodes::StringNode("c");
@@ -244,13 +239,21 @@ int main (int argc, char* argv[]) {
   std::cout << "ranking: " << heap2.size() << " / " << heap2.max_size() << std::endl;
   tasm::tasm_dynamic<nodes::StringNode, nodes::StringCosts<nodes::StringNode>>(*g3, *h7, 2, heap2, false);
   std::cout << "ranking: " << heap2.size() << " / " << heap2.max_size() << std::endl;
-  heap2.rprint_array();
+  std::cout << heap2.max_size() << "-Heap: | ";
+  for (auto rit = heap2.rbegin(); rit != heap2.rend(); --rit) {
+    std::cout << rit->get_node().get_label() << ", " << rit->get_distance() <<" | ";
+  }
+  std::cout << std::endl;
 
   data_structures::KHeap<wrappers::NodeDistancePair<nodes::StringNode>> heap6(6);
   std::cout << "ranking: " << heap6.size() << " / " << heap6.max_size() << std::endl;
   tasm::tasm_dynamic<nodes::StringNode, nodes::StringCosts<nodes::StringNode>>(*query, *d22, 6, heap6, false);
   std::cout << "ranking: " << heap6.size() << " / " << heap6.max_size() << std::endl;
-  heap6.rprint_array();
+  std::cout << heap6.max_size() << "-Heap: | ";
+  for (auto rit = heap6.rbegin(); rit != heap6.rend(); --rit) {
+    std::cout << rit->get_node().get_label() << ", " << rit->get_distance() <<" | ";
+  }
+  std::cout << std::endl;
 
   std::vector<nodes::StringNode*>* postorder =
     common::generate_postorder<nodes::StringNode>(d22);
@@ -262,7 +265,11 @@ int main (int argc, char* argv[]) {
   
   auto heap = tasm::tasm_postorder<nodes::StringNode, nodes::StringCosts<nodes::StringNode>>(*query, po_queue, 6);
   std::cout << "ranking: " << heap.size() << " / " << heap.max_size() << std::endl;
-  heap.rprint_array();
+  std::cout << heap.max_size() << "-Heap: | ";
+  for (auto rit = heap.rbegin(); rit != heap.rend(); --rit) {
+    std::cout << rit->get_node().get_label() << ", " << rit->get_distance() <<" | ";
+  }
+  std::cout << std::endl;
 
   return 0;
 }
