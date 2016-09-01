@@ -29,9 +29,12 @@ public:
   const Type replace_front(Type replacement);
   const Type replace_front_if_greater(Type replacement);
 
-  void print_array() const;
-  void rprint_array() const;
-
+  Type* begin() const;
+  Type* end() const;
+  // please notice: by now, the reverse iterator has to be DECREMENTED in the
+  // loop (not incremeneted like in the STL rbegin()/rend())
+  Type* rbegin() const;
+  Type* rend() const;
 };
 
 template<class Type>
@@ -120,21 +123,23 @@ const Type KHeap<Type>::replace_front_if_greater(Type replacement) {
 }
 
 template<class Type>
-void KHeap<Type>::print_array() const {
-  std::cout << max_size_ << "-Heap: | ";
-  for (int i = 0; i < size_; ++i) {
-    std::cout << data_[i].get_node().get_label() << ", " << data_[i].get_distance() << " | ";
-  }
-  std::cout << std::endl;
+Type* KHeap<Type>::begin() const {
+  return data_;
 }
 
 template<class Type>
-void KHeap<Type>::rprint_array() const {
-  std::cout << max_size_ << "-Heap: | ";
-  for (int i = (size_ - 1); i >= 0; --i) {
-    std::cout << data_[i].get_node().get_label() << ", " << data_[i].get_distance() << " | ";
-  }
-  std::cout << std::endl;
+Type* KHeap<Type>::end() const {
+  return &(data_[max_size_]);
+}
+
+template<class Type>
+Type* KHeap<Type>::rbegin() const {
+  return &(data_[max_size_ - 1]);
+}
+
+template<class Type>
+Type* KHeap<Type>::rend() const {
+  return (data_ - 1);
 }
 
 template<class Type>
