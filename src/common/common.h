@@ -24,16 +24,21 @@ typedef std::map<int, nodes::Node*, std::greater<int>> IDMappedNode;
 //
 // Return:  None (the result is stored in tr_post, which is altered)
 template<class _node = nodes::Node>
-void postorder(_node* root, std::vector<_node*>* tr_post, int* node_id_counter) {
+void postorder(_node* root, std::vector<_node*>* tr_post, int* node_id_counter,
+  bool keep_ids = false) {
   if (root) {
     // traverse children first
     if (root->get_children_number() > 0) {
       for (int i = 0; i < root->get_children_number(); ++i) {
-        postorder(root->get_child(i), tr_post, node_id_counter);
+        postorder(root->get_child(i), tr_post, node_id_counter, keep_ids);
       }
     }
-    root->set_id(*node_id_counter);
-    ++(*node_id_counter);
+
+    if (!keep_ids) {
+      root->set_id(*node_id_counter);
+      ++(*node_id_counter);
+    }
+
     tr_post->push_back(root);
   }
 }
@@ -44,7 +49,7 @@ void postorder(_node* root, std::vector<_node*>* tr_post, int* node_id_counter) 
 //
 // Return:  A pointer to a vector of node pointers of the 'postorderified' tree
 template<class _node = nodes::Node>
-std::vector<_node*>* generate_postorder(_node* root) {
+std::vector<_node*>* generate_postorder(_node* root, bool keep_ids = false) {
 
 // TODO: rename to create_postorder
 // TODISCUSS: this function modifies the id of the node object. is this correct?
@@ -54,7 +59,7 @@ std::vector<_node*>* generate_postorder(_node* root) {
   std::vector<_node*>* tree_postorder = new std::vector<_node*>();
 
   // Recursively traverse tree in postorder
-  postorder(root, tree_postorder, &node_id_counter);
+  postorder(root, tree_postorder, &node_id_counter, keep_ids);
   return tree_postorder;
 }
 
