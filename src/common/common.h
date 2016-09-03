@@ -5,13 +5,14 @@
 #include <map>
 #include <set>
 #include <array>
+#include <unordered_map>
 
 #include "../nodes/node.h"
 
 namespace common {
 
 typedef std::unordered_map<int, std::string> IDLabelMap;
-typedef std::map<int, nodes::Node*, std::greater<int>> IDMappedNode;
+typedef std::map<int, nodes::StringNode*, std::greater<int>> IDMappedNode;
 
 // Recursively traverses the subtree rooted at a given root.
 //
@@ -19,24 +20,18 @@ typedef std::map<int, nodes::Node*, std::greater<int>> IDMappedNode;
 //                          postorder
 //          tr_post         A pointer to a vector which is filled with the
 //                          traverse nodes in postorder
-//          node_id_counter A pointer to the counter which is incremented each
-//                          time a node is added to the resulting vector
 //
 // Return:  None (the result is stored in tr_post, which is altered)
-template<class _node = nodes::Node>
-void postorder(_node* root, std::vector<_node*>* tr_post, int* node_id_counter,
-  bool keep_ids = false) {
+template<class _node = nodes::StringNode>
+void postorder(nodes::Node<_node>* root,
+  std::vector<nodes::Node<_node>*>* tr_post)
+{
   if (root) {
     // traverse children first
     if (root->get_children_number() > 0) {
       for (int i = 0; i < root->get_children_number(); ++i) {
-        postorder(root->get_child(i), tr_post, node_id_counter, keep_ids);
+        postorder(root->get_child(i), tr_post);
       }
-    }
-
-    if (!keep_ids) {
-      root->set_id(*node_id_counter);
-      ++(*node_id_counter);
     }
 
     tr_post->push_back(root);
@@ -48,21 +43,22 @@ void postorder(_node* root, std::vector<_node*>* tr_post, int* node_id_counter,
 // Params:  root  The root node of the tree to be 'postorderified'
 //
 // Return:  A pointer to a vector of node pointers of the 'postorderified' tree
-template<class _node = nodes::Node>
-std::vector<_node*>* generate_postorder(_node* root, bool keep_ids = false) {
+template<class _node = nodes::StringNode>
+std::vector<nodes::Node<_node>*>* generate_postorder(nodes::Node<_node>* root)
+{
 
-// TODO: rename to create_postorder
-// TODISCUSS: this function modifies the id of the node object. is this correct?
+  // TODO: rename to create_postorder
 
-  int node_id_counter = 1;
   // Heap allocation
-  std::vector<_node*>* tree_postorder = new std::vector<_node*>();
+  std::vector<nodes::Node<_node>*>* tree_postorder =
+    new std::vector<nodes::Node<_node>*>();
 
   // Recursively traverse tree in postorder
-  postorder(root, tree_postorder, &node_id_counter, keep_ids);
+  postorder(root, tree_postorder);
   return tree_postorder;
 }
 
+/*
 // Generate a simple tree recursively.
 // Each path has length equal to depth.
 // Each node has a random fanout between 1 and max_fanout.
@@ -224,6 +220,7 @@ void print_tree_indented(_node* n, int level, IDLabelMap hashtable_id_to_label){
     print_tree_indented(n->get_child(i), (level+1),hashtable_id_to_label);
   }
 }
+*/
 
 } // namespace common
 

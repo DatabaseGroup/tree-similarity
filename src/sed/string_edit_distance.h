@@ -9,18 +9,21 @@
 
 namespace sed {
 
+// TODO: refactor! use the StringNode, StringCosts combination
+
 // Generic function to compute the distance between two line-trees (Strings) under a specified
 // cost model. Each tree is represented by its respective root node. A root node
 // type is specified as first template parameter, the cost model type as second
 // template parameter.
-template<class _node = nodes::Node, class _costs = nodes::Costs<_node>>
-int compute_string_edit_distance(_node* tree1, _node* tree2, _costs costs = _costs())
+template<class _node = nodes::StringNode, class _costs = nodes::Costs<_node>>
+int compute_string_edit_distance(nodes::Node<_node>* tree1,
+  nodes::Node<_node>* tree2, _costs costs = _costs())
 {
-  std::vector<int> string1, string2;
+  std::vector<std::string> string1, string2;
   int rename_cost = 0, temp = 0;
 
   // check if input is a string
-  nodes::Node* temp_node = tree1;
+  nodes::Node<_node>* temp_node = tree1;
   while (temp_node->get_children_number() == 1) {
     string1.push_back(temp_node->get_label_id());
     temp_node = temp_node->get_child(0);
@@ -39,7 +42,7 @@ int compute_string_edit_distance(_node* tree1, _node* tree2, _costs costs = _cos
   // check String 2
   temp_node = tree2;
   while (temp_node->get_children_number() == 1) {
-    string2.push_back(temp_node->get_label_id());
+    string2.push_back(temp_node->get_label());
     temp_node = temp_node->get_child(0);
   }
 
@@ -52,7 +55,9 @@ int compute_string_edit_distance(_node* tree1, _node* tree2, _costs costs = _cos
   }
 
   // calculate string edit distance
-  data_structures::Array2D<double> result(tree1->get_subtree_size(), tree2->get_subtree_size());
+  data_structures::Array2D<double> result(tree1->get_subtree_size(),
+    tree2->get_subtree_size()
+  );
   int i = 0;
 
   // Costs for deleting of all characters of the left-hand string (assuming that
@@ -70,7 +75,7 @@ int compute_string_edit_distance(_node* tree1, _node* tree2, _costs costs = _cos
   // calculate the costs for all pairs of substrings of the two input strings
   for (int j = 1; j < tree2->get_subtree_size(); ++j) {
     for (i = 1; i < tree1->get_subtree_size(); ++i) {
-      rename_cost = (string1.at(i) == string2.at(j)) ? 0 : costs.ren();
+      rename_cost = (string1.at(i).compare(string2.at(j))) ? 0 : costs.ren();
 
       // calculate the minimum cost of:
       //  * inserting a character to the right-hand string

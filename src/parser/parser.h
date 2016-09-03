@@ -1,22 +1,24 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include "../nodes/node.h"
+
 namespace parser {
 
 typedef std::unordered_map<std::string, int> LabelIDMap;
 
-template<class _node = nodes::Node>
-_node* create_tree_from_string(char* str, LabelIDMap& hashtable,
+template<class _node = nodes::StringNode>
+nodes::Node<_node>* create_tree_from_string(char* str, LabelIDMap& hashtable,
   int& labelid)
 { 
   int length = std::strlen(str);
   int scope = -1;
    
-  std::vector<_node*> scope_parent_list;
-  typename std::vector<_node*>::const_iterator it;
+  std::vector<nodes::Node<_node>*> scope_parent_list;
+  typename std::vector<nodes::Node<_node>*>::const_iterator it;
   std::string label = "";
     
-  _node* root = new _node(1, 1);
+  nodes::Node<_node>* root = new nodes::Node<_node>(new _node());
   for (int i = 0; i < length; i++) {
     if (i != 0 && scope <= -1) {
       break;
@@ -28,7 +30,7 @@ _node* create_tree_from_string(char* str, LabelIDMap& hashtable,
           hashtable.emplace(label, labelid++);
         }
         
-        _node* tmp_node = new _node(hashtable[label]);
+        nodes::Node<_node>* tmp_node = new nodes::Node<_node>(new _node(label));
         scope_parent_list.push_back(tmp_node);
         
         if (scope > 0) {
@@ -52,7 +54,7 @@ _node* create_tree_from_string(char* str, LabelIDMap& hashtable,
           hashtable.emplace(label, labelid++);
         }
 
-        _node* tmp_node = new _node(hashtable[label]);
+        nodes::Node<_node>* tmp_node = new nodes::Node<_node>(new _node(label));
         scope_parent_list.push_back(tmp_node);
         
         if (scope > 0 && scope_parent_list.size() > 1) {

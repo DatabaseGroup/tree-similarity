@@ -5,19 +5,21 @@
 
 namespace wrappers {
 
-template<class NodeType = nodes::Node>
+// TODO: Make node_ of type _Node and adapt get_node/constr. accordingly
+
+template<class _Node = nodes::StringNode>
 class NodeDistancePair {
 private:
-  NodeType node_;
+  nodes::Node<_Node> node_;
   double distance_;
 
 public:
   NodeDistancePair();
-  NodeDistancePair(const NodeType node, double distance);
+  NodeDistancePair(const nodes::Node<_Node> node, double distance);
   ~NodeDistancePair();
 
   double get_distance() const;
-  const NodeType get_node() const;
+  const nodes::Node<_Node> get_node() const;
 
   bool operator<(const NodeDistancePair& other) const;
   bool operator>(const NodeDistancePair& other) const;
@@ -26,52 +28,52 @@ public:
   bool operator<=(const NodeDistancePair& other) const;
 };
 
-template<class NodeType>
-NodeDistancePair<NodeType>::NodeDistancePair() { }
+template<class _Node>
+NodeDistancePair<_Node>::NodeDistancePair() { }
 
-template<class NodeType>
-NodeDistancePair<NodeType>::NodeDistancePair(const NodeType node,
+template<class _Node>
+NodeDistancePair<_Node>::NodeDistancePair(const nodes::Node<_Node> node,
   double distance) : node_(node), distance_(distance) { }
 
-template<class NodeType>
-NodeDistancePair<NodeType>::~NodeDistancePair() { }
+template<class _Node>
+NodeDistancePair<_Node>::~NodeDistancePair() { }
 
-template<class NodeType>
-double NodeDistancePair<NodeType>::get_distance() const {
+template<class _Node>
+double NodeDistancePair<_Node>::get_distance() const {
   return distance_;
 }
 
-template<class NodeType>
-const NodeType NodeDistancePair<NodeType>::get_node() const {
+template<class _Node>
+const nodes::Node<_Node> NodeDistancePair<_Node>::get_node() const {
   return node_;
 }
 
-template<class NodeType>
-bool NodeDistancePair<NodeType>::operator<(const NodeDistancePair& other) const
+template<class _Node>
+bool NodeDistancePair<_Node>::operator<(const NodeDistancePair& other) const
 {
   return (distance_ < other.get_distance());
 }
 
-template<class NodeType>
-bool NodeDistancePair<NodeType>::operator>(const NodeDistancePair& other) const
+template<class _Node>
+bool NodeDistancePair<_Node>::operator>(const NodeDistancePair& other) const
 {
   return (distance_ > other.get_distance());
 }
 
-template<class NodeType>
-bool NodeDistancePair<NodeType>::operator==(const NodeDistancePair& other) const
+template<class _Node>
+bool NodeDistancePair<_Node>::operator==(const NodeDistancePair& other) const
 {
   return (distance_ == other.get_distance());
 }
 
-template<class NodeType>
-bool NodeDistancePair<NodeType>::operator>=(const NodeDistancePair& other) const
+template<class _Node>
+bool NodeDistancePair<_Node>::operator>=(const NodeDistancePair& other) const
 {
   return ((*this > other) || (*this == other));
 }
 
-template<class NodeType>
-bool NodeDistancePair<NodeType>::operator<=(const NodeDistancePair& other) const
+template<class _Node>
+bool NodeDistancePair<_Node>::operator<=(const NodeDistancePair& other) const
 {
   return ((*this < other) || (*this == other));
 }

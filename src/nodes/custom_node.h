@@ -13,29 +13,19 @@ class CustomNode {
 private:
   // custom label
   std::vector<std::string> label_;
-  std::vector<CustomNode*> children_;
 
 public:
   // Basic constructor
-  CustomNode(std::vector<std::string> label,
-    std::vector<CustomNode*> children);
+  CustomNode(std::vector<std::string> label);
 
   // Getter label
   std::vector<std::string> get_label() const;
-
-  // Getter children
-  std::vector<CustomNode*> get_children() const;
 };
 
-CustomNode::CustomNode(std::vector<std::string> label,
-  std::vector<CustomNode*> children) : label_(label), children_(children) {}
+CustomNode::CustomNode(std::vector<std::string> label) : label_(label) { }
 
 std::vector<std::string> CustomNode::get_label() const {
   return label_;
-}
-
-std::vector<CustomNode*> CustomNode::get_children() const {
-  return children_;
 }
 
 // Example of a struct representing custom cost functions to be used for the
