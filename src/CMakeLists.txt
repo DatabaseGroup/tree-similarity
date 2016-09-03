@@ -19,21 +19,22 @@ include_directories(${CMAKE_BINARY_DIR})
 # the set of all source files
 set(tree_similarity_sources
   tree_similarity.cc
-  data_structures/array_2d.h
-  nodes/custom_node.h
   common/common.h
-  nodes/node.h
-  sed/string_edit_distance.h
-  upper_bound/upper_bound.h
-  zhang_shasha/zhang_shasha.h
-  nodes/string_node.h
-  nodes/hybrid_node.h
-  visualisation/visualisation.h
+  data_structures/array_2d.h
   data_structures/k_heap.h
+  nodes/custom_node.h
+  nodes/node.h
+  nodes/hybrid_node.h
+  nodes/string_node.h
+  parser/parser.h
+  rted/rted.h
+  sed/string_edit_distance.h
+  tasm/tasm.h
+  upper_bound/upper_bound.h
+  visualisation/visualisation.h
   wrappers/node_distance_pair.h
   wrappers/node_prefixes_pair.h
-  tasm/tasm.h
-  parser/parser.h
+  zhang_shasha/zhang_shasha.h
 )
 
 # build executable

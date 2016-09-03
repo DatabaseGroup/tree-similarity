@@ -15,6 +15,8 @@
 
 #include "parser/parser.h"
 
+#include "rted/rted.h"
+
 #include "sed/string_edit_distance.h"
 
 #include "tasm/tasm.h"
