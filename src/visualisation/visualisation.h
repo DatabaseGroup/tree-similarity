@@ -12,8 +12,7 @@ namespace visualisation {
 
 
 typedef std::unordered_map<int, std::string> IDLabelMap;
-typedef std::map<int, nodes::Node*, std::greater<int>> IDMappedNode;
-
+typedef std::map<int, nodes::HybridNode*, std::greater<int>> IDMappedNode;
 
 template<class _node = nodes::HybridNode>
 void copy_tree_with_colour(_node* original, _node* copy, char colour) {
