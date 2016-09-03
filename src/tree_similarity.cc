@@ -71,6 +71,11 @@ int main (int argc, char* argv[]) {
     << "Distance (string-labeled tree, string-labeled cost model, Zhang Shasha):\t"
     << zhang_shasha::compute_zhang_shasha<nodes::StringNode, nodes::StringCosts<nodes::StringNode>>(tree1, tree2)
     << std::endl;
+
+  std::cout
+    << "Distance (string-labeled tree, string-labeled cost model, RTED):\t"
+    << rted::compute_rted<nodes::StringNode, nodes::StringCosts<nodes::StringNode>>(tree1, tree2)
+    << std::endl;
 /*
   // TOBIAS PART - TO BE RESOLVED/REMOVE/CLEANED BY TOBIAS
   //
