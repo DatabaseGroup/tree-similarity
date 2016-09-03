@@ -33,6 +33,7 @@ set(tree_similarity_sources
   wrappers/node_distance_pair.h
   wrappers/node_prefixes_pair.h
   tasm/tasm.h
+  parser/parser.h
 )
 
 # build executable
