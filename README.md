@@ -181,35 +181,35 @@ is inconsistent/unclear, please just ask and we will discuss it.
 
     ```c++    
     // declaration
-    template<typename Type>
+    template<typename _Type>
     class TestContainer {
     private:
-      Type* data_;
+      _Type* data_;
     
     public:
-      TestContainer (Type* data);
+      TestContainer (_Type* data);
       ~TestContainer ();
     
-      Type* get_data () const;
-      void set_data (Type* data);
+      _Type* get_data () const;
+      void set_data (_Type* data);
     };
             
     // definition
-    template<typename Type>
-    TestContainer<Type>::TestContainer (Type* data) : data_(data) {};
+    template<typename _Type>
+    TestContainer<_Type>::TestContainer (_Type* data) : data_(data) {};
     
-    template<typename Type>
-    TestContainer<Type>::~TestContainer () {
-        delete[] data_;
+    template<typename _Type>
+    TestContainer<_Type>::~TestContainer () {
+        delete data_;
     }
     
-    template<typename Type>
-    Type* TestContainer<Type>::get_data () const {
+    template<typename _Type>
+    _Type* TestContainer<_Type>::get_data () const {
       return data_;
     }
     
-    template<typename Type>
-    void TestContainer<Type>::set_data (Type* data) {
+    template<typename _Type>
+    void TestContainer<_Type>::set_data (_Type* data) {
       data_ = data;
     }
     ```
