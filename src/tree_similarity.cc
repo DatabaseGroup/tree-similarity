@@ -131,7 +131,7 @@ int main (int argc, char* argv[]) {
   delete tree1_postorder;
   delete tree2_postorder;
 
-
+/*
   // TEST CASES OF DANIEL, DO NOT TOUCH THESE! ;)
   //
   nodes::Node<nodes::StringNodeData>* d1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("John"));
@@ -284,6 +284,7 @@ int main (int argc, char* argv[]) {
     std::cout << rit->get_node().get_data()->get_label() << ", " << rit->get_distance() <<" | ";
   }
   std::cout << std::endl;
+*/
 
   return 0;
 }
