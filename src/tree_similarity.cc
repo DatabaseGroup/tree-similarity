@@ -17,10 +17,10 @@ int main (int argc, char* argv[]) {
   parser::LabelIDMap hashtable_label_to_id;
   common::IDLabelMap hashtable_id_to_label;
   int node_id_counter = 1;
-  nodes::Node<nodes::StringNode>* tree1 = parser::create_tree_from_string(argv[1], hashtable_label_to_id,
+  nodes::Node<nodes::StringNodeData>* tree1 = parser::create_tree_from_string(argv[1], hashtable_label_to_id,
     node_id_counter
   );
-  nodes::Node<nodes::StringNode>* tree2 = parser::create_tree_from_string(argv[2], hashtable_label_to_id,
+  nodes::Node<nodes::StringNodeData>* tree2 = parser::create_tree_from_string(argv[2], hashtable_label_to_id,
     node_id_counter
   );
 
@@ -30,8 +30,8 @@ int main (int argc, char* argv[]) {
     hashtable_id_to_label.emplace(it->second, it->first);
   }
 
-  std::vector<nodes::Node<nodes::StringNode>*>* tree1_postorder = common::generate_postorder(tree1);
-  std::vector<nodes::Node<nodes::StringNode>*>* tree2_postorder = common::generate_postorder(tree2);
+  std::vector<nodes::Node<nodes::StringNodeData>*>* tree1_postorder = common::generate_postorder(tree1);
+  std::vector<nodes::Node<nodes::StringNodeData>*>* tree2_postorder = common::generate_postorder(tree2);
 
   // Zhang and Shasha cost = 1 (insert), 1 (delete), 1 (rename)
   // compute distance using basic nodes and basic cost model
@@ -39,18 +39,18 @@ int main (int argc, char* argv[]) {
   // parameter
   
   /*
-  nodes::Node<nodes::StringNode>* a1 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("a"));
-  nodes::Node<nodes::StringNode>* r1 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("r"));
-  nodes::Node<nodes::StringNode>* d1 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("d"));
-  nodes::Node<nodes::StringNode>* e1 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("d"));
-  nodes::Node<nodes::StringNode>* i1 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("i"));
-  nodes::Node<nodes::StringNode>* l1 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("l"));
-  nodes::Node<nodes::StringNode>* t1 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("t"));
-  nodes::Node<nodes::StringNode>* k1 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("k"));
-  nodes::Node<nodes::StringNode>* g1 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("g"));
-  nodes::Node<nodes::StringNode>* h1 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("h"));
+  nodes::Node<nodes::StringNodeData>* a1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("a"));
+  nodes::Node<nodes::StringNodeData>* r1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("r"));
+  nodes::Node<nodes::StringNodeData>* d1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("d"));
+  nodes::Node<nodes::StringNodeData>* e1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("d"));
+  nodes::Node<nodes::StringNodeData>* i1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("i"));
+  nodes::Node<nodes::StringNodeData>* l1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("l"));
+  nodes::Node<nodes::StringNodeData>* t1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("t"));
+  nodes::Node<nodes::StringNodeData>* k1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("k"));
+  nodes::Node<nodes::StringNodeData>* g1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("g"));
+  nodes::Node<nodes::StringNodeData>* h1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("h"));
   
-  nodes::Node<nodes::StringNode>* stree1 = a1;
+  nodes::Node<nodes::StringNodeData>* stree1 = a1;
   stree1->add_child(r1);
   stree1->add_child(d1);
   stree1->add_child(e1);
@@ -61,20 +61,20 @@ int main (int argc, char* argv[]) {
   t1->add_child(g1);
   t1->add_child(h1);
 
-  nodes::Node<nodes::StringNode>* x2 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("x"));
-  nodes::Node<nodes::StringNode>* stree2 = x2;
+  nodes::Node<nodes::StringNodeData>* x2 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("x"));
+  nodes::Node<nodes::StringNodeData>* stree2 = x2;
 
   // distance between stree1 and stree2 should be 10 (using StringCosts)
   */
 
   std::cout
     << "Distance (string-labeled tree, string-labeled cost model, Zhang Shasha):\t"
-    << zhang_shasha::compute_zhang_shasha<nodes::StringNode, nodes::StringCosts<nodes::StringNode>>(tree1, tree2)
+    << zhang_shasha::compute_zhang_shasha<nodes::StringNodeData, nodes::StringCosts<nodes::StringNodeData>>(tree1, tree2)
     << std::endl;
 
   std::cout
     << "Distance (string-labeled tree, string-labeled cost model, RTED):\t"
-    << rted::compute_rted<nodes::StringNode, nodes::StringCosts<nodes::StringNode>>(tree1, tree2)
+    << rted::compute_rted<nodes::StringNodeData, nodes::StringCosts<nodes::StringNodeData>>(tree1, tree2)
     << std::endl;
 /*
   // TOBIAS PART - TO BE RESOLVED/REMOVE/CLEANED BY TOBIAS
@@ -131,31 +131,31 @@ int main (int argc, char* argv[]) {
   delete tree1_postorder;
   delete tree2_postorder;
 
-/*
+
   // TEST CASES OF DANIEL, DO NOT TOUCH THESE! ;)
   //
-  nodes::Node<nodes::StringNode>* d1 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("John"));
-  nodes::Node<nodes::StringNode>* d2 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("auth"));
-  nodes::Node<nodes::StringNode>* d3 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("X1"));
-  nodes::Node<nodes::StringNode>* d4 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("title"));
-  nodes::Node<nodes::StringNode>* d5 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("article"));
-  nodes::Node<nodes::StringNode>* d6 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("VLDB"));
-  nodes::Node<nodes::StringNode>* d7 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("conf"));
-  nodes::Node<nodes::StringNode>* d8 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("Peter"));
-  nodes::Node<nodes::StringNode>* d9 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("auth"));
-  nodes::Node<nodes::StringNode>* d10 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("X3"));
-  nodes::Node<nodes::StringNode>* d11 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("title"));
-  nodes::Node<nodes::StringNode>* d12 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("article"));
-  nodes::Node<nodes::StringNode>* d13 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("Mike"));
-  nodes::Node<nodes::StringNode>* d14 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("auth"));
-  nodes::Node<nodes::StringNode>* d15 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("X4"));
-  nodes::Node<nodes::StringNode>* d16 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("title"));
-  nodes::Node<nodes::StringNode>* d17 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("article"));
-  nodes::Node<nodes::StringNode>* d18 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("proceedings"));
-  nodes::Node<nodes::StringNode>* d19 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("X2"));
-  nodes::Node<nodes::StringNode>* d20 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("title"));
-  nodes::Node<nodes::StringNode>* d21 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("book"));
-  nodes::Node<nodes::StringNode>* d22 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("dblp"));
+  nodes::Node<nodes::StringNodeData>* d1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("John"));
+  nodes::Node<nodes::StringNodeData>* d2 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("auth"));
+  nodes::Node<nodes::StringNodeData>* d3 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("X1"));
+  nodes::Node<nodes::StringNodeData>* d4 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("title"));
+  nodes::Node<nodes::StringNodeData>* d5 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("article"));
+  nodes::Node<nodes::StringNodeData>* d6 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("VLDB"));
+  nodes::Node<nodes::StringNodeData>* d7 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("conf"));
+  nodes::Node<nodes::StringNodeData>* d8 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("Peter"));
+  nodes::Node<nodes::StringNodeData>* d9 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("auth"));
+  nodes::Node<nodes::StringNodeData>* d10 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("X3"));
+  nodes::Node<nodes::StringNodeData>* d11 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("title"));
+  nodes::Node<nodes::StringNodeData>* d12 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("article"));
+  nodes::Node<nodes::StringNodeData>* d13 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("Mike"));
+  nodes::Node<nodes::StringNodeData>* d14 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("auth"));
+  nodes::Node<nodes::StringNodeData>* d15 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("X4"));
+  nodes::Node<nodes::StringNodeData>* d16 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("title"));
+  nodes::Node<nodes::StringNodeData>* d17 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("article"));
+  nodes::Node<nodes::StringNodeData>* d18 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("proceedings"));
+  nodes::Node<nodes::StringNodeData>* d19 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("X2"));
+  nodes::Node<nodes::StringNodeData>* d20 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("title"));
+  nodes::Node<nodes::StringNodeData>* d21 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("book"));
+  nodes::Node<nodes::StringNodeData>* d22 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("dblp"));
   
   d22->add_child(d5);
   d22->add_child(d18);
@@ -179,14 +179,14 @@ int main (int argc, char* argv[]) {
   d14->add_child(d13);
   d16->add_child(d15);
 
-  nodes::Node<nodes::StringNode>* query = new nodes::Node<nodes::StringNode>(new nodes::StringNode("book"));
-  nodes::Node<nodes::StringNode>* title = new nodes::Node<nodes::StringNode>(new nodes::StringNode("title"));
-  nodes::Node<nodes::StringNode>* x2 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("X2"));
+  nodes::Node<nodes::StringNodeData>* query = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("book"));
+  nodes::Node<nodes::StringNodeData>* title = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("title"));
+  nodes::Node<nodes::StringNodeData>* x2 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("X2"));
 
   query->add_child(title);
   title->add_child(x2);
 
-  std::queue<nodes::Node<nodes::StringNode>> postorder_queue;
+  std::queue<nodes::Node<nodes::StringNodeData>> postorder_queue;
   postorder_queue.push(*d1);
   postorder_queue.push(*d2);
   postorder_queue.push(*d3);
@@ -211,15 +211,15 @@ int main (int argc, char* argv[]) {
   postorder_queue.push(*d22);
 
 
-  std::vector<nodes::Node<nodes::StringNode>> result = tasm::prb_pruning<nodes::StringNode>(postorder_queue, 6);
+  std::vector<nodes::Node<nodes::StringNodeData>> result = tasm::prb_pruning<nodes::StringNodeData>(postorder_queue, 6);
 
   std::cout << "prb-pruning result:" << std::endl;
-  for (nodes::Node<nodes::StringNode>& s: result) {
+  for (nodes::Node<nodes::StringNodeData>& s: result) {
     std::cout << s.get_data()->get_label() << std::endl;
   }
 
-  data_structures::KHeap<wrappers::NodeDistancePair<nodes::StringNode>> ranking =
-    tasm::naive<nodes::StringNode, nodes::StringCosts<nodes::StringNode>>(*query, *d22, 6);
+  data_structures::KHeap<wrappers::NodeDistancePair<nodes::StringNodeData>> ranking =
+    tasm::naive<nodes::StringNodeData, nodes::StringCosts<nodes::StringNodeData>>(*query, *d22, 6);
   std::cout << "ranking: ";
   std::cout << ranking.max_size() << "-Heap: | ";
   for (auto it = ranking.begin(); it != ranking.end(); ++it) {
@@ -227,20 +227,20 @@ int main (int argc, char* argv[]) {
   }
   std::cout << std::endl;
 
-  nodes::Node<nodes::StringNode>* g3 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("a"));
-  nodes::Node<nodes::StringNode>* g2 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("c"));
-  nodes::Node<nodes::StringNode>* g1 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("b"));
+  nodes::Node<nodes::StringNodeData>* g3 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("a"));
+  nodes::Node<nodes::StringNodeData>* g2 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("c"));
+  nodes::Node<nodes::StringNodeData>* g1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("b"));
 
   g3->add_child(g1);
   g3->add_child(g2);
 
-  nodes::Node<nodes::StringNode>* h7 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("x"));
-  nodes::Node<nodes::StringNode>* h6 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("a"));
-  nodes::Node<nodes::StringNode>* h5 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("c"));
-  nodes::Node<nodes::StringNode>* h4 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("b"));
-  nodes::Node<nodes::StringNode>* h3 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("a"));
-  nodes::Node<nodes::StringNode>* h2 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("d"));
-  nodes::Node<nodes::StringNode>* h1 = new nodes::Node<nodes::StringNode>(new nodes::StringNode("b"));
+  nodes::Node<nodes::StringNodeData>* h7 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("x"));
+  nodes::Node<nodes::StringNodeData>* h6 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("a"));
+  nodes::Node<nodes::StringNodeData>* h5 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("c"));
+  nodes::Node<nodes::StringNodeData>* h4 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("b"));
+  nodes::Node<nodes::StringNodeData>* h3 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("a"));
+  nodes::Node<nodes::StringNodeData>* h2 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("d"));
+  nodes::Node<nodes::StringNodeData>* h1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("b"));
 
   h7->add_child(h3);
   h7->add_child(h6);
@@ -249,9 +249,9 @@ int main (int argc, char* argv[]) {
   h6->add_child(h4);
   h6->add_child(h5);
 
-  data_structures::KHeap<wrappers::NodeDistancePair<nodes::StringNode>> heap2(2);
+  data_structures::KHeap<wrappers::NodeDistancePair<nodes::StringNodeData>> heap2(2);
   std::cout << "ranking: " << heap2.size() << " / " << heap2.max_size() << std::endl;
-  tasm::tasm_dynamic<nodes::StringNode, nodes::StringCosts<nodes::StringNode>>(*g3, *h7, 2, heap2, false);
+  tasm::tasm_dynamic<nodes::StringNodeData, nodes::StringCosts<nodes::StringNodeData>>(*g3, *h7, 2, heap2, false);
   std::cout << "ranking: " << heap2.size() << " / " << heap2.max_size() << std::endl;
   std::cout << heap2.max_size() << "-Heap: | ";
   for (auto rit = heap2.rbegin(); rit != heap2.rend(); --rit) {
@@ -259,9 +259,9 @@ int main (int argc, char* argv[]) {
   }
   std::cout << std::endl;
 
-  data_structures::KHeap<wrappers::NodeDistancePair<nodes::StringNode>> heap6(6);
+  data_structures::KHeap<wrappers::NodeDistancePair<nodes::StringNodeData>> heap6(6);
   std::cout << "ranking: " << heap6.size() << " / " << heap6.max_size() << std::endl;
-  tasm::tasm_dynamic<nodes::StringNode, nodes::StringCosts<nodes::StringNode>>(*query, *d22, 6, heap6, false);
+  tasm::tasm_dynamic<nodes::StringNodeData, nodes::StringCosts<nodes::StringNodeData>>(*query, *d22, 6, heap6, false);
   std::cout << "ranking: " << heap6.size() << " / " << heap6.max_size() << std::endl;
   std::cout << heap6.max_size() << "-Heap: | ";
   for (auto rit = heap6.rbegin(); rit != heap6.rend(); --rit) {
@@ -269,22 +269,21 @@ int main (int argc, char* argv[]) {
   }
   std::cout << std::endl;
 
-  std::vector<nodes::Node<nodes::StringNode>*>* postorder =
-    common::generate_postorder<nodes::StringNode>(d22);
+  std::vector<nodes::Node<nodes::StringNodeData>*>* postorder =
+    common::generate_postorder<nodes::StringNodeData>(d22);
   // TODO: do not traverse postorder again to create postorder queue
-  std::queue<nodes::Node<nodes::StringNode>> po_queue;
-  for (nodes::Node<nodes::StringNode>*& item: *postorder) {
+  std::queue<nodes::Node<nodes::StringNodeData>> po_queue;
+  for (nodes::Node<nodes::StringNodeData>*& item: *postorder) {
     po_queue.push(*item);
   }
   
-  auto heap = tasm::tasm_postorder<nodes::StringNode, nodes::StringCosts<nodes::StringNode>>(*query, po_queue, 6);
+  auto heap = tasm::tasm_postorder<nodes::StringNodeData, nodes::StringCosts<nodes::StringNodeData>>(*query, po_queue, 6);
   std::cout << "ranking: " << heap.size() << " / " << heap.max_size() << std::endl;
   std::cout << heap.max_size() << "-Heap: | ";
   for (auto rit = heap.rbegin(); rit != heap.rend(); --rit) {
     std::cout << rit->get_node().get_data()->get_label() << ", " << rit->get_distance() <<" | ";
   }
   std::cout << std::endl;
-*/
 
   return 0;
 }
