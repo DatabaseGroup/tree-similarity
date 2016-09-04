@@ -13,6 +13,8 @@ to write code to the best of his/her knowledge (regarding this document).
 
 - [General](#general)
 - [Description](#description)
+    - [Trees](#trees)
+    - [HowTo: Implement New Algorithms](#howto-implement-new-algorithms)
 - [Building Process](#building-process)
     - [Prerequisites](#prerequisites)
         - [Remarks](#remarks)
