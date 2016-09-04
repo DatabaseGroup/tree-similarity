@@ -22,10 +22,10 @@ set(tree_similarity_sources
   common/common.h
   data_structures/array_2d.h
   data_structures/k_heap.h
-  nodes/custom_node.h
+  nodes/custom_node_data.h
   nodes/node.h
   nodes/hybrid_node.h
-  nodes/string_node.h
+  nodes/string_node_data.h
   parser/parser.h
   rted/rted.h
   sed/string_edit_distance.h
