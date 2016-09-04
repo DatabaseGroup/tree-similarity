@@ -166,7 +166,7 @@ template<class _NodeData = nodes::StringNodeData, class _Costs = nodes::Costs<_N
 double my_awesome_algorithm_func(std::vector<nodes::Node<_NodeData>> trees,
   _Costs costs = new _Costs())
 {
-  // implement your new function here!
+  // implement your awesome function here!
   return 0.0;
 }
 
