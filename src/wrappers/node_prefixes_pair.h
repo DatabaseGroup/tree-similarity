@@ -5,68 +5,69 @@
 #include <map>
 
 #include "../nodes/node.h"
+#include "../nodes/string_node_data.h"
 
 namespace wrappers {
 
 // TODO: make node_ of type _Node and adapt methods accordingly
 
-template<class _Node = nodes::StringNode>
+template<class _NodeData = nodes::StringNodeData>
 class NodePrefixesPair {
 private:
-  nodes::Node<_Node> node_;
-  std::map<int, std::vector<nodes::Node<_Node>*>*> subtrees_;
-  std::map<int, std::vector<nodes::Node<_Node>*>*> prefixes_;
+  nodes::Node<_NodeData> node_;
+  std::map<int, std::vector<nodes::Node<_NodeData>*>*> subtrees_;
+  std::map<int, std::vector<nodes::Node<_NodeData>*>*> prefixes_;
 
-  void extract_subtrees_prefixes(nodes::Node<_Node>* root, int& id);
+  void extract_subtrees_prefixes(nodes::Node<_NodeData>* root, int& id);
 
 public:
-  NodePrefixesPair(nodes::Node<_Node>& node, const int& node_id);
+  NodePrefixesPair(nodes::Node<_NodeData>& node, const int& node_id);
   ~NodePrefixesPair();
 
-  void add_prefix(std::vector<nodes::Node<_Node>*>* subroot);
+  void add_prefix(std::vector<nodes::Node<_NodeData>*>* subroot);
   void create_subtrees_prefixes(const int& node_id);
   int get_number_of_prefixes() const;
 
-  const nodes::Node<_Node> get_node() const;
+  const nodes::Node<_NodeData> get_node() const;
   
-  const std::map<nodes::Node<_Node>, std::vector<nodes::Node<_Node>*>*> get_prefixes() const;
-  //const std::vector<nodes::Node<_Node>*>* get_prefix(nodes::Node<_Node>& subroot) const;
-  const std::vector<nodes::Node<_Node>*>* get_prefix(int index) const;
+  const std::map<nodes::Node<_NodeData>, std::vector<nodes::Node<_NodeData>*>*> get_prefixes() const;
+  //const std::vector<nodes::Node<_NodeData>*>* get_prefix(nodes::Node<_NodeData>& subroot) const;
+  const std::vector<nodes::Node<_NodeData>*>* get_prefix(int index) const;
 
-  const std::map<nodes::Node<_Node>, std::vector<nodes::Node<_Node>*>*> get_subtrees() const;
-  //const std::vector<nodes::Node<_Node>*>* get_subtree(nodes::Node<_Node>& subroot) const;
-  const std::vector<nodes::Node<_Node>*>* get_subtree(int index) const;
+  const std::map<nodes::Node<_NodeData>, std::vector<nodes::Node<_NodeData>*>*> get_subtrees() const;
+  //const std::vector<nodes::Node<_NodeData>*>* get_subtree(nodes::Node<_NodeData>& subroot) const;
+  const std::vector<nodes::Node<_NodeData>*>* get_subtree(int index) const;
 
-  void set_node(nodes::Node<_Node>& node);
+  void set_node(nodes::Node<_NodeData>& node);
 };
 
-template<class _Node>
-NodePrefixesPair<_Node>::NodePrefixesPair(nodes::Node<_Node>& node, const int& node_id)
+template<class _NodeData>
+NodePrefixesPair<_NodeData>::NodePrefixesPair(nodes::Node<_NodeData>& node, const int& node_id)
   : node_(node)
 {
   create_subtrees_prefixes(node_id);
 }
 
-template<class _Node>
-NodePrefixesPair<_Node>::~NodePrefixesPair() {
+template<class _NodeData>
+NodePrefixesPair<_NodeData>::~NodePrefixesPair() {
   prefixes_.clear();
 }
 
-template<class _Node>
-void NodePrefixesPair<_Node>::add_prefix(std::vector<nodes::Node<_Node>*>* subroot) {
+template<class _NodeData>
+void NodePrefixesPair<_NodeData>::add_prefix(std::vector<nodes::Node<_NodeData>*>* subroot) {
   //prefixes_.push_back(subroot);
 }
 
 // TODO: not optimal since it executes another postorder traversal ...
-template<class _Node>
-void NodePrefixesPair<_Node>::create_subtrees_prefixes(const int& node_id) {
+template<class _NodeData>
+void NodePrefixesPair<_NodeData>::create_subtrees_prefixes(const int& node_id) {
   int id = node_id - node_.get_subtree_size();
   extract_subtrees_prefixes(&node_, id);
 }
 
 // TODO: avoid code duplication! (common.h)
-template<class _Node>
-void NodePrefixesPair<_Node>::extract_subtrees_prefixes(nodes::Node<_Node>* node,
+template<class _NodeData>
+void NodePrefixesPair<_NodeData>::extract_subtrees_prefixes(nodes::Node<_NodeData>* node,
   int& id)
 {
   if (node != nullptr) {
@@ -81,49 +82,49 @@ void NodePrefixesPair<_Node>::extract_subtrees_prefixes(nodes::Node<_Node>* node
     subtrees_.insert(std::make_pair(id, common::generate_postorder(node)));
 
     if (prefixes_.empty()) {
-      prefixes_.insert(std::make_pair(id, new std::vector<nodes::Node<_Node>*>({ node })));
+      prefixes_.insert(std::make_pair(id, new std::vector<nodes::Node<_NodeData>*>({ node })));
     } else {
       // uses insert return pair<iterator, bool> instantly to update the prefix
-      prefixes_.insert(std::make_pair(id, new std::vector<nodes::Node<_Node>*>(
+      prefixes_.insert(std::make_pair(id, new std::vector<nodes::Node<_NodeData>*>(
         prefixes_.rbegin()->second->begin(), prefixes_.rbegin()->second->end()
       ))).first->second->push_back(node);
     }
   }
 }
 
-template<class _Node>
-int NodePrefixesPair<_Node>::get_number_of_prefixes() const {
+template<class _NodeData>
+int NodePrefixesPair<_NodeData>::get_number_of_prefixes() const {
   return prefixes_.size();
 }
 
-template<class _Node>
-const nodes::Node<_Node> NodePrefixesPair<_Node>::get_node() const {
+template<class _NodeData>
+const nodes::Node<_NodeData> NodePrefixesPair<_NodeData>::get_node() const {
   return node_;
 }
 
-template<class _Node>
-const std::map<nodes::Node<_Node>, std::vector<nodes::Node<_Node>*>*> NodePrefixesPair<_Node>::get_prefixes() const {
+template<class _NodeData>
+const std::map<nodes::Node<_NodeData>, std::vector<nodes::Node<_NodeData>*>*> NodePrefixesPair<_NodeData>::get_prefixes() const {
   return prefixes_;
 }
 
-template<class _Node>
-void NodePrefixesPair<_Node>::set_node(nodes::Node<_Node>& node) {
+template<class _NodeData>
+void NodePrefixesPair<_NodeData>::set_node(nodes::Node<_NodeData>& node) {
   node_ = node;
 }
 
-template<class _Node>
-const std::vector<nodes::Node<_Node>*>* NodePrefixesPair<_Node>::get_prefix(int index) const {
+template<class _NodeData>
+const std::vector<nodes::Node<_NodeData>*>* NodePrefixesPair<_NodeData>::get_prefix(int index) const {
   return prefixes_.at(index);
   //return *prefixes_.begin();
 }
 
-template<class _Node>
-const std::map<nodes::Node<_Node>, std::vector<nodes::Node<_Node>*>*> NodePrefixesPair<_Node>::get_subtrees() const {
+template<class _NodeData>
+const std::map<nodes::Node<_NodeData>, std::vector<nodes::Node<_NodeData>*>*> NodePrefixesPair<_NodeData>::get_subtrees() const {
   return subtrees_;
 }
 
-template<class _Node>
-const std::vector<nodes::Node<_Node>*>* NodePrefixesPair<_Node>::get_subtree(int index) const {
+template<class _NodeData>
+const std::vector<nodes::Node<_NodeData>*>* NodePrefixesPair<_NodeData>::get_subtree(int index) const {
   return subtrees_.at(index);
 }
 

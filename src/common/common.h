@@ -8,11 +8,12 @@
 #include <unordered_map>
 
 #include "../nodes/node.h"
+#include "../nodes/string_node_data.h"
 
 namespace common {
 
 typedef std::unordered_map<int, std::string> IDLabelMap;
-typedef std::map<int, nodes::StringNode*, std::greater<int>> IDMappedNode;
+typedef std::map<int, nodes::StringNodeData*, std::greater<int>> IDMappedNode;
 
 // Recursively traverses the subtree rooted at a given root.
 //
@@ -22,9 +23,9 @@ typedef std::map<int, nodes::StringNode*, std::greater<int>> IDMappedNode;
 //                          traverse nodes in postorder
 //
 // Return:  None (the result is stored in tr_post, which is altered)
-template<class _node = nodes::StringNode>
-void postorder(nodes::Node<_node>* root,
-  std::vector<nodes::Node<_node>*>* tr_post)
+template<class _NodeData = nodes::StringNodeData>
+void postorder(nodes::Node<_NodeData>* root,
+  std::vector<nodes::Node<_NodeData>*>* tr_post)
 {
   if (root) {
     // traverse children first
@@ -43,15 +44,16 @@ void postorder(nodes::Node<_node>* root,
 // Params:  root  The root node of the tree to be 'postorderified'
 //
 // Return:  A pointer to a vector of node pointers of the 'postorderified' tree
-template<class _node = nodes::StringNode>
-std::vector<nodes::Node<_node>*>* generate_postorder(nodes::Node<_node>* root)
+template<class _NodeData = nodes::StringNodeData>
+std::vector<nodes::Node<_NodeData>*>* generate_postorder(
+  nodes::Node<_NodeData>* root)
 {
 
   // TODO: rename to create_postorder
 
   // Heap allocation
-  std::vector<nodes::Node<_node>*>* tree_postorder =
-    new std::vector<nodes::Node<_node>*>();
+  std::vector<nodes::Node<_NodeData>*>* tree_postorder =
+    new std::vector<nodes::Node<_NodeData>*>();
 
   // Recursively traverse tree in postorder
   postorder(root, tree_postorder);

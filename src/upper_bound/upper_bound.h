@@ -2,6 +2,7 @@
 #define UPPER_BOUND_H
 
 #include "../nodes/node.h"
+#include "../nodes/string_node_data.h"
 
 namespace upper_bound {
 
@@ -22,18 +23,18 @@ public:
   //        optional cost-model
   //
   // Return: The simple upper bound for the two input-trees
-  template<class _Node = nodes::StringNode, class _Costs = nodes::Costs<_Node>>
-  double compute_simple_upper_bound(nodes::Node<_Node>* tree1, nodes::Node<_Node>* tree2,
-    _Costs costs = _Costs());
+  template<class _NodeData = nodes::StringNodeData, class _Costs = nodes::Costs<_NodeData>>
+  double compute_simple_upper_bound(nodes::Node<_NodeData>* tree1,
+    nodes::Node<_NodeData>* tree2,_Costs costs = _Costs());
 };
 
 UpperBound::UpperBound() { }
 
 UpperBound::~UpperBound() { }
 
-template<typename _Node, typename _Costs>
-double UpperBound::compute_simple_upper_bound(nodes::Node<_Node>* tree1,
-  nodes::Node<_Node>* tree2, _Costs costs)
+template<typename _NodeData, typename _Costs>
+double UpperBound::compute_simple_upper_bound(nodes::Node<_NodeData>* tree1,
+  nodes::Node<_NodeData>* tree2, _Costs costs)
 {
   return (tree1->get_subtree_size() * costs.del() +
     tree2->get_subtree_size() * costs.ins()

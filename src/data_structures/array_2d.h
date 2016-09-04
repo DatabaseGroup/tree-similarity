@@ -16,14 +16,14 @@ namespace data_structures {
  * As a result, lots of cache misses happen, in general. This slows down the
  * actual access.
  */
-template<typename Type>
+template<typename _Type>
 class Array2D {
 private:
   // consecutive allocated memory: rows * columns
   size_t rows_;
   size_t columns_;
   // consecutive allocated row containing the array elements
-  Type* data_;
+  _Type* data_;
 
 public:
   // Constructor(s)
@@ -44,41 +44,41 @@ public:
   // Params:  row the row to be accessed
   //
   // Return:  A pointer to the beginning of the row to be accessed
-  Type* operator[](size_t row);
+  _Type* operator[](size_t row);
 };
 
-template<typename Type>
-Array2D<Type>::Array2D(size_t rows, size_t columns)
+template<typename _Type>
+Array2D<_Type>::Array2D(size_t rows, size_t columns)
   : rows_(rows), columns_(columns), data_(nullptr)
 {
   // allocate array and initialize to zero
-  data_ = new Type[rows_ * columns_] { };
+  data_ = new _Type[rows_ * columns_] { };
 }
 
-template<typename Type>
-Array2D<Type>::Array2D(const Array2D& other)
+template<typename _Type>
+Array2D<_Type>::Array2D(const Array2D& other)
   : Array2D(other.get_rows(), other.get_columns())
 {
   std::copy(other.data, other.data + (rows_ * columns_), data_);
 }
 
-template<typename Type>
-Array2D<Type>::~Array2D() {
+template<typename _Type>
+Array2D<_Type>::~Array2D() {
   delete[] data_;
 }
 
-template<typename Type>
-size_t Array2D<Type>::get_rows() const {
+template<typename _Type>
+size_t Array2D<_Type>::get_rows() const {
   return rows_;
 }
 
-template<typename Type>
-size_t Array2D<Type>::get_columns() const {
+template<typename _Type>
+size_t Array2D<_Type>::get_columns() const {
   return columns_;
 }
 
-template<typename Type>
-Type* Array2D<Type>::operator[](size_t row) {
+template<typename _Type>
+_Type* Array2D<_Type>::operator[](size_t row) {
   return data_ + row * columns_;
 }
 

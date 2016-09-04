@@ -5,25 +5,26 @@
 #include <iostream>
 
 #include "../nodes/node.h"
+#include "../nodes/string_node_data.h"
 #include "../data_structures/array_2d.h"
 
 namespace sed {
 
-// TODO: refactor! use the StringNode, StringCosts combination
+// TODO: refactor! use the StringNodeData, StringCosts combination
 
 // Generic function to compute the distance between two line-trees (Strings) under a specified
 // cost model. Each tree is represented by its respective root node. A root node
 // type is specified as first template parameter, the cost model type as second
 // template parameter.
-template<class _node = nodes::StringNode, class _costs = nodes::Costs<_node>>
-int compute_string_edit_distance(nodes::Node<_node>* tree1,
-  nodes::Node<_node>* tree2, _costs costs = _costs())
+template<class _NodeData = nodes::StringNodeData, class _costs = nodes::Costs<_NodeData>>
+int compute_string_edit_distance(nodes::Node<_NodeData>* tree1,
+  nodes::Node<_NodeData>* tree2, _costs costs = _costs())
 {
   std::vector<std::string> string1, string2;
   int rename_cost = 0, temp = 0;
 
   // check if input is a string
-  nodes::Node<_node>* temp_node = tree1;
+  nodes::Node<_NodeData>* temp_node = tree1;
   while (temp_node->get_children_number() == 1) {
     string1.push_back(temp_node->get_label_id());
     temp_node = temp_node->get_child(0);

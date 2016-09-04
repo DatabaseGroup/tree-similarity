@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #include "../nodes/node.h"
+#include "../nodes/string_node_data.h"
 #include "../common/common.h"
 
 //  TODO:
@@ -21,15 +22,15 @@ std::vector<int> l2; //stores the left-most-leaf-descendants of tree 2
 //Computes the left most leaf descendant for all subtrees of the input tree
 //
 //Param: root of the tree, a vector which stores the left most leaf descendant for each subtree
-template<class _node = nodes::StringNode>
-int lmld(nodes::Node<_node>* root, int& id, std::vector<int>& l) {
+template<class _NodeData = nodes::StringNodeData>
+int lmld(nodes::Node<_NodeData>* root, int& id, std::vector<int>& l) {
   int lml = 0;
   // call lmld recursively and compute the left-most-leaf descendants
   for (int i = 0; i < root->get_children_number(); ++i) {
     if (i == 0) {
-      lml = lmld<_node>(root->get_children().at(i), id, l);
+      lml = lmld<_NodeData>(root->get_children().at(i), id, l);
     } else {
-      lmld<_node>(root->get_children().at(i), id, l);
+      lmld<_NodeData>(root->get_children().at(i), id, l);
     }
   }
   
@@ -64,16 +65,16 @@ void kr(std::vector<int>& l, std::vector<int>& kr) {
   }
 }
 
-template<class _node = nodes::StringNode>
-void set_leaves(std::vector<nodes::Node<_node>*>* leaves_tree1,
-  std::vector<nodes::Node<_node>*>* leaves_tree2, nodes::Node<_node>* root,
+template<class _NodeData = nodes::StringNodeData>
+void set_leaves(std::vector<nodes::Node<_NodeData>*>* leaves_tree1,
+  std::vector<nodes::Node<_NodeData>*>* leaves_tree2, nodes::Node<_NodeData>* root,
   int which_tree)
 {  
   if (which_tree == 1) {
     if (root) {
       if (root->get_children_number() > 0) {
         for (int i = 0; i < root->get_children_number(); ++i) {
-          set_leaves<_node>(leaves_tree1, leaves_tree2, root->get_child(i), 1);
+          set_leaves<_NodeData>(leaves_tree1, leaves_tree2, root->get_child(i), 1);
         }
       } else {
         leaves_tree1->push_back(root);
@@ -82,7 +83,7 @@ void set_leaves(std::vector<nodes::Node<_node>*>* leaves_tree1,
   } else {
     if (root->get_children_number() > 0) {
       for (int i = 0; i < root->get_children_number(); ++i) {
-        set_leaves<_node>(leaves_tree1, leaves_tree2, root->get_child(i), 2);
+        set_leaves<_NodeData>(leaves_tree1, leaves_tree2, root->get_child(i), 2);
       }
     } else {
       leaves_tree2->push_back(root);
@@ -94,14 +95,14 @@ void set_leaves(std::vector<nodes::Node<_node>*>* leaves_tree1,
 // tree.
 //
 // Parameters: left-hand tree, right-hand tree
-template<class _node = nodes::StringNode>
-void make_leaves(std::vector<nodes::Node<_node>*>* leaves_tree1,
-  std::vector<nodes::Node<_node>*>* leaves_tree2, nodes::Node<_node>* tree1,
-  nodes::Node<_node>* tree2)
+template<class _NodeData = nodes::StringNodeData>
+void make_leaves(std::vector<nodes::Node<_NodeData>*>* leaves_tree1,
+  std::vector<nodes::Node<_NodeData>*>* leaves_tree2, nodes::Node<_NodeData>* tree1,
+  nodes::Node<_NodeData>* tree2)
 {
   // TODO: remove which_tree from set_leaves
-  set_leaves<_node>(leaves_tree1, leaves_tree2, tree1, 1);
-  set_leaves<_node>(leaves_tree1, leaves_tree2, tree2, 2);
+  set_leaves<_NodeData>(leaves_tree1, leaves_tree2, tree1, 1);
+  set_leaves<_NodeData>(leaves_tree1, leaves_tree2, tree2, 2);
 }
 
 // Computes the forest-distance of:
@@ -109,9 +110,9 @@ void make_leaves(std::vector<nodes::Node<_node>*>* leaves_tree1,
 // T2[l(j)...dj], where dj is element of desc(T2[j])
 //
 // Param: i, j defined as above and a optional cost-model
-template<class _node = nodes::StringNode, class _costs = nodes::Costs<_node>>
-void forest_dist(std::vector<nodes::Node<_node>*>* tree1_postorder,
-  std::vector<nodes::Node<_node>*>* tree2_postorder, int i, int j,
+template<class _NodeData = nodes::StringNodeData, class _costs = nodes::Costs<_NodeData>>
+void forest_dist(std::vector<nodes::Node<_NodeData>*>* tree1_postorder,
+  std::vector<nodes::Node<_NodeData>*>* tree2_postorder, int i, int j,
   _costs costs = _costs())
 {
   fd.at(l1.at(i) - 1).at(l2.at(j) - 1) = 0;
@@ -219,17 +220,17 @@ void get_edit_mapping_int_array(
 //          e.g.: node_in_t1  -> node_in_t2   mapping or rename operation
 //                nullptr     -> node_in_t2   insert operation
 //                node_in_t1  -> nullptr      delete operation
-template<class _node = nodes::StringNode, class _costs = nodes::Costs<_node>>
-std::vector<std::array<nodes::Node<_node>*, 2> > compute_edit_mapping(
-  nodes::Node<_node>* tree1, nodes::Node<_node>* tree2, _costs costs = _costs())
+template<class _NodeData = nodes::StringNodeData, class _costs = nodes::Costs<_NodeData>>
+std::vector<std::array<nodes::Node<_NodeData>*, 2> > compute_edit_mapping(
+  nodes::Node<_NodeData>* tree1, nodes::Node<_NodeData>* tree2, _costs costs = _costs())
 {
-  typename std::vector<nodes::Node<_node>*>* tree1_postorder;
-  tree1_postorder = common::generate_postorder<_node>(tree1);
-  typename std::vector<nodes::Node<_node>*>* tree2_postorder;
-  tree2_postorder = common::generate_postorder<_node>(tree2);
+  typename std::vector<nodes::Node<_NodeData>*>* tree1_postorder;
+  tree1_postorder = common::generate_postorder<_NodeData>(tree1);
+  typename std::vector<nodes::Node<_NodeData>*>* tree2_postorder;
+  tree2_postorder = common::generate_postorder<_NodeData>(tree2);
 
-  typename std::vector<nodes::Node<_node>*> leaves_tree1; //stores the leaves of tree 2
-  typename std::vector<nodes::Node<_node>*> leaves_tree2; //stores the leaves of tree 2
+  typename std::vector<nodes::Node<_NodeData>*> leaves_tree1; //stores the leaves of tree 2
+  typename std::vector<nodes::Node<_NodeData>*> leaves_tree2; //stores the leaves of tree 2
 
   td.resize(tree1_postorder->size() + 1);
   for (unsigned int i = 0; i < td.size(); ++i) {
@@ -267,10 +268,10 @@ std::vector<std::array<nodes::Node<_node>*, 2> > compute_edit_mapping(
     std::fill(it->begin(), it->end(), 0);
   }
 
-  make_leaves<_node>(&leaves_tree1, &leaves_tree2, tree1, tree2);
+  make_leaves<_NodeData>(&leaves_tree1, &leaves_tree2, tree1, tree2);
 
-  lmld<_node>(tree1, l1);
-  lmld<_node>(tree2, l2);
+  lmld<_NodeData>(tree1, l1);
+  lmld<_NodeData>(tree2, l2);
 
   std::vector<int> kr1(leaves_tree1.size() + 1);
   std::vector<int> kr2(leaves_tree2.size() + 1);
@@ -284,12 +285,12 @@ std::vector<std::array<nodes::Node<_node>*, 2> > compute_edit_mapping(
     for ( std::vector<int>::iterator kr2_it = std::next(kr2.begin());
           kr2_it != kr2.end(); ++kr2_it)
     {
-      forest_dist<_node, _costs>(tree1_postorder, tree2_postorder, *kr1_it, *kr2_it, costs);
+      forest_dist<_NodeData, _costs>(tree1_postorder, tree2_postorder, *kr1_it, *kr2_it, costs);
     }
   }
  
   typename std::vector<std::array<int, 2> > tree_pairs;
-  typename std::vector<std::array<nodes::Node<_node>*, 2> > edit_mapping;
+  typename std::vector<std::array<nodes::Node<_NodeData>*, 2> > edit_mapping;
   tree_pairs.push_back({ tree1->get_subtree_size(), tree2->get_subtree_size() });
   std::array<int, 2> tree_pair;
   bool root_node_pair = true;
@@ -352,17 +353,17 @@ std::vector<std::array<nodes::Node<_node>*, 2> > compute_edit_mapping(
 // cost model. Each tree is represented by its respective root node. A root node
 // type is specified as first template parameter, the cost model type as second
 // template parameter.
-template<class _node = nodes::StringNode, class _costs = nodes::Costs<_node>>
-double compute_zhang_shasha(nodes::Node<_node>* tree1, nodes::Node<_node>* tree2,
+template<class _NodeData = nodes::StringNodeData, class _costs = nodes::Costs<_NodeData>>
+double compute_zhang_shasha(nodes::Node<_NodeData>* tree1, nodes::Node<_NodeData>* tree2,
   _costs costs = _costs())
 {
   // TODO: instead of running generate_postorder we could integrate this with
   // the lmld function
-  std::vector<nodes::Node<_node>*>* tree1_postorder = common::generate_postorder<_node>(tree1);
-  std::vector<nodes::Node<_node>*>* tree2_postorder = common::generate_postorder<_node>(tree2);
+  std::vector<nodes::Node<_NodeData>*>* tree1_postorder = common::generate_postorder<_NodeData>(tree1);
+  std::vector<nodes::Node<_NodeData>*>* tree2_postorder = common::generate_postorder<_NodeData>(tree2);
 
-  std::vector<nodes::Node<_node>*> leaves_tree1; //stores the leaves of tree 2
-  std::vector<nodes::Node<_node>*> leaves_tree2; //stores the leaves of tree 2
+  std::vector<nodes::Node<_NodeData>*> leaves_tree1; //stores the leaves of tree 2
+  std::vector<nodes::Node<_NodeData>*> leaves_tree2; //stores the leaves of tree 2
 
   td.resize(tree1_postorder->size() + 1);
   for (unsigned int i = 0; i < td.size(); ++i) {
@@ -400,12 +401,12 @@ double compute_zhang_shasha(nodes::Node<_node>* tree1, nodes::Node<_node>* tree2
     std::fill(it->begin(), it->end(), 0);
   }
 
-  make_leaves<_node>(&leaves_tree1, &leaves_tree2, tree1, tree2);
+  make_leaves<_NodeData>(&leaves_tree1, &leaves_tree2, tree1, tree2);
 
   int id = 0;
-  lmld<_node>(tree1, id, l1);
+  lmld<_NodeData>(tree1, id, l1);
   id = 0;
-  lmld<_node>(tree2, id, l2);
+  lmld<_NodeData>(tree2, id, l2);
 
   std::vector<int> kr1(leaves_tree1.size() + 1);
   std::vector<int> kr2(leaves_tree2.size() + 1);
@@ -419,7 +420,7 @@ double compute_zhang_shasha(nodes::Node<_node>* tree1, nodes::Node<_node>* tree2
     for ( std::vector<int>::iterator kr2_it = std::next(kr2.begin());
           kr2_it != kr2.end(); ++kr2_it)
     {
-      forest_dist<_node, _costs>(tree1_postorder, tree2_postorder, *kr1_it, *kr2_it, costs);
+      forest_dist<_NodeData, _costs>(tree1_postorder, tree2_postorder, *kr1_it, *kr2_it, costs);
     }
   }
 
@@ -427,8 +428,8 @@ double compute_zhang_shasha(nodes::Node<_node>* tree1, nodes::Node<_node>* tree2
   delete tree1_postorder;
   delete tree2_postorder;
 
-  std::vector<nodes::Node<_node>*>().swap(leaves_tree1);
-  std::vector<nodes::Node<_node>*>().swap(leaves_tree2);
+  std::vector<nodes::Node<_NodeData>*>().swap(leaves_tree1);
+  std::vector<nodes::Node<_NodeData>*>().swap(leaves_tree2);
   std::vector<int>().swap(l1);
   std::vector<int>().swap(l2);
   std::vector<int>().swap(kr1);

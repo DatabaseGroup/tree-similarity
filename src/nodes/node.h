@@ -1,5 +1,5 @@
-#ifndef NODE_H
-#define NODE_H
+#ifndef NODE_TYPE_H
+#define NODE_TYPE_H
 
 #include <algorithm>
 #include <iostream>
@@ -10,31 +10,29 @@
 #include <ctime>
 #include <unordered_map>
 
-#include "string_node.h"
-
 namespace nodes {
 
 // Represents a node in a tree. A node label is a string and the children
 // are stored in an array of pointers to nodes.
-template<class SatelliteData = nodes::StringNode>
+template<class _NodeData>
 class Node {
 public:
   // A vector of pointers to child nodes
-  std::vector<Node<SatelliteData>*> children_;
+  std::vector<Node<_NodeData>*> children_;
   // Additional node data
-  SatelliteData* data_;
+  _NodeData* data_;
 
 public:
   // Constructors
-  Node(SatelliteData* data = new SatelliteData());
+  Node(_NodeData* data = new _NodeData());
 
   // Destructor
   ~Node();
 
-  SatelliteData* get_data() const;
+  _NodeData* get_data() const;
 
   // Get children
-  std::vector<Node<SatelliteData>*> get_children() const;
+  std::vector<Node<_NodeData>*> get_children() const;
 
   // Get children_number
   int get_children_number() const;
@@ -44,28 +42,28 @@ public:
   // Params:  child A pointer to the node to be added
   //
   // Return:  None
-  void add_child(Node* child);
+  void add_child(Node<_NodeData>* child);
 
   // TODO
-  Node<SatelliteData>* get_child(int position) const;
+  Node<_NodeData>* get_child(int position) const;
 
   // Get subtree size rooted at this node.
   //
   // Return:  The size of the subtree rooted at this node (including this node)
   int get_subtree_size() const;
 
-  bool operator<(const Node<SatelliteData>& other) const;
-  bool operator==(const Node<SatelliteData>& other) const;
+  bool operator<(const Node<_NodeData>& other) const;
+  bool operator==(const Node<_NodeData>& other) const;
 };
 
-template<class SatelliteData>
-Node<SatelliteData>::Node(SatelliteData* data) : data_(data) { }
+template<class _NodeData>
+Node<_NodeData>::Node(_NodeData* data) : data_(data) { }
 
-template<class SatelliteData>
-Node<SatelliteData>::~Node() {
+template<class _NodeData>
+Node<_NodeData>::~Node() {
   // TODO: why does this not work any more but throws a segfault? Ask Willi
   // delete all children nodes
-  /*for ( typename std::vector<Node<SatelliteData>*>::const_iterator node_it = children_.begin();
+  /*for ( typename std::vector<Node<_NodeData>*>::const_iterator node_it = children_.begin();
         node_it != children_.end(); ++node_it)
   {
     delete *node_it;
@@ -75,33 +73,33 @@ Node<SatelliteData>::~Node() {
   //children_.clear();
 }
 
-template<class SatelliteData>
-SatelliteData* Node<SatelliteData>::get_data() const {
+template<class _NodeData>
+_NodeData* Node<_NodeData>::get_data() const {
   return data_;
 }
 
-template<class SatelliteData>
-std::vector<Node<SatelliteData>*> Node<SatelliteData>::get_children() const {
+template<class _NodeData>
+std::vector<Node<_NodeData>*> Node<_NodeData>::get_children() const {
   return children_;
 }
 
-template<class SatelliteData>
-int Node<SatelliteData>::get_children_number() const {
+template<class _NodeData>
+int Node<_NodeData>::get_children_number() const {
   return children_.size();
 }
 
-template<class SatelliteData>
-void Node<SatelliteData>::add_child(Node<SatelliteData>* child) {
+template<class _NodeData>
+void Node<_NodeData>::add_child(Node<_NodeData>* child) {
   children_.push_back(child);
 }
 
-template<class SatelliteData>
-Node<SatelliteData>* Node<SatelliteData>::get_child(int position) const {
+template<class _NodeData>
+Node<_NodeData>* Node<_NodeData>::get_child(int position) const {
   return children_[position];
 }
 
-template<class SatelliteData>
-int Node<SatelliteData>::get_subtree_size() const {
+template<class _NodeData>
+int Node<_NodeData>::get_subtree_size() const {
   int descendants_sum = 1;
   // Sum up sizes of subtrees rooted at child nodes (number of descendants)
   for ( auto node_it = children_.begin();
@@ -114,13 +112,13 @@ int Node<SatelliteData>::get_subtree_size() const {
   return descendants_sum;
 }
 
-template<class SatelliteData>
-bool Node<SatelliteData>::operator<(const Node<SatelliteData>& other) const {
+template<class _NodeData>
+bool Node<_NodeData>::operator<(const Node<_NodeData>& other) const {
   return (*data_ < *other.get_data());
 }
 
-template<class SatelliteData>
-bool Node<SatelliteData>::operator==(const Node<SatelliteData>& other) const {
+template<class _NodeData>
+bool Node<_NodeData>::operator==(const Node<_NodeData>& other) const {
   return (*data_ == *other.get_data());
 }
 
@@ -131,7 +129,7 @@ bool Node<SatelliteData>::operator==(const Node<SatelliteData>& other) const {
 //  - del(n) for deletion costs of a node n
 //  - ins(n) for insertion costs of a node n
 // All three cost functions must return an integer.
-template<typename _Node>
+template<typename _NodeData>
 struct Costs {
   // Basic rename cost function
   //
@@ -139,33 +137,33 @@ struct Costs {
   //          node2  The node having the desired name
   //
   // Return:  The cost of renaming node1 to node2
-  int ren(_Node* node1, _Node* node2);
+  virtual int ren(_NodeData* node1, _NodeData* node2);
 
   // Basic delete cost function
   //
   // Params:  node The node to be deleted
   //
   // Return:  The cost of deleting node
-  int del(_Node node);
+  virtual int del(_NodeData* node);
 
   // Basic insert cost function
   //
   // Params:  node The node to be inserted
   //
   // Return:  The cost of inserting node
-  int ins(_Node node);
+  virtual int ins(_NodeData* node);
 
-  // Dummy methods
-  int ren();
-  int del();
-  int ins();
+  // Dummy methods: TO BE REMOVED AT SOME POINT
+  virtual int ren();
+  virtual int del();
+  virtual int ins();
 };
 
-Node<> empty_node;
+//NodeType<> empty_node;
 
 } // namespace nodes
 
-#endif // NODE_H
+#endif // NODE_TYPE_H
 
 // TODO:
 // NO - Should the fields of Node, especially children, be pointers?
