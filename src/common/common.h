@@ -9,6 +9,7 @@
 
 #include "../nodes/node.h"
 #include "../nodes/string_node_data.h"
+#include "../nodes/hybrid_node.h" // TEMPORARILLY until Tobi finishes his thesis
 
 namespace common {
 
@@ -60,7 +61,6 @@ std::vector<nodes::Node<_NodeData>*>* generate_postorder(
   return tree_postorder;
 }
 
-/*
 // Generate a simple tree recursively.
 // Each path has length equal to depth.
 // Each node has a random fanout between 1 and max_fanout.
@@ -71,7 +71,7 @@ std::vector<nodes::Node<_NodeData>*>* generate_postorder(
 //          max_fanout  Maximum fanout
 //
 // Return:  None
-void generate_full_tree(nodes::Node *root, int fixed_depth, int max_fanout) {
+void generate_full_tree(nodes::HybridNode *root, int fixed_depth, int max_fanout) {
   // If we reached the maximum depth, terminate this branch.
   if (fixed_depth == 0) {
     return;
@@ -91,7 +91,7 @@ void generate_full_tree(nodes::Node *root, int fixed_depth, int max_fanout) {
     // Create new node.
     // We have to use 'new' here. Otherwise as soon as we get out of this
     // method's scope, the object gets deleted.
-    nodes::Node* new_node = new nodes::Node(random_label); // modified by stefan
+    nodes::HybridNode* new_node = new nodes::HybridNode(random_label); // modified by stefan
     // Add node as a child of root.
     root->add_child(new_node);
     // Recursively generate consecutive levels.
@@ -99,9 +99,9 @@ void generate_full_tree(nodes::Node *root, int fixed_depth, int max_fanout) {
   }
 }
 
-void copy_tree(nodes::Node* original, nodes::Node* copy) {
+void copy_tree(nodes::HybridNode* original, nodes::HybridNode* copy) {
   for(int i = 0; i < original->get_children_number(); i++){
-    nodes::Node* temp = new nodes::Node(original->get_child(i)->get_label_id());
+    nodes::HybridNode* temp = new nodes::HybridNode(original->get_child(i)->get_label_id());
     copy->add_child(temp);
     copy_tree(original->get_child(i), temp);
   }
@@ -113,11 +113,11 @@ void copy_tree(nodes::Node* original, nodes::Node* copy) {
 // Params:  node  The root node of the labels to be printed
 //
 // Return:  None
-void print_tree_labels(nodes::Node* node) {
+void print_tree_labels(nodes::HybridNode* node) {
   // Print the label of node.
   // Recursively print labels of all descendants of node.
-  std::vector<nodes::Node*> children = node->get_children();
-  for ( std::vector<nodes::Node*>::const_iterator node_it = children.cbegin();
+  std::vector<nodes::HybridNode*> children = node->get_children();
+  for ( std::vector<nodes::HybridNode*>::const_iterator node_it = children.cbegin();
         node_it != children.cend(); ++node_it)
   {
     print_tree_labels(*node_it);
@@ -133,7 +133,7 @@ void print_tree_labels(nodes::Node* node) {
 //          level   the int level for this level
 //
 // Return: a string in json format
-template<class _node = nodes::Node>
+template<class _node = nodes::HybridNode>
 std::string get_json_tree(_node* root, int level, IDLabelMap hashtable,
   int* map = nullptr, int tree = 0)
 {
@@ -169,7 +169,7 @@ std::string get_json_tree(_node* root, int level, IDLabelMap hashtable,
   return str.str();
 }
 
-template<class _node = nodes::Node>
+template<class _node = nodes::HybridNode>
 std::string get_json_side_by_side(_node* tree1, _node* tree2, 
   IDLabelMap hashtable_id_to_label, int** edit_mapping_int_array = nullptr)
 {
@@ -187,7 +187,7 @@ std::string get_json_side_by_side(_node* tree1, _node* tree2,
 }
 
 // check if two trees are the same (speaking of labels & structure)
-template<class _node = nodes::Node>
+template<class _node = nodes::HybridNode>
 bool check_if_same_trees(_node* t1, _node* t2){
   bool result = false;
 
@@ -211,7 +211,7 @@ bool check_if_same_trees(_node* t1, _node* t2){
 
 
 // prints the given tree indented using dots
-template<class _node = nodes::Node>
+template<class _node = nodes::HybridNode>
 void print_tree_indented(_node* n, int level, IDLabelMap hashtable_id_to_label){
   for(int i = 0; i < level; i++){
     std::cout << ".";
@@ -222,7 +222,6 @@ void print_tree_indented(_node* n, int level, IDLabelMap hashtable_id_to_label){
     print_tree_indented(n->get_child(i), (level+1),hashtable_id_to_label);
   }
 }
-*/
 
 } // namespace common
 
