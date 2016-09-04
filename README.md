@@ -178,6 +178,7 @@ double my_awesome_algorithm_func(std::vector<nodes::Node<_NodeData>> trees,
 Now, one can implement the functionality of the function and then call it in the `src/tree_similarity.cc` file (construction of `trees` and instantiation of `costs` omitted):
 
 ```c++
+// uses the default template parameters
 double result = my_awesome_algorithm::my_awesome_algorithm_func(trees, costs);
 ```
 
