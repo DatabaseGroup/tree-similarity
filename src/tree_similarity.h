@@ -8,9 +8,9 @@
 #include "data_structures/k_heap.h"
 #include "data_structures/array_2d.h"
 
-#include "nodes/custom_node.h"
+#include "nodes/custom_node_data.h"
 #include "nodes/node.h"
-#include "nodes/string_node.h"
+#include "nodes/string_node_data.h"
 #include "nodes/hybrid_node.h"
 
 #include "parser/parser.h"
