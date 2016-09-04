@@ -63,7 +63,96 @@ This part describes the framework internals. After reading this, one should unde
 
 ## Trees
 
-A tree is represented in a very traditional way. There exists a `Node` class which provides some basic tree functionality, e.g. get the size of the subtree rooted at the node or get all/a specific children/child of the node (see `src/nodes/node.h`). The `Node` class is templated and takes one template paremeter: the data of the node. The idea is, that the data of a node may be anything as long as this *anything* provides a corresponding cost model. An example is the `StringNodeData` class (see `src/nodes/string_node_data.h`). This class represents a string label, so every node of a tree would, in this case, have a member of type `StringNodeData` inside. Thus, the `Node` class could be seen as kind of wrapper class around the data, providing the tree functionality. The advantage of this approach should now be obvious: if a user wants a node to hold other data, e.g., a vector of vector of strings, the tree functionality is still there and the user does not have to care about this but just his node data class.
+A tree is represented in a very traditional way. There exists a `Node` class which provides some basic tree functionality, e.g. get the size of the subtree rooted at the node or get all/a specific children/child of the node (see `src/nodes/node.h`). The `Node` class is templated and takes one template paremeter: the data of the node. The idea is, that the data of a node may be anything as long as this *anything* provides a corresponding cost model. An example is the `StringNodeData` class (see `src/nodes/string_node_data.h`). This class represents a string label, so every node of a tree would, in this case, have a member of type `StringNodeData` inside. Thus, the `Node` class could be seen as kind of wrapper class around the data, providing the tree functionality. The advantage of this approach should now be obvious: if a user wants a node to hold other data, e.g., a vector of vector of strings, the tree functionality is still there and the user does not have to care about this but just his node data class. The other thing the user has to take care of is the cost model. The cost model is based upon the node data class because, typically, it utilizes the node data class to get the costs of renaming/deleting/inserting a node. In the following example, the node data class holds an integer and the corresponding cost model uses the `get_id()` member to compare the node ids (includes are omitted).
+
+```c++
+namespace nodes {
+
+class IntNodeData {
+private:
+  int id_;
+
+public:
+  IntNodeData(int id = 0);
+
+  int get_id() const;
+
+  bool operator<(const IntNodeData& other) const;
+  bool operator==(const IntNodeData& other) const;
+};
+
+IntNodeData::IntNodeData(int id) : id_(id) { }
+
+int IntNodeData::get_id() const {
+  return id_;
+}
+
+bool IntNodeData::operator<(const IntNodeData& other) const {
+  return (id_ < other.get_id());
+}
+
+bool IntNodeData::operator==(const IntNodeData& other) const {
+  return (id_ == other.get_id());
+}
+
+template<class _NodeData = IntNodeData>
+struct IntCosts : public Costs<_NodeData> {
+  int ren(_NodeData* node_data1, _NodeData* node_data2);
+  int del(_NodeData* node_data);
+  int ins(_NodeData* node_data);
+};
+
+template<class _NodeData>
+int StringCosts<_NodeData>::ren(_NodeData* node_data1, _NodeData* node_data2) {
+  if (node_data1->get_id() == node_data2->get_id()) {
+    return 0;
+  }
+
+  return ((del(node_data1) + ins(node_data2)) / 2);
+}
+
+template<class _NodeData>
+int StringCosts<_NodeData>::del(_NodeData* node_data) {
+  return 2;
+}
+
+template<class _NodeData>
+int StringCosts<_NodeData>::ins(_NodeData* node_data) {
+  return 3;
+}
+
+}
+```
+
+All the algorithms are then called by providing the node data and the costs type accordingly. The following snippet shows the call of the Zhang & Shasha algorithm as an example (the construction of `tree1` and `tree2` are omitted, see `src/tree_similarity.cc` for examples).
+
+```c++
+zhang_shasha::compute_zhang_shasha<nodes::IntNodeData, nodes::IntCosts<nodes::IntNodeData>>(tree1, tree2);
+```
+
+The above call tells the algorithm to use the `IntNodeData` type as node data and use the `IntCosts` of `IntNodeData` to compute the rename/deletion/insertion costs when they are needed.
+
+Please check out the `Node` class to see all the tree functionality provided (`src/nodes/node.h`).
+
+## HowTo: Implement New Algorithms
+
+The following steps are mandatory if one wants to contribute a new algorithm to the framework:
+
+1. Create a new file (of course).
+2. Add the file to the list starting at line 19 of the `src/CMakeLists.txt` file.
+3. Add the include in the `src/tree_similarity.h` file.
+4. Add the obvious parts to the file (header guard, includes you need).
+5. Add the includes of `src/nodes/node.h` and `src/nodes/string_node_data.h` (used a default template parameter).
+6. Add the template signature and your algorithms signature (in this example, it takes a vector of trees as input).
+
+```c++
+// StringNodeData and StringCosts are the defaults if now template parameters are given
+template<class _NodeData = nodes::StringNodeData, class _Costs = nodes::Costs<_NodeData>>
+double your_new_function(std::vector<nodes::Node<_NodeData>> trees) {
+    // implement your new function here!
+    return 0.0;
+}
+```
 
 # Building Process
 
