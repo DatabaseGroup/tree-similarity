@@ -143,15 +143,42 @@ The following steps are mandatory if one wants to contribute a new algorithm to 
 3. Add the include in the `src/tree_similarity.h` file.
 4. Add the obvious parts to the file (header guard, includes you need).
 5. Add the includes of `src/nodes/node.h` and `src/nodes/string_node_data.h` (used a default template parameter).
-6. Add the template signature and your algorithms signature (in this example, it takes a vector of trees as input).
+6. Add an existing or introduce a new namespace in which the function resides.
+7. Add the template signature and your algorithms signature.
 
+After these 7 steps, one should be able to compile it using `CMake` (as described afterwards). The file should look similar to the following code snippet (the example function takes a vector of nodes and the cost model as input, and returns a `double` value):
+ 
 ```c++
+// content of src/my_awesome_algorithm/my_awesome_algorithm.h
+#ifndef MY_AWESOME_ALGORITHM_H
+#define MY_AWESOME_ALGORITHM_H
+
+#include <vector>
+
+#include "../nodes/node.h"
+#include "../nodes/string_node_data.h"
+
+// one could also use an existing namespace here, e.g., zhang_shasha, tasm, ...
+namespace my_awesome_algorithm {
+
 // StringNodeData and StringCosts are the defaults if now template parameters are given
 template<class _NodeData = nodes::StringNodeData, class _Costs = nodes::Costs<_NodeData>>
-double your_new_function(std::vector<nodes::Node<_NodeData>> trees) {
-    // implement your new function here!
-    return 0.0;
+double my_awesome_algorithm_func(std::vector<nodes::Node<_NodeData>> trees,
+  _Costs costs = new _Costs())
+{
+  // implement your new function here!
+  return 0.0;
 }
+
+}
+
+#endif // MY_AWESOME_ALGORITHM
+```
+
+Now, one can implement the functionality of the function and then call it in the `src/tree_similarity.cc` file (construction of `trees` and instantiation of `costs` omitted):
+
+```c++
+double result = my_awesome_algorithm::my_awesome_algorithm_func(trees, costs);
 ```
 
 # Building Process
