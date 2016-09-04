@@ -12,6 +12,7 @@ to write code to the best of his/her knowledge (regarding this document).
 # Table of Contents
 
 - [General](#general)
+- [Description](#description)
 - [Building Process](#building-process)
     - [Prerequisites](#prerequisites)
         - [Remarks](#remarks)
@@ -55,6 +56,14 @@ them before continue writing new code (and potentially introducing additional
 errors) or make sure that it is not necessary to resolve them due to some
 rational reason (e.g., `The scope of the variable 'x' can be reduced` may be
 ignored if the variable scope is chosen on purpose).
+
+# Description
+
+This part describes the framework internals. After reading this, one should understand how the framework organizes trees and should also be able to implement additional algorithm within the framework. If anything is unclear, please open an issue so that we can update this part of the README accordingly.
+
+## Trees
+
+A tree is represented in a very traditional way. There exists a `Node` class which provides some basic tree functionality, e.g. get the size of the subtree rooted at the node or get all/a specific children/child of the node (see `src/nodes/node.h`). The `Node` class is templated and takes one template paremeter: the data of the node. The idea is, that the data of a node may be anything as long as this *anything* provides a corresponding cost model. An example is the `StringNodeData` class (see `src/nodes/string_node_data.h`). This class represents a string label, so every node of a tree would, in this case, have a member of type `StringNodeData` inside. Thus, the `Node` class could be seen as kind of wrapper class around the data, providing the tree functionality. The advantage of this approach should now be obvious: if a user wants a node to hold other data, e.g., a vector of vector of strings, the tree functionality is still there and the user does not have to care about this but just his node data class.
 
 # Building Process
 
