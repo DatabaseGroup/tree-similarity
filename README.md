@@ -219,8 +219,10 @@ is inconsistent/unclear, please just ask and we will discuss it.
     above example would be located in `my_class_impl.h`. The rest would remain
     in `my_class.h`. One then needs to include `my_class_impl.h` after the
     declarative part.
+
+2. For template parameters, we use a `_` (underscore) prefix and then the usual type naming style (e.g. _MyTemplType - see the example above).
     
-2. **We *always* use the *safer* method if there are multiple methods achieving
+3. **We *always* use the *safer* method if there are multiple methods achieving
 the same result.**
 
     A good example is the
@@ -236,7 +238,7 @@ check, whereas the
 [`[]`](http://www.cplusplus.com/reference/vector/vector/operator%5B%5D/) operator
 does not.
 
-3. **We use exceptions in order to make the library more error prone. Further, we
+4. **We use exceptions in order to make the library more error prone. Further, we
 do not allow any call to a function which terminates the library (e.g., `exit`).**
 
     This is due to the fact that we cannot anticipate if a termination is desired
@@ -245,7 +247,7 @@ the exception(s) and decide whether it wants to terminate or not). The only poin
 in the code where a call to the `exit` function is allowed, is - of course - in
 the `tree_similarity.cc`.
 
-4. **Function/Method declaration/definition if they do not fit on a single line:**
+5. **Function/Method declaration/definition if they do not fit on a single line:**
 
     We fit as many arguments into a single line as possible. Further, if there is a
 line break in a function/method definition, we put the curly brace into the next
