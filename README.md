@@ -220,7 +220,7 @@ is inconsistent/unclear, please just ask and we will discuss it.
     in `my_class.h`. One then needs to include `my_class_impl.h` after the
     declarative part.
 
-2. For template parameters, we use a `_` (underscore) prefix and then the usual type naming style (e.g. _MyTemplType - see the example above).
+2. For template parameters, we use a `_` (underscore) prefix and then the usual type naming style (e.g. `_MyTemplType` - see the example above).
     
 3. **We *always* use the *safer* method if there are multiple methods achieving
 the same result.**
