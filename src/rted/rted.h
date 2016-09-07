@@ -14,6 +14,24 @@ double compute_rted(nodes::Node<_NodeData>* tree1, nodes::Node<_NodeData>* tree2
   return 0.0;
 }
 
+// Returns the size of a given tree
+//
+// Params:  tree   The root node of the tree
+//
+// Return:  An integer which is the size of the tree
+int get_tree_size(nodes::Node<nodes::StringNodeData>* tree) {
+  if(tree) {
+    if(tree->get_children_number() > 0) {
+      int count = 1;
+      for (int i = 0; i < tree->get_children_number(); ++i) {
+        count += get_tree_size(tree->get_child(i));
+      }
+      return count;
+    }
+    return 1;
+  }
 }
+
+} // END NAMESPACE
 
 #endif // RTED_RTED_H

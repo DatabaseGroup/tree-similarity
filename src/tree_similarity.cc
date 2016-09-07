@@ -8,8 +8,22 @@
 // TODO: tobi: put everything in a method e.g. called get_sbs_fs(node* t1, node* t2)
 //
 int main (int argc, char* argv[]) {
-  if(argc != 3 && argc != 4 && argc != 6) {
+  if(/*argc != 3 &&*/ argc != 4 && argc != 6) {
     std::cout << "TODO print a help message" << std::endl;
+    return 0;
+  }
+  if(argv[1] == std::string("-apted")){
+    //Test of rted::get_tree_size function
+    parser::LabelIDMap hashtable_label_to_id;
+    int node_id_counter = 1;
+
+    nodes::Node<nodes::StringNodeData>* test_tree1 = parser::create_tree_from_string(argv[2],
+      hashtable_label_to_id, node_id_counter);
+    nodes::Node<nodes::StringNodeData>* test_tree2 = parser::create_tree_from_string(argv[3],
+      hashtable_label_to_id, node_id_counter);
+
+    std::cout << rted::get_tree_size(test_tree1) << ";" << rted::get_tree_size(test_tree2) << std::endl;
+
     return 0;
   }
   std::cout << argv[1] << " " << argv[2] << std::endl;
@@ -37,7 +51,7 @@ int main (int argc, char* argv[]) {
   // compute distance using basic nodes and basic cost model
   // no need to generate basic cost model since it is set as default template
   // parameter
-  
+
   /*
   nodes::Node<nodes::StringNodeData>* a1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("a"));
   nodes::Node<nodes::StringNodeData>* r1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("r"));
@@ -49,7 +63,7 @@ int main (int argc, char* argv[]) {
   nodes::Node<nodes::StringNodeData>* k1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("k"));
   nodes::Node<nodes::StringNodeData>* g1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("g"));
   nodes::Node<nodes::StringNodeData>* h1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("h"));
-  
+
   nodes::Node<nodes::StringNodeData>* stree1 = a1;
   stree1->add_child(r1);
   stree1->add_child(d1);
@@ -93,7 +107,7 @@ int main (int argc, char* argv[]) {
       std::cout << "sbs" << std::endl;
       int *edit_mapping_int_array[2];
       int max_nodes = std::max(tree1->get_subtree_size(), tree2->get_subtree_size());
-     
+
       edit_mapping_int_array[0] = new int[max_nodes + 1];
       edit_mapping_int_array[1] = new int[max_nodes + 1];
       for (int i = 0; i < 2; ++i) {
@@ -102,8 +116,8 @@ int main (int argc, char* argv[]) {
         }
       }
       zs::get_edit_mapping_int_array<nodes::Node>(edit_mapping, edit_mapping_int_array);
-      
-      output = common::get_json_side_by_side(tree1, tree2, 
+
+      output = common::get_json_side_by_side(tree1, tree2,
         hashtable_id_to_label, edit_mapping_int_array);
         for (int i = 0; i < 2; ++i){
           delete[] edit_mapping_int_array[i];
@@ -125,7 +139,7 @@ int main (int argc, char* argv[]) {
     }
   }
 */
-  
+
   delete tree1;
   delete tree2;
   delete tree1_postorder;
@@ -156,7 +170,7 @@ int main (int argc, char* argv[]) {
   nodes::Node<nodes::StringNodeData>* d20 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("title"));
   nodes::Node<nodes::StringNodeData>* d21 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("book"));
   nodes::Node<nodes::StringNodeData>* d22 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("dblp"));
-  
+
   d22->add_child(d5);
   d22->add_child(d18);
   d22->add_child(d21);
@@ -276,7 +290,7 @@ int main (int argc, char* argv[]) {
   for (nodes::Node<nodes::StringNodeData>*& item: *postorder) {
     po_queue.push(*item);
   }
-  
+
   auto heap = tasm::tasm_postorder<nodes::StringNodeData, nodes::StringCosts<nodes::StringNodeData>>(*query, po_queue, 6);
   std::cout << "ranking: " << heap.size() << " / " << heap.max_size() << std::endl;
   std::cout << heap.max_size() << "-Heap: | ";
