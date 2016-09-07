@@ -8,7 +8,7 @@
 // TODO: tobi: put everything in a method e.g. called get_sbs_fs(node* t1, node* t2)
 //
 int main (int argc, char* argv[]) {
-  if(/*argc != 3 &&*/ argc != 4 && argc != 6) {
+  if(argc != 3 && argc != 4 && argc != 6) {
     std::cout << "TODO print a help message" << std::endl;
     return 0;
   }
@@ -22,7 +22,11 @@ int main (int argc, char* argv[]) {
     nodes::Node<nodes::StringNodeData>* test_tree2 = parser::create_tree_from_string(argv[3],
       hashtable_label_to_id, node_id_counter);
 
-    std::cout << rted::get_tree_size(test_tree1) << ";" << rted::get_tree_size(test_tree2) << std::endl;
+    try {
+      std::cout << rted::get_tree_size(test_tree1) << ";" << rted::get_tree_size(test_tree2) << std::endl;
+    } catch(char const *e) {
+      std::cout << "Exception caught: " << e << std::endl;
+    }
 
     return 0;
   }
