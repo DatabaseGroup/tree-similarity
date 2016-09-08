@@ -13,14 +13,17 @@ int main (int argc, char* argv[]) {
     std::cout << "TODO print a help message" << std::endl;
     return 0;
   }
-  if(argv[1] == std::string("-apted")){
+  if(argv[1] == std::string("-apted")){ // option to test apted
+    // variables needed for parser functions to create trees
     parser::LabelIDMap hashtable_label_to_id;
     int node_id_counter = 1;
+
+    // root nodes of the test trees (arguments 4 & 5 in bracket notation)
     nodes::Node<nodes::StringNodeData>* test_tree1 = parser::create_tree_from_string(argv[3],
       hashtable_label_to_id, node_id_counter);
     nodes::Node<nodes::StringNodeData>* test_tree2 = parser::create_tree_from_string(argv[4],
       hashtable_label_to_id, node_id_counter);
-      
+
     if(argv[2] == std::string("size")){ //Test rted::get_tree_size function
       try {
         std::cout << rted::get_tree_size(test_tree1) << ";" << rted::get_tree_size(test_tree2) << std::endl;
@@ -30,9 +33,9 @@ int main (int argc, char* argv[]) {
         std::cout << e.what() << std::endl;
       }
 
-    } else if(argv[2] == std::string("preorder")){ //Test of rted::tree_array_preorder
-      nodes::Node<nodes::StringNodeData>* tree_array_preorder[rted::get_tree_size(test_tree1)];
+    } else if(argv[2] == std::string("preorder")){ //Test of rted::tree_to_array_preorder
       try {
+        nodes::Node<nodes::StringNodeData>* tree_array_preorder[rted::get_tree_size(test_tree1)];
         rted::tree_to_array_preorder(test_tree1, tree_array_preorder);
         for(int i = 0; i < rted::get_tree_size(test_tree1); i++) {
           std::cout <<  i << ":" << tree_array_preorder[i]->get_data()->get_label() << "|";
@@ -45,7 +48,7 @@ int main (int argc, char* argv[]) {
       }
     }
 
-    return 0;
+    return 0; //terminate programm
   }
   std::cout << argv[1] << " " << argv[2] << std::endl;
   // TODO replace hashtable with a custom node class that sup. strings as labels

@@ -27,7 +27,7 @@ int get_tree_size(nodes::Node<_NodeData>* tree) {
 
   if(tree->get_children_number() > 0) {
     int count = 1;
-    for (int i = 0; i < tree->get_children_number(); ++i) {
+    for (int i = 0; i < tree->get_children_number(); ++i) { // TODO make with iterator
       count += get_tree_size(tree->get_child(i));
     }
     return count;
@@ -43,7 +43,7 @@ int tree_to_array_preorder(nodes::Node<_NodeData>* tree, nodes::Node<_NodeData>*
 
   nodes_array[counter] = tree;
   if(tree->get_children_number() > 0) {
-    for (int i = 0; i < tree->get_children_number(); ++i) {
+    for (int i = 0; i < tree->get_children_number(); ++i) { // TODO make with iterator
       int tmp = tree_to_array_preorder(tree->get_child(i), nodes_array, ++counter);
       counter += tmp;
     }
