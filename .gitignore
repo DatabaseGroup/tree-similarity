@@ -9,6 +9,8 @@ tree_similarity
 *.o
 *~
 
+build/
+
 # CMake
 CMakeCache.txt
 CMakeFiles

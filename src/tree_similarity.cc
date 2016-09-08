@@ -2,30 +2,47 @@
 #include <random>
 #include <unordered_map>
 #include <fstream>
+#include <exception>
 
 #include "tree_similarity.h"
 
 // TODO: tobi: put everything in a method e.g. called get_sbs_fs(node* t1, node* t2)
 //
 int main (int argc, char* argv[]) {
-  if(argc != 3 && argc != 4 && argc != 6) {
+  if(argc != 3 && argc != 4 && argc != 5 && argc != 6) {
     std::cout << "TODO print a help message" << std::endl;
     return 0;
   }
   if(argv[1] == std::string("-apted")){
-    //Test of rted::get_tree_size function
     parser::LabelIDMap hashtable_label_to_id;
     int node_id_counter = 1;
-
-    nodes::Node<nodes::StringNodeData>* test_tree1 = parser::create_tree_from_string(argv[2],
+    nodes::Node<nodes::StringNodeData>* test_tree1 = parser::create_tree_from_string(argv[3],
       hashtable_label_to_id, node_id_counter);
-    nodes::Node<nodes::StringNodeData>* test_tree2 = parser::create_tree_from_string(argv[3],
+    nodes::Node<nodes::StringNodeData>* test_tree2 = parser::create_tree_from_string(argv[4],
       hashtable_label_to_id, node_id_counter);
+      
+    if(argv[2] == std::string("size")){ //Test rted::get_tree_size function
+      try {
+        std::cout << rted::get_tree_size(test_tree1) << ";" << rted::get_tree_size(test_tree2) << std::endl;
+      } catch(char const *e) { //catches manually thrwon undefined exception
+        std::cerr << "Exception caught: " << e << std::endl;
+      } catch(std::exception &e) { //catches all std exceptions
+        std::cout << e.what() << std::endl;
+      }
 
-    try {
-      std::cout << rted::get_tree_size(test_tree1) << ";" << rted::get_tree_size(test_tree2) << std::endl;
-    } catch(char const *e) {
-      std::cout << "Exception caught: " << e << std::endl;
+    } else if(argv[2] == std::string("preorder")){ //Test of rted::tree_array_preorder
+      nodes::Node<nodes::StringNodeData>* tree_array_preorder[rted::get_tree_size(test_tree1)];
+      try {
+        rted::tree_to_array_preorder(test_tree1, tree_array_preorder);
+        for(int i = 0; i < rted::get_tree_size(test_tree1); i++) {
+          std::cout <<  i << ":" << tree_array_preorder[i]->get_data()->get_label() << "|";
+        }
+        std::cout << std::endl;
+      } catch(char const *e) { //catches manually thrwon undefined exception
+        std::cerr << "Exception caught: " << e << std::endl;
+      } catch(std::exception &e) { //catches all std exceptions
+        std::cout << e.what() << std::endl;
+      }
     }
 
     return 0;
