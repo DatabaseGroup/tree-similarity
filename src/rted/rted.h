@@ -62,7 +62,9 @@ int gather_tree_info(nodes::Node<_NodeData>* tree, nodes::Node<_NodeData>** node
 
   int current_id = total_tree_size; // the id of tree in the current invocation is the total_tree_size at the moment of the invocation
   nodes_array_preorder[current_id] = tree; // set the array in place current_id to the pointer of the current node
-  node_info_array_preorder[current_id]->parent_id = preorder_id_parent;
+  node_info_array_preorder[current_id] = new NodeInfo<_NodeData>; //allocate memory for NodeInfo struct in node_info_array
+  node_info_array_preorder[current_id]->parent_id = preorder_id_parent; //FIXME not correct
+  //std::cout << "node_info_array_preorder[" << current_id << "]->parent_id: " << node_info_array_preorder[current_id]->parent_id << std::endl;
 
   if(tree->get_children_number() > 0) { // check if it has children
     int current_children_counter = 0;
@@ -72,10 +74,12 @@ int gather_tree_info(nodes::Node<_NodeData>* tree, nodes::Node<_NodeData>** node
       current_children_counter++;
     }
     node_info_array_preorder[current_id]->subtree_size = total_tree_size - current_id;
+    //std::cout << "node_info_array_preorder[" << current_id << "]->subtree_size: " << node_info_array_preorder[current_id]->subtree_size << std::endl;
     return 1;
   }
 
   node_info_array_preorder[current_id]->subtree_size = 0;
+  //std::cout << "node_info_array_preorder[" << current_id << "]->subtree_size: " << node_info_array_preorder[current_id]->subtree_size << std::endl;
   return 0;
 }
 

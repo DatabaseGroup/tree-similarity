@@ -36,11 +36,8 @@ int main (int argc, char* argv[]) {
     } else if(argv[2] == std::string("preorder")){ //Test of rted::gather_tree_info
       try {
         int tree1_size = rted::get_tree_size(test_tree1);
-        rted::NodeInfo<nodes::StringNodeData>* tree_info_array_preorder[tree1_size]; //array of NodeInfo structs FIXME on the stack - allocate in heap
-        for(int i = 0; i < tree1_size; ++i) { // allocation of memory for every struct in array
-          tree_info_array_preorder[0] = (rted::NodeInfo<nodes::StringNodeData>*) malloc(sizeof(rted::NodeInfo<nodes::StringNodeData>*));
-        }
-        nodes::Node<nodes::StringNodeData>* tree_array_preorder[tree1_size]; //FIXME on the stack - allocate in heap
+        rted::NodeInfo<nodes::StringNodeData>** tree_info_array_preorder = new rted::NodeInfo<nodes::StringNodeData>*[tree1_size];
+        nodes::Node<nodes::StringNodeData>** tree_array_preorder = new nodes::Node<nodes::StringNodeData>*[tree1_size];
 
         //gathering info - storing in params tree_array_preorder, tree_info_array_preorder
         rted::gather_tree_info(test_tree1, tree_array_preorder, tree_info_array_preorder);
@@ -48,7 +45,7 @@ int main (int argc, char* argv[]) {
         //printing
         std::cout << "\nposition:label" << std::endl;
         for(int i = 0; i < tree1_size; i++) { //printing preordered nodes array in form position:label
-          std::cout <<  i << ":" << tree_array_preorder[i]->get_data()->get_label() << "|";
+          std::cout <<  i << ":" << tree_array_preorder[i]->get_data()->get_label() << "|" << std::flush;
         }
         std::cout << std::endl;
 
@@ -64,13 +61,16 @@ int main (int argc, char* argv[]) {
         }
         std::cout << std::endl;
 
+        for(int i = 0; i < tree1_size; i++) {
+          delete[] tree_info_array_preorder[i];
+        }
+
       } catch(char const *e) { //catches manually thrwon undefined exception
         std::cerr << "Exception caught: " << e << std::endl;
       } catch(std::exception &e) { //catches all std exceptions
         std::cout << e.what() << std::endl;
       }
     }
-    std::cout << "\nbefore return 0" << std::endl;
     return 0; //terminate programm
   }
 
