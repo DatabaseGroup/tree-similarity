@@ -60,26 +60,26 @@ int gather_tree_info(nodes::Node<_NodeData>* tree, nodes::Node<_NodeData>** node
     throw "passed undefined argument"; // manually thrown exception because segfault would throw no exception (caller must catch this)
   }
 
+  std::cout << "recursion called for the " << total_tree_size  << " time" << std::endl;
+
   int current_id = total_tree_size; // the id of tree in the current invocation is the total_tree_size at the moment of the invocation
+  nodes_array_preorder[current_id] = new nodes::Node<_NodeData>; // new returns pointer
   nodes_array_preorder[current_id] = tree; // set the array in place current_id to the pointer of the current node
   node_info_array_preorder[current_id] = new NodeInfo<_NodeData>; //allocate memory for NodeInfo struct in node_info_array
-  node_info_array_preorder[current_id]->parent_id = preorder_id_parent; //FIXME not correct
-  //std::cout << "node_info_array_preorder[" << current_id << "]->parent_id: " << node_info_array_preorder[current_id]->parent_id << std::endl;
+  node_info_array_preorder[current_id]->parent_id = preorder_id_parent;
 
   if(tree->get_children_number() > 0) { // check if it has children
-    int current_children_counter = 0;
+    int tmp, current_children_counter = 0;
     for (auto node_it : tree->get_children()) { // iterate over the children
-      int tmp = gather_tree_info(node_it, nodes_array_preorder, node_info_array_preorder, ++total_tree_size, current_id);
+      tmp = gather_tree_info(node_it, nodes_array_preorder, node_info_array_preorder, ++total_tree_size, current_id);
       total_tree_size += tmp; //needs to be stored in tmp because total_tree_size is also used as param - would create warning [-Wunsequenced]
       current_children_counter++;
     }
     node_info_array_preorder[current_id]->subtree_size = total_tree_size - current_id;
-    //std::cout << "node_info_array_preorder[" << current_id << "]->subtree_size: " << node_info_array_preorder[current_id]->subtree_size << std::endl;
-    return 1;
+    return current_children_counter + tmp;
   }
 
   node_info_array_preorder[current_id]->subtree_size = 0;
-  //std::cout << "node_info_array_preorder[" << current_id << "]->subtree_size: " << node_info_array_preorder[current_id]->subtree_size << std::endl;
   return 0;
 }
 

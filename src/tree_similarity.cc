@@ -30,7 +30,7 @@ int main (int argc, char* argv[]) {
       } catch(char const *e) { //catches manually thrwon undefined exception
         std::cerr << "Exception caught: " << e << std::endl;
       } catch(std::exception &e) { //catches all std exceptions
-        std::cout << e.what() << std::endl;
+        std::cerr << e.what() << std::endl;
       }
 
     } else if(argv[2] == std::string("preorder")){ //Test of rted::gather_tree_info
@@ -45,19 +45,19 @@ int main (int argc, char* argv[]) {
         //printing
         std::cout << "\nposition:label" << std::endl;
         for(int i = 0; i < tree1_size; i++) { //printing preordered nodes array in form position:label
-          std::cout <<  i << ":" << tree_array_preorder[i]->get_data()->get_label() << "|" << std::flush;
+          std::cout << i << ":" << tree_array_preorder[i]->get_data()->get_label() << " | " << std::flush;
         }
         std::cout << std::endl;
 
         std::cout << "\nposition:subtree_size" << std::endl;
         for(int i = 0; i < tree1_size; i++) { //printing tree info array in form position:subtree_size
-          std::cout <<  i << ":" << tree_info_array_preorder[i]->subtree_size << "|";
+          std::cout <<  i << ":" << tree_info_array_preorder[i]->subtree_size << " | ";
         }
         std::cout << std::endl;
 
         std::cout << "\nposition:parent_id" << std::endl;
         for(int i = 0; i < tree1_size; i++) { //printing tree info array in form position:parent_id
-          std::cout <<  i << ":" << tree_info_array_preorder[i]->parent_id << "|";
+          std::cout <<  i << ":" << tree_info_array_preorder[i]->parent_id << " | ";
         }
         std::cout << std::endl;
 
@@ -65,10 +65,13 @@ int main (int argc, char* argv[]) {
           delete[] tree_info_array_preorder[i];
         }
 
+        delete[] tree_info_array_preorder;
+        delete[] tree_array_preorder;
+
       } catch(char const *e) { //catches manually thrwon undefined exception
         std::cerr << "Exception caught: " << e << std::endl;
       } catch(std::exception &e) { //catches all std exceptions
-        std::cout << e.what() << std::endl;
+        std::cerr << e.what() << std::endl;
       }
     }
     return 0; //terminate programm
