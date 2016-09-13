@@ -61,6 +61,12 @@ int main (int argc, char* argv[]) {
         }
         std::cout << std::endl;
 
+        std::cout << "\nposition:full_decomp_size" << std::endl;
+        for(int i = 0; i < tree1_size; i++) { //printing tree info array in form position:parent_id
+          std::cout <<  i << ":" << tree_info_array_preorder[i]->full_decomp_size << " | ";
+        }
+        std::cout << std::endl;
+
         for(int i = 0; i < tree1_size; i++) {
           delete[] tree_info_array_preorder[i]; // deletes every struct where tree_info_array_preorder[i] points to. has not to be done for tree_array_preorder because the nodes are members of the NodeInfo struct and get therefore already deleted with this line
         }
