@@ -62,11 +62,11 @@ int main (int argc, char* argv[]) {
         std::cout << std::endl;
 
         for(int i = 0; i < tree1_size; i++) {
-          delete[] tree_info_array_preorder[i];
+          delete[] tree_info_array_preorder[i]; // deletes every struct where tree_info_array_preorder[i] points to. has not to be done for tree_array_preorder because the nodes are members of the NodeInfo struct and get therefore already deleted with this line
         }
 
-        delete[] tree_info_array_preorder;
-        delete[] tree_array_preorder;
+        delete[] tree_info_array_preorder; // deletes the NodeInfo pointer array
+        delete[] tree_array_preorder; // deletes the Node pointer array
 
       } catch(char const *e) { //catches manually thrwon undefined exception
         std::cerr << "Exception caught: " << e << std::endl;
