@@ -84,33 +84,37 @@ int gather_tree_info(nodes::Node<_NodeData>* tree, nodes::Node<_NodeData>** node
 
     // iterate over the children
     for (auto node_it : tree->get_children()) {
+      // evaluating, whether the child called next is a rightmost child or not, to tell it the child via a parameter passed to the function
       bool is_rightmost_child = true; // initially every child is assumed to be a rightmost child
-      // check if the child for which the recursion is called next is not rightmost child to tell it the child via a parameter passed with the function
-      if(tree->get_children_number() > 1 && node_it != tree->get_children().back()) {
+      if(tree->get_children_number() > 1 && node_it != tree->get_children().back()) { // check if the child for which the recursion is called next is not rightmost child
         is_rightmost_child = false;
       }
+
       // call the function recusrively
       int child_subtree_size = gather_tree_info(node_it, nodes_array_preorder, node_info_array_preorder,
         preorder_id + 1, current_preorder_id, sum_of_subtree_sizes, left_decomp_sum, is_rightmost_child);
+
+      // after coming back from the recursion, the following code is executed
       // check if the child for which the recursion was called last is a leftmost child and if it is, increase the left decomposition sum by the subtree size of the called child
       if(tree->get_children_number() > 1 && node_it != tree->get_children().front()) {
         (*left_decomp_sum) += child_subtree_size;
       }
-
       preorder_id += child_subtree_size; // the preorder id must be increased by the number of nodes the last child contained, so when the next child is called, it is called with the right preorder id
       children_subtree_sizes += child_subtree_size; // the subtree size of the last child is summed up to the size of all children of the current node
       children_subtree_sizes_sum += (*sum_of_subtree_sizes); // the last subtree size sum is added to the sum of the last subtree size sum of the other child nodes
     }
+
+    // after iterating over all children, the following code is executed:
     // setting the sum of the subtree sizes to the sum of the subtree sizes of all children plus my own subtree size (needed for full decomposition size)
     *sum_of_subtree_sizes = children_subtree_sizes_sum + children_subtree_sizes + 1;
     // setting subtree size to the size of all subtrees plus the root node
     node_info_array_preorder[current_preorder_id]->subtree_size = children_subtree_sizes + 1;
 
     // updating parents right decomposition cost
-    // computed differently to left decomosition cost due to preorder traversal of the tree
-    if(is_rightmost_child == false) { // if I'm not a rightmost child - I update my parent with my current value + my own size
+    // passed to parent differently to left decomosition cost due to preorder traversal of the tree
+    if(is_rightmost_child == false) { // if I'm not a rightmost child - I update my parent with my current right decomposition value + my own subtree size
       node_info_array_preorder[preorder_id_parent]->right_decomp_size += node_info_array_preorder[current_preorder_id]->right_decomp_size + children_subtree_sizes + 1;
-    } else if(preorder_id_parent > -1) { // I always update my parent if I have one
+    } else if(preorder_id_parent > -1) { // even if I am a rightmost child, I update my parent with the other right decomposition sizes from my descendants but not with my own subtree size
       node_info_array_preorder[preorder_id_parent]->right_decomp_size += node_info_array_preorder[current_preorder_id]->right_decomp_size;
     }
 
@@ -125,14 +129,14 @@ int gather_tree_info(nodes::Node<_NodeData>* tree, nodes::Node<_NodeData>** node
     return (children_subtree_sizes + 1); // + 1 for current subtree root node
   }
 
-  // This code is executed if tree is a leave
+  // this code is executed if the current node is a leave
   // set the right decomposition cost to 1
   node_info_array_preorder[current_preorder_id]->right_decomp_size = 1;
-  // check if it's not a rightmost child and if so add the right decomposition size of 1 to the right decomposition size of the parent
+  // check if it's not a rightmost child and if so, add the right decomposition size of 1 to the right decomposition size of the parent
   if(is_rightmost_child == false) {
     node_info_array_preorder[preorder_id_parent]->right_decomp_size += node_info_array_preorder[current_preorder_id]->right_decomp_size;
   }
-  // set subtree, decomposition and the sum of the subtree sizes to 1
+  // set subtree size, full and left decomposition size and the sum of the subtree sizes to 1
   node_info_array_preorder[current_preorder_id]->subtree_size = 1; // if the node has no children, the subtree size is 1
   node_info_array_preorder[current_preorder_id]->full_decomp_size = 1; // Lemma 5.1 equals one if subtree_size is 1 and (*sum_of_subtree_sizes) is 1
   node_info_array_preorder[current_preorder_id]->left_decomp_size = 1;
