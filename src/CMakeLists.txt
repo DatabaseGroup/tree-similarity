@@ -22,6 +22,7 @@ set(tree_similarity_sources
   common/common.h
   data_structures/array_2d.h
   data_structures/k_heap.h
+  data_structures/btree.h
   nodes/custom_node_data.h
   nodes/node.h
   nodes/hybrid_node.h
