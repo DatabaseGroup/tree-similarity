@@ -36,55 +36,53 @@ int main (int argc, char* argv[]) {
     } else if(argv[2] == std::string("preorder")){ //Test of rted::gather_tree_info
       try {
         int tree1_size = rted::get_tree_size(test_tree1);
-        rted::NodeInfo<nodes::StringNodeData>** tree_info_array_preorder = new rted::NodeInfo<nodes::StringNodeData>*[tree1_size];
-        nodes::Node<nodes::StringNodeData>** tree_array_preorder = new nodes::Node<nodes::StringNodeData>*[tree1_size];
+        rted::NodeInfo<nodes::StringNodeData>* tree_info_array_preorder = new rted::NodeInfo<nodes::StringNodeData>[tree1_size];
 
-        //gathering info - storing in params tree_array_preorder, tree_info_array_preorder
-        rted::gather_tree_info(test_tree1, tree_array_preorder, tree_info_array_preorder);
+        //gathering info - storing in params tree_info_array_preorder
+        rted::gather_tree_info(test_tree1, tree_info_array_preorder);
 
         //printing
         std::cout << "\nposition:label" << std::endl;
         for(int i = 0; i < tree1_size; i++) { //printing preordered nodes array in form position:label
-          std::cout << i << ":" << tree_array_preorder[i]->get_data()->get_label() << " | " << std::flush;
+          std::cout << i << ":" << tree_info_array_preorder[i].nodeData << " | " << std::flush;
         }
         std::cout << std::endl;
 
         std::cout << "\nposition:subtree_size" << std::endl;
         for(int i = 0; i < tree1_size; i++) { //printing tree info array in form position:subtree_size
-          std::cout <<  i << ":" << tree_info_array_preorder[i]->subtree_size << " | ";
+          std::cout <<  i << ":" << tree_info_array_preorder[i].subtree_size << " | ";
         }
         std::cout << std::endl;
 
         std::cout << "\nposition:parent_id" << std::endl;
         for(int i = 0; i < tree1_size; i++) { //printing tree info array in form position:parent_id
-          std::cout <<  i << ":" << tree_info_array_preorder[i]->parent_id << " | ";
+          std::cout <<  i << ":" << tree_info_array_preorder[i].parent_id << " | ";
         }
         std::cout << std::endl;
 
         std::cout << "\nposition:full_decomp_size" << std::endl;
         for(int i = 0; i < tree1_size; i++) { //printing tree info array in form position:parent_id
-          std::cout <<  i << ":" << tree_info_array_preorder[i]->full_decomp_size << " | ";
+          std::cout <<  i << ":" << tree_info_array_preorder[i].full_decomp_size << " | ";
         }
         std::cout << std::endl;
 
         std::cout << "\nposition:left_decomp_size" << std::endl;
         for(int i = 0; i < tree1_size; i++) { //printing tree info array in form position:parent_id
-          std::cout <<  i << ":" << tree_info_array_preorder[i]->left_decomp_size << " | ";
+          std::cout <<  i << ":" << tree_info_array_preorder[i].left_decomp_size << " | ";
         }
         std::cout << std::endl;
 
         std::cout << "\nposition:right_decomp_size" << std::endl;
         for(int i = 0; i < tree1_size; i++) { //printing tree info array in form position:parent_id
-          std::cout <<  i << ":" << tree_info_array_preorder[i]->right_decomp_size << " | ";
+          std::cout <<  i << ":" << tree_info_array_preorder[i].right_decomp_size << " | ";
         }
         std::cout << std::endl;
 
-        for(int i = 0; i < tree1_size; i++) {
-          delete[] tree_info_array_preorder[i]; // deletes every struct where tree_info_array_preorder[i] points to. has not to be done for tree_array_preorder because the nodes are members of the NodeInfo struct and get therefore already deleted with this line
-        }
+        // for(int i = 0; i < tree1_size; i++) {
+        //   delete[] tree_info_array_preorder[i]; // deletes every struct where tree_info_array_preorder[i] points to. has not to be done for tree_array_preorder because the nodes are members of the NodeInfo struct and get therefore already deleted with this line
+        // }
 
         delete[] tree_info_array_preorder; // deletes the NodeInfo pointer array
-        delete[] tree_array_preorder; // deletes the Node pointer array
 
       } catch(char const *e) { //catches manually thrwon undefined exception
         std::cerr << "Exception caught: " << e << std::endl;
