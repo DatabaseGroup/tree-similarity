@@ -7,6 +7,7 @@
 
 #include "data_structures/k_heap.h"
 #include "data_structures/array_2d.h"
+#include "data_structures/btree.h"
 
 #include "nodes/custom_node_data.h"
 #include "nodes/node.h"
