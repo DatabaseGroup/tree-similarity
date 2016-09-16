@@ -44,7 +44,7 @@ int main (int argc, char* argv[]) {
         //printing
         std::cout << "\nposition:label" << std::endl;
         for(int i = 0; i < tree1_size; i++) { //printing preordered nodes array in form position:label
-          std::cout << i << ":" << tree_info_array_preorder[i].nodeData << " | " << std::flush;
+          std::cout << i << ":" << tree_info_array_preorder[i].nodeData->get_label() << " | " << std::flush;
         }
         std::cout << std::endl;
 

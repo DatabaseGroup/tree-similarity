@@ -3,6 +3,7 @@
 
 #include "../nodes/node.h"
 #include "../nodes/string_node_data.h"
+#include "../data_structures/array_2d.h"
 
 namespace rted {
 
@@ -11,19 +12,12 @@ struct NodeInfo {
   _NodeData* nodeData;
   int subtree_size;
   int parent_id;
+  int l_to_r; //TODO
   //nodes::Node<_NodeData>* children; //Maybe change type later
   int full_decomp_size; // The number of subforests in the full decomposition of subtree rooted at this node (Lemma 5.1 in TODS paper)
   int left_decomp_size; // The number of relevant subforests produced by a recursive path decomposition (Lemma 5.3 in TODS paper)
   int right_decomp_size = 0;
 };
-
-template<class _NodeData = nodes::StringNodeData, class _Costs = nodes::Costs<_NodeData>>
-double compute_rted(nodes::Node<_NodeData>* tree1, nodes::Node<_NodeData>* tree2,
-  _Costs costs = _Costs())
-{
-  // IMPLEMENT RTED THERE
-  return 0.0;
-}
 
 // Returns the size of a given tree
 //
@@ -46,11 +40,36 @@ int get_tree_size(nodes::Node<_NodeData>* tree) {
   return 1;
 }
 
+// Computes the Tree Edit Distance with the RTED Algorithm
+//
+// Params:  tree1   The first tree to be compared
+//          tree2   The second tree to be compared
+//          costs   The costs for the edit operations
+// Return:  A double TODO
+// Throws:  TODO
+template<class _NodeData = nodes::StringNodeData, class _Costs = nodes::Costs<_NodeData>>
+double compute_rted(nodes::Node<_NodeData>* tree1, nodes::Node<_NodeData>* tree2,
+  _Costs costs = _Costs())
+{
+  int tree1_size = get_tree_size(tree1);
+  int tree2_size = get_tree_size(tree2);
+  NodeInfo<_NodeData>* tree1_info_array = new NodeInfo<_NodeData>[tree1_size]; // on heap because it's too big for stack and size not known at compile time
+  NodeInfo<_NodeData>* tree2_info_array = new NodeInfo<_NodeData>[tree2_size];
+
+  gather_tree_info(tree1, tree1_info_array);
+  gather_tree_info(tree2, tree2_info_array);
+
+  data_structures::Array2D<double>* str = compute_strategy_postorder(tree1_info_array, tree2_info_array);
+
+  // IMPLEMENT RTED THERE
+  return (double) tree1_size + tree2_size;
+}
+
 // Returns the size of a given tree
 //
 // Params:  tree                      The root node of the tree of type nodes::Node<nodes::StringNodeData>*
 //          nodes_array_preorder      The array in which the nodes should be stored in preorder (size must be at least size of tree!)
-//          node_info_array_preorder  The array in which the node infos should be stored (size must be at least size of tree!)
+//          node_info_array_preorder  The array in which the node infos should be stored (size must be at least size of tree!) indexed in preorder
 //          preorder_id               Internally needed parameter, do not overwrite!
 //          preorder_id_parent        Internally needed parameter, do not overwrite!
 //          sum_of_subtree_sizes      Internally needed parameter, do not overwrite!
@@ -104,6 +123,8 @@ int gather_tree_info(nodes::Node<_NodeData>* tree, NodeInfo<_NodeData>* node_inf
 
     // after iterating over all children, the following code is executed:
 
+    // TODO get postorder id here to calculate l_to_r = treeSize - 1 - postorder
+
     // updating parents right decomposition cost
     // passed to parent differently to left decomosition cost due to preorder traversal of the tree
     if(is_rightmost_child == false) { // if I'm not a rightmost child - I update my parent with my current right decomposition value + my own subtree size
@@ -136,6 +157,34 @@ int gather_tree_info(nodes::Node<_NodeData>* tree, NodeInfo<_NodeData>* node_inf
   node_info_array_preorder[current_preorder_id].full_decomp_size = 1; // Lemma 5.1 equals one if subtree_size is 1 and (*sum_of_subtree_sizes) is 1
 
   return 1; // 1 is returned as the subtree size
+}
+
+template<class _NodeData = nodes::StringNodeData>
+data_structures::Array2D<double>* compute_strategy_postorder(NodeInfo<nodes::StringNodeData>* tree_info_array_1, NodeInfo<nodes::StringNodeData>* tree_info_array_2){
+  //store tree sizes
+  int tree1_size = tree_info_array_1->subtree_size;
+  int tree2_size = tree_info_array_2->subtree_size;
+
+  // allocate memory for the strategy matrix
+  data_structures::Array2D<double>* str = new data_structures::Array2D<double>(tree1_size, tree2_size);
+  // allocate memory for the cost matrices
+  data_structures::Array2D<int> l1(tree1_size, tree2_size);
+  data_structures::Array2D<int> r1(tree1_size, tree2_size);
+  data_structures::Array2D<int> i1(tree1_size, tree2_size);
+  int l2[tree2_size];
+  int r2[tree2_size];
+  int i2[tree2_size];
+
+  // TODO l_to_r and r_to_l (example on page 20 TODS)
+
+  for(int v = tree1_size -1; v >= 0; --v) { // Line 5 in algorithm 1 APTED
+    for(int w = tree2_size -1; w >= 0; --w) { // Line 8 in algorithm 1 APTED
+      // updating parent
+
+    }
+  }
+
+  return str;
 }
 
 } // END NAMESPACE
