@@ -21,6 +21,7 @@ namespace data_structures {
  *  Properties:
  *    - Nodes have many more than two children.
  *    - A node may contain more than just a single element.
+ *    - No duplicates supported/allowed (data of the duplicate key gets replaced).
  *
  *  A B-tree depends on a positive constant integer m. This tells us how many
  *  elements a single node is able to hold. The root node may have as few as one
@@ -38,105 +39,146 @@ namespace data_structures {
 template<class _Key, class _Data, size_t _M>
 class BTree {
 private:
+  // only for internal usage
   struct BTreeNode {
+    typedef std::array<std::pair<_Key, _Data>, _M> EntriesType;
+    typedef std::array<BTreeNode*, _M + 1> ChildrenType;
     // hopefully better performance using std::array (evaluated at compile time)
-    std::array<std::pair<_Key, _Data>, _M> entries_{}; // std::pair<>& possible?
-    std::array<BTreeNode*, _M + 1> children_{};
-    size_t max_index_;
+    EntriesType entries_{};
+    ChildrenType children_{};
+    size_t max_index_{};
 
-    BTreeNode() {
-      max_index_ = 0;
-    }
-
-    BTreeNode(const _Key& key, const _Data& data) : BTreeNode() {
-      entries_.at(0) = std::make_pair(key, data);
-    }
-
+    BTreeNode() { }
     ~BTreeNode() { }
 
-    bool insert(const _Key& key, const _Data& data) {
-      if (full()) {
-        return false;
+    // debug, to be removed once tests succeed
+    void print() const {
+      std::cout << "{ ";
+      for (const std::pair<_Key, _Data>& entry: entries_) {
+        std::cout << "(" << entry.first << ", " << entry.second << ") ";
       }
-
-      size_t key_index = search(key);
-      // move array elements if necessary
-      if (key_index < max_index_) {
-        move_entries(this, key_index); // maybe key_index +- 1 - to be tested
-      }
-
-      entries_.at(key_index + 1) = std::make_pair(key, data);
-      ++max_index_;
-
-      return true;
+      std::cout << "}" << std::endl;
     }
-
-    // shifts entries by 1 from start_index to end_index (inclusive)
-    void move_entries(BTreeNode* other, const size_t& start_index = 0,
-      const size_t& end_index = _M - 1, const int offset = 1)
-    {
-      if (end_index >= entries_.size() || start_index < 0) {
-        return; // TODO: throw exception
-      }
-
-      for (int i = end_index - 1; i >= start_index; --i) {
-        entries_.at(i + offset) = std::move(other->entries_.at(i));
-      }
-    }
-
-    // returns index wrt. the entries array, children array is of different size
-    size_t search(const _Key& key) const {
-      if (max_index_ < 0) {
-        return (-1); // TODO: exception
-      }
-
-      if (max_index_ == 0 && key == entries_.at(max_index_).first) {
-        return max_index_;
-      }
-
-      typename std::array<std::pair<_Key, _Data>, _M>::iterator lower_end =
-        std::lower_bound(entries_.begin(), entries_.begin() + max_index_, key,
-          [](std::pair<_Key, _Data> lhs, std::pair<_Key, _Data> rhs) -> bool {
-            return (lhs.first < rhs.first);
-          }
-        );
-
-      return (lower_end - entries_.begin());
-    }
-
-    bool leaf() const {
-      return (children_.at(0) == nullptr);
-    }
-
-    bool full() const {
-      return (entries_.size() == max_index_);
-    }
-
-
   };
 
 private:
   BTreeNode* root_;
-  size_t number_of_nodes_;
+  size_t size_;
 
-  BTreeNode* split(const BTreeNode* root);
+  size_t lower_bound(BTreeNode* node, const _Key& key) const;
+  std::pair<BTreeNode*, size_t> find_node(BTreeNode* node, const _Key& key) const;
+  BTreeNode* split(const std::pair<BTreeNode*, size_t> to_split);
+
+  // debug, remove once tests succeed and print() is removed
+  void print(BTreeNode* root, int level) const;
 
 public:
   BTree();
   ~BTree();
 
-  void insert(const _Key& key, const _Data& data);
-  BTreeNode* insert(const BTreeNode* root, const _Key& key, const _Data& data);
+  BTreeNode* insert(const _Key& key, const _Data& data);
+  BTreeNode* insert(BTreeNode* root, const _Key& key, const _Data& data);
   _Data get(const _Key& key) const;
   _Data search(const BTreeNode* root, const _Key& key) const;
   void remove();
 
   bool empty() const;
+  size_t size() const;
+
+  bool is_leaf(const BTreeNode* node) const;
+  bool is_full(const BTreeNode* node) const;
+
+  // debug, remove once tests succeed (or replace by operator<<)
+  void print() const;
 };
 
 template<class _Key, class _Data, size_t _M>
-BTree<_Key, _Data, _M>::BTree() : number_of_nodes_(0) {
-  BTreeNode* root_ = new BTreeNode();
+size_t BTree<_Key, _Data, _M>::lower_bound(BTreeNode* node, const _Key& key) const
+{
+  if (node->max_index_ < 0) {
+    return (-1); // TODO: exception
+  }
+
+  // O(log n) in the size of the entries_ array
+  typename BTreeNode::EntriesType::const_iterator lower_bound =
+    std::lower_bound(node->entries_.begin(),
+      node->entries_.begin() + node->max_index_, key,
+      [](const std::pair<_Key, _Data>& lhs, const _Key& rhs) -> bool {
+        return (lhs.first < rhs);
+      }
+    );
+
+  // return the index of the first element >= key
+  return (lower_bound - node->entries_.begin());
+}
+
+template<class _Key, class _Data, size_t _M>
+std::pair<typename BTree<_Key, _Data, _M>::BTreeNode*, size_t> BTree<_Key, _Data, _M>::find_node(
+  BTreeNode* node, const _Key& key) const
+{
+  if (is_leaf(node)) {
+    //return std::make_pair(node, lower_bound(node, key));
+    return std::pair<BTreeNode*, size_t>(node, lower_bound(node, key));
+  }
+
+  size_t lower_bound = this->lower_bound(node, key); // compute position in node
+
+  // check for duplicate key
+  if (node->entries_.at(lower_bound).first == key) {
+    return std::make_pair(node, lower_bound);
+  }
+
+  // may be lower_bound +- 1, to be tested/verified
+  return find_node(node->children_.at(lower_bound), key);
+}
+
+// TODO: beautify signature (return type)
+template<class _Key, class _Data, size_t _M>
+typename BTree<_Key, _Data, _M>::BTreeNode* BTree<_Key, _Data, _M>::split(
+  const std::pair<BTreeNode*, size_t> to_split)
+{
+  BTreeNode* new_node = new BTreeNode();
+  BTreeNode* node_to_split = to_split.first;
+  const size_t& insertion_index = to_split.second;
+  int i = 0;
+  int half = std::floor(_M / 2);
+  std::pair<_Key, _Data>& middle_element = node_to_split->entries_.at(half);
+  bool is_part_of_first_half = (to_split.second < half);
+
+  std::cout << "Middle element: (" << middle_element.first << ", " << middle_element.second << ")" << std::endl;
+
+  for (i = half - 1; i >= 0; --i) {
+    std::cout << "1 - i = " << i << " -> " << i << std::endl;
+    new_node->entries_.at(i) = std::move(node_to_split->entries_.at(i));
+  }
+  new_node->max_index_ = half - 1;
+
+  for (i = node_to_split->max_index_; i > half; --i) {
+    std::cout << "2 - i = " << i << " -> " << i - half - 1 << std::endl;
+    node_to_split->entries_.at(i - half - 1) = std::move(node_to_split->entries_.at(i));
+  }
+
+  std::cout << "NEW_NODE: " << std::endl;
+  new_node->print();
+  std::cout << "NODE_TO_SPLIT: " << std::endl;
+  node_to_split->print();
+
+  // if the root is split, we need to do some additional things
+  /*
+  if (node_to_split == root_) {
+    BTreeNode* new_root = new BTreeNode();
+
+    new_root->children_.at(0) = new_node;
+    new_root->children_.at(1) = node_to_split;
+
+
+  }*/
+  return nullptr;
+}
+
+template<class _Key, class _Data, size_t _M>
+BTree<_Key, _Data, _M>::BTree() : size_(0) {
+  root_ = new BTreeNode();
 }
 
 template<class _Key, class _Data, size_t _M>
@@ -145,37 +187,42 @@ BTree<_Key, _Data, _M>::~BTree() {
 }
 
 template<class _Key, class _Data, size_t _M>
-void BTree<_Key, _Data, _M>::insert(const _Key& key, const _Data& data) {
-  BTreeNode* new_node = insert(root_, key, data);
-  ++number_of_nodes_;
-
-  if (new_node == nullptr) {
-    return;
-  }
-
-  // split root node
-  //BTreeNode* new_root = new BTreeNode();
+typename BTree<_Key, _Data, _M>::BTreeNode* BTree<_Key, _Data, _M>::insert(
+  const _Key& key, const _Data& data)
+{
+  return insert(root_, key, data);
 }
 
 // TODO: beautify signature (return type)
 template<class _Key, class _Data, size_t _M>
 typename BTree<_Key, _Data, _M>::BTreeNode* BTree<_Key, _Data, _M>::insert(
-  const BTreeNode* root, const _Key& key, const _Data& data)
+  BTreeNode* node, const _Key& key, const _Data& data)
 {
-  if (!root->insert(key, data)) {
-    // node is full, need to split
-    split(root);
-  }
-}
+  std::pair<_Key, _Data> new_entry = std::make_pair(key, data);
+  std::pair<BTreeNode*, size_t> to_insert = find_node(node, key);
+  BTreeNode* node_to_insert = to_insert.first;
+  size_t& insertion_index = to_insert.second;
+  bool is_duplicate = (node_to_insert->entries_.at(insertion_index).first == key);
 
-// TODO: beautify signature (return type)
-template<class _Key, class _Data, size_t _M>
-typename BTree<_Key, _Data, _M>::BTreeNode* BTree<_Key, _Data, _M>::split(
-  const BTreeNode* root)
-{
-  BTreeNode* new_node = new BTreeNode();
-  const int half = std::floor(_M / 2);
-  new_node->move_entries(root, half, root->max_index_, half);
+  if (is_leaf(node_to_insert)) {
+    std::cout << "Leaf: Inserting at position " << insertion_index << std::endl;
+
+    if (is_full(node_to_insert)) {
+      std::cout << "Leaf: Is full" << std::endl;
+      split(to_insert);
+    }
+
+    node_to_insert->entries_.at(insertion_index) = std::make_pair(key, data);
+  } else {
+
+  }
+
+  if (!is_duplicate) {
+    ++size_;
+    ++node_to_insert->max_index_; // adjust search range in node
+  }
+
+  return nullptr;
 }
 
 template<class _Key, class _Data, size_t _M>
@@ -186,26 +233,55 @@ _Data BTree<_Key, _Data, _M>::get(const _Key& key) const {
 template<class _Key, class _Data, size_t _M>
 _Data BTree<_Key, _Data, _M>::search(const BTreeNode* root, const _Key& key) const 
 {
-  size_t key_index = (-1);
-  if (root->leaf()) {
-    if ((key_index = root->search(key)) >= 0) {
-      return root->entries.at(key_index).second;
-    }
-  } else { // non-leaf
-    key_index = root->search(key);
-    return search(root->children.at(key_index + 1), key);
-  }
+
 }
 
 template<class _Key, class _Data, size_t _M>
 void BTree<_Key, _Data, _M>::remove() {
 
-  --number_of_nodes_;
+  --size_;
 }
 
 template<class _Key, class _Data, size_t _M>
 bool BTree<_Key, _Data, _M>::empty() const {
-  return (number_of_nodes_ <= 0);
+  return (size_ <= 0);
+}
+
+template<class _Key, class _Data, size_t _M>
+size_t BTree<_Key, _Data, _M>::size() const {
+  return size_;
+}
+
+template<class _Key, class _Data, size_t _M>
+bool BTree<_Key, _Data, _M>::is_leaf(const BTreeNode* node) const {
+  return (node->children_.at(0) == nullptr);
+}
+
+template<class _Key, class _Data, size_t _M>
+bool BTree<_Key, _Data, _M>::is_full(const BTreeNode* node) const {
+  return (node->max_index_ + 1 >= node->entries_.size());
+}
+
+// debug, remove once tests succeed (or replace by operator<<)
+template<class _Key, class _Data, size_t _M>
+void BTree<_Key, _Data, _M>::print() const {
+  std::cout << "Tree size: " << size_ << std::endl;
+  print(root_, 0);
+}
+
+// debug, remove once tests succeed and print() is removed
+template<class _Key, class _Data, size_t _M>
+void BTree<_Key, _Data, _M>::print(BTreeNode* root, int level) const {
+  for (int i = 0; i < level; ++i) {
+    std::cout << "  ";
+  }
+  root->print();
+  
+  if (!is_leaf(root)) {
+    for (BTreeNode* child: root->children_) {
+      print(child, level + 1);
+    }
+  }
 }
 
 } // namespace data_structures
