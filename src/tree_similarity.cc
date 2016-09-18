@@ -3,12 +3,14 @@
 #include <unordered_map>
 #include <fstream>
 #include <exception>
+#include <random>
 
 #include "tree_similarity.h"
 
 // TODO: tobi: put everything in a method e.g. called get_sbs_fs(node* t1, node* t2)
 //
 int main (int argc, char* argv[]) {
+  /*
   if(argc != 3 && argc != 4 && argc != 5 && argc != 6) {
     std::cout << "TODO print a help message" << std::endl;
     return 0;
@@ -69,7 +71,7 @@ int main (int argc, char* argv[]) {
   // no need to generate basic cost model since it is set as default template
   // parameter
 
-  /*
+  
   nodes::Node<nodes::StringNodeData>* a1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("a"));
   nodes::Node<nodes::StringNodeData>* r1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("r"));
   nodes::Node<nodes::StringNodeData>* d1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("d"));
@@ -96,7 +98,6 @@ int main (int argc, char* argv[]) {
   nodes::Node<nodes::StringNodeData>* stree2 = x2;
 
   // distance between stree1 and stree2 should be 10 (using StringCosts)
-  */
 
   std::cout
     << "Distance (string-labeled tree, string-labeled cost model, Zhang Shasha):\t"
@@ -107,7 +108,7 @@ int main (int argc, char* argv[]) {
     << "Distance (string-labeled tree, string-labeled cost model, RTED):\t"
     << rted::compute_rted<nodes::StringNodeData, nodes::StringCosts<nodes::StringNodeData>>(tree1, tree2)
     << std::endl;
-/*
+
   // TOBIAS PART - TO BE RESOLVED/REMOVE/CLEANED BY TOBIAS
   //
   std::vector<std::array<nodes::Node*, 2> > edit_mapping =
@@ -155,12 +156,12 @@ int main (int argc, char* argv[]) {
       output.clear();
     }
   }
-*/
 
   delete tree1;
   delete tree2;
   delete tree1_postorder;
   delete tree2_postorder;
+*/
 
 /*
   // TEST CASES OF DANIEL, DO NOT TOUCH THESE! ;)
@@ -316,6 +317,65 @@ int main (int argc, char* argv[]) {
   }
   std::cout << std::endl;
 */
+
+  /*
+  data_structures::BTree<int, std::string, 6> btree_even_m;
+
+  btree_even_m.insert(1, "1"); btree_even_m.print();
+  btree_even_m.insert(3, "3"); btree_even_m.print();
+  btree_even_m.insert(5, "5"); btree_even_m.print();
+  btree_even_m.insert(7, "7"); btree_even_m.print();
+  btree_even_m.insert(99, "99"); btree_even_m.print();
+  btree_even_m.insert(9, "9"); btree_even_m.print();
+
+  btree_even_m.insert(8, "8"); btree_even_m.print();
+  btree_even_m.insert(2, "2"); btree_even_m.print();
+  btree_even_m.insert(4, "4"); btree_even_m.print();
+  btree_even_m.insert(6, "6"); btree_even_m.print();
+  btree_even_m.insert(10, "10"); btree_even_m.print();
+  btree_even_m.insert(11, "11"); btree_even_m.print();
+  btree_even_m.insert(12, "12"); btree_even_m.print();
+  btree_even_m.insert(13, "13"); btree_even_m.print();
+  btree_even_m.insert(14, "14"); btree_even_m.print();
+  btree_even_m.insert(15, "15"); btree_even_m.print();
+  btree_even_m.insert(16, "16"); btree_even_m.print();
+  btree_even_m.insert(17, "17"); btree_even_m.print();
+  btree_even_m.insert(18, "18"); btree_even_m.print();
+  btree_even_m.insert(19, "19"); btree_even_m.print();
+  btree_even_m.insert(20, "20"); btree_even_m.print();
+  btree_even_m.insert(21, "21"); btree_even_m.print();
+  btree_even_m.insert(22, "22"); btree_even_m.print();
+  btree_even_m.insert(23, "23"); btree_even_m.print();
+  btree_even_m.insert(24, "24"); btree_even_m.print();
+  btree_even_m.insert(25, "25"); btree_even_m.print();
+  btree_even_m.insert(26, "26"); btree_even_m.print();
+  btree_even_m.insert(27, "27"); btree_even_m.print();
+  btree_even_m.insert(28, "28"); btree_even_m.print();
+  btree_even_m.insert(29, "29"); btree_even_m.print();
+  btree_even_m.insert(17, "42"); btree_even_m.print();
+  btree_even_m.insert(30, "30"); btree_even_m.print();
+  btree_even_m.insert(31, "31"); btree_even_m.print();
+  btree_even_m.insert(32, "32"); btree_even_m.print();
+  btree_even_m.insert(33, "33"); btree_even_m.print();
+
+  data_structures::BTree<int, std::string, 5> btree_odd_m;
+  btree_odd_m.insert(1, "One"); btree_odd_m.print();
+  btree_odd_m.insert(3, "Three"); btree_odd_m.print();
+  btree_odd_m.insert(5, "Five"); btree_odd_m.print();
+  btree_odd_m.insert(7, "Seven"); btree_odd_m.print();
+  btree_odd_m.insert(99, "Ninety-Nine"); btree_odd_m.print();
+  btree_odd_m.insert(8, "Eight"); btree_odd_m.print();
+  btree_odd_m.insert(9, "Nine"); btree_odd_m.print();
+  btree_odd_m.insert(11, "Eleven"); btree_odd_m.print();
+  btree_odd_m.insert(12, "Twelve"); btree_odd_m.print();
+  */
+
+  int runs = 5;
+  int i = 0;
+  std::mt19937 mt(42);
+  for (i = 0; i < runs; ++i) {
+    test_btree<int, 2>(mt);
+  }
 
   return 0;
 }
