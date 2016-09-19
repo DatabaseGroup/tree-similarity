@@ -270,8 +270,10 @@ std::vector<std::array<nodes::Node<_NodeData>*, 2> > compute_edit_mapping(
 
   make_leaves<_NodeData>(&leaves_tree1, &leaves_tree2, tree1, tree2);
 
-  lmld<_NodeData>(tree1, l1);
-  lmld<_NodeData>(tree2, l2);
+  int id = 0;
+  lmld<_NodeData>(tree1, id, l1);
+  id = 0;
+  lmld<_NodeData>(tree2, id, l2);
 
   std::vector<int> kr1(leaves_tree1.size() + 1);
   std::vector<int> kr2(leaves_tree2.size() + 1);
