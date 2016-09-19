@@ -39,7 +39,7 @@ int main (int argc, char* argv[]) {
         rted::NodeInfo<nodes::StringNodeData>* tree_info_array_preorder = new rted::NodeInfo<nodes::StringNodeData>[tree1_size];
 
         //gathering info - storing in params tree_info_array_preorder
-        rted::gather_tree_info(test_tree1, tree_info_array_preorder);
+        rted::gather_tree_info(test_tree1, tree_info_array_preorder, tree1_size);
 
         //printing
         std::cout << "\nposition:label" << std::endl;
@@ -78,9 +78,11 @@ int main (int argc, char* argv[]) {
         }
         std::cout << std::endl;
 
-        // for(int i = 0; i < tree1_size; i++) {
-        //   delete[] tree_info_array_preorder[i]; // deletes every struct where tree_info_array_preorder[i] points to. has not to be done for tree_array_preorder because the nodes are members of the NodeInfo struct and get therefore already deleted with this line
-        // }
+        std::cout << "\nposition:l_to_r" << std::endl;
+        for(int i = 0; i < tree1_size; i++) { //printing tree info array in form position:parent_id
+          std::cout <<  i << ":" << tree_info_array_preorder[i].l_to_r << " | ";
+        }
+        std::cout << std::endl;
 
         delete[] tree_info_array_preorder; // deletes the NodeInfo pointer array
 

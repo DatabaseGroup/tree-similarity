@@ -56,8 +56,8 @@ double compute_rted(nodes::Node<_NodeData>* tree1, nodes::Node<_NodeData>* tree2
   NodeInfo<_NodeData>* tree1_info_array = new NodeInfo<_NodeData>[tree1_size]; // on heap because it's too big for stack and size not known at compile time
   NodeInfo<_NodeData>* tree2_info_array = new NodeInfo<_NodeData>[tree2_size];
 
-  gather_tree_info(tree1, tree1_info_array);
-  gather_tree_info(tree2, tree2_info_array);
+  gather_tree_info(tree1, tree1_info_array, tree1_size);
+  gather_tree_info(tree2, tree2_info_array, tree2_size);
 
   data_structures::Array2D<double>* str = compute_strategy_postorder(tree1_info_array, tree2_info_array);
 
@@ -70,26 +70,27 @@ double compute_rted(nodes::Node<_NodeData>* tree1, nodes::Node<_NodeData>* tree2
 // Params:  tree                      The root node of the tree of type nodes::Node<nodes::StringNodeData>*
 //          nodes_array_preorder      The array in which the nodes should be stored in preorder (size must be at least size of tree!)
 //          node_info_array_preorder  The array in which the node infos should be stored (size must be at least size of tree!) indexed in preorder
+//          total_tree_size           The size of the tree. Must be passed by the caller - should be get from get_tree_size function
 //          preorder_id               Internally needed parameter, do not overwrite!
 //          preorder_id_parent        Internally needed parameter, do not overwrite!
 //          sum_of_subtree_sizes      Internally needed parameter, do not overwrite!
 //          left_decomp_sum           Internally needed parameter, do not overwrite!
+//          postorder_id              Internally needed parameter, do not overwrite!
 //          is_rightmost_child        Internally needed parameter, do not overwrite!
 // Return:  An integer which is the size of the subtree rooted at the given node
 // Throws:  A char const* with the error message or an std::exception
 template<class _NodeData = nodes::StringNodeData>
 int gather_tree_info(nodes::Node<_NodeData>* tree, NodeInfo<_NodeData>* node_info_array_preorder,
-    int preorder_id = 0, int preorder_id_parent = -1, int* sum_of_subtree_sizes = new int(),
-    int* left_decomp_sum = new int(0), bool is_rightmost_child = true){ //TODO *_decomp should be deleted anywhere (is on the heap)
+    int total_tree_size, int preorder_id = 0, int preorder_id_parent = -1, int* sum_of_subtree_sizes = new int(),
+    int* left_decomp_sum = new int(0), int* postorder_id = new int(0), bool is_rightmost_child = true) { //TODO *_decomp should be deleted anywhere (is on the heap)
 
   // Check if the arguments are valid
-  if(!tree || !node_info_array_preorder) { // has to be checked, because otherwise there is a segfault below in the code
+  if(!tree || !node_info_array_preorder || !total_tree_size) { // has to be checked, because otherwise there is a segfault below in the code
     throw "passed undefined argument"; // manually thrown exception because segfault would throw no exception (caller must catch this)
   }
   // variable needed in the algorithm
   int current_preorder_id = preorder_id; // the id of the node in the current invocation is the preorder_id at the moment of the invocation
-  // allocate memory for the NodeInfo struct of the current node and set the data and the parent id
-  //node_info_array_preorder[current_preorder_id] = new NodeInfo<_NodeData>; //allocate memory for NodeInfo struct in node_info_array
+  // set the data and the parent id of the NodeInfo struct of the current preorder id
   node_info_array_preorder[current_preorder_id].nodeData = tree->get_data();
   node_info_array_preorder[current_preorder_id].parent_id = preorder_id_parent; //parent id is always the id of the caller (caller passes its id as an argument)
 
@@ -107,8 +108,8 @@ int gather_tree_info(nodes::Node<_NodeData>* tree, NodeInfo<_NodeData>* node_inf
       }
 
       // call the function recursively
-      int child_subtree_size = gather_tree_info(node_it, node_info_array_preorder, preorder_id + 1,
-        current_preorder_id, sum_of_subtree_sizes, left_decomp_sum, is_rightmost_child);
+      int child_subtree_size = gather_tree_info(node_it, node_info_array_preorder, total_tree_size, preorder_id + 1,
+        current_preorder_id, sum_of_subtree_sizes, left_decomp_sum, postorder_id, is_rightmost_child);
 
       // after coming back from the recursion, the following code is executed:
 
@@ -123,8 +124,6 @@ int gather_tree_info(nodes::Node<_NodeData>* tree, NodeInfo<_NodeData>* node_inf
 
     // after iterating over all children, the following code is executed:
 
-    // TODO get postorder id here to calculate l_to_r = treeSize - 1 - postorder
-
     // updating parents right decomposition cost
     // passed to parent differently to left decomosition cost due to preorder traversal of the tree
     if(is_rightmost_child == false) { // if I'm not a rightmost child - I update my parent with my current right decomposition value + my own subtree size
@@ -138,7 +137,9 @@ int gather_tree_info(nodes::Node<_NodeData>* tree, NodeInfo<_NodeData>* node_inf
     node_info_array_preorder[current_preorder_id].left_decomp_size = (*left_decomp_sum) + children_subtree_sizes + 1; // setting left decomposition cost to the left decomposition sum of the last child plus own subtree size
     node_info_array_preorder[current_preorder_id].right_decomp_size += children_subtree_sizes + 1; // updating right decomposition cost - own subtree size added
     node_info_array_preorder[current_preorder_id].full_decomp_size = (((children_subtree_sizes + 1) * (children_subtree_sizes + 1 + 3)) / 2) - (*sum_of_subtree_sizes); // setting full decomposition cost - Lemma 5.1 of TODS
+    node_info_array_preorder[current_preorder_id].l_to_r = total_tree_size - 1 - (*postorder_id);
 
+    ++(*postorder_id);
     return (children_subtree_sizes + 1); // returning the current subtree size which is the size of all subtrees plus the root node // + 1 for current subtree root node
   }
 
@@ -155,7 +156,9 @@ int gather_tree_info(nodes::Node<_NodeData>* tree, NodeInfo<_NodeData>* node_inf
   node_info_array_preorder[current_preorder_id].left_decomp_size = 1;
   node_info_array_preorder[current_preorder_id].right_decomp_size = 1;
   node_info_array_preorder[current_preorder_id].full_decomp_size = 1; // Lemma 5.1 equals one if subtree_size is 1 and (*sum_of_subtree_sizes) is 1
+  node_info_array_preorder[current_preorder_id].l_to_r = total_tree_size - 1 - (*postorder_id);
 
+  ++(*postorder_id);
   return 1; // 1 is returned as the subtree size
 }
 
