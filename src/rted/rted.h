@@ -12,7 +12,8 @@ struct NodeInfo {
   _NodeData* nodeData;
   int subtree_size;
   int parent_id;
-  int l_to_r; //TODO
+  int l_to_r;
+  int r_to_l; // indexed in postorder!
   //nodes::Node<_NodeData>* children; //Maybe change type later
   int full_decomp_size; // The number of subforests in the full decomposition of subtree rooted at this node (Lemma 5.1 in TODS paper)
   int left_decomp_size; // The number of relevant subforests produced by a recursive path decomposition (Lemma 5.3 in TODS paper)
@@ -138,6 +139,8 @@ int gather_tree_info(nodes::Node<_NodeData>* tree, NodeInfo<_NodeData>* node_inf
     node_info_array_preorder[current_preorder_id].right_decomp_size += children_subtree_sizes + 1; // updating right decomposition cost - own subtree size added
     node_info_array_preorder[current_preorder_id].full_decomp_size = (((children_subtree_sizes + 1) * (children_subtree_sizes + 1 + 3)) / 2) - (*sum_of_subtree_sizes); // setting full decomposition cost - Lemma 5.1 of TODS
     node_info_array_preorder[current_preorder_id].l_to_r = total_tree_size - 1 - (*postorder_id);
+    node_info_array_preorder[total_tree_size - 1 - (*postorder_id)].r_to_l = current_preorder_id;
+
 
     ++(*postorder_id);
     return (children_subtree_sizes + 1); // returning the current subtree size which is the size of all subtrees plus the root node // + 1 for current subtree root node
@@ -157,6 +160,7 @@ int gather_tree_info(nodes::Node<_NodeData>* tree, NodeInfo<_NodeData>* node_inf
   node_info_array_preorder[current_preorder_id].right_decomp_size = 1;
   node_info_array_preorder[current_preorder_id].full_decomp_size = 1; // Lemma 5.1 equals one if subtree_size is 1 and (*sum_of_subtree_sizes) is 1
   node_info_array_preorder[current_preorder_id].l_to_r = total_tree_size - 1 - (*postorder_id);
+  node_info_array_preorder[total_tree_size - 1 - (*postorder_id)].r_to_l = current_preorder_id;
 
   ++(*postorder_id);
   return 1; // 1 is returned as the subtree size

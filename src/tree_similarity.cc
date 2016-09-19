@@ -84,6 +84,12 @@ int main (int argc, char* argv[]) {
         }
         std::cout << std::endl;
 
+        std::cout << "\nposition:r_to_l" << std::endl;
+        for(int i = 0; i < tree1_size; i++) { //printing tree info array in form position:parent_id
+          std::cout <<  i << ":" << tree_info_array_preorder[i].r_to_l << " | ";
+        }
+        std::cout << std::endl;
+
         delete[] tree_info_array_preorder; // deletes the NodeInfo pointer array
 
       } catch(char const *e) { //catches manually thrwon undefined exception
