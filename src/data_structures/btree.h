@@ -102,7 +102,7 @@ public:
   );
   std::pair<_Key, _Data> search(const _Key& key) const;
   std::pair<_Key, _Data> search(const BTreeNode* root, const _Key& key) const;
-  void remove();
+  void remove(const _Key& key);
 
   bool empty() const;
   size_t size() const;
@@ -251,7 +251,7 @@ std::pair<_Key, _Data> BTree<_Key, _Data, _M>::search(const BTreeNode* node,
 }
 
 template<class _Key, class _Data, size_t _M>
-void BTree<_Key, _Data, _M>::remove() {
+void BTree<_Key, _Data, _M>::remove(const _Key& key) {
   if (empty()) {
     return; // TODO: exception
   }
