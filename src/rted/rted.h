@@ -49,8 +49,8 @@ int get_tree_size(nodes::Node<_NodeData>* tree) {
 // Return:  A double TODO
 // Throws:  TODO
 template<class _NodeData = nodes::StringNodeData, class _Costs = nodes::Costs<_NodeData>>
-double compute_rted(nodes::Node<_NodeData>* tree1, nodes::Node<_NodeData>* tree2,
-  _Costs costs = _Costs())
+double compute_rted(nodes::Node<_NodeData>* tree1, nodes::Node<_NodeData>* tree2/*,
+  _Costs costs = _Costs()*/) //TODO add costs
 {
   int tree1_size = get_tree_size(tree1);
   int tree2_size = get_tree_size(tree2);
@@ -60,7 +60,7 @@ double compute_rted(nodes::Node<_NodeData>* tree1, nodes::Node<_NodeData>* tree2
   gather_tree_info(tree1, tree1_info_array, tree1_size);
   gather_tree_info(tree2, tree2_info_array, tree2_size);
 
-  data_structures::Array2D<double>* str = compute_strategy_postorder(tree1_info_array, tree2_info_array);
+  data_structures::Array2D<double>* str = compute_strategy_right_to_left_preorder(tree1_info_array, tree2_info_array);
 
   // IMPLEMENT RTED THERE
   return (double) tree1_size + tree2_size;
@@ -167,31 +167,55 @@ int gather_tree_info(nodes::Node<_NodeData>* tree, NodeInfo<_NodeData>* node_inf
 }
 
 template<class _NodeData = nodes::StringNodeData>
-data_structures::Array2D<double>* compute_strategy_postorder(NodeInfo<nodes::StringNodeData>* tree_info_array_1, NodeInfo<nodes::StringNodeData>* tree_info_array_2){
+data_structures::Array2D<double>* compute_strategy_right_to_left_preorder(
+  NodeInfo<nodes::StringNodeData>* tree_info_array_1, NodeInfo<nodes::StringNodeData>* tree_info_array_2){
   //store tree sizes
   int tree1_size = tree_info_array_1->subtree_size;
   int tree2_size = tree_info_array_2->subtree_size;
+  int lv; // left-to-right-preorder of node v (we iterate over v in right-to-left-preorder)
 
-  // allocate memory for the strategy matrix
-  data_structures::Array2D<double>* str = new data_structures::Array2D<double>(tree1_size, tree2_size);
+  // Algorithm 1 in APTED
+  // Lines 1-4 Prepare arrays (initiate leafrow with 0s)
+  data_structures::Array2D<double>* str = new data_structures::Array2D<double>(tree1_size, tree2_size); // allocate memory for the strategy matrix
   // allocate memory for the cost matrices
-  data_structures::Array2D<int> l1(tree1_size, tree2_size);
-  data_structures::Array2D<int> r1(tree1_size, tree2_size);
-  data_structures::Array2D<int> i1(tree1_size, tree2_size);
-  int l2[tree2_size];
-  int r2[tree2_size];
-  int i2[tree2_size];
+  int** l1 = new int*[tree1_size]{NULL}; //Assign to NULL to be able to check if a row is already allocated
+  int** r1 = new int*[tree1_size]{NULL};
+  int** i1 = new int*[tree1_size]{NULL};
+  int* l2 = new int[tree2_size];
+  int* r2 = new int[tree2_size];
+  int* i2 = new int[tree2_size];
+  int* leaf_row = new int[tree2_size]{};
 
-  // TODO l_to_r and r_to_l (example on page 20 TODS)
-
-  for(int v = tree1_size -1; v >= 0; --v) { // Line 5 in algorithm 1 APTED
-    for(int w = tree2_size -1; w >= 0; --w) { // Line 8 in algorithm 1 APTED
-      // updating parent
-
+  for(int v = tree1_size -1; v >= 0; --v) { // Line 5: outer loop, traverses over left hand tree in right to left preorder
+    lv = tree_info_array_1[v].r_to_l;
+    // Line 6 and 7: dynamic (de)allocation
+    if(tree_info_array_1[lv].subtree_size == 1) { // Line 6: if v is a leave, assign leave_row-pointer to cost-row-pointers
+      std::cout << "v[" << lv << "] is a leave. cost rows assigned to leaverow." << std::endl;
+      l1[lv] = r1[lv] = i1[lv] = leaf_row; // no allocation needed, beacuse we can use the allocated space of leave_row - fewer space needed
+    }
+    if(tree_info_array_1[lv].parent_id != -1 && l1[tree_info_array_1[lv].parent_id] == NULL) { // Line 7: if row for parent of v is not allocated, allocate cost rows for parent
+      std::cout << "parent row of v[" << lv << "] is not allocated. is being allocated now." << std::endl;
+      l1[tree_info_array_1[lv].parent_id] = new int[tree2_size];
+      r1[tree_info_array_1[lv].parent_id] = new int[tree2_size];
+      i1[tree_info_array_1[lv].parent_id] = new int[tree2_size];
+    }
+    for(int w = tree2_size -1; w >= 0; --w) { // Line 8: inner loop, traverses over right hand tree in right to left preorder
+      // Line 9: if w is leaf node then cost matrices rows of w equal 0
+      // Line 10-15: get cost-path pairs (6: left, inner, right for both F and G)
+      // Line 16: get pair that has minimum cost (if-statements to get min)
+      // Line 17-36: update parent
+      // Line 37: write path that maps to the minimun cost into the strategy matrix at [v,w]
+    }
+    if(tree_info_array_1[lv].subtree_size != 1) { // Line 38: if v is not a leaf node then deallocate the row of v in left, right and inner cost matrices
+      std::cout << "v[" << lv << "] is not a leave. its rows are being deallocated now." << std::endl;
+      l1[lv] = r1[lv] = i1[lv] = {NULL}; // set the pointers to the rows to NULL which means they are not allocated
+      delete[] l1[lv]; // free the pointers to the rows
+      delete[] r1[lv];
+      delete[] i1[lv];
     }
   }
 
-  return str;
+  return str; // Line 39
 }
 
 } // END NAMESPACE
