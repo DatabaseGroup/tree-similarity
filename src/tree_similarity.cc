@@ -370,12 +370,13 @@ int main (int argc, char* argv[]) {
   btree_odd_m.insert(12, "Twelve"); btree_odd_m.print();
   */
 
-  int runs = 5;
+  int runs = 10;
   int i = 0;
-  std::mt19937 mt(42);
-  for (i = 0; i < runs; ++i) {
-    test_btree<int, 2>(mt);
-  }
+  std::random_device rnd;
+  std::mt19937 mt(rnd()); // for reproduction: seed 42
+  const int m = 16;
+
+  test_btree<int, m>(mt);
 
   return 0;
 }
