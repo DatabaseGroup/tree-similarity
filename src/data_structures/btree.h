@@ -100,7 +100,7 @@ public:
   typename std::pair<BTreeNode*, std::pair<_Key, _Data>> insert(BTreeNode* root,
     std::pair<_Key, _Data>& entry
   );
-  std::pair<_Key, _Data> get(const _Key& key) const;
+  std::pair<_Key, _Data> search(const _Key& key) const;
   std::pair<_Key, _Data> search(const BTreeNode* root, const _Key& key) const;
   void remove();
 
@@ -172,7 +172,6 @@ void BTree<_Key, _Data, _M>::insert(const _Key& key, const _Data& data) {
     new_root->children_.at(0) = root_;
     new_root->children_.at(1) = last.first;
     new_root->next_index_ = 1;
-    ++size_;
 
     root_ = new_root;
   }
@@ -213,12 +212,13 @@ typename std::pair<typename BTree<_Key, _Data, _M>::BTreeNode*, std::pair<_Key, 
     node->children_.at(insertion_index + 1) = propagate.first;
   } else {
     node->entries_.at(insertion_index) = entry;
+    ++size_;
   }
 
   ++node->next_index_;
-  ++size_; // TODO: correct size
 
-  if (node->full()) {return split(node, entry);
+  if (node->full()) {
+    return split(node, entry);
   }  
 
   return std::make_pair(nullptr, std::make_pair(_Key{}, _Data{}));
@@ -227,7 +227,7 @@ typename std::pair<typename BTree<_Key, _Data, _M>::BTreeNode*, std::pair<_Key, 
 
 
 template<class _Key, class _Data, size_t _M>
-std::pair<_Key, _Data> BTree<_Key, _Data, _M>::get(const _Key& key) const {
+std::pair<_Key, _Data> BTree<_Key, _Data, _M>::search(const _Key& key) const {
   return search(root_, key);
 }
 
@@ -252,8 +252,11 @@ std::pair<_Key, _Data> BTree<_Key, _Data, _M>::search(const BTreeNode* node,
 
 template<class _Key, class _Data, size_t _M>
 void BTree<_Key, _Data, _M>::remove() {
+  if (empty()) {
+    return; // TODO: exception
+  }
 
-  --size_;
+
 }
 
 template<class _Key, class _Data, size_t _M>
