@@ -43,8 +43,10 @@ class BTree {
 private:
   // only for internal usage
   struct BTreeNode {
-    typedef std::array<std::pair<_Key, _Data>, _M> EntriesType;
-    typedef std::array<BTreeNode*, _M + 1> ChildrenType;
+    // not entirely memory-efficient but reduces code complexity a lot
+    // TODO: maybe optimize memory usage
+    typedef std::array<std::pair<_Key, _Data>, _M + 1> EntriesType;
+    typedef std::array<BTreeNode*, _M + 2> ChildrenType;
     // hopefully better performance using std::array (evaluated at compile time)
     EntriesType entries_{};
     ChildrenType children_{};
@@ -53,13 +55,21 @@ private:
     BTreeNode() { }
     ~BTreeNode() { }
 
+    bool leaf() const {
+      return (children_.at(0) == nullptr);
+    }
+
+    bool full() const {
+      return (next_index_ >= _M + 1);
+    }
+
     // debug, to be removed once tests succeed
     void print() const { 
       std::cout << "{ ";
       for (int i = 0; i < next_index_; ++i) {
         std::cout << "(" << entries_.at(i).first << ", " << entries_.at(i).second << ") ";
       }
-      std::cout << "} (next_index_ = " << next_index_ << ")" << std::endl;
+      std::cout << "} (next_index_ = " << next_index_ << ")";
     }
   };
 
@@ -89,7 +99,7 @@ public:
 
   void insert(const _Key& key, const _Data& data);
   typename std::pair<BTreeNode*, std::pair<_Key, _Data>> insert(BTreeNode* root,
-    const std::pair<_Key, _Data>& entry
+    std::pair<_Key, _Data>& entry
   );
   _Data get(const _Key& key) const;
   _Data search(const BTreeNode* root, const _Key& key) const;
@@ -97,9 +107,6 @@ public:
 
   bool empty() const;
   size_t size() const;
-
-  bool is_leaf(const BTreeNode* node) const;
-  bool is_full(const BTreeNode* node) const;
 
   // debug, remove once tests succeed (or replace by operator<<)
   void print() const;
@@ -129,105 +136,33 @@ size_t BTree<_Key, _Data, _M>::lower_bound_index(const _Key& key,
 // TODO: beautify signature (return type)
 template<class _Key, class _Data, size_t _M>
 typename std::pair<typename BTree<_Key, _Data, _M>::BTreeNode*, std::pair<_Key, _Data>> BTree<_Key, _Data, _M>::split(
-  BTreeNode* node, const std::pair<_Key, _Data>& entry, BTreeNode* new_child)
+  BTreeNode* node, const std::pair<_Key, _Data>& entry,
+  BTreeNode* new_child)
 {
+  std::pair<_Key, _Data>& mid = node->entries_.at(half_);
+  //std::cout << "Split: Mid = " << mid.first << std::endl;
+
   BTreeNode* new_node = new BTreeNode();
   int i = 0, j = 0;
-  size_t half_index = half_ - (even_M_ ? 1 : 0);
-  size_t insertion_index = 0;
 
-  // Add new child if available (preserve ordering)
-  if (new_child) {
-    _Key last_key_new_child = new_child->entries_.at(new_child->next_index_ - 1).first;
-    insertion_index = lower_bound_index(last_key_new_child,
-      node->entries_.cbegin(), (is_full(node) ? node->entries_.cend() : node->entries_.cbegin() + node->next_index_)
-    );
+  int j_begin = half_ - (even_M_ ? 1 : 0);
 
-    for (i = node->next_index_ - 1; i > insertion_index; --i) {
-      node->children_.at(i + 1) = std::move(node->children_.at(i));
-    }
-    node->children_.at(insertion_index + 1) = new_child;
-  }
-
-  insertion_index = lower_bound_index(entry.first,
-    node->entries_.cbegin(), (is_full(node) ? node->entries_.cend() : node->entries_.cbegin() + node->next_index_)
-  ) - half_ - 1;
-
-  std::cout << "SPLIT: " << half_ << " "; node->print();
-  print();
-
-  std::pair<_Key, _Data> mid = entry;
-  if ((half_ > 0) && (entry.first < node->entries_.at(half_ - 1).first)) {
-    update_mid(mid, node->entries_.at(half_ - 1), entry);
-    //++insertion_index;
-  } else if (entry.first > node->entries_.at(half_).first) {
-    update_mid(mid, node->entries_.at(half_), entry);
-  }
-  print();
-
-  std::cout << "Mid: (" << mid.first << ", " << mid.second << ")" << std::endl;
-  std::cout << "insertion_index = " << insertion_index << std::endl;
-
-  //new_node->children_.at(half_index + 1) = std::move(node->children_.at(node->next_index_));
-  std::cout << " +++ "; //node->children_.at(node->next_index_ - 1)->print();
-  for (j = half_index, i = node->next_index_ - 1; j >= 0; --j) {
-    std::cout << "1 - i = " << i << " -> j = " << j << std::endl;
-
-    if (j == insertion_index) {
-      new_node->entries_.at(j) = entry;
-      continue;
-    }
-
-    if (node->entries_.at(i).first == entry.first) {
-      node->entries_.at(i).second = entry.second;
-    }
-    
+  new_node->children_.at(j_begin + 1) = std::move(node->children_.at(node->next_index_));
+  for (j = j_begin, i = node->next_index_ - 1; i > half_; --i, --j) {
+    //std::cout << "Split: i = " << i << " -> j = " << j << std::endl;
+    //std::cout << "Split: Transfering node entry " << node->entries_.at(i).first << " -> new_node entry " << j << std::endl;
+    //print();
     new_node->entries_.at(j) = std::move(node->entries_.at(i));
-    --i;
+    new_node->children_.at(j) = std::move(node->children_.at(i));
   }
 
-  if (insertion_index == half_index) {
-    new_node->entries_.at(insertion_index) = entry;
-  }
-  
   node->next_index_ = half_;
   new_node->next_index_ = half_ + (even_M_ ? 0 : 1);
 
-  std::cout << "node: "; node->print();
-  std::cout << "new_node: "; new_node->print();
-  print();
+  //std::cout << "Split: node = "; node->print(); std::cout << std::endl;
+  //std::cout << "Split: new_node = "; new_node->print(); std::cout << std::endl;
 
   return std::make_pair(new_node, mid);
-}
-
-template<class _Key, class _Data, size_t _M>
-std::pair<size_t, bool> BTree<_Key, _Data, _M>::replace_if(BTreeNode* node,
-  const std::pair<_Key, _Data>& entry)
-{
-  bool replaced = false;
-  // compute position in node
-  size_t insertion_index = this->lower_bound_index(entry.first,
-    node->entries_.cbegin(), (is_full(node) ? node->entries_.cend() : node->entries_.cbegin() + node->next_index_)
-  );
-
-  // check for duplicate key
-  if ((insertion_index < node->entries_.size()) &&
-      (node->entries_.at(insertion_index).first == entry.first)) 
-  {
-    node->entries_.at(insertion_index).second = entry.second;
-    replaced = true;
-  }
-
-  return std::make_pair(insertion_index, replaced);
-}
-
-template<class _Key, class _Data, size_t _M>
-void BTree<_Key, _Data, _M>::update_mid(std::pair<_Key, _Data>& mid,
-  std::pair<_Key, _Data>& node_entry, const std::pair<_Key, _Data>& entry)
-{
-  std::cout << "update: " << mid.first << " -> " << node_entry.first << ", " << node_entry.first << " -> " << entry.first << std::endl;
-  mid = node_entry;
-  node_entry = entry;
 }
 
 template<class _Key, class _Data, size_t _M>
@@ -243,82 +178,81 @@ template<class _Key, class _Data, size_t _M>
 void BTree<_Key, _Data, _M>::insert(
   const _Key& key, const _Data& data)
 {
-  std::cout << "Inserting (" << key << ", " << data << ")" << std::endl;
+  //std::cout << "Inserting (" << key << ", " << data << ")" << std::endl;
   std::pair<_Key, _Data> new_entry = std::make_pair(key, data);
-  insert(root_, new_entry);
+
+  std::pair<BTreeNode*, std::pair<_Key, _Data>> last = insert(root_, new_entry);
+  
+  // need to split the root node
+  //std::cout << "root_->next_index_ = " << root_->next_index_ << std::endl;
+  if (last.first != nullptr) {
+    //std::cout << "Root is split: "; root_->print(); std::cout << std::endl;
+    BTreeNode* new_root = new BTreeNode();
+
+    new_root->entries_.at(0) = last.second;
+    new_root->children_.at(0) = root_;
+    new_root->children_.at(1) = last.first;
+    new_root->next_index_ = 1;
+    ++size_;
+
+    root_ = new_root;
+  }
 }
 
 // TODO: beautify signature (return type)
 template<class _Key, class _Data, size_t _M>
 typename std::pair<typename BTree<_Key, _Data, _M>::BTreeNode*, std::pair<_Key, _Data>> BTree<_Key, _Data, _M>::insert(
-  BTreeNode* node, const std::pair<_Key, _Data>& entry)
+  BTreeNode* node, std::pair<_Key, _Data>& entry)
 { 
-  std::pair<BTreeNode*, std::pair<_Key, _Data>> propagated(node, entry);
-  std::pair<size_t, bool> replace{};
-  size_t insertion_index = 0;
+  int i = 0;
+  std::pair<BTreeNode*, std::pair<_Key, _Data>> propagate;
+  // TODO: optimize search range
+  size_t insertion_index = lower_bound_index(entry.first,
+    node->entries_.cbegin(), node->entries_.cbegin() + node->next_index_
+  );
 
-  replace = replace_if(node, entry);
-  if (replace.second) {
-    return std::make_pair(nullptr, std::make_pair(_Key{}, _Data{}));
+  //std::cout << "insertion_index = " << insertion_index << std::endl;
+
+  // duplicate
+  if (node->entries_.at(insertion_index).first == entry.first) {
+    node->entries_.at(insertion_index).second = entry.second;
+    return propagate;
   }
 
-  if (!is_leaf(node)) {
-    // go down one level in the tree (in the correct branch)
-    insertion_index = replace.first;
-    propagated = insert(node->children_.at(insertion_index), entry);
-  }
+  if (!node->leaf()) {
+    propagate = insert(node->children_.at(insertion_index), entry);
 
-  bool propagate = (propagated.first != nullptr);
-  // no further propagation necessary
-  if (!propagate) {
-    return std::make_pair(nullptr, std::make_pair(_Key{}, _Data{}));
-  }
-  
-  if (is_full(node)) {
-    //std::cout << "Is full" << ", next_index_ = " << node->next_index_ << ", size() = " << node->entries_.size() << std::endl;
-    std::pair<BTreeNode*, std::pair<_Key, _Data>> splitted = split(node,
-      propagated.second, propagated.first
-    );
-
-    // Am I the root node?
-    if (node == root_) {
-      BTreeNode* new_root = new BTreeNode();
-
-      new_root->entries_.at(0) = splitted.second;
-      new_root->children_.at(0) = node;
-      //std::cout << "splitted.first: "; splitted.first->print();
-      new_root->children_.at(1) = splitted.first;
-      new_root->next_index_ = 1;
-      ++size_;
-
-      root_ = new_root;
-      return std::make_pair(nullptr, std::make_pair(_Key{}, _Data{}));
-    }
-      
-    return splitted;
-  }
-
-  // recompute position in node
-  replace = replace_if(node, propagated.second);
-  if (replace.second) {
-    return std::make_pair(nullptr, std::make_pair(_Key{}, _Data{}));
-  }
-
-  // enough space; insertion in between -> shift remaining by 1 to the right
-  insertion_index = replace.first;
-  if (insertion_index < node->next_index_) {
-    std::cout << "Shifting: " << insertion_index << std::endl;
-    for (int i = node->next_index_ - 1; i >= 0 && i >= insertion_index; --i) {
-      std::cout << "i = " << i << " -> " << i + 1 << std::endl;
-      node->entries_.at(i + 1) = std::move(node->entries_.at(i));
-      node->children_.at(i + 2) = std::move(node->children_.at(i + 1));
+    if (propagate.first == nullptr) {
+      return propagate;
     }
   }
 
-  node->entries_.at(insertion_index) = propagated.second;
-  node->children_.at(insertion_index + 1) = propagated.first;
-  ++size_;
-  ++node->next_index_; // adjust search range in node
+  for (i = node->next_index_ - 1; i >= static_cast<int>(insertion_index); --i) {
+    //std::cout << "Relocating: " << i + 1 << " -> " << i << std::endl;
+
+    node->entries_.at(i + 1) = std::move(node->entries_.at(i));
+    node->children_.at(i + 2) = std::move(node->children_.at(i + 1));
+  }
+
+  if (propagate.first != nullptr) {
+    //std::cout << "propagation of (" << propagate.second.first << ", "; propagate.first->print(); std::cout << ") insertion_index = " << insertion_index << std::endl;
+
+    node->entries_.at(insertion_index) = propagate.second;
+    node->children_.at(insertion_index + 1) = propagate.first;
+  } else {
+    node->entries_.at(insertion_index) = entry;
+  }
+
+  ++node->next_index_;
+  //++size_;
+
+  //std::cout << "Node: "; node->print(); std::cout << std::endl;
+
+  if (node->full()) {
+    //std::cout << "Full: "; node->print(); std::cout << std::endl;
+
+    return split(node, entry);
+  }  
 
   return std::make_pair(nullptr, std::make_pair(_Key{}, _Data{}));
 }
@@ -352,16 +286,6 @@ size_t BTree<_Key, _Data, _M>::size() const {
   return size_;
 }
 
-template<class _Key, class _Data, size_t _M>
-bool BTree<_Key, _Data, _M>::is_leaf(const BTreeNode* node) const {
-  return (node->children_.at(0) == nullptr);
-}
-
-template<class _Key, class _Data, size_t _M>
-bool BTree<_Key, _Data, _M>::is_full(const BTreeNode* node) const {
-  return (node->next_index_ >= node->entries_.size());
-}
-
 // debug, remove once tests succeed (or replace by operator<<)
 template<class _Key, class _Data, size_t _M>
 void BTree<_Key, _Data, _M>::print() const {
@@ -372,15 +296,19 @@ void BTree<_Key, _Data, _M>::print() const {
 
 // debug, remove once tests succeed and print() is removed
 template<class _Key, class _Data, size_t _M>
-void BTree<_Key, _Data, _M>::print(BTreeNode* root, int level) const {
+void BTree<_Key, _Data, _M>::print(BTreeNode* node, int level) const {
+  if (node == nullptr) {
+    return;
+  }
+
   for (int i = 0; i < level; ++i) {
     std::cout << "  ";
   }
-  root->print();
+  node->print(); std::cout << std::endl;
   
-  if (!is_leaf(root)) {
-    for (int i = 0; i <= root->next_index_; ++i) {
-      print(root->children_.at(i), level + 1);
+  if (!node->leaf()) {
+    for (int i = 0; i <= node->next_index_; ++i) {
+      print(node->children_.at(i), level + 1);
     }
   }
 }
