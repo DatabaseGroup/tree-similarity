@@ -175,20 +175,20 @@ data_structures::Array2D<double>* compute_strategy_right_to_left_preorder(
   int tree2_size = tree_info_array_2->subtree_size;
   int lv, lw; // left-to-right-preorder of node v and w (we iterate over v and w in right-to-left-preorder)
   double min_cost, tmp_cost, min_path = -1;
-  data_structures::Stack<unsigned long*> reusable_rows_l; // calls default constructor even without parentheses
-  data_structures::Stack<unsigned long*> reusable_rows_r;
-  data_structures::Stack<unsigned long*> reusable_rows_i;
+  data_structures::Stack<long*> reusable_rows_l; // calls default constructor even without parentheses
+  data_structures::Stack<long*> reusable_rows_r;
+  data_structures::Stack<long*> reusable_rows_i;
 
   // Algorithm 1 in APTED
   // Lines 1-4 Prepare arrays (initiate leafrow with 0s)
   data_structures::Array2D<double>* str = new data_structures::Array2D<double>(tree1_size, tree2_size); // allocate memory for the strategy matrix
-  unsigned long** l1 = new unsigned long*[tree1_size]{NULL}; // allocate memory for the cost matrices
-  unsigned long** r1 = new unsigned long*[tree1_size]{NULL}; // assign to NULL to be able to check if a row is already allocated
-  unsigned long** i1 = new unsigned long*[tree1_size]{NULL};
-  unsigned long* l2 = new unsigned long[tree2_size];
-  unsigned long* r2 = new unsigned long[tree2_size];
-  unsigned long* i2 = new unsigned long[tree2_size];
-  unsigned long* leaf_row = new unsigned long[tree2_size]{};
+  long** l1 = new long*[tree1_size]{NULL}; // allocate memory for the cost matrices
+  long** r1 = new long*[tree1_size]{NULL}; // assign to NULL to be able to check if a row is already allocated
+  long** i1 = new long*[tree1_size]{NULL};
+  long* l2 = new long[tree2_size];
+  long* r2 = new long[tree2_size];
+  long* i2 = new long[tree2_size];
+  long* leaf_row = new long[tree2_size]{};
   int* path2 = new int[tree2_size];
 
   // Line 5: outer loop, traverses over left hand tree in right to left preorder
@@ -196,25 +196,35 @@ data_structures::Array2D<double>* compute_strategy_right_to_left_preorder(
     lv = tree_info_array_1[v].r_to_l;
     // Line 6 and 7: dynamic (de)allocation
     if(tree_info_array_1[lv].subtree_size == 1) { // Line 6: if v is a leave, assign leave_row-pointer to cost-row-pointers
-      std::cout << "v[" << lv << "] is a leave. cost rows assigned to leaverow." << std::endl;
+      //std::cout << "v[" << lv << "] is a leave. cost rows assigned to leaverow." << std::endl;
       l1[lv] = r1[lv] = i1[lv] = leaf_row; // no allocation needed, beacuse we can use the allocated space of leave_row - fewer space needed
       for(int i = 0; i < tree2_size; ++i) {
         (*str)[lv][i] = -1; // TODO correct path_id going through lv
       }
     }
     if(tree_info_array_1[lv].parent_id != -1 && l1[tree_info_array_1[lv].parent_id] == NULL) { // Line 7: if row for parent of v is not allocated, allocate cost rows for parent
-      std::cout << "parent row of v[" << lv << "] is not allocated. ";
+      //std::cout << "parent row of v[" << lv << "] is not allocated. ";
       if(reusable_rows_l.isEmpty()) {
-        std::cout << "is being allocated now beacuse stack is empty." << std::endl;
-        l1[tree_info_array_1[lv].parent_id] = new unsigned long[tree2_size];
-        r1[tree_info_array_1[lv].parent_id] = new unsigned long[tree2_size];
-        i1[tree_info_array_1[lv].parent_id] = new unsigned long[tree2_size];
+        //std::cout << "is being allocated now beacuse stack is empty." << std::endl;
+        l1[tree_info_array_1[lv].parent_id] = new long[tree2_size]{0};
+        r1[tree_info_array_1[lv].parent_id] = new long[tree2_size]{0};
+        i1[tree_info_array_1[lv].parent_id] = new long[tree2_size]{0};
       } else {
-        std::cout << "uses row from stack." << std::endl;
+        //std::cout << "uses row from stack." << std::endl;
         l1[tree_info_array_1[lv].parent_id] = reusable_rows_l.pop();
         r1[tree_info_array_1[lv].parent_id] = reusable_rows_r.pop();
         i1[tree_info_array_1[lv].parent_id] = reusable_rows_i.pop();
+        for(int i = 0; i < tree2_size; ++i) {
+          l1[tree_info_array_1[lv].parent_id][i] = 0;
+          r1[tree_info_array_1[lv].parent_id][i] = 0;
+          i1[tree_info_array_1[lv].parent_id][i] = 0;
+        }
       }
+    }
+    for(int i = 0; i < tree2_size; ++i) {
+      l2[i] = 0;
+      r2[i] = 0;
+      i2[i] = 0;
     }
     // Line 8: inner loop, traverses over right hand tree in right to left preorder
     for(int w = tree2_size -1; w >= 0; --w) { // Line 8: inner loop
@@ -229,57 +239,51 @@ data_structures::Array2D<double>* compute_strategy_right_to_left_preorder(
       min_path = -1; // left_path_tree1
       tmp_cost = tree_info_array_1[lv].subtree_size * tree_info_array_2[lw].right_decomp_size + r1[lv][lw];
       if(tmp_cost < min_cost) {
-        if(v == 0 && w == 0) {
-          root_min_path = "r1";
-        }
+        root_min_path = "r1";
         min_cost = tmp_cost;
         min_path = -1; // right_path_tree1
       }
       tmp_cost = tree_info_array_1[lv].subtree_size * tree_info_array_2[lw].full_decomp_size + i1[lv][lw];
       if(tmp_cost < min_cost) {
-        if(v == 0 && w == 0) {
-          root_min_path = "i1";
-        }
+        root_min_path = "i1";
         min_cost = tmp_cost;
         min_path = -1; // inner_path_tree1
       }
       tmp_cost = tree_info_array_2[lw].subtree_size * tree_info_array_1[lv].left_decomp_size + l2[lw];
       if(tmp_cost < min_cost) {
-        if(v == 0 && w == 0) {
-          root_min_path = "l2";
-        }
+        root_min_path = "l2";
         min_cost = tmp_cost;
         min_path = -1; // left_path_tree2
       }
       tmp_cost = tree_info_array_2[lw].subtree_size * tree_info_array_1[lv].right_decomp_size + r2[lw];
       if(tmp_cost < min_cost) {
-        if(v == 0 && w == 0) {
-          root_min_path = "r2";
-        }
+        root_min_path = "r2";
         min_cost = tmp_cost;
         min_path = -1; // right_path_tree2
       }
       tmp_cost = tree_info_array_2[lw].subtree_size * tree_info_array_1[lv].full_decomp_size + i2[lw];
       if(tmp_cost < min_cost) {
-        if(v == 0 && w == 0) {
-          root_min_path = "i2";
-        }
+        root_min_path = "i2";
         min_cost = tmp_cost;
         min_path = -1; // inner_path_tree2
       }
-      if(v == 0 && w == 0) {
-        std::cout << "root_min_path: " << root_min_path << std::endl;
-      }
+      std::cout << "min_cost and min_path for preorder_node " << lv << ": " << min_cost << ", " << root_min_path << std::endl;
+
       // Line 17-36: update parents
       if(tree_info_array_1[lv].parent_id != -1) { // Line 17: if v is not root then
         r1[tree_info_array_1[lv].parent_id][lw] += min_cost; // Line 18
         tmp_cost = -min_cost + i1[lv][lw]; // Line 19
+        // std::cout << "tmp_cost after Line 19: " << tmp_cost << std::endl;
+        // std::cout << "compared to the following value in Line 20: " << i1[tree_info_array_1[lv].parent_id][lw] << std::endl;
         if(tmp_cost < i1[tree_info_array_1[lv].parent_id][lw]) { // Line 20
+          // std::cout << "i1[" << tree_info_array_1[lv].parent_id << "][" << lw << "] is being set to: " << tmp_cost << " by " << "[" << lv << "][" << lw << "] (Line 21)" << std::endl;
           i1[tree_info_array_1[lv].parent_id][lw] = tmp_cost; // Line 21
           (*str)[tree_info_array_1[lv].parent_id][lw] = (*str)[lv][lw]; // Line 22
         }
         if((v - tree_info_array_1[tree_info_array_1[lv].parent_id].l_to_r) == 1) { // Line 23 TODO can be computed outside of inner loop
+          // std::cout << "i1[" << tree_info_array_1[lv].parent_id << "][" << lw << "] is being increased by: " << r1[tree_info_array_1[lv].parent_id][lw] << std::flush;
           i1[tree_info_array_1[lv].parent_id][lw] += r1[tree_info_array_1[lv].parent_id][lw]; // Line 24
+          // std::cout << " and is now: " << i1[tree_info_array_1[lv].parent_id][lw] << " (Line 24)" << std::endl << std::flush;
           r1[tree_info_array_1[lv].parent_id][lw] += (r1[lv][lw] - min_cost); // Line 25
         }
         l1[tree_info_array_1[lv].parent_id][lw] += (((lv - tree_info_array_1[lv].parent_id) == 1) ? l1[lv][lw] : min_cost); // Line 26
@@ -291,17 +295,20 @@ data_structures::Array2D<double>* compute_strategy_right_to_left_preorder(
           i2[tree_info_array_2[lw].parent_id] = tmp_cost; // Line 31
           path2[tree_info_array_2[lw].parent_id] = path2[lw]; // Line 32
         }
-        if((w - tree_info_array_2[tree_info_array_2[w].parent_id].l_to_r) == 1) { // Line 33
+        if((w - tree_info_array_2[tree_info_array_2[lw].parent_id].l_to_r) == 1) { // Line 33
           i2[tree_info_array_2[lw].parent_id] += r2[tree_info_array_2[lw].parent_id]; // Line 34
           r2[tree_info_array_2[lw].parent_id] += (r2[lw] - min_cost); // Line 35
         }
-        l2[tree_info_array_2[lw].parent_id] += (((lw - tree_info_array_2[lw].parent_id) == 1) ? l2[lw] : min_cost); // Line 36 TODO check
+        l2[tree_info_array_2[lw].parent_id] += (((lw - tree_info_array_2[lw].parent_id) == 1) ? l2[lw] : min_cost); // Line 36
       }
       (*str)[lv][lw] = min_path; // Line 37: write path that maps to the minimun cost into the strategy matrix at [v,w]
+      if(v == 0 && w == 0) {
+        std::cout << "min_cost of root node is: " << min_cost << std::endl;
+      }
     }
     // Line 38: dynamic deallocation
     if(tree_info_array_1[lv].subtree_size != 1) { // Line 38: if v is not a leaf node then deallocate the row of v in left, right and inner cost matrices
-      std::cout << "v[" << lv << "] is not a leave. its rows are being deallocated now." << std::endl;
+      //std::cout << "v[" << lv << "] is not a leave. its rows are being deallocated now." << std::endl;
       reusable_rows_l.push(l1[lv]);
       reusable_rows_r.push(r1[lv]);
       reusable_rows_i.push(i1[lv]);
