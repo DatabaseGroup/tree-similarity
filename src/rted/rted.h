@@ -224,32 +224,51 @@ data_structures::Array2D<double>* compute_strategy_right_to_left_preorder(
         path2[lw] = -1; // TODO correct path_id going through lw
       }
       // Line 10-16: get cost-path pairs (6: left, inner, right for both F and G) and determine minimum cost and path
+      std::string root_min_path = "l1";
       min_cost = tree_info_array_1[lv].subtree_size * tree_info_array_2[lw].left_decomp_size + l1[lv][lw];
       min_path = -1; // left_path_tree1
       tmp_cost = tree_info_array_1[lv].subtree_size * tree_info_array_2[lw].right_decomp_size + r1[lv][lw];
       if(tmp_cost < min_cost) {
+        if(v == 0 && w == 0) {
+          root_min_path = "r1";
+        }
         min_cost = tmp_cost;
         min_path = -1; // right_path_tree1
       }
       tmp_cost = tree_info_array_1[lv].subtree_size * tree_info_array_2[lw].full_decomp_size + i1[lv][lw];
       if(tmp_cost < min_cost) {
+        if(v == 0 && w == 0) {
+          root_min_path = "i1";
+        }
         min_cost = tmp_cost;
         min_path = -1; // inner_path_tree1
       }
-      tmp_cost = tree_info_array_2[lw].subtree_size * tree_info_array_1[lw].left_decomp_size + l2[lw];
+      tmp_cost = tree_info_array_2[lw].subtree_size * tree_info_array_1[lv].left_decomp_size + l2[lw];
       if(tmp_cost < min_cost) {
+        if(v == 0 && w == 0) {
+          root_min_path = "l2";
+        }
         min_cost = tmp_cost;
         min_path = -1; // left_path_tree2
       }
-      tmp_cost = tree_info_array_2[lw].subtree_size * tree_info_array_1[lw].right_decomp_size + r2[lw];
+      tmp_cost = tree_info_array_2[lw].subtree_size * tree_info_array_1[lv].right_decomp_size + r2[lw];
       if(tmp_cost < min_cost) {
+        if(v == 0 && w == 0) {
+          root_min_path = "r2";
+        }
         min_cost = tmp_cost;
         min_path = -1; // right_path_tree2
       }
-      tmp_cost = tree_info_array_2[lw].subtree_size * tree_info_array_1[lw].full_decomp_size + i2[lw];
+      tmp_cost = tree_info_array_2[lw].subtree_size * tree_info_array_1[lv].full_decomp_size + i2[lw];
       if(tmp_cost < min_cost) {
+        if(v == 0 && w == 0) {
+          root_min_path = "i2";
+        }
         min_cost = tmp_cost;
         min_path = -1; // inner_path_tree2
+      }
+      if(v == 0 && w == 0) {
+        std::cout << "root_min_path: " << root_min_path << std::endl;
       }
       // Line 17-36: update parents
       if(tree_info_array_1[lv].parent_id != -1) { // Line 17: if v is not root then
@@ -259,20 +278,20 @@ data_structures::Array2D<double>* compute_strategy_right_to_left_preorder(
           i1[tree_info_array_1[lv].parent_id][lw] = tmp_cost; // Line 21
           (*str)[tree_info_array_1[lv].parent_id][lw] = (*str)[lv][lw]; // Line 22
         }
-        if((v - tree_info_array_1[v].parent_id) == 1) { // Line 23 TODO check if correct
+        if((v - tree_info_array_1[tree_info_array_1[lv].parent_id].l_to_r) == 1) { // Line 23 TODO can be computed outside of inner loop
           i1[tree_info_array_1[lv].parent_id][lw] += r1[tree_info_array_1[lv].parent_id][lw]; // Line 24
           r1[tree_info_array_1[lv].parent_id][lw] += (r1[lv][lw] - min_cost); // Line 25
         }
-        l1[tree_info_array_1[lv].parent_id][lw] += (((lv - tree_info_array_1[lv].parent_id) == 1) ? l1[lv][lw] : min_cost); // Line 26 TODO check
+        l1[tree_info_array_1[lv].parent_id][lw] += (((lv - tree_info_array_1[lv].parent_id) == 1) ? l1[lv][lw] : min_cost); // Line 26
       }
       if(tree_info_array_2[lw].parent_id != -1) { // Line 27: if w is not root then
-        r2[tree_info_array_1[lw].parent_id] += min_cost; // Line 28
+        r2[tree_info_array_2[lw].parent_id] += min_cost; // Line 28
         tmp_cost = -min_cost + i2[lw]; // Line 29
         if(tmp_cost < i2[tree_info_array_2[lw].parent_id]) { // Line 30
           i2[tree_info_array_2[lw].parent_id] = tmp_cost; // Line 31
           path2[tree_info_array_2[lw].parent_id] = path2[lw]; // Line 32
         }
-        if((w - tree_info_array_2[w].parent_id) == 1) { // Line 33 TODO check if correct
+        if((w - tree_info_array_2[tree_info_array_2[w].parent_id].l_to_r) == 1) { // Line 33
           i2[tree_info_array_2[lw].parent_id] += r2[tree_info_array_2[lw].parent_id]; // Line 34
           r2[tree_info_array_2[lw].parent_id] += (r2[lw] - min_cost); // Line 35
         }
