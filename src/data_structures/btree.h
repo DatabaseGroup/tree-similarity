@@ -79,14 +79,16 @@ private:
   };
 
 private:
+  typedef typename BTreeNode::EntriesType NodeEntriesType;
+  typedef typename NodeEntriesType::const_iterator NodeEntriesTypeIter;
+
   BTreeNode* root_{};
   size_t size_{};
   const size_t half_{};
   const bool even_M_{};
 
-  int lower_bound_index(const _Key& key,
-    typename BTreeNode::EntriesType::const_iterator begin,
-    typename BTreeNode::EntriesType::const_iterator end) const;
+  int lower_bound_index(const _Key& key, NodeEntriesTypeIter begin,
+    NodeEntriesTypeIter end) const;
   std::pair<BTreeNode*, std::pair<_Key, _Data>> insert(BTreeNode* node,
     std::pair<_Key, _Data>& entry);
   std::pair<BTreeNode*, std::pair<_Key, _Data>> split(
@@ -189,16 +191,14 @@ void BTree<_Key, _Data, _M>::print() const {
 
 template<class _Key, class _Data, size_t _M>
 int BTree<_Key, _Data, _M>::lower_bound_index(const _Key& key,
-  typename BTree<_Key, _Data, _M>::BTreeNode::EntriesType::const_iterator begin,
-  typename BTree<_Key, _Data, _M>::BTreeNode::EntriesType::const_iterator end) const
+  NodeEntriesTypeIter begin, NodeEntriesTypeIter end) const
 {
   // O(log n) in the size of the entries_ array
-  typename BTreeNode::EntriesType::const_iterator lower_bound =
-    std::lower_bound(begin, end, key,
-      [](const std::pair<_Key, _Data>& lhs, const _Key& rhs) -> bool {
-        return (lhs.first < rhs);
-      }
-    );
+  NodeEntriesTypeIter lower_bound = std::lower_bound(begin, end, key,
+    [](const std::pair<_Key, _Data>& lhs, const _Key& rhs) -> bool {
+      return (lhs.first < rhs);
+    }
+  );
 
   // return the index of the first element >= key
   return (lower_bound - begin);
