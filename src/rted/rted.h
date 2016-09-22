@@ -17,7 +17,7 @@ struct NodeInfo {
   int r_to_l; // indexed in postorder!
   //nodes::Node<_NodeData>* children; //Maybe change type later
   int full_decomp_size; // The number of subforests in the full decomposition of subtree rooted at this node (Lemma 5.1 in TODS paper)
-  int left_decomp_size; // The number of relevant subforests produced by a recursive path decomposition (Lemma 5.3 in TODS paper)
+  int left_decomp_size = 0; // The number of relevant subforests produced by a recursive path decomposition (Lemma 5.3 in TODS paper)
   int right_decomp_size = 0;
 };
 
@@ -69,22 +69,21 @@ double compute_rted(nodes::Node<_NodeData>* tree1, nodes::Node<_NodeData>* tree2
 
 // Returns the size of a given tree
 //
-// Params:  tree                      The root node of the tree of type nodes::Node<nodes::StringNodeData>*
-//          nodes_array_preorder      The array in which the nodes should be stored in preorder (size must be at least size of tree!)
-//          node_info_array_preorder  The array in which the node infos should be stored (size must be at least size of tree!) indexed in preorder
-//          total_tree_size           The size of the tree. Must be passed by the caller - should be get from get_tree_size function
-//          preorder_id               Internally needed parameter, do not overwrite!
-//          preorder_id_parent        Internally needed parameter, do not overwrite!
-//          sum_of_subtree_sizes      Internally needed parameter, do not overwrite!
-//          left_decomp_sum           Internally needed parameter, do not overwrite!
-//          postorder_id              Internally needed parameter, do not overwrite!
-//          is_rightmost_child        Internally needed parameter, do not overwrite!
+// Params:  tree                        The root node of the tree of type nodes::Node<nodes::StringNodeData>*
+//          nodes_array_preorder        The array in which the nodes should be stored in preorder (size must be at least size of tree!)
+//          node_info_array_preorder    The array in which the node infos should be stored (size must be at least size of tree!) indexed in preorder
+//          total_tree_size             The size of the tree. Must be passed by the caller - should be get from get_tree_size function
+//          preorder_id                 Internally needed parameter, do not overwrite!
+//          preorder_id_parent          Internally needed parameter, do not overwrite!
+//          sum_of_subtree_sizes        Internally needed parameter, do not overwrite!
+//          postorder_id                Internally needed parameter, do not overwrite!
+//          has_left_or_right_sibling   Internally needed parameter, do not overwrite! -1=left, 0=inner, 1=right, -2=no siblings
 // Return:  An integer which is the size of the subtree rooted at the given node
 // Throws:  A char const* with the error message or an std::exception
 template<class _NodeData = nodes::StringNodeData>
 int gather_tree_info(nodes::Node<_NodeData>* tree, NodeInfo<_NodeData>* node_info_array_preorder,
     int total_tree_size, int preorder_id = 0, int preorder_id_parent = -1, int* sum_of_subtree_sizes = new int(),
-    int* left_decomp_sum = new int(0), int* postorder_id = new int(0), bool is_rightmost_child = true) { //TODO *_decomp should be deleted anywhere (is on the heap)
+    int* postorder_id = new int(0), int has_left_or_right_sibling = -2) { //TODO *_decomp should be deleted anywhere (is on the heap)
 
   // Check if the arguments are valid
   if(!tree || !node_info_array_preorder || !total_tree_size) { // has to be checked, because otherwise there is a segfault below in the code
@@ -103,22 +102,22 @@ int gather_tree_info(nodes::Node<_NodeData>* tree, NodeInfo<_NodeData>* node_inf
 
     // iterate over the children
     for (auto node_it : tree->get_children()) {
-      // evaluating, whether the child called next is a rightmost child or not, to tell it the child via a parameter passed to the function
-      bool is_rightmost_child = true; // initially every child is assumed to be a rightmost child
-      if(tree->get_children_number() > 1 && node_it != tree->get_children().back()) { // check if the child for which the recursion is called next is not rightmost child
-        is_rightmost_child = false;
+      // evaluating, whether the child called next has left or right siblings, to tell it the child via a parameter passed to the function
+      int left_or_right_sibling = -2; // initially every child is assumed to have no siblings
+      if(tree->get_children_number() > 2 && (node_it != tree->get_children().front() && node_it != tree->get_children().back())) {
+        left_or_right_sibling = 0; // 0 stands for inner node (has both left and right siblings)
+      } else if(tree->get_children_number() > 1 && node_it != tree->get_children().front()) { // check if the child for which the recursion is called next has left siblings
+        left_or_right_sibling = -1; // -1 stands for has left siblings
+      } else if(tree->get_children_number() > 1 && node_it != tree->get_children().back()) {
+        left_or_right_sibling = 1; // 1 stands for has right siblings
       }
 
       // call the function recursively
       int child_subtree_size = gather_tree_info(node_it, node_info_array_preorder, total_tree_size, preorder_id + 1,
-        current_preorder_id, sum_of_subtree_sizes, left_decomp_sum, postorder_id, is_rightmost_child);
+        current_preorder_id, sum_of_subtree_sizes, postorder_id, left_or_right_sibling);
 
       // after coming back from the recursion, the following code is executed:
 
-      // check if the child for which the recursion was called last is a leftmost child and if it is, increase the left decomposition sum by the subtree size of the called child
-      if(tree->get_children_number() > 1 && node_it != tree->get_children().front()) {
-        (*left_decomp_sum) += child_subtree_size;
-      }
       preorder_id += child_subtree_size; // the preorder id must be increased by the number of nodes the last child contained, so when the next child is called, it is called with the right preorder id
       children_subtree_sizes += child_subtree_size; // the subtree size of the last child is summed up to the size of all children of the current node
       children_subtree_sizes_sum += (*sum_of_subtree_sizes); // the last subtree size sum is added to the sum of the last subtree size sum of the other child nodes
@@ -126,17 +125,28 @@ int gather_tree_info(nodes::Node<_NodeData>* tree, NodeInfo<_NodeData>* node_inf
 
     // after iterating over all children, the following code is executed:
 
-    // updating parents right decomposition cost
-    // passed to parent differently to left decomosition cost due to preorder traversal of the tree
-    if(is_rightmost_child == false) { // if I'm not a rightmost child - I update my parent with my current right decomposition value + my own subtree size
-      node_info_array_preorder[preorder_id_parent].right_decomp_size += node_info_array_preorder[current_preorder_id].right_decomp_size + children_subtree_sizes + 1;
-    } else if(preorder_id_parent > -1) { // even if I am a rightmost child, I update my parent with the other right decomposition sizes from my descendants but not with my own subtree size
-      node_info_array_preorder[preorder_id_parent].right_decomp_size += node_info_array_preorder[current_preorder_id].right_decomp_size;
+    // updating parents decomposition costs
+    if(preorder_id_parent > -1) {
+      if(has_left_or_right_sibling == 0) { // if I have both left and right siblings
+        node_info_array_preorder[preorder_id_parent].left_decomp_size += node_info_array_preorder[current_preorder_id].left_decomp_size + children_subtree_sizes + 1;
+        node_info_array_preorder[preorder_id_parent].right_decomp_size += node_info_array_preorder[current_preorder_id].right_decomp_size + children_subtree_sizes + 1;
+      } else {
+        if(has_left_or_right_sibling == -1) { // if I have left siblings - I update my parent with my current left decomposition value + my own subtree size
+          node_info_array_preorder[preorder_id_parent].left_decomp_size += node_info_array_preorder[current_preorder_id].left_decomp_size + children_subtree_sizes + 1;
+          node_info_array_preorder[preorder_id_parent].right_decomp_size += node_info_array_preorder[current_preorder_id].right_decomp_size;
+        } else if(has_left_or_right_sibling == 1) { // if I have right siblings - I update my parent with my current right decomposition value + my own subtree size
+          node_info_array_preorder[preorder_id_parent].right_decomp_size += node_info_array_preorder[current_preorder_id].right_decomp_size + children_subtree_sizes + 1;
+          node_info_array_preorder[preorder_id_parent].left_decomp_size += node_info_array_preorder[current_preorder_id].left_decomp_size;
+        } else { // if I have no siblings - I update my parent with my values only (left and right)
+          node_info_array_preorder[preorder_id_parent].left_decomp_size += node_info_array_preorder[current_preorder_id].left_decomp_size;
+          node_info_array_preorder[preorder_id_parent].right_decomp_size += node_info_array_preorder[current_preorder_id].right_decomp_size;
+        }
+      }
     }
 
     (*sum_of_subtree_sizes) = children_subtree_sizes_sum + children_subtree_sizes + 1; // setting the sum of the subtree sizes to the sum of the subtree sizes of all children plus my own subtree size (needed for full decomposition size)
     node_info_array_preorder[current_preorder_id].subtree_size = children_subtree_sizes + 1; // setting subtree size to the size of all subtrees plus the root node
-    node_info_array_preorder[current_preorder_id].left_decomp_size = (*left_decomp_sum) + children_subtree_sizes + 1; // setting left decomposition cost to the left decomposition sum of the last child plus own subtree size
+    node_info_array_preorder[current_preorder_id].left_decomp_size += children_subtree_sizes + 1; // setting left decomposition cost to the left decomposition sum of the last child plus own subtree size
     node_info_array_preorder[current_preorder_id].right_decomp_size += children_subtree_sizes + 1; // updating right decomposition cost - own subtree size added
     node_info_array_preorder[current_preorder_id].full_decomp_size = (((children_subtree_sizes + 1) * (children_subtree_sizes + 1 + 3)) / 2) - (*sum_of_subtree_sizes); // setting full decomposition cost - Lemma 5.1 of TODS
     node_info_array_preorder[current_preorder_id].l_to_r = total_tree_size - 1 - (*postorder_id);
@@ -149,10 +159,16 @@ int gather_tree_info(nodes::Node<_NodeData>* tree, NodeInfo<_NodeData>* node_inf
 
   // this code is executed if the current node is a leave
 
-  // updating parents right decomposition cost
-  // check if it's not a rightmost child and if so, add the right decomposition size of 1 to the right decomposition size of the parent
-  if(is_rightmost_child == false) {
-    node_info_array_preorder[preorder_id_parent].right_decomp_size += 1; // because node_info_array_preorder[current_preorder_id]->right_decomp_size is 1 when it's a leave - set below
+  // updating parents decomposition costs
+  if(preorder_id_parent > -1) {
+    if(has_left_or_right_sibling == -1) { // check if it has left children and if so, add the left decomposition size of 1 to the left decomposition size of the parent
+      node_info_array_preorder[preorder_id_parent].left_decomp_size += 1; // 1 for subtree size
+    } else if(has_left_or_right_sibling == 1) {
+      node_info_array_preorder[preorder_id_parent].right_decomp_size += 1;
+    } else if(has_left_or_right_sibling == 0) {
+      node_info_array_preorder[preorder_id_parent].left_decomp_size += 1;
+      node_info_array_preorder[preorder_id_parent].right_decomp_size += 1;
+    }
   }
 
   (*sum_of_subtree_sizes) = 1; // the sum of subtree sizes is reset to 1 if it's a leave
@@ -174,7 +190,8 @@ data_structures::Array2D<double>* compute_strategy_right_to_left_preorder(
   int tree1_size = tree_info_array_1->subtree_size; // store tree sizes
   int tree2_size = tree_info_array_2->subtree_size;
   int lv, lw; // left-to-right-preorder of node v and w (we iterate over v and w in right-to-left-preorder)
-  double min_cost, tmp_cost, min_path = -1;
+  long min_cost, tmp_cost;
+  long min_path = -1;
   data_structures::Stack<long*> reusable_rows_l; // calls default constructor even without parentheses
   data_structures::Stack<long*> reusable_rows_r;
   data_structures::Stack<long*> reusable_rows_i;
@@ -235,40 +252,44 @@ data_structures::Array2D<double>* compute_strategy_right_to_left_preorder(
       }
       // Line 10-16: get cost-path pairs (6: left, inner, right for both F and G) and determine minimum cost and path
       std::string root_min_path = "l1";
-      min_cost = tree_info_array_1[lv].subtree_size * tree_info_array_2[lw].left_decomp_size + l1[lv][lw];
+      min_cost = (long) tree_info_array_1[lv].subtree_size * (long) tree_info_array_2[lw].left_decomp_size + l1[lv][lw];
       min_path = -1; // left_path_tree1
-      tmp_cost = tree_info_array_1[lv].subtree_size * tree_info_array_2[lw].right_decomp_size + r1[lv][lw];
+      tmp_cost = (long) tree_info_array_1[lv].subtree_size * (long) tree_info_array_2[lw].right_decomp_size + r1[lv][lw];
       if(tmp_cost < min_cost) {
         root_min_path = "r1";
         min_cost = tmp_cost;
         min_path = -1; // right_path_tree1
       }
-      tmp_cost = tree_info_array_1[lv].subtree_size * tree_info_array_2[lw].full_decomp_size + i1[lv][lw];
+      tmp_cost = (long) tree_info_array_1[lv].subtree_size * (long) tree_info_array_2[lw].full_decomp_size + i1[lv][lw];
+      // if(lv == 284 && lw == 0) {
+      //   std::cout << "subtree size: " << tree_info_array_1[lv].subtree_size << ", " << tree_info_array_2[lw].full_decomp_size << ", " << i1[lv][lw] << std::endl;
+      // }
       if(tmp_cost < min_cost) {
         root_min_path = "i1";
         min_cost = tmp_cost;
         min_path = -1; // inner_path_tree1
       }
-      tmp_cost = tree_info_array_2[lw].subtree_size * tree_info_array_1[lv].left_decomp_size + l2[lw];
+      tmp_cost = (long) tree_info_array_2[lw].subtree_size * (long) tree_info_array_1[lv].left_decomp_size + l2[lw];
       if(tmp_cost < min_cost) {
         root_min_path = "l2";
         min_cost = tmp_cost;
         min_path = -1; // left_path_tree2
       }
-      tmp_cost = tree_info_array_2[lw].subtree_size * tree_info_array_1[lv].right_decomp_size + r2[lw];
+      tmp_cost = (long) tree_info_array_2[lw].subtree_size * (long) tree_info_array_1[lv].right_decomp_size + r2[lw];
       if(tmp_cost < min_cost) {
         root_min_path = "r2";
         min_cost = tmp_cost;
         min_path = -1; // right_path_tree2
       }
-      tmp_cost = tree_info_array_2[lw].subtree_size * tree_info_array_1[lv].full_decomp_size + i2[lw];
+      tmp_cost = (long) tree_info_array_2[lw].subtree_size * (long) tree_info_array_1[lv].full_decomp_size + i2[lw];
       if(tmp_cost < min_cost) {
         root_min_path = "i2";
         min_cost = tmp_cost;
         min_path = -1; // inner_path_tree2
       }
-      std::cout << "min_cost and min_path for preorder_node " << lv << ": " << min_cost << ", " << root_min_path << std::endl;
-
+      // if(min_cost < 0) {
+      //   std::cout << "min_cost and min_path for node pair " << lv << "," << lw <<": " << (long) min_cost << ", " << root_min_path << std::endl;
+      // }
       // Line 17-36: update parents
       if(tree_info_array_1[lv].parent_id != -1) { // Line 17: if v is not root then
         r1[tree_info_array_1[lv].parent_id][lw] += min_cost; // Line 18
@@ -285,6 +306,9 @@ data_structures::Array2D<double>* compute_strategy_right_to_left_preorder(
           i1[tree_info_array_1[lv].parent_id][lw] += r1[tree_info_array_1[lv].parent_id][lw]; // Line 24
           // std::cout << " and is now: " << i1[tree_info_array_1[lv].parent_id][lw] << " (Line 24)" << std::endl << std::flush;
           r1[tree_info_array_1[lv].parent_id][lw] += (r1[lv][lw] - min_cost); // Line 25
+          if(i1[tree_info_array_1[lv].parent_id][lw] < 0 || r1[tree_info_array_1[lv].parent_id][lw] < 0) {
+            throw "r1 or i1 is negative!";
+          }
         }
         l1[tree_info_array_1[lv].parent_id][lw] += (((lv - tree_info_array_1[lv].parent_id) == 1) ? l1[lv][lw] : min_cost); // Line 26
       }
@@ -298,12 +322,15 @@ data_structures::Array2D<double>* compute_strategy_right_to_left_preorder(
         if((w - tree_info_array_2[tree_info_array_2[lw].parent_id].l_to_r) == 1) { // Line 33
           i2[tree_info_array_2[lw].parent_id] += r2[tree_info_array_2[lw].parent_id]; // Line 34
           r2[tree_info_array_2[lw].parent_id] += (r2[lw] - min_cost); // Line 35
+          if(i2[tree_info_array_2[lw].parent_id] < 0 || i2[tree_info_array_2[lw].parent_id] < 0) {
+            throw "r2 or i2 is negative!";
+          }
         }
         l2[tree_info_array_2[lw].parent_id] += (((lw - tree_info_array_2[lw].parent_id) == 1) ? l2[lw] : min_cost); // Line 36
       }
       (*str)[lv][lw] = min_path; // Line 37: write path that maps to the minimun cost into the strategy matrix at [v,w]
       if(v == 0 && w == 0) {
-        std::cout << "min_cost of root node is: " << min_cost << std::endl;
+        std::cout << "min_cost: " << min_cost << std::endl;
       }
     }
     // Line 38: dynamic deallocation

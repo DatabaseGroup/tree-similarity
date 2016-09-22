@@ -13,6 +13,10 @@ int main (int argc, char* argv[]) {
     std::cout << "TODO print a help message" << std::endl;
     return 0;
   }
+  // passing too big trees from command line could exceed the stack size and cause
+  // a stack overflow because argv and argc are passed like normal function
+  // parameters via the stack - get the maximum argument length under linux via
+  // $ getconf ARG_MAX
   if(argv[1] == std::string("--apted")){ // option to test apted
     // variables needed for parser functions to create trees
     parser::LabelIDMap hashtable_label_to_id;
@@ -35,7 +39,7 @@ int main (int argc, char* argv[]) {
       rted::gather_tree_info(test_tree2, tree_info_array_preorder2, tree2_size);
 
       //printing
-      std::cout << "\nposition:label" << std::endl;
+      /*std::cout << "\nposition:label" << std::endl;
       for(int i = 0; i < tree1_size; i++) { //printing preordered nodes array in form position:label
         std::cout << i << ":" << tree_info_array_preorder1[i].nodeData->get_label() << " | " << std::flush;
       }
@@ -83,7 +87,7 @@ int main (int argc, char* argv[]) {
       }
       std::cout << std::endl;
 
-      std::cout << std::endl << std::endl << "rted is being invoked." << std::endl << std::endl;
+      std::cout << std::endl << std::endl << "rted is being invoked." << std::endl << std::endl;*/
 
       rted::compute_rted(test_tree1, test_tree2); //TODO test with costs
 
