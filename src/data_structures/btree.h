@@ -121,45 +121,6 @@ public:
 };
 
 template<class _Key, class _Data, size_t _M>
-int BTree<_Key, _Data, _M>::lower_bound_index(const _Key& key,
-  typename BTree<_Key, _Data, _M>::BTreeNode::EntriesType::const_iterator begin,
-  typename BTree<_Key, _Data, _M>::BTreeNode::EntriesType::const_iterator end) const
-{
-  // O(log n) in the size of the entries_ array
-  typename BTreeNode::EntriesType::const_iterator lower_bound =
-    std::lower_bound(begin, end, key,
-      [](const std::pair<_Key, _Data>& lhs, const _Key& rhs) -> bool {
-        return (lhs.first < rhs);
-      }
-    );
-
-  // return the index of the first element >= key
-  return (lower_bound - begin);
-}
-
-// TODO: beautify signature (return type)
-template<class _Key, class _Data, size_t _M>
-typename std::pair<typename BTree<_Key, _Data, _M>::BTreeNode*, std::pair<_Key, _Data>> BTree<_Key, _Data, _M>::split(
-  BTreeNode* node, const std::pair<_Key, _Data>& entry)
-{
-  std::pair<_Key, _Data>& mid = node->entries_.at(half_);
-  BTreeNode* new_node = new BTreeNode();
-  int i = 0, j = 0;
-  int j_begin = half_ - (even_M_ ? 1 : 0);
-
-  new_node->children_.at(j_begin + 1) = std::move(node->children_.at(node->next_index_));
-  for (j = j_begin, i = node->next_index_ - 1; i > half_; --i, --j) {
-    new_node->entries_.at(j) = std::move(node->entries_.at(i));
-    new_node->children_.at(j) = std::move(node->children_.at(i));
-  }
-
-  node->next_index_ = half_;
-  new_node->next_index_ = half_ + (even_M_ ? 0 : 1);
-
-  return std::make_pair(new_node, mid);
-}
-
-template<class _Key, class _Data, size_t _M>
 BTree<_Key, _Data, _M>::BTree() : size_(0), half_(std::floor(_M / 2)),
   root_(new BTreeNode()), even_M_(_M % 2 == 0) { }
 
@@ -186,6 +147,61 @@ void BTree<_Key, _Data, _M>::insert(const _Key& key, const _Data& data) {
 
     root_ = new_root;
   }
+}
+
+template<class _Key, class _Data, size_t _M>
+std::pair<_Key, _Data> BTree<_Key, _Data, _M>::search(const _Key& key) const {
+  return search(root_, key);
+}
+
+template<class _Key, class _Data, size_t _M>
+void BTree<_Key, _Data, _M>::remove(const _Key& key) {
+  if (empty()) {
+    return; // TODO: exception
+  }
+
+  --size_;
+  BTreeNode* propagate = remove(root_, key);
+
+  if ((propagate != nullptr) && (root_->next_index_ == 0)) {
+    //delete root_;
+    root_ = propagate;
+  }
+}
+
+template<class _Key, class _Data, size_t _M>
+bool BTree<_Key, _Data, _M>::empty() const {
+  return (size_ <= 0);
+}
+
+template<class _Key, class _Data, size_t _M>
+size_t BTree<_Key, _Data, _M>::size() const {
+  return size_;
+}
+
+// debug, remove once tests succeed (or replace by operator<<)
+template<class _Key, class _Data, size_t _M>
+void BTree<_Key, _Data, _M>::print() const {
+  std::cout << "Tree size: " << size_ << std::endl;
+  print(root_, 0);
+  std::cout << std::endl;
+}
+
+template<class _Key, class _Data, size_t _M>
+int BTree<_Key, _Data, _M>::lower_bound_index(const _Key& key,
+  typename BTree<_Key, _Data, _M>::BTreeNode::EntriesType::const_iterator begin,
+  typename BTree<_Key, _Data, _M>::BTreeNode::EntriesType::const_iterator end) const
+{
+  // O(log n) in the size of the entries_ array
+  typename BTreeNode::EntriesType::const_iterator lower_bound =
+    std::lower_bound(begin, end, key,
+      [](const std::pair<_Key, _Data>& lhs, const _Key& rhs) -> bool {
+        return (lhs.first < rhs);
+      }
+    );
+
+  // return the index of the first element >= key
+  return (lower_bound - begin);
 }
 
 // TODO: beautify signature (return type)
@@ -236,9 +252,26 @@ typename std::pair<typename BTree<_Key, _Data, _M>::BTreeNode*, std::pair<_Key, 
   return std::make_pair(nullptr, std::make_pair(_Key{}, _Data{}));
 }
 
+// TODO: beautify signature (return type)
 template<class _Key, class _Data, size_t _M>
-std::pair<_Key, _Data> BTree<_Key, _Data, _M>::search(const _Key& key) const {
-  return search(root_, key);
+typename std::pair<typename BTree<_Key, _Data, _M>::BTreeNode*, std::pair<_Key, _Data>> BTree<_Key, _Data, _M>::split(
+  BTreeNode* node, const std::pair<_Key, _Data>& entry)
+{
+  std::pair<_Key, _Data>& mid = node->entries_.at(half_);
+  BTreeNode* new_node = new BTreeNode();
+  int i = 0, j = 0;
+  int j_begin = half_ - (even_M_ ? 1 : 0);
+
+  new_node->children_.at(j_begin + 1) = std::move(node->children_.at(node->next_index_));
+  for (j = j_begin, i = node->next_index_ - 1; i > half_; --i, --j) {
+    new_node->entries_.at(j) = std::move(node->entries_.at(i));
+    new_node->children_.at(j) = std::move(node->children_.at(i));
+  }
+
+  node->next_index_ = half_;
+  new_node->next_index_ = half_ + (even_M_ ? 0 : 1);
+
+  return std::make_pair(new_node, mid);
 }
 
 template<class _Key, class _Data, size_t _M>
@@ -258,21 +291,6 @@ std::pair<_Key, _Data> BTree<_Key, _Data, _M>::search(const BTreeNode* node,
   }
 
   return search(node->children_.at(index), key);
-}
-
-template<class _Key, class _Data, size_t _M>
-void BTree<_Key, _Data, _M>::remove(const _Key& key) {
-  if (empty()) {
-    return; // TODO: exception
-  }
-
-  --size_;
-  BTreeNode* propagate = remove(root_, key);
-
-  if ((propagate != nullptr) && (root_->next_index_ == 0)) {
-    //delete root_;
-    root_ = propagate;
-  }
 }
 
 template<class _Key, class _Data, size_t _M>
@@ -505,24 +523,6 @@ typename BTree<_Key, _Data, _M>::BTreeNode* BTree<_Key, _Data, _M>::replace_sepa
   }
 
   return nullptr;
-}
-
-template<class _Key, class _Data, size_t _M>
-bool BTree<_Key, _Data, _M>::empty() const {
-  return (size_ <= 0);
-}
-
-template<class _Key, class _Data, size_t _M>
-size_t BTree<_Key, _Data, _M>::size() const {
-  return size_;
-}
-
-// debug, remove once tests succeed (or replace by operator<<)
-template<class _Key, class _Data, size_t _M>
-void BTree<_Key, _Data, _M>::print() const {
-  std::cout << "Tree size: " << size_ << std::endl;
-  print(root_, 0);
-  std::cout << std::endl;
 }
 
 // debug, remove once tests succeed and print() is removed
