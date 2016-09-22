@@ -37,6 +37,11 @@ namespace data_structures {
  *  number (i + 1) of the node. All leaf nodes in the B-tree have the same depth.
  *  Thus, the B-tree is a self-balancing tree data structure avoiding some of
  *  the problems of unbalanced tree data structures.
+ *
+ *  References:
+ *    - http://www.cs.carleton.edu/faculty/jgoldfea/cs201/spring11/inclass/Tree/BTreefinalNew.pdf
+ *    - https://en.wikipedia.org/wiki/B-tree
+ *    - https://www.cs.usfca.edu/~galles/visualization/BTree.html
  */
 template<class _Key, class _Data, size_t _M>
 class BTree {
