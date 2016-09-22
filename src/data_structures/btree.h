@@ -55,7 +55,7 @@ private:
     // hopefully better performance using std::array (evaluated at compile time)
     EntriesType entries_{};
     ChildrenType children_{};
-    size_t next_index_{};
+    int next_index_{};
 
     BTreeNode() { }
     ~BTreeNode() { }
@@ -87,26 +87,31 @@ private:
   size_t lower_bound_index(const _Key& key,
     typename BTreeNode::EntriesType::const_iterator begin,
     typename BTreeNode::EntriesType::const_iterator end) const;
-  typename std::pair<BTreeNode*, std::pair<_Key, _Data>> split(
+  std::pair<BTreeNode*, std::pair<_Key, _Data>> split(
     BTreeNode* node, const std::pair<_Key, _Data>& entry);
-  std::pair<size_t, bool> replace_if(BTreeNode* node,
-    const std::pair<_Key, _Data>& entry);
-  void update_mid(std::pair<_Key, _Data>& mid, std::pair<_Key, _Data>& node_entry,
-    const std::pair<_Key, _Data>& entry);
+  std::pair<_Key, _Data> search(const BTreeNode* node, const _Key& key) const;
+  BTreeNode* remove(BTreeNode* node, const _Key& key);
+  BTreeNode* rebalance(BTreeNode* node, BTreeNode* propagate, size_t& removal_index);
+  BTreeNode* rotate_left(BTreeNode* node, BTreeNode* propagate, BTreeNode* right,
+    int& separator_index);
+  BTreeNode* rotate_right(BTreeNode* node, BTreeNode* propagate, BTreeNode* left,
+    int& separator_index);
+  BTreeNode* merge(BTreeNode* node, BTreeNode* propagate, BTreeNode* left,
+    int& separator_index);
+  BTreeNode* replace_separator(BTreeNode* node,
+    typename std::pair<_Key, _Data>& separator);
 
   // debug, remove once tests succeed and print() is removed
-  void print(BTreeNode* root, int level) const;
+  void print(BTreeNode* node, int level) const;
 
 public:
   BTree();
   ~BTree();
 
   void insert(const _Key& key, const _Data& data);
-  typename std::pair<BTreeNode*, std::pair<_Key, _Data>> insert(BTreeNode* root,
-    std::pair<_Key, _Data>& entry
-  );
+  std::pair<BTreeNode*, std::pair<_Key, _Data>> insert(BTreeNode* node,
+    std::pair<_Key, _Data>& entry);
   std::pair<_Key, _Data> search(const _Key& key) const;
-  std::pair<_Key, _Data> search(const BTreeNode* root, const _Key& key) const;
   void remove(const _Key& key);
 
   bool empty() const;
@@ -167,6 +172,7 @@ BTree<_Key, _Data, _M>::~BTree() {
 template<class _Key, class _Data, size_t _M>
 void BTree<_Key, _Data, _M>::insert(const _Key& key, const _Data& data) {
   std::pair<_Key, _Data> new_entry = std::make_pair(key, data);
+  ++size_;
   std::pair<BTreeNode*, std::pair<_Key, _Data>> last = insert(root_, new_entry);
   
   // need to split the root node
@@ -194,8 +200,9 @@ typename std::pair<typename BTree<_Key, _Data, _M>::BTreeNode*, std::pair<_Key, 
   );
 
   // duplicate
-  if (node->entries_.at(insertion_index).first == entry.first) {
+  if (insertion_index < node->next_index_ && node->entries_.at(insertion_index).first == entry.first) {
     node->entries_.at(insertion_index).second = entry.second;
+    --size_;
     return propagate;
   }
 
@@ -217,7 +224,7 @@ typename std::pair<typename BTree<_Key, _Data, _M>::BTreeNode*, std::pair<_Key, 
     node->children_.at(insertion_index + 1) = propagate.first;
   } else {
     node->entries_.at(insertion_index) = entry;
-    ++size_;
+    
   }
 
   ++node->next_index_;
@@ -228,8 +235,6 @@ typename std::pair<typename BTree<_Key, _Data, _M>::BTreeNode*, std::pair<_Key, 
 
   return std::make_pair(nullptr, std::make_pair(_Key{}, _Data{}));
 }
-
-
 
 template<class _Key, class _Data, size_t _M>
 std::pair<_Key, _Data> BTree<_Key, _Data, _M>::search(const _Key& key) const {
@@ -244,7 +249,7 @@ std::pair<_Key, _Data> BTree<_Key, _Data, _M>::search(const BTreeNode* node,
     node->entries_.cbegin() + node->next_index_
   );
 
-  if (node->entries_.at(index).first == key) {
+  if ((index < node->next_index_) && (node->entries_.at(index).first == key)) {
     return node->entries_.at(index);
   }
 
@@ -261,7 +266,290 @@ void BTree<_Key, _Data, _M>::remove(const _Key& key) {
     return; // TODO: exception
   }
 
+  --size_;
+  BTreeNode* propagate = remove(root_, key);
 
+  if ((propagate != nullptr) && (root_->next_index_ == 0)) {
+    //delete root_;
+    //std::cout << "new root" << std::endl;
+    //root_->print(); std::cout << std::endl;
+    //propagate->print(); std::cout << std::endl;
+    root_ = propagate;
+  }
+}
+
+template<class _Key, class _Data, size_t _M>
+typename BTree<_Key, _Data, _M>::BTreeNode* BTree<_Key, _Data, _M>::remove(
+  BTreeNode* node, const _Key& key)
+{
+  if (node == nullptr) {
+    return nullptr;
+  }
+
+  size_t removal_index = lower_bound_index(key, node->entries_.cbegin(),
+    node->entries_.cbegin() + node->next_index_
+  );
+
+  // leaf node and key is found
+  //std::cout << "removal_index = " << removal_index << std::endl;
+  //node->print(); std::cout << " leaf? " << node->leaf() << std::endl;
+  if (node->leaf()) {
+    if (node->entries_.at(removal_index).first == key) {
+      for (int i = removal_index; i < node->next_index_ - 1; ++i) {
+        node->entries_.at(i) = std::move(node->entries_.at(i + 1));
+      }
+      --node->next_index_;
+
+      if (node->next_index_ >= half_) {
+        // tree stays balanced (leaf has enough element), nothing to propagate
+        return nullptr; 
+      }
+
+      // balance tree (leaf has too little elements), propagate leaf upwards
+      return node;
+    }
+
+    // tree stays balanced (key not found), nothing to propagate
+    ++size_;
+    return nullptr;
+  }
+
+  // internal node
+
+  // key found in internal node
+  if ((removal_index < node->next_index_) &&
+    (node->entries_.at(removal_index).first == key))
+  {
+    //std::cout << "Internal Node: Key " << key << " found!" << std::endl;
+
+    // choose new separator (largest element of left subtree wrt. key position)
+    // and replace element at key position with new separator
+    BTreeNode* propagate = replace_separator(node->children_.at(removal_index),
+      node->entries_.at(removal_index)
+    );
+
+    // rebalance tree if necessary (rebalancing may be necessary up to the root)
+    if (propagate == nullptr) {
+      return propagate;
+    }
+
+    //std::cout << "Rebalance 1: removal_index = " << removal_index << std::endl;
+    //node->print(); std::cout << std::endl;
+    return rebalance(node, propagate, removal_index);
+  }
+
+  // if propagate != nullptr, then the current node needs to be balanced
+  // (propagated from the corresponding child which was also balanced)
+  BTreeNode* propagate = remove(node->children_.at(removal_index), key);
+
+  if (propagate == nullptr) {
+    // tree is balanced, nothing to propagate
+    return propagate;
+  }
+
+  // rebalance tree
+  //std::cout << "Rebalance 2" << std::endl;
+  return rebalance(node, propagate, removal_index);
+}
+
+template<class _Key, class _Data, size_t _M>
+typename BTree<_Key, _Data, _M>::BTreeNode* BTree<_Key, _Data, _M>::rebalance(
+  BTreeNode* node, BTreeNode* propagate, size_t& removal_index)
+{
+  BTreeNode* left = nullptr;
+  BTreeNode* right = nullptr;
+  int separator_index = removal_index;
+
+  if (removal_index > 0) {
+    left = node->children_.at(removal_index - 1);
+  }
+
+  if (removal_index < node->next_index_) {
+    right = node->children_.at(removal_index + 1);
+  }
+
+  int i = 0;
+  bool has_left_sibling = (left != nullptr);
+  bool has_right_sibling = (right != nullptr);
+
+  /*std::cout << "removal_index = " << removal_index << ", next_index_ = "
+    << node->next_index_ << ", separator_index = " << separator_index
+    << std::endl;
+  print();
+  if (left != nullptr) { std::cout << "left: "; left->print(); std::cout << std::endl; }
+  if (propagate != nullptr) { std::cout << "propagate: "; propagate->print(); std::cout << std::endl; }
+  if (right != nullptr) { std::cout << "right: "; right->print(); std::cout << std::endl; }
+  if (node != nullptr) { std::cout << "node: "; node->print(); std::cout << std::endl; }
+  */
+  // check whether right sibling of propagate is usable
+  if (has_right_sibling && (right->next_index_ > half_)) {
+    // propagate is not the right-most child (it has a right sibling)
+    return rotate_left(node, propagate, right, separator_index);
+  } else if (has_left_sibling && (left->next_index_ > half_)) {
+    // propagate is not the left-most child (it has a left sibling)
+    return rotate_right(node, propagate, left, --separator_index);
+  } 
+
+  // propagate has no left or right sibling holding enough elements (> M/2)
+  if (left != nullptr) {
+    //std::cout << "Merge 1: " << (propagate == left) << std::endl;
+    return merge(node, propagate, left, --separator_index);
+  }
+
+  //std::cout << "Merge 2" << std::endl;
+  return merge(node, right, propagate, separator_index);
+}
+
+template<class _Key, class _Data, size_t _M>
+typename BTree<_Key, _Data, _M>::BTreeNode* BTree<_Key, _Data, _M>::rotate_left(
+  BTreeNode* node, BTreeNode* propagate, BTreeNode* right, int& separator_index)
+{
+  //std::cout << "Case 1: separator_index = " << separator_index << std::endl;
+
+  // move separator to the end of the deficient node
+  propagate->entries_.at(propagate->next_index_) = std::move(node->entries_.at(separator_index));
+  ++propagate->next_index_;
+
+  //propagate->print(); std::cout << std::endl;
+
+  // replace separator with the first element of right sibling
+  node->entries_.at(separator_index) = std::move(right->entries_.at(0));
+  // move left-most child of right accordingly (to propagate)
+  if (!propagate->leaf()) {
+    propagate->children_.at(propagate->next_index_) = right->children_.at(0);
+  }
+  // shift elements of right sibling by 1 to the left
+  right->children_.at(0) = right->children_.at(1);
+  for (int i = 0; i < right->next_index_; ++i) {
+    right->entries_.at(i) = std::move(right->entries_.at(i + 1));
+    right->children_.at(i + 1) = std::move(right->children_.at(i + 2));
+  }
+  --right->next_index_;
+
+  // tree is balanced, thus nothing to propagate
+  return nullptr;
+}
+
+template<class _Key, class _Data, size_t _M>
+typename BTree<_Key, _Data, _M>::BTreeNode* BTree<_Key, _Data, _M>::rotate_right(
+  BTreeNode* node, BTreeNode* propagate, BTreeNode* left, int& separator_index)
+{
+  //std::cout << "Case 2: separator_index = " << separator_index << std::endl;
+
+  // move separator to the start of the deficient node
+  // thus shift elements of deficient node by 1 to the right
+  if (!propagate->leaf()) {
+    propagate->children_.at(propagate->next_index_+ 1) =
+      std::move(propagate->children_.at(propagate->next_index_));
+  }
+
+  for (int i = propagate->next_index_ - 1; i >= 0; --i) {
+    //std::cout << "i = " << i << std::endl;
+    propagate->entries_.at(i + 1) = std::move(propagate->entries_.at(i));
+    propagate->children_.at(i + 1) = std::move(propagate->children_.at(i));
+  }
+  propagate->entries_.at(0) = std::move(node->entries_.at(separator_index)); // wrt. the left sibling (propagate)
+  ++propagate->next_index_;
+
+  // replace separator with the last element of the left sibling
+  node->entries_.at(separator_index) = std::move(left->entries_.at(left->next_index_ - 1));
+  // move right-most child accordingly (to propagate)
+  if (!propagate->leaf()) {
+    propagate->children_.at(0) = std::move(left->children_.at(left->next_index_));
+  }
+  --left->next_index_;
+
+  // tree is balanced, thus nothing to propagate
+  return nullptr;
+}
+
+template<class _Key, class _Data, size_t _M>
+typename BTree<_Key, _Data, _M>::BTreeNode* BTree<_Key, _Data, _M>::merge(
+  BTreeNode* node, BTreeNode* propagate, BTreeNode* left, int& separator_index)
+{
+  //std::cout << "Case 3: separator_index = " << separator_index << std::endl;
+  //std::cout << "Moving " << node->entries_.at(separator_index).first << " to left sibling "; left->print(); std::cout << std::endl;
+
+  // move separator to the end of the left sibling
+  left->entries_.at(left->next_index_) = std::move(node->entries_.at(separator_index));
+  ++left->next_index_;
+
+  // remove separator and corresponding child (empty child)
+  int i = 0;
+  for (i = separator_index; i < node->next_index_; ++i) {
+    node->entries_.at(i) = std::move(node->entries_.at(i + 1));
+    node->children_.at(i + 1) = std::move(node->children_.at(i + 2));
+  }
+  node->children_.at(i + 1) = nullptr;
+  --node->next_index_;
+
+  //propagate->print(); std::cout << std::endl;
+  //left->print(); std::cout << std::endl;
+
+  // move elements from the right node to the left sibling
+  for (i = 0; i < propagate->next_index_; ++i) {
+    //std::cout << "i = " << i << ", next_index_ = " << left->next_index_ << std::endl;
+    left->entries_.at(left->next_index_) = std::move(propagate->entries_.at(i));
+    left->children_.at(left->next_index_) = std::move(propagate->children_.at(i));
+    ++left->next_index_;
+  }
+  
+  //left->print(); std::cout << std::endl;
+  if (!left->full()) {
+    left->children_.at(left->next_index_) = std::move(propagate->children_.at(i));
+  }
+
+  delete propagate; // is empty now
+
+  //left->print(); std::cout << std::endl;
+
+  if (node->next_index_ < half_) {
+    //std::cout << "return node: "; node->print(); std::cout << std::endl;
+    //std::cout << "left: "; left->print(); std::cout << std::endl;
+    //print();
+
+    return ((node == root_) ? left : node);
+  }
+
+  // tree is balanced (enough elements in node), thus nothing to propagate
+  return nullptr;
+}
+
+template<class _Key, class _Data, size_t _M>
+typename BTree<_Key, _Data, _M>::BTreeNode* BTree<_Key, _Data, _M>::replace_separator(
+    BTreeNode* node, std::pair<_Key, _Data>& separator)
+{
+  if (node == nullptr) {
+    return nullptr;
+  }
+
+  if (node->leaf()) {
+    //std::cout << "Internal Node: Replacement "
+    //  << node->entries_.at(node->next_index_ - 1).first << " found in ";
+    //node->print(); std::cout << std::endl;
+
+    separator = std::move(node->entries_.at(node->next_index_ - 1));
+    --node->next_index_; // remove new separator from node, essentially
+
+    if (node->next_index_ < half_) {
+      return node;
+    }
+
+    return nullptr;
+  }
+
+  BTreeNode* propagate = replace_separator( node->children_.at(node->next_index_),
+    separator
+  );
+
+  //std::cout << "Internal Node: propagate = "; if (propagate) propagate->print(); std::cout << std::endl;
+
+  if (propagate != nullptr) {
+    size_t n = node->next_index_;
+    return rebalance(node, propagate, n);
+  }
+
+  return nullptr;
 }
 
 template<class _Key, class _Data, size_t _M>
