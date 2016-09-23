@@ -94,7 +94,8 @@ private:
     std::pair<_Key, _Data>& entry);
   std::pair<BTreeNode*, std::pair<_Key, _Data>> split(
     BTreeNode* node, const std::pair<_Key, _Data>& entry);
-  std::pair<_Key, _Data> search(const BTreeNode* node, const _Key& key) const;
+  std::pair<bool, std::pair<_Key, _Data>> search(const BTreeNode* node,
+    const _Key& key) const;
   BTreeNode* remove(BTreeNode* node, const _Key& key);
   BTreeNode* rebalance(BTreeNode* node, BTreeNode* propagate, int& removal_index);
   BTreeNode* rotate_left(BTreeNode* node, BTreeNode* propagate, BTreeNode* right,
@@ -114,7 +115,7 @@ public:
   ~BTree();
 
   void insert(const _Key& key, const _Data& data);
-  std::pair<_Key, _Data> search(const _Key& key) const;
+  std::pair<bool, std::pair<_Key, _Data>> search(const _Key& key) const;
   void remove(const _Key& key);
   bool empty() const;
   size_t size() const;
@@ -153,7 +154,9 @@ void BTree<_Key, _Data, _M>::insert(const _Key& key, const _Data& data) {
 }
 
 template<class _Key, class _Data, size_t _M>
-std::pair<_Key, _Data> BTree<_Key, _Data, _M>::search(const _Key& key) const {
+std::pair<bool, std::pair<_Key, _Data>> BTree<_Key, _Data, _M>::search(
+  const _Key& key) const
+{
   return search(root_, key);
 }
 
@@ -276,7 +279,7 @@ typename std::pair<typename BTree<_Key, _Data, _M>::BTreeNode*, std::pair<_Key, 
 }
 
 template<class _Key, class _Data, size_t _M>
-std::pair<_Key, _Data> BTree<_Key, _Data, _M>::search(const BTreeNode* node,
+std::pair<bool, std::pair<_Key, _Data>> BTree<_Key, _Data, _M>::search(const BTreeNode* node,
   const _Key& key) const 
 {
   size_t index = lower_bound_index(key, node->entries_.cbegin(),
@@ -284,11 +287,11 @@ std::pair<_Key, _Data> BTree<_Key, _Data, _M>::search(const BTreeNode* node,
   );
 
   if ((index < node->next_index_) && (node->entries_.at(index).first == key)) {
-    return node->entries_.at(index);
+    return std::make_pair(true, node->entries_.at(index));
   }
 
   if (node->leaf()) {
-    return std::make_pair(_Key{}, _Data{});
+    return std::make_pair(false, std::make_pair(_Key{}, _Data{}));
   }
 
   return search(node->children_.at(index), key);
