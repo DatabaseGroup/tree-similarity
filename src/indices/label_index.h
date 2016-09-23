@@ -1,6 +1,9 @@
 #ifndef INDICES_LABEL_INDEX_H
 #define INDICES_LABEL_INDEX_H
 
+#include <list>
+#include <vector>
+
 #include "../data_structures/btree.h"
 
 namespace indices {
@@ -21,15 +24,41 @@ namespace indices {
  *              end of their lists.
  *  In essence, this is the Label Index, described on p. 51 of the paper.
  */
-template<class _Type>
+template<class _LabelType, class _ListEntryType, size_t _M = 10>
 class LabelIndex {
-private:
-  data_structures::BTree<> posting_lists;
+protected:
+  // For every label l in a tree, we store the list of Dewey identifiers of nodes
+  // v such that v is labeled l
+  // BTree is used to store (label, list of Dewey identifiers) pairs. A node can
+  // store up to m = 10 keys (hence, 11 children)
+  // TODO: maybe use std::vector instead of std::list and store position?
+  // according to Bjarne Stroustrup, vector >> list in almost every situation
+  // TODO: DeweyIdentifier class instead of std::vector<int>?
+  data_structures::BTree<_LabelType, std::list<_ListEntryType>, _M> posting_lists;
 
 public:
   LabelIndex();
   ~LabelIndex();
+
+  size_t size() const;
+  bool empty() const;
 };
+
+template<class _LabelType, class _ListEntryType, size_t _M>
+LabelIndex<_LabelType, _ListEntryType, _M>::LabelIndex() { }
+
+template<class _LabelType, class _ListEntryType, size_t _M>
+LabelIndex<_LabelType, _ListEntryType, _M>::~LabelIndex() { }
+
+template<class _LabelType, class _ListEntryType, size_t _M>
+size_t LabelIndex<_LabelType, _ListEntryType, _M>::size() const {
+  return posting_lists.size();
+}
+
+template<class _LabelType, class _ListEntryType, size_t _M>
+bool LabelIndex<_LabelType, _ListEntryType, _M>::empty() const {
+  return posting_lists.empty();
+}
 
 } // namespace indices
 
