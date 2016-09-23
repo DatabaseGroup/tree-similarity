@@ -44,7 +44,7 @@ namespace data_structures {
  *    - https://en.wikipedia.org/wiki/B-tree
  *    - https://www.cs.usfca.edu/~galles/visualization/BTree.html
  */
-template<class _Key, class _Data, size_t _M>
+template<class _Key, class _Data, size_t _M = 10>
 class BTree {
 private:
   // only for internal usage
@@ -73,7 +73,11 @@ private:
     void print() const { 
       std::cout << "{ ";
       for (int i = 0; i < next_index_; ++i) {
-        std::cout << "(" << entries_.at(i).first << ", " << entries_.at(i).second << ") ";
+        std::cout << "(" << entries_.at(i).first << ", [ ";
+        for (const std::pair<int, int>& e: entries_.at(i).second) {
+          std::cout << "(" << e.first << ", " << e.second << ") ";
+        }
+        std::cout << "]) ";
       }
       std::cout << "} (next_index_ = " << next_index_ << ")";
     }
@@ -106,6 +110,9 @@ private:
     int& separator_index);
   BTreeNode* replace_separator(BTreeNode* node,
     typename std::pair<_Key, _Data>& separator);
+  template<class _Compare = std::greater<_Data>>
+  void min_value(BTreeNode* node, BTreeNode*& min_node, int& min_index,
+    _Compare comparator) const;
 
   // debug, remove once tests succeed and print() is removed
   void print(BTreeNode* node, int level) const;
@@ -119,6 +126,10 @@ public:
   void remove(const _Key& key);
   bool empty() const;
   size_t size() const;
+
+  // TODO: better to make this a class template?
+  template<class _Compare = std::greater<_Data>>
+  std::pair<_Key, _Data>& min_value(_Compare comparator = _Compare());
 
   // debug, remove once tests succeed (or replace by operator<<)
   void print() const;
@@ -183,6 +194,24 @@ bool BTree<_Key, _Data, _M>::empty() const {
 template<class _Key, class _Data, size_t _M>
 size_t BTree<_Key, _Data, _M>::size() const {
   return size_;
+}
+
+template<class _Key, class _Data, size_t _M>
+template<class _Compare>
+std::pair<_Key, _Data>& BTree<_Key, _Data, _M>::min_value(
+  _Compare comparator)
+{
+  // TODO
+  //if (empty()) {
+    // exception
+  //}
+
+  // TODO: make sure that there is no better way (min_copy contains copy of the
+  // whole list and not just the relevant identifier located at .front())
+  BTreeNode* min_node = root_;
+  int min_index = 0;
+  min_value(root_, min_node, min_index, comparator);
+  return min_node->entries_.at(min_index);
 }
 
 // debug, remove once tests succeed (or replace by operator<<)
@@ -527,6 +556,30 @@ typename BTree<_Key, _Data, _M>::BTreeNode* BTree<_Key, _Data, _M>::replace_sepa
   }
 
   return nullptr;
+}
+
+template<class _Key, class _Data, size_t _M>
+template<class _Compare>
+void BTree<_Key, _Data, _M>::min_value(BTreeNode* node, BTreeNode*& min_node,
+  int& min_index, _Compare comparator) const
+{
+  int i = 0;
+  for ( i = 0; i < node->next_index_; ++i) {
+    if ((min_node->entries_.at(min_index).second == _Data{})
+        || comparator(node->entries_.at(i).second, min_node->entries_.at(min_index).second))
+    {
+      min_node = node;
+      min_index = i;
+    }
+  }
+
+  if (node->leaf()) {
+    return;
+  }
+
+  for (i = 0; i <= node->next_index_; ++i) {
+    min_value(node->children_.at(i), min_node, min_index, comparator);
+  }
 }
 
 // debug, remove once tests succeed and print() is removed
