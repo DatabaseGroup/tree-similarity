@@ -40,6 +40,7 @@ namespace data_structures {
  *
  *  References:
  *    - http://www.cs.carleton.edu/faculty/jgoldfea/cs201/spring11/inclass/Tree/BTreefinalNew.pdf
+ *    - http://www.cs.cornell.edu/courses/cs3110/2011sp/recitations/rec24-B-trees/B-trees.htm
  *    - https://en.wikipedia.org/wiki/B-tree
  *    - https://www.cs.usfca.edu/~galles/visualization/BTree.html
  */
