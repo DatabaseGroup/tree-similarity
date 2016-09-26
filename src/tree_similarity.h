@@ -5,9 +5,11 @@
 
 #include "visualisation/visualisation.h"
 
-#include "data_structures/k_heap.h"
 #include "data_structures/array_2d.h"
 #include "data_structures/btree.h"
+#include "data_structures/dewey_identifier.h"
+#include "data_structures/k_heap.h"
+#include "data_structures/posting_list_container.h"
 
 #include "nodes/custom_node_data.h"
 #include "nodes/node.h"
@@ -19,6 +21,8 @@
 #include "rted/rted.h"
 
 #include "sed/string_edit_distance.h"
+
+#include "structure_search/structure_search.h"
 
 #include "tasm/tasm.h"
 
