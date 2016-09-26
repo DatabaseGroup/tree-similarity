@@ -1,0 +1,78 @@
+#ifndef DATA_STRUCTURES_DEWEY_IDENTIFIER_H
+#define DATA_STRUCTURES_DEWEY_IDENTIFIER_H
+
+#include <vector>
+
+namespace data_structures {
+
+class DeweyIdentifier {
+public:
+  std::vector<size_t> id_;
+
+public:
+  DeweyIdentifier(const size_t& value = 0);
+  DeweyIdentifier(const DeweyIdentifier& other);
+  DeweyIdentifier(const DeweyIdentifier& other, const size_t& last_value);
+  ~DeweyIdentifier();
+
+  void clear();
+  size_t& at(const size_t& level);
+  void set(const size_t& value, const size_t& level);
+
+  bool operator<(const DeweyIdentifier& other) const;
+  bool operator==(const DeweyIdentifier& other) const;
+};
+
+DeweyIdentifier::DeweyIdentifier(const size_t& value) {
+  if (id_.size() > 0) {
+    clear();
+  }
+
+  id_.push_back(value);
+}
+
+DeweyIdentifier::DeweyIdentifier(const DeweyIdentifier& other) {
+  //id_.resize(other.id_.size());
+  //std::copy(other.id_.begin(), other.id_.end(), id_.begin());
+  id_.insert(id_.end(), other.id_.begin(), other.id_.end());
+}
+
+DeweyIdentifier::DeweyIdentifier(const DeweyIdentifier& other,
+  const size_t& last_value) : DeweyIdentifier(other)
+{
+  id_.push_back(last_value);
+}
+
+DeweyIdentifier::~DeweyIdentifier() { }
+
+void DeweyIdentifier::clear() {
+  id_.clear();
+}
+
+size_t& DeweyIdentifier::at(const size_t& level) {
+  try {
+    return id_.at(level);
+  } catch(std::exception& e) {
+    throw;
+  }
+}
+
+void DeweyIdentifier::set(const size_t& value, const size_t& level) {
+  try {
+    id_.at(level) = value;
+  } catch(std::exception& e) {
+    throw;
+  }
+}
+
+bool DeweyIdentifier::operator<(const DeweyIdentifier& other) const {
+  return (id_ < other.id_);
+}
+
+bool DeweyIdentifier::operator==(const DeweyIdentifier& other) const {
+  return (id_ == other.id_);
+}
+
+} // namespace data_structures
+
+#endif // DATA_STRUCTURES_DEWEY_IDENTIFIER_H
