@@ -15,6 +15,8 @@ struct NodeInfo {
   int parent_id;
   int l_to_r;
   int r_to_l; // indexed in postorder!
+  int number_of_children;
+  int* children; // array of the preorder ids of the children
   //nodes::Node<_NodeData>* children; //Maybe change type later
   int full_decomp_size; // The number of subforests in the full decomposition of subtree rooted at this node (Lemma 5.1 in TODS paper)
   int left_decomp_size = 0; // The number of relevant subforests produced by a recursive path decomposition (Lemma 5.3 in TODS paper)
@@ -42,13 +44,69 @@ int get_tree_size(nodes::Node<_NodeData>* tree) {
   return 1;
 }
 
+/*
+ * Algorithm 3 in TODS paper
+ */
+template<class _NodeData = nodes::StringNodeData, class _Costs = nodes::Costs<_NodeData>>
+double spfG() {
+
+}
+
+/*
+ * Algorithm 1 in TODS paper
+ */
+ template<class _NodeData = nodes::StringNodeData>
+data_structures::Array2D<double>* gted(NodeInfo<_NodeData>* ia1, NodeInfo<_NodeData>* ia2, int root_node1, int root_node2, data_structures::Array2D<double>* str) {
+  double pathId = (*str)[root_node1][root_node2]; // Line 1: Get the path id of the root-leave-path
+  // std::cout << "gted was called for root_node1: " << root_node1 << " and root_node2: " << root_node2 << ";\tpathId: " << pathId << std::endl;
+  int parentId = ia1[(int) pathId].parent_id; // Store the preorder id of the parent
+  // Decomposition of the tree 1
+  int ignored_child_id = pathId;
+  if((int) pathId < ia1[0].subtree_size) { // Line 2: Check if the path is in the left hand tree
+    // Line 3-4: Call the function recursively for all trees in the resulting subforest (the subforest that results from removing the root-leave-path)
+    int i = pathId;
+    while(i != root_node1) {
+      for(int j = 0; j < ia1[i].number_of_children; ++j) { // At every parent node loop over all children and call for everyone that's not the node on the path the function
+        if(ia1[i].children[j] != ignored_child_id) { // Check if the child is not the one on the path
+          gted(ia1, ia2, ia1[i].children[j], root_node2, str);
+        }
+      }
+      ignored_child_id = i;
+      i = ia1[ignored_child_id].parent_id;
+    }
+    for(int j = 0; j < ia1[root_node1].number_of_children; ++j) { // Loop over the children of the current root node (can't be done in the loop above)
+      if(ia1[root_node1].children[j] != ignored_child_id) { // Check if the child is not the one on the path
+        gted(ia1, ia2, ia1[root_node1].children[j], root_node2, str);
+      }
+    }
+  // Decomposition of tree 2
+} else { // Line 6: Differs from the algorithm because we don't transpose the matrices. Instead we decompose the right tree aswell (like tree1)
+    int i = pathId - ia1[0].subtree_size; // Substract the offset
+    while(i != root_node2) {
+      for(int j = 0; j < ia2[i].number_of_children; ++j) { // At every parent node loop over all children and call for everyone that's not the node on the path the function
+        if(ia2[i].children[j] != ignored_child_id) { // Check if the child is not the one on the path
+          gted(ia1, ia2, root_node1, ia2[i].children[j], str);
+        }
+      }
+      ignored_child_id = i;
+      i = ia2[ignored_child_id].parent_id;
+    }
+    for(int j = 0; j < ia2[root_node2].number_of_children; ++j) { // Loop over the children of the current root node (can't be done in the loop above)
+      if(ia2[root_node2].children[j] != ignored_child_id) { // Check if the child is not the one on the path
+        gted(ia1, ia2, root_node1, ia2[i].children[j], str);
+      }
+    }
+  }
+  return str;
+}
+
 // Computes the Tree Edit Distance with the RTED Algorithm
 //
-// Params:  tree1   The first tree to be compared
-//          tree2   The second tree to be compared
-//          costs   The costs for the edit operations
-// Return:  A double TODO
-// Throws:  TODO
+// Params:  tree1     The first tree to be compared
+//          tree2     The second tree to be compared
+//          costs     The costs for the edit operations
+// Return:  A double which is the tree edit distance of the two trees
+// Throws:  A char const* with the error message or an std::exception
 template<class _NodeData = nodes::StringNodeData, class _Costs = nodes::Costs<_NodeData>>
 double compute_rted(nodes::Node<_NodeData>* tree1, nodes::Node<_NodeData>* tree2/*,
   _Costs costs = _Costs()*/) //TODO add costs
@@ -63,8 +121,10 @@ double compute_rted(nodes::Node<_NodeData>* tree1, nodes::Node<_NodeData>* tree2
 
   data_structures::Array2D<double>* str = compute_strategy_right_to_left_preorder(tree1_info_array, tree2_info_array);
 
+  gted(tree1_info_array, tree2_info_array, 0, 0, str);
+
   // IMPLEMENT RTED THERE
-  return (double) tree1_size + tree2_size;
+  return (double) (tree1_size + tree2_size);
 }
 
 // Returns the size of a given tree
@@ -83,7 +143,7 @@ double compute_rted(nodes::Node<_NodeData>* tree1, nodes::Node<_NodeData>* tree2
 template<class _NodeData = nodes::StringNodeData>
 int gather_tree_info(nodes::Node<_NodeData>* tree, NodeInfo<_NodeData>* node_info_array_preorder,
     int total_tree_size, int preorder_id = 0, int preorder_id_parent = -1, int* sum_of_subtree_sizes = new int(),
-    int* postorder_id = new int(0), int has_left_or_right_sibling = -2) { //TODO *_decomp should be deleted anywhere (is on the heap)
+    int* postorder_id = new int(0), int has_left_or_right_sibling = -2) { //TODO sum_of_subtree_sizes and postorder_id should be deleted anywhere (is on the heap)
 
   // Check if the arguments are valid
   if(!tree || !node_info_array_preorder || !total_tree_size) { // has to be checked, because otherwise there is a segfault below in the code
@@ -94,12 +154,14 @@ int gather_tree_info(nodes::Node<_NodeData>* tree, NodeInfo<_NodeData>* node_inf
   // set the data and the parent id of the NodeInfo struct of the current preorder id
   node_info_array_preorder[current_preorder_id].nodeData = tree->get_data();
   node_info_array_preorder[current_preorder_id].parent_id = preorder_id_parent; //parent id is always the id of the caller (caller passes its id as an argument)
+  node_info_array_preorder[current_preorder_id].number_of_children = tree->get_children_number();
+  node_info_array_preorder[current_preorder_id].children = new int[tree->get_children_number()];
 
   if(tree->get_children_number() > 0) {
     // code executed if the tree has children (is therefore not a leave)
     int children_subtree_sizes_sum = 0; // stores the sum of all sum_of_subtree_sizes values of the children
     int children_subtree_sizes = 0; // size of subtrees rooted in all children computed incrementally while traversing the children
-
+    int children_counter = 0;
     // iterate over the children
     for (auto node_it : tree->get_children()) {
       // evaluating, whether the child called next has left or right siblings, to tell it the child via a parameter passed to the function
@@ -118,9 +180,11 @@ int gather_tree_info(nodes::Node<_NodeData>* tree, NodeInfo<_NodeData>* node_inf
 
       // after coming back from the recursion, the following code is executed:
 
+      node_info_array_preorder[current_preorder_id].children[children_counter] = preorder_id + 1;
       preorder_id += child_subtree_size; // the preorder id must be increased by the number of nodes the last child contained, so when the next child is called, it is called with the right preorder id
       children_subtree_sizes += child_subtree_size; // the subtree size of the last child is summed up to the size of all children of the current node
       children_subtree_sizes_sum += (*sum_of_subtree_sizes); // the last subtree size sum is added to the sum of the last subtree size sum of the other child nodes
+      ++children_counter;
     }
 
     // after iterating over all children, the following code is executed:
@@ -183,9 +247,19 @@ int gather_tree_info(nodes::Node<_NodeData>* tree, NodeInfo<_NodeData>* node_inf
   return 1; // 1 is returned as the subtree size
 }
 
+
+/*
+ * A path is identified by its leaf node's left-to-right-preorder id. To distinguish
+ * between paths in the left hand and right hand input tree, we add an offset of
+ * the size of the left hand tree to the ids of right hand tree paths.
+ *
+ *
+ */
 template<class _NodeData = nodes::StringNodeData>
 data_structures::Array2D<double>* compute_strategy_right_to_left_preorder(
   NodeInfo<nodes::StringNodeData>* tree_info_array_1, NodeInfo<nodes::StringNodeData>* tree_info_array_2){
+
+  // TODO precompute values for loops (especially inner one)
 
   int tree1_size = tree_info_array_1->subtree_size; // store tree sizes
   int tree2_size = tree_info_array_2->subtree_size;
@@ -216,7 +290,7 @@ data_structures::Array2D<double>* compute_strategy_right_to_left_preorder(
       //std::cout << "v[" << lv << "] is a leave. cost rows assigned to leaverow." << std::endl;
       l1[lv] = r1[lv] = i1[lv] = leaf_row; // no allocation needed, beacuse we can use the allocated space of leave_row - fewer space needed
       for(int i = 0; i < tree2_size; ++i) {
-        (*str)[lv][i] = -1; // TODO correct path_id going through lv
+        (*str)[lv][i] = lv; // Path ids
       }
     }
     if(tree_info_array_1[lv].parent_id != -1 && l1[tree_info_array_1[lv].parent_id] == NULL) { // Line 7: if row for parent of v is not allocated, allocate cost rows for parent
@@ -248,17 +322,17 @@ data_structures::Array2D<double>* compute_strategy_right_to_left_preorder(
       lw = tree_info_array_2[w].r_to_l;
       if(tree_info_array_2[lw].subtree_size == 1) { // Line 9: if w is leaf node then cost matrices rows of w equal 0
         l2[lw] = r2[lw] = i2[lw] = 0;
-        path2[lw] = -1; // TODO correct path_id going through lw
+        path2[lw] = lw;
       }
       // Line 10-16: get cost-path pairs (6: left, inner, right for both F and G) and determine minimum cost and path
       std::string root_min_path = "l1";
       min_cost = (long) tree_info_array_1[lv].subtree_size * (long) tree_info_array_2[lw].left_decomp_size + l1[lv][lw];
-      min_path = -1; // left_path_tree1
+      min_path = tree_info_array_1[v + tree_info_array_1[lv].subtree_size - 1].r_to_l; // left_path_tree1
       tmp_cost = (long) tree_info_array_1[lv].subtree_size * (long) tree_info_array_2[lw].right_decomp_size + r1[lv][lw];
       if(tmp_cost < min_cost) {
         root_min_path = "r1";
         min_cost = tmp_cost;
-        min_path = -1; // right_path_tree1
+        min_path = lv + tree_info_array_1[lv].subtree_size - 1; // right_path_tree1
       }
       tmp_cost = (long) tree_info_array_1[lv].subtree_size * (long) tree_info_array_2[lw].full_decomp_size + i1[lv][lw];
       // if(lv == 284 && lw == 0) {
@@ -267,29 +341,29 @@ data_structures::Array2D<double>* compute_strategy_right_to_left_preorder(
       if(tmp_cost < min_cost) {
         root_min_path = "i1";
         min_cost = tmp_cost;
-        min_path = -1; // inner_path_tree1
+        min_path = (*str)[lv][lw]; // inner_path_tree1
       }
       tmp_cost = (long) tree_info_array_2[lw].subtree_size * (long) tree_info_array_1[lv].left_decomp_size + l2[lw];
       if(tmp_cost < min_cost) {
         root_min_path = "l2";
         min_cost = tmp_cost;
-        min_path = -1; // left_path_tree2
+        min_path = tree_info_array_2[w + tree_info_array_2[lw].subtree_size - 1].r_to_l + tree1_size; // left_path_tree2 + offset
       }
       tmp_cost = (long) tree_info_array_2[lw].subtree_size * (long) tree_info_array_1[lv].right_decomp_size + r2[lw];
       if(tmp_cost < min_cost) {
         root_min_path = "r2";
         min_cost = tmp_cost;
-        min_path = -1; // right_path_tree2
+        min_path = lw + tree_info_array_2[lw].subtree_size - 1 + tree1_size; // right_path_tree2 + offest
       }
       tmp_cost = (long) tree_info_array_2[lw].subtree_size * (long) tree_info_array_1[lv].full_decomp_size + i2[lw];
       if(tmp_cost < min_cost) {
         root_min_path = "i2";
         min_cost = tmp_cost;
-        min_path = -1; // inner_path_tree2
+        min_path = path2[lw] + tree1_size; // inner_path_tree2 + offest
       }
-      // if(min_cost < 0) {
-      //   std::cout << "min_cost and min_path for node pair " << lv << "," << lw <<": " << (long) min_cost << ", " << root_min_path << std::endl;
-      // }
+      //if(min_cost < 0) {
+      //  std::cout << "min_cost and min_path for node pair " << lv << "," << lw <<": " << (long) min_cost << ", " << min_path << std::endl;
+      //}
       // Line 17-36: update parents
       if(tree_info_array_1[lv].parent_id != -1) { // Line 17: if v is not root then
         r1[tree_info_array_1[lv].parent_id][lw] += min_cost; // Line 18
@@ -301,7 +375,7 @@ data_structures::Array2D<double>* compute_strategy_right_to_left_preorder(
           i1[tree_info_array_1[lv].parent_id][lw] = tmp_cost; // Line 21
           (*str)[tree_info_array_1[lv].parent_id][lw] = (*str)[lv][lw]; // Line 22
         }
-        if((v - tree_info_array_1[tree_info_array_1[lv].parent_id].l_to_r) == 1) { // Line 23 TODO can be computed outside of inner loop
+        if((v - tree_info_array_1[tree_info_array_1[lv].parent_id].l_to_r) == 1) { // Line 23
           // std::cout << "i1[" << tree_info_array_1[lv].parent_id << "][" << lw << "] is being increased by: " << r1[tree_info_array_1[lv].parent_id][lw] << std::flush;
           i1[tree_info_array_1[lv].parent_id][lw] += r1[tree_info_array_1[lv].parent_id][lw]; // Line 24
           // std::cout << " and is now: " << i1[tree_info_array_1[lv].parent_id][lw] << " (Line 24)" << std::endl << std::flush;

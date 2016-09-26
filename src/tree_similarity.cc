@@ -87,6 +87,14 @@ int main (int argc, char* argv[]) {
       }
       std::cout << std::endl;
 
+      std::cout << "\nposition:child_position:preorder_id_child" << std::endl;
+      for(int i = 0; i < tree1_size; ++i) { //printing tree info array in form position:parent_id
+        for(int j = 0; j < tree_info_array_preorder1[i].number_of_children; ++j) {
+          std::cout <<  i << ":" <<  j << ":" << tree_info_array_preorder1[i].children[j] << " | ";
+        }
+      }
+      std::cout << std::endl;
+
       std::cout << std::endl << std::endl << "rted is being invoked." << std::endl << std::endl;*/
 
       rted::compute_rted(test_tree1, test_tree2); //TODO test with costs
