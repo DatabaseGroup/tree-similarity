@@ -21,8 +21,10 @@ set(tree_similarity_sources
   tree_similarity.cc
   common/common.h
   data_structures/array_2d.h
-  data_structures/k_heap.h
   data_structures/btree.h
+  data_structures/dewey_identifier.h
+  data_structures/k_heap.h
+  data_structures/posting_list_container.h
   nodes/custom_node_data.h
   nodes/node.h
   nodes/hybrid_node.h
@@ -30,6 +32,7 @@ set(tree_similarity_sources
   parser/parser.h
   rted/rted.h
   sed/string_edit_distance.h
+  structure_search/structure_search.h
   tasm/tasm.h
   upper_bound/upper_bound.h
   visualisation/visualisation.h
