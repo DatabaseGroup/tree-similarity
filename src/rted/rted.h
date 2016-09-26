@@ -61,40 +61,30 @@ data_structures::Array2D<double>* gted(NodeInfo<_NodeData>* ia1, NodeInfo<_NodeD
   // std::cout << "gted was called for root_node1: " << root_node1 << " and root_node2: " << root_node2 << ";\tpathId: " << pathId << std::endl;
   int parentId = ia1[(int) pathId].parent_id; // Store the preorder id of the parent
   // Decomposition of the tree 1
-  int ignored_child_id = pathId;
+  int path_node_id = pathId;
   if((int) pathId < ia1[0].subtree_size) { // Line 2: Check if the path is in the left hand tree
     // Line 3-4: Call the function recursively for all trees in the resulting subforest (the subforest that results from removing the root-leave-path)
     int i = pathId;
-    while(i != root_node1) {
+    while(i >= root_node1) { // Loop over all path nodes from pathId to root_node1 (walk up the path)
       for(int j = 0; j < ia1[i].number_of_children; ++j) { // At every parent node loop over all children and call for everyone that's not the node on the path the function
-        if(ia1[i].children[j] != ignored_child_id) { // Check if the child is not the one on the path
+        if(ia1[i].children[j] != path_node_id) { // Check if the child is not the one on the path
           gted(ia1, ia2, ia1[i].children[j], root_node2, str);
         }
       }
-      ignored_child_id = i;
-      i = ia1[ignored_child_id].parent_id;
-    }
-    for(int j = 0; j < ia1[root_node1].number_of_children; ++j) { // Loop over the children of the current root node (can't be done in the loop above)
-      if(ia1[root_node1].children[j] != ignored_child_id) { // Check if the child is not the one on the path
-        gted(ia1, ia2, ia1[root_node1].children[j], root_node2, str);
-      }
+      path_node_id = i;
+      i = ia1[path_node_id].parent_id;
     }
   // Decomposition of tree 2
 } else { // Line 6: Differs from the algorithm because we don't transpose the matrices. Instead we decompose the right tree aswell (like tree1)
     int i = pathId - ia1[0].subtree_size; // Substract the offset
-    while(i != root_node2) {
+    while(i >= root_node2) { // Loop over all path nodes from pathId to root_node2 (walk up the path)
       for(int j = 0; j < ia2[i].number_of_children; ++j) { // At every parent node loop over all children and call for everyone that's not the node on the path the function
-        if(ia2[i].children[j] != ignored_child_id) { // Check if the child is not the one on the path
+        if(ia2[i].children[j] != path_node_id) { // Check if the child is not the one on the path
           gted(ia1, ia2, root_node1, ia2[i].children[j], str);
         }
       }
-      ignored_child_id = i;
-      i = ia2[ignored_child_id].parent_id;
-    }
-    for(int j = 0; j < ia2[root_node2].number_of_children; ++j) { // Loop over the children of the current root node (can't be done in the loop above)
-      if(ia2[root_node2].children[j] != ignored_child_id) { // Check if the child is not the one on the path
-        gted(ia1, ia2, root_node1, ia2[i].children[j], str);
-      }
+      path_node_id = i;
+      i = ia2[path_node_id].parent_id;
     }
   }
   return str;
