@@ -4,6 +4,7 @@
 #include <iterator>
 
 #include "../nodes/node.h"
+#include "dewey_identifier.h"
 
 namespace data_structures {
 
@@ -74,8 +75,11 @@ private:
       std::cout << "{ ";
       for (int i = 0; i < next_index_; ++i) {
         std::cout << "(" << entries_.at(i).first << ", [ ";
-        for (const std::pair<int, int>& e: entries_.at(i).second) {
-          std::cout << "(" << e.first << ", " << e.second << ") ";
+        for (const DeweyIdentifier& e: entries_.at(i).second) {
+          for (const size_t& p: e.id_) {
+            std::cout << p << ".";
+          }
+          std::cout << " ";
         }
         std::cout << "]) ";
       }
