@@ -17,6 +17,7 @@ public:
 
   void clear();
   size_t& at(const size_t& level);
+  const size_t& at(const size_t& level) const;
   void set(const size_t& value, const size_t& level);
   bool is_prefix(const DeweyIdentifier& other) const;
   bool is_predecessor(const DeweyIdentifier& other) const;
@@ -53,6 +54,14 @@ void DeweyIdentifier::clear() {
 }
 
 size_t& DeweyIdentifier::at(const size_t& level) {
+  try {
+    return id_.at(level);
+  } catch(std::exception& e) {
+    throw;
+  }
+}
+
+const size_t& DeweyIdentifier::at(const size_t& level) const {
   try {
     return id_.at(level);
   } catch(std::exception& e) {
