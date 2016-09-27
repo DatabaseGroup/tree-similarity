@@ -120,14 +120,22 @@ data_structures::KHeap<std::pair<int, nodes::Node<_NodeData>*>> naive_search(
   data_structures::KHeap<std::pair<int, nodes::Node<_NodeData>*>> results(k);
 
   std::pair<data_structures::DeweyIdentifier, std::multiset<_NodeData>> previous;
+  std::multiset<_NodeData> labels;
   while (!pl.empty()) {
     auto p = pl.next();
-    std::multiset<_NodeData> labels;
+    labels = { };
+
+    std::cout << "m = " << m << std::endl;
+
+    std::cout << "d = ";
+    for (const int& i: p.first.id_) { std::cout << i << "."; }
+    std::cout << std::endl;
 
     _NodeData& current_data = p.second;
     data_structures::DeweyIdentifier& current_dewey_id = p.first;
 
     while (!s.empty() && !(previous = s.top()).first.is_prefix(p.first)) {
+      std::cout << "Popping (1)." << std::endl;
       s.pop();
 
       // TODO: is this the best/fastet way to build the union of 2 multisets
@@ -143,10 +151,19 @@ data_structures::KHeap<std::pair<int, nodes::Node<_NodeData>*>> naive_search(
     data_structures::DeweyIdentifier top_dewey_id{};
     if (!s.empty()) {
       previous = s.top();
+
+      std::cout << "Popping (2)." << std::endl;
       s.pop();
 
       std::multiset<_NodeData> labels_union = { labels };
       labels_union.insert(previous.second.begin(), previous.second.end());
+
+      std::cout << "Pushing (";
+      for (const int& i: previous.first.id_) { std::cout << i << "."; }
+      std::cout << ", ";
+      for (const _NodeData& nd: labels_union) { std::cout << nd.get_label() << " "; }
+      std::cout << ") onto the stack." << std::endl;
+
       s.push(std::make_pair(previous.first, labels_union));
 
       top_dewey_id = previous.first;
@@ -159,10 +176,34 @@ data_structures::KHeap<std::pair<int, nodes::Node<_NodeData>*>> naive_search(
     );
 
     for (const data_structures::DeweyIdentifier& id: intermediate_dewey_ids) {
+      std::cout << "Pushing (";
+      for (const int& i: id.id_) { std::cout << i << "."; }
+      std::cout << ", { }) onto the stack." << std::endl;
+
       s.push(std::make_pair(id, std::multiset<_NodeData>{ }));
     }
 
+    std::cout << "Pushing (";
+    for (const int& i: current_dewey_id.id_) { std::cout << i << "."; }
+    std::cout << ", " << current_data.get_label() << ") onto the stack." << std::endl;
     s.push(std::make_pair(current_dewey_id, std::multiset<_NodeData>{ current_data }));
+
+    std::cout << "Stack: size = " << s.size() << std::endl;
+  }
+
+  labels = { };
+  while (!s.empty()) {
+    std::cout << "Popping (3)." << std::endl;
+    s.pop();
+
+    // TODO: is this the best/fastet way to build the union of 2 multisets
+    // or rather use std::set_union ...
+    // O(n log (n + k)), n = distance between the two multisets,
+    // k = size of the calling multiset (labels)
+    labels.insert(previous.second.begin(), previous.second.end());
+
+    // no return value, m is modified since it's passed by reference
+    filter_and_add(query, labels, labels_query, previous.first, m, results, node_index);
   }
 
   return results;
