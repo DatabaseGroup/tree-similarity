@@ -117,7 +117,7 @@ data_structures::KHeap<std::pair<int, nodes::Node<_NodeData>*>> naive_search(
 
   std::cout << pl.size() << std::endl;
   std::stack<std::pair<data_structures::DeweyIdentifier, std::multiset<_NodeData>>> s;
-  data_structures::KHeap<std::pair<int, nodes::Node<_NodeData>*>> results(6);
+  data_structures::KHeap<std::pair<int, nodes::Node<_NodeData>*>> results(k);
 
   std::pair<data_structures::DeweyIdentifier, std::multiset<_NodeData>> previous;
   while (!pl.empty()) {
