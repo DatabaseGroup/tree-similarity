@@ -5,6 +5,7 @@
 #include <stack>
 #include <list>
 #include <set>
+#include <algorithm>
 
 #include "../data_structures/k_heap.h"
 #include "../data_structures/posting_list_container.h"
@@ -17,7 +18,13 @@ void filter_and_add(nodes::Node<_NodeData>* query,
   data_structures::DeweyIdentifier& dewey_id, int& m,
   data_structures::KHeap<nodes::Node<_NodeData>>& results)
 {
-  
+  std::multiset<_NodeData> intersection;
+  std::set_intersection(labels.begin(), labels.end(), labels_query.begin(),
+    labels_query.end(), std::inserter(intersection, intersection.begin())
+  );
+
+  size_t intersection_size = intersection.size();
+  //size_t label_diff = std::max(( - intersection_size), ( - intersection_size));
 }
 
 template<class _NodeData>
