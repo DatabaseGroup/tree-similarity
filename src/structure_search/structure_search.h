@@ -27,8 +27,20 @@ void filter_and_add(nodes::Node<_NodeData>* query,
     labels_query.end(), std::inserter(intersection, intersection.begin())
   );
 
-  wrappers::NodeIndexValue<_NodeData> node_information =
-    node_index.search(dewey_id).second.second;
+  std::cout << "FilterAndAdd: Searching for dewey_id ";
+  for (const int& i: dewey_id.id_) { std::cout << i << "."; }
+  std::cout << std::endl;
+  wrappers::NodeIndexValue<_NodeData> node_information;
+  std::pair<bool, std::pair<data_structures::DeweyIdentifier, wrappers::NodeIndexValue<_NodeData>>> search_result =
+    node_index.search(dewey_id);
+
+  if(!search_result.first) {
+    // nothing found in node index
+    return;
+  }
+  
+  node_information = node_index.search(dewey_id).second.second;
+  
   size_t intersection_size = intersection.size();
   int label_diff = std::max((labels_query.size() - intersection_size),
     (node_information.size() - intersection_size)
