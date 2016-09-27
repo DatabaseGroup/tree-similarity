@@ -20,6 +20,7 @@ public:
   void set(const size_t& value, const size_t& level);
   bool is_prefix(const DeweyIdentifier& other) const;
   bool is_predecessor(const DeweyIdentifier& other) const;
+  size_t length() const;
 
   bool operator<(const DeweyIdentifier& other) const;
   bool operator==(const DeweyIdentifier& other) const;
@@ -92,6 +93,10 @@ bool DeweyIdentifier::is_predecessor(const DeweyIdentifier& other) const {
   // other is a descendant of this iff did(this) is a prefix of did(other)
   // as a consequence, this is a predecessor of other if this holds
   return is_prefix(other);
+}
+
+size_t DeweyIdentifier::length() const {
+  return id_.size();
 }
 
 bool DeweyIdentifier::operator<(const DeweyIdentifier& other) const {
