@@ -81,7 +81,7 @@ void set_leaves(std::vector<nodes::Node<_NodeData>*>* leaves_tree1,
       }
     }
   } else {
-    if (root->get_children_number() > 0) {
+    if ((root != nullptr) && (root->get_children_number() > 0)) {
       for (int i = 0; i < root->get_children_number(); ++i) {
         set_leaves<_NodeData>(leaves_tree1, leaves_tree2, root->get_child(i), 2);
       }
