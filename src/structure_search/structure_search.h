@@ -54,6 +54,14 @@ void filter_and_add(nodes::Node<_NodeData>* query,
   }
 }
 
+void generate_intermediate_dewey_ids(
+  const data_structures::DeweyIdentifier& begin,
+  const data_structures::DeweyIdentifier& end,
+  std::vector<data_structures::DeweyIdentifier>& to_fill)
+{
+
+}
+
 template<class _NodeData>
 data_structures::KHeap<std::pair<int, nodes::Node<_NodeData>*>> naive_search(
   nodes::Node<_NodeData>* query, std::vector<nodes::Node<_NodeData>*> trees,
@@ -82,7 +90,7 @@ data_structures::KHeap<std::pair<int, nodes::Node<_NodeData>*>> naive_search(
     auto p = pl.next();
     std::multiset<_NodeData> labels;
 
-    _NodeData& current_label = p.second;
+    _NodeData& current_data = p.second;
     data_structures::DeweyIdentifier& current_dewey_id = p.first;
 
     while (!s.empty() && !(previous = s.top()).first.is_prefix(p.first)) {
@@ -99,7 +107,6 @@ data_structures::KHeap<std::pair<int, nodes::Node<_NodeData>*>> naive_search(
     }
 
     data_structures::DeweyIdentifier top_dewey_id{};
-
     if (!s.empty()) {
       previous = s.top();
       s.pop();
@@ -111,7 +118,17 @@ data_structures::KHeap<std::pair<int, nodes::Node<_NodeData>*>> naive_search(
       top_dewey_id = previous.first;
     }
 
-    
+
+    std::vector<data_structures::DeweyIdentifier> intermediate_dewey_ids;
+    generate_intermediate_dewey_ids(top_dewey_id, current_dewey_id,
+      intermediate_dewey_ids
+    );
+
+    for (const data_structures::DeweyIdentifier& id: intermediate_dewey_ids) {
+      s.push(std::make_pair(id, std::multiset<_NodeData>{ }));
+    }
+
+    s.push(std::make_pair(current_dewey_id, std::multiset<_NodeData>{ current_data }));
   }
 
   return results;
