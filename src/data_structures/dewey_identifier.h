@@ -10,7 +10,8 @@ public:
   std::vector<size_t> id_;
 
 public:
-  DeweyIdentifier(const size_t& value = 0);
+  DeweyIdentifier();
+  DeweyIdentifier(const size_t& value);
   DeweyIdentifier(const DeweyIdentifier& other);
   DeweyIdentifier(const DeweyIdentifier& other, const size_t& last_value);
   ~DeweyIdentifier();
@@ -22,10 +23,13 @@ public:
   bool is_prefix(const DeweyIdentifier& other) const;
   bool is_predecessor(const DeweyIdentifier& other) const;
   size_t length() const;
+  bool empty() const;
 
   bool operator<(const DeweyIdentifier& other) const;
   bool operator==(const DeweyIdentifier& other) const;
 };
+
+DeweyIdentifier::DeweyIdentifier() { }
 
 DeweyIdentifier::DeweyIdentifier(const size_t& value) {
   if (id_.size() > 0) {
@@ -106,6 +110,10 @@ bool DeweyIdentifier::is_predecessor(const DeweyIdentifier& other) const {
 
 size_t DeweyIdentifier::length() const {
   return id_.size();
+}
+
+bool DeweyIdentifier::empty() const {
+  return id_.empty();
 }
 
 bool DeweyIdentifier::operator<(const DeweyIdentifier& other) const {
