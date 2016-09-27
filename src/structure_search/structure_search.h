@@ -71,17 +71,29 @@ void generate_intermediate_dewey_ids(
   const data_structures::DeweyIdentifier& end,
   std::vector<data_structures::DeweyIdentifier>& to_fill)
 {
-  if (begin.length() >= end.length()) {
+  if ((begin.length() >= end.length())
+      || (!begin.empty() && ((end.length() - begin.length()) <= 1)))
+  {
     return;
   }
 
-  size_t length_diff = end.length() - begin.length() - 1;
+  std::cout << "GenerateIntermediateDeweyIDs: from ";
+  for (const int& i: begin.id_) { std::cout << i << "."; }
+  std::cout << " to ";
+  for (const int& i: end.id_) { std::cout << i << "."; }
+  std::cout << std::endl;
+
   // TODO: possibly use reference here (prefix)
-  data_structures::DeweyIdentifier prefix = begin;
-  for (int i = length_diff; i < end.length(); ++i) {
+  data_structures::DeweyIdentifier prefix =
+    (begin.empty() ? data_structures::DeweyIdentifier(1) : begin);
+
+  // TODO: verify predecessor definition with Nikolaus
+  to_fill.push_back(prefix);
+  for (int i = prefix.length(); i < end.length() - 1; ++i) {
     to_fill.push_back(data_structures::DeweyIdentifier(prefix, end.at(i)));
     prefix = to_fill.back();
   }
+  //to_fill.push_back(end);
 }
 
 template<class _NodeData>
