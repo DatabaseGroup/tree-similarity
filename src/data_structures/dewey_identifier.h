@@ -18,6 +18,7 @@ public:
   void clear();
   size_t& at(const size_t& level);
   void set(const size_t& value, const size_t& level);
+  bool is_prefix(const DeweyIdentifier& other) const;
 
   bool operator<(const DeweyIdentifier& other) const;
   bool operator==(const DeweyIdentifier& other) const;
@@ -63,6 +64,27 @@ void DeweyIdentifier::set(const size_t& value, const size_t& level) {
   } catch(std::exception& e) {
     throw;
   }
+}
+
+bool DeweyIdentifier::is_prefix(const DeweyIdentifier& other) const {
+  if (id_.size() >= other.id_.size()) {
+    return false;
+  }
+
+  // id_.size() < other.id_.size()
+  std::vector<size_t>::const_iterator tcit, ocit;
+  size_t i = 0;
+  for ( tcit = id_.cbegin(), ocit = other.id_.cbegin(); tcit != id_.cend();
+        ++tcit, ++ocit)
+  {
+    //std::cout << *tcit << ", " << *ocit << std::endl;
+    if (*tcit != *ocit) {
+      //std::cout << *tcit << " != " << *ocit << std::endl;
+      return false;
+    }
+  }
+
+  return true;
 }
 
 bool DeweyIdentifier::operator<(const DeweyIdentifier& other) const {
