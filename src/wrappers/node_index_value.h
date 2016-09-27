@@ -6,9 +6,9 @@ namespace wrappers {
 template<class _NodeData>
 class NodeIndexValue {
 private:  
-  const size_t size_;
-  const size_t depth_;
-  const _NodeData data_;
+  size_t size_;
+  size_t depth_;
+  _NodeData data_;
 
 public:
   NodeIndexValue();
