@@ -21,7 +21,8 @@ public:
 };
 
 template<class _NodeData>
-NodeIndexValue<_NodeData>::NodeIndexValue() { }
+NodeIndexValue<_NodeData>::NodeIndexValue() : NodeIndexValue(0, 0, _NodeData{})
+{ }
 
 template<class _NodeData>
 NodeIndexValue<_NodeData>::NodeIndexValue(const size_t& size, const size_t& depth,
