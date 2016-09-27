@@ -59,7 +59,17 @@ void generate_intermediate_dewey_ids(
   const data_structures::DeweyIdentifier& end,
   std::vector<data_structures::DeweyIdentifier>& to_fill)
 {
+  if (begin.length() >= end.length()) {
+    return;
+  }
 
+  size_t length_diff = end.length() - begin.length() - 1;
+  // TODO: possibly use reference here (prefix)
+  data_structures::DeweyIdentifier prefix = begin;
+  for (int i = length_diff; i < end.length(); ++i) {
+    to_fill.push_back(data_structures::DeweyIdentifier(prefix, end.at(i)));
+    prefix = to_fill.back();
+  }
 }
 
 template<class _NodeData>
