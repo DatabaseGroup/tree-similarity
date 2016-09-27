@@ -6,6 +6,7 @@
 #include <list>
 #include <set>
 #include <algorithm>
+#include <cmath>
 
 #include "../data_structures/k_heap.h"
 #include "../data_structures/posting_list_container.h"
@@ -96,6 +97,21 @@ data_structures::KHeap<std::pair<int, nodes::Node<_NodeData>*>> naive_search(
       // no return value, m is modified since it's passed by reference
       filter_and_add(query, labels, labels_query, previous.first, m, results, node_index);
     }
+
+    data_structures::DeweyIdentifier top_dewey_id{};
+
+    if (!s.empty()) {
+      previous = s.top();
+      s.pop();
+
+      std::multiset<_NodeData> labels_union = { labels };
+      labels_union.insert(previous.second.begin(), previous.second.end());
+      s.push(std::make_pair(previous.first, labels_union));
+
+      top_dewey_id = previous.first;
+    }
+
+    
   }
 
   return results;
