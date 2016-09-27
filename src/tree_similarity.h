@@ -29,6 +29,7 @@
 #include "upper_bound/upper_bound.h"
 
 #include "wrappers/node_distance_pair.h"
+#include "wrappers/node_index_value.h"
 #include "wrappers/node_prefixes_pair.h"
 
 #include "zhang_shasha/zhang_shasha.h"

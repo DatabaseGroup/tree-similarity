@@ -37,6 +37,7 @@ set(tree_similarity_sources
   upper_bound/upper_bound.h
   visualisation/visualisation.h
   wrappers/node_distance_pair.h
+  wrappers/node_index_value.h
   wrappers/node_prefixes_pair.h
   zhang_shasha/zhang_shasha.h
 )
