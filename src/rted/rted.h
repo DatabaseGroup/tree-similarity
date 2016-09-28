@@ -48,18 +48,125 @@ int get_tree_size(nodes::Node<_NodeData>* tree) {
  * Algorithm 3 in TODS paper
  */
 template<class _NodeData = nodes::StringNodeData, class _Costs = nodes::Costs<_NodeData>>
-double spfG() {
+double spfG(NodeInfo<_NodeData>* ia1, NodeInfo<_NodeData>* ia2, int root_node1, int root_node2,
+  data_structures::Array2D<double>* str, bool swapped)
+  {
 
 }
 
 /*
- * Algorithm 1 in TODS paper
+ * Single Path Function for One-node trees
+ * Equation 4 in Information Systems paper
+ * The algorithm works as follows (for the case, that the right hand tree is one node):
+ *
+ * If the right hand tree consists of only one node, calculate the distance between the input trees
+ * as defined in Equation 4 of the Inf Sys paper
+ * That means summing up all deletion costs of the nodes in the left hand tree except the root node (this is done in the for loop)
+ * While looping over the nodes, the node for which the renaming-cost to the root node of the right-hand tree
+ * minus its deletion cost is the minimum is found and in the end added to the returned distance value
+ * plus the deletion cost of the left-hand trees root node
+ *
+ * If the left hand tree is a one-node tree, it works in the same, but the insertion costs
+ * are summed up and the minimum value for renaming minus insertion cost is found
+ *
+ * Params:  ia1/2          The NodeInfo arrays of the trees
+ *          root_node1/2   The preorder ids of the root nodes for which gted is called
+ *          str            The strategy matrix
+ *          costs          The costs object
+ * Return:  The Tree Edit Distance between the two trees (as a double)
+ * Throws:  A char const* with the error message or an std::exception
  */
- template<class _NodeData = nodes::StringNodeData>
-data_structures::Array2D<double>* gted(NodeInfo<_NodeData>* ia1, NodeInfo<_NodeData>* ia2, int root_node1, int root_node2, data_structures::Array2D<double>* str) {
-  double pathId = (*str)[root_node1][root_node2]; // Line 1: Get the path id of the root-leave-path
+template<class _NodeData = nodes::StringNodeData, class _Costs = nodes::Costs<_NodeData>>
+double spf1(NodeInfo<_NodeData>* ia1, NodeInfo<_NodeData>* ia2, int root_node1, int root_node2,
+  data_structures::Array2D<double>* str, _Costs* costs)
+  {
+  // If both trees are single-nodes, set the distance value in the matrix at the according index to 0 and return the rename cost of renaming node1 to node2
+  if(ia1[root_node1].subtree_size == 1 && ia2[root_node2].subtree_size == 1) {
+    (*str)[root_node1][root_node2] = 0; // 0 because the distance matrix stores the distances without the root nodes
+    return (*costs).ren(ia1[root_node1].nodeData, ia2[root_node2].nodeData);
+
+  } else if(ia2[root_node2].subtree_size == 1) { // If the right hand tree is a one-node tree
+    // Assume that the minimum rename cost is the one of the root node
+    double min_rename_cost = (*costs).ren(ia1[root_node1].nodeData, ia2[root_node2].nodeData) - (*costs).del(ia1[root_node1].nodeData);
+    double current_node_rename_cost;
+    // Reseting values in the strategy matrix because it is reused as the distance matrix
+    for(int i = root_node1 + ia1[root_node1].subtree_size - 1; i >= root_node1; --i) { // Every node in the left hand subtree
+      (*str)[i][root_node2] = 0; // Can be done because the strategy for this particular node won't be needed anymore because of our bottom-up approach
+    }
+
+    // Traverse through the left-hand subtree in reverse left-to-right-preorder without the root (bottom-up)
+    for(int i = root_node1 + ia1[root_node1].subtree_size - 1; i > root_node1; --i) {
+      current_node_rename_cost = (*costs).ren(ia1[i].nodeData, ia2[root_node2].nodeData) - (*costs).del(ia1[i].nodeData);
+      if(current_node_rename_cost < min_rename_cost) { // Find minimum renaming value of a left-hand-trees node minus its deletion cost to add that in the end to the strategy
+        min_rename_cost = current_node_rename_cost;
+      }
+      if(ia1[i].subtree_size == 1) { // If the current node is a leave
+        (*str)[i][root_node2] = 0; // Set the according distance value in the matrix to 0 (because it's the distance value without the root node)
+      }
+      // Add to the parents distance value in the matrix the current nodes deletion cost and the already stored costs of its descendants
+      (*str)[ia1[i].parent_id][root_node2] += (*costs).del(ia1[i].nodeData) + (*str)[i][root_node2];
+    }
+
+    // Return the distance between the root nodes
+    // This is the currently stored distance value plus the minimum rename cost (renaming minus deletion cost) and the deletion cost of the left-hand root node
+    return (*str)[root_node1][root_node2] + (*costs).del(ia1[root_node1].nodeData) + min_rename_cost;
+
+  } else if(ia1[root_node1].subtree_size == 1) {
+    // If the left hand tree consists of only one node, calculate the distance between them like in Equation 4,
+    // but now summing up the insertion costs for inserting the right-hand nodes
+    double min_rename_cost = (*costs).ren(ia1[root_node1].nodeData, ia2[root_node2].nodeData) - (*costs).ins(ia2[root_node2].nodeData);
+    double current_node_rename_cost;
+    // Reseting values in the strategy matrix because it is reused as the distance matrix
+    for(int i = root_node2 + ia2[root_node2].subtree_size - 1; i >= root_node2; --i) {
+      (*str)[root_node1][i] = 0;
+    }
+
+    // Traverse through the right-hand subtree in reverse left-to-right-preorder without the root (bottom-up)
+    for(int i = root_node2 + ia2[root_node2].subtree_size - 1; i > root_node2; --i) {
+      current_node_rename_cost = (*costs).ren(ia1[root_node1].nodeData, ia2[i].nodeData) - (*costs).ins(ia2[i].nodeData);
+      if(current_node_rename_cost < min_rename_cost) { // Find minimum renaming value of a right-hand-trees node minus its insertion cost to add that in the end to the strategy
+        min_rename_cost = current_node_rename_cost;
+      }
+      if(ia2[i].subtree_size == 1) { // If the current node is a leave
+        (*str)[root_node1][i] = 0; // Set the according distance value in the matrix to 0 (because it's the distance value without the root node)
+      }
+      // Add to the parents distance value in the matrix the current nodes insertion cost and the already stored costs of its descendants
+      (*str)[root_node1][ia2[i].parent_id] += (*costs).ins(ia2[i].nodeData) + (*str)[root_node1][i];
+    }
+
+    // Return the distance between the root nodes
+    // This is the currently stored distance value plus the minimum rename cost (renaming minus insertion cost) and the insertion cost of the right-hand root node
+    return (*str)[root_node1][root_node2] + (*costs).ins(ia2[root_node2].nodeData) + min_rename_cost;
+  } else {
+    throw "None of the trees passed to spf1 was a single-node!";
+  }
+}
+
+/*
+ * Algorithm 1 in TODS paper
+ *
+ *
+ * Params:  ia1/2          The NodeInfo arrays of the trees
+ *          root_node1/2   The preorder ids of the root nodes for which gted is called
+ *          str            The strategy matrix
+ * Return:  The tree edit distance of the two trees as a double
+ */
+template<class _NodeData = nodes::StringNodeData, class _Costs = nodes::StringCosts<_NodeData>>
+double gted(NodeInfo<_NodeData>* ia1, NodeInfo<_NodeData>* ia2, int root_node1, int root_node2,
+  data_structures::Array2D<double>* str, _Costs* costs)
+  {
+  int pathId = (int) (*str)[root_node1][root_node2]; // Line 1: Get the path id of the root-leave-path
   // std::cout << "gted was called for root_node1: " << root_node1 << " and root_node2: " << root_node2 << ";\tpathId: " << pathId << std::endl;
-  int parentId = ia1[(int) pathId].parent_id; // Store the preorder id of the parent
+  int parentId = ia1[pathId].parent_id; // Store the preorder id of the parent
+
+  // cases:
+  //        1: single node, input tree
+  //        2: single node, not input tree
+
+  if(ia1[root_node1].subtree_size == 1 || ia2[root_node2].subtree_size == 1) { // case 2
+    return spf1(ia1, ia2, root_node1, root_node2, str, costs);
+  }
+
   // Decomposition of the tree 1
   int path_node_id = pathId;
   if((int) pathId < ia1[0].subtree_size) { // Line 2: Check if the path is in the left hand tree
@@ -68,26 +175,28 @@ data_structures::Array2D<double>* gted(NodeInfo<_NodeData>* ia1, NodeInfo<_NodeD
     while(i >= root_node1) { // Loop over all path nodes from pathId to root_node1 (walk up the path)
       for(int j = 0; j < ia1[i].number_of_children; ++j) { // At every parent node loop over all children and call for everyone that's not the node on the path the function
         if(ia1[i].children[j] != path_node_id) { // Check if the child is not the one on the path
-          gted(ia1, ia2, ia1[i].children[j], root_node2, str);
+          gted(ia1, ia2, ia1[i].children[j], root_node2, str, costs);
         }
       }
       path_node_id = i;
       i = ia1[path_node_id].parent_id;
     }
+    // TODO call spfG
   // Decomposition of tree 2
-} else { // Line 6: Differs from the algorithm because we don't transpose the matrices. Instead we decompose the right tree aswell (like tree1)
+  } else { // Line 6: Differs from the algorithm because we don't transpose the matrices. Instead we decompose the right tree aswell (like tree1)
     int i = pathId - ia1[0].subtree_size; // Substract the offset
     while(i >= root_node2) { // Loop over all path nodes from pathId to root_node2 (walk up the path)
       for(int j = 0; j < ia2[i].number_of_children; ++j) { // At every parent node loop over all children and call for everyone that's not the node on the path the function
         if(ia2[i].children[j] != path_node_id) { // Check if the child is not the one on the path
-          gted(ia1, ia2, root_node1, ia2[i].children[j], str);
+          gted(ia1, ia2, root_node1, ia2[i].children[j], str, costs);
         }
       }
       path_node_id = i;
       i = ia2[path_node_id].parent_id;
     }
+    // TODO call spfG with ia and root nodes swapped
   }
-  return str;
+  return (*str)[0][0];
 }
 
 // Computes the Tree Edit Distance with the RTED Algorithm
@@ -97,9 +206,9 @@ data_structures::Array2D<double>* gted(NodeInfo<_NodeData>* ia1, NodeInfo<_NodeD
 //          costs     The costs for the edit operations
 // Return:  A double which is the tree edit distance of the two trees
 // Throws:  A char const* with the error message or an std::exception
-template<class _NodeData = nodes::StringNodeData, class _Costs = nodes::Costs<_NodeData>>
-double compute_rted(nodes::Node<_NodeData>* tree1, nodes::Node<_NodeData>* tree2/*,
-  _Costs costs = _Costs()*/) //TODO add costs
+template<class _NodeData = nodes::StringNodeData, class _Costs = nodes::StringCosts<_NodeData>>
+double compute_rted(nodes::Node<_NodeData>* tree1, nodes::Node<_NodeData>* tree2,
+  _Costs* costs = new _Costs()) //TODO add costs
 {
   int tree1_size = get_tree_size(tree1);
   int tree2_size = get_tree_size(tree2);
@@ -111,10 +220,7 @@ double compute_rted(nodes::Node<_NodeData>* tree1, nodes::Node<_NodeData>* tree2
 
   data_structures::Array2D<double>* str = compute_strategy_right_to_left_preorder(tree1_info_array, tree2_info_array);
 
-  gted(tree1_info_array, tree2_info_array, 0, 0, str);
-
-  // IMPLEMENT RTED THERE
-  return (double) (tree1_size + tree2_size);
+  return gted(tree1_info_array, tree2_info_array, 0, 0, str, costs);
 }
 
 // Returns the size of a given tree
@@ -315,6 +421,7 @@ data_structures::Array2D<double>* compute_strategy_right_to_left_preorder(
         path2[lw] = lw;
       }
       // Line 10-16: get cost-path pairs (6: left, inner, right for both F and G) and determine minimum cost and path
+      // TODO if one of the subtrees is a single node, the min cost is the maximum size of both subtrees
       std::string root_min_path = "l1";
       min_cost = (long) tree_info_array_1[lv].subtree_size * (long) tree_info_array_2[lw].left_decomp_size + l1[lv][lw];
       min_path = tree_info_array_1[v + tree_info_array_1[lv].subtree_size - 1].r_to_l; // left_path_tree1

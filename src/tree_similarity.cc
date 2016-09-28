@@ -97,7 +97,9 @@ int main (int argc, char* argv[]) {
 
       std::cout << std::endl << std::endl << "rted is being invoked." << std::endl << std::endl;*/
 
-      rted::compute_rted(test_tree1, test_tree2); //TODO test with costs
+      double rted_output = rted::compute_rted(test_tree1, test_tree2); //TODO test with costs
+
+      std::cout << "ted: " << rted_output << std::endl;
 
       delete[] tree_info_array_preorder1; // deletes the NodeInfo pointer array
       delete[] tree_info_array_preorder2; // deletes the NodeInfo pointer array
