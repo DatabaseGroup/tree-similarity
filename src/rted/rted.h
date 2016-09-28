@@ -17,7 +17,6 @@ struct NodeInfo {
   int r_to_l; // indexed in postorder!
   int number_of_children;
   int* children; // array of the preorder ids of the children
-  //nodes::Node<_NodeData>* children; //Maybe change type later
   int full_decomp_size; // The number of subforests in the full decomposition of subtree rooted at this node (Lemma 5.1 in TODS paper)
   int left_decomp_size = 0; // The number of relevant subforests produced by a recursive path decomposition (Lemma 5.3 in TODS paper)
   int right_decomp_size = 0;
@@ -66,7 +65,7 @@ double spfG(NodeInfo<_NodeData>* ia1, NodeInfo<_NodeData>* ia2, int root_node1, 
  * minus its deletion cost is the minimum is found and in the end added to the returned distance value
  * plus the deletion cost of the left-hand trees root node
  *
- * If the left hand tree is a one-node tree, it works in the same, but the insertion costs
+ * If the left hand tree is a one-node tree, it works in the same way, but the insertion costs
  * are summed up and the minimum value for renaming minus insertion cost is found
  *
  * Params:  ia1/2          The NodeInfo arrays of the trees
@@ -130,7 +129,7 @@ double spf1(NodeInfo<_NodeData>* ia1, NodeInfo<_NodeData>* ia2, int root_node1, 
       if(ia2[i].subtree_size == 1) { // If the current node is a leave
         (*str)[root_node1][i] = 0; // Set the according distance value in the matrix to 0 (because it's the distance value without the root node)
       }
-      // Add to the parents distance value in the matrix the current nodes insertion cost and the already stored costs of its descendants
+      // Add the current nodes insertion cost and the already stored costs of its descendants to the parents distance value in the matrix
       (*str)[root_node1][ia2[i].parent_id] += (*costs).ins(ia2[i].nodeData) + (*str)[root_node1][i];
     }
 
@@ -159,11 +158,7 @@ double gted(NodeInfo<_NodeData>* ia1, NodeInfo<_NodeData>* ia2, int root_node1, 
   // std::cout << "gted was called for root_node1: " << root_node1 << " and root_node2: " << root_node2 << ";\tpathId: " << pathId << std::endl;
   int parentId = ia1[pathId].parent_id; // Store the preorder id of the parent
 
-  // cases:
-  //        1: single node, input tree
-  //        2: single node, not input tree
-
-  if(ia1[root_node1].subtree_size == 1 || ia2[root_node2].subtree_size == 1) { // case 2
+  if(ia1[root_node1].subtree_size == 1 || ia2[root_node2].subtree_size == 1) {
     return spf1(ia1, ia2, root_node1, root_node2, str, costs);
   }
 
@@ -208,7 +203,7 @@ double gted(NodeInfo<_NodeData>* ia1, NodeInfo<_NodeData>* ia2, int root_node1, 
 // Throws:  A char const* with the error message or an std::exception
 template<class _NodeData = nodes::StringNodeData, class _Costs = nodes::StringCosts<_NodeData>>
 double compute_rted(nodes::Node<_NodeData>* tree1, nodes::Node<_NodeData>* tree2,
-  _Costs* costs = new _Costs()) //TODO add costs
+  _Costs* costs = new _Costs())
 {
   int tree1_size = get_tree_size(tree1);
   int tree2_size = get_tree_size(tree2);
@@ -223,19 +218,20 @@ double compute_rted(nodes::Node<_NodeData>* tree1, nodes::Node<_NodeData>* tree2
   return gted(tree1_info_array, tree2_info_array, 0, 0, str, costs);
 }
 
-// Returns the size of a given tree
-//
-// Params:  tree                        The root node of the tree of type nodes::Node<nodes::StringNodeData>*
-//          nodes_array_preorder        The array in which the nodes should be stored in preorder (size must be at least size of tree!)
-//          node_info_array_preorder    The array in which the node infos should be stored (size must be at least size of tree!) indexed in preorder
-//          total_tree_size             The size of the tree. Must be passed by the caller - should be get from get_tree_size function
-//          preorder_id                 Internally needed parameter, do not overwrite!
-//          preorder_id_parent          Internally needed parameter, do not overwrite!
-//          sum_of_subtree_sizes        Internally needed parameter, do not overwrite!
-//          postorder_id                Internally needed parameter, do not overwrite!
-//          has_left_or_right_sibling   Internally needed parameter, do not overwrite! -1=left, 0=inner, 1=right, -2=no siblings
-// Return:  An integer which is the size of the subtree rooted at the given node
-// Throws:  A char const* with the error message or an std::exception
+/* Returns the size of a given tree
+ *
+ * Params:  tree                        The root node of the tree of type nodes::Node<nodes::StringNodeData>*
+ *          nodes_array_preorder        The array in which the nodes should be stored in preorder (size must be at least size of tree!)
+ *          node_info_array_preorder    The array in which the node infos should be stored (size must be at least size of tree!) indexed in preorder
+ *          total_tree_size             The size of the tree. Must be passed by the caller - should be get from get_tree_size function
+ *          preorder_id                 Internally needed parameter, do not overwrite!
+ *          preorder_id_parent          Internally needed parameter, do not overwrite!
+ *          sum_of_subtree_sizes        Internally needed parameter, do not overwrite!
+ *          postorder_id                Internally needed parameter, do not overwrite!
+ *          has_left_or_right_sibling   Internally needed parameter, do not overwrite! -1=left, 0=inner, 1=right, -2=no siblings
+ * Return:  An integer which is the size of the subtree rooted at the given node
+ * Throws:  A char const* with the error message or an std::exception
+ */
 template<class _NodeData = nodes::StringNodeData>
 int gather_tree_info(nodes::Node<_NodeData>* tree, NodeInfo<_NodeData>* node_info_array_preorder,
     int total_tree_size, int preorder_id = 0, int preorder_id_parent = -1, int* sum_of_subtree_sizes = new int(),
@@ -349,7 +345,8 @@ int gather_tree_info(nodes::Node<_NodeData>* tree, NodeInfo<_NodeData>* node_inf
  * between paths in the left hand and right hand input tree, we add an offset of
  * the size of the left hand tree to the ids of right hand tree paths.
  *
- *
+ * Params: tree_info_array_1/2  The NodeInfo arrays of the trees
+ * Return: A pointer to the strategy matrix
  */
 template<class _NodeData = nodes::StringNodeData>
 data_structures::Array2D<double>* compute_strategy_right_to_left_preorder(
