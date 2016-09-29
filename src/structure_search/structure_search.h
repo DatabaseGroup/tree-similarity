@@ -10,6 +10,7 @@
 
 #include "../data_structures/k_heap.h"
 #include "../data_structures/posting_list_container.h"
+#include "../wrappers/node_distance_pair.h"
 #include "../wrappers/node_index_value.h"
 #include "../zhang_shasha/zhang_shasha.h"
 
@@ -19,7 +20,7 @@ template<class _NodeData>
 void filter_and_add(nodes::Node<_NodeData>* query,
   std::multiset<_NodeData>& labels, std::multiset<_NodeData>& labels_query,
   data_structures::DeweyIdentifier& dewey_id, int& m,
-  data_structures::KHeap<std::pair<int, nodes::Node<_NodeData>*>>& results,
+  data_structures::KHeap<wrappers::NodeDistancePair<_NodeData>>& ranking,
   data_structures::BTree<data_structures::DeweyIdentifier, wrappers::NodeIndexValue<_NodeData>>& node_index)
 {
   std::multiset<_NodeData> intersection;
@@ -48,21 +49,28 @@ void filter_and_add(nodes::Node<_NodeData>* query,
   // TODO: replace 3 by depth of the query
   int depth_diff = static_cast<int>(std::abs(3 - node_information.depth()));
 
+  std::cout << "FilterAndAdd: labelDiff = " << label_diff << ", depth_diff = " << depth_diff << std::endl;
+
   if ((label_diff <= m) && (depth_diff <= m)) {
     // TODO: replace template parameters with actual correct ones (custom costs)
-    int edit_distance = static_cast<int>(
+    int ted = static_cast<int>(
       zhang_shasha::compute_zhang_shasha<_NodeData, nodes::StringCosts<_NodeData>>(
         query, node_information.root()
       )
     );
+    std::cout << "FilterAndAdd: ted = " << ted << std::endl;
 
-    if ((edit_distance < m) || ((edit_distance == m) && !results.full())) {
-      results.insert(std::make_pair(edit_distance, node_information.root()));
+    if ((ted < m) || ((ted == m) && !ranking.full())) {
+      // boundedEnqueue operation
+      wrappers::NodeDistancePair<_NodeData> in_ranking(*node_information.root(), ted);
+      if (!ranking.insert(in_ranking)) {
+        ranking.replace_front(in_ranking);
+      }
     }
   }
 
-  if (results.full()) {
-    m = results.front().first;
+  if (ranking.full()) {
+    m = ranking.front().get_distance();
   }
 }
 
@@ -83,7 +91,6 @@ void generate_intermediate_dewey_ids(
   for (const int& i: end.id_) { std::cout << i << "."; }
   std::cout << std::endl;
 
-  // TODO: possibly use reference here (prefix)
   data_structures::DeweyIdentifier prefix =
     (begin.empty() ? data_structures::DeweyIdentifier(1) : begin);
 
@@ -97,7 +104,7 @@ void generate_intermediate_dewey_ids(
 }
 
 template<class _NodeData>
-data_structures::KHeap<std::pair<int, nodes::Node<_NodeData>*>> naive_search(
+data_structures::KHeap<wrappers::NodeDistancePair<_NodeData>> naive_search(
   nodes::Node<_NodeData>* query, std::vector<nodes::Node<_NodeData>*> trees,
   int& m, const int& k,
   data_structures::BTree<_NodeData, std::list<data_structures::DeweyIdentifier>>& label_index,
@@ -117,7 +124,7 @@ data_structures::KHeap<std::pair<int, nodes::Node<_NodeData>*>> naive_search(
 
   std::cout << pl.size() << std::endl;
   std::stack<std::pair<data_structures::DeweyIdentifier, std::multiset<_NodeData>>> s;
-  data_structures::KHeap<std::pair<int, nodes::Node<_NodeData>*>> results(k);
+  data_structures::KHeap<wrappers::NodeDistancePair<_NodeData>> ranking(k);
 
   std::pair<data_structures::DeweyIdentifier, std::multiset<_NodeData>> previous;
   std::multiset<_NodeData> labels;
@@ -145,7 +152,7 @@ data_structures::KHeap<std::pair<int, nodes::Node<_NodeData>*>> naive_search(
       labels.insert(previous.second.begin(), previous.second.end());
 
       // no return value, m is modified since it's passed by reference
-      filter_and_add(query, labels, labels_query, previous.first, m, results, node_index);
+      filter_and_add(query, labels, labels_query, previous.first, m, ranking, node_index);
     }
 
     data_structures::DeweyIdentifier top_dewey_id{};
@@ -186,6 +193,7 @@ data_structures::KHeap<std::pair<int, nodes::Node<_NodeData>*>> naive_search(
     std::cout << "Pushing (";
     for (const int& i: current_dewey_id.id_) { std::cout << i << "."; }
     std::cout << ", " << current_data.get_label() << ") onto the stack." << std::endl;
+
     s.push(std::make_pair(current_dewey_id, std::multiset<_NodeData>{ current_data }));
 
     std::cout << "Stack: size = " << s.size() << std::endl;
@@ -197,16 +205,13 @@ data_structures::KHeap<std::pair<int, nodes::Node<_NodeData>*>> naive_search(
     s.pop();
 
     // TODO: is this the best/fastet way to build the union of 2 multisets
-    // or rather use std::set_union ...
-    // O(n log (n + k)), n = distance between the two multisets,
-    // k = size of the calling multiset (labels)
     labels.insert(previous.second.begin(), previous.second.end());
 
     // no return value, m is modified since it's passed by reference
-    filter_and_add(query, labels, labels_query, previous.first, m, results, node_index);
+    filter_and_add(query, labels, labels_query, previous.first, m, ranking, node_index);
   }
 
-  return results;
+  return ranking;
 }
 
 }
