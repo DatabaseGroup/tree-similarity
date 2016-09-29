@@ -74,10 +74,11 @@ void filter_and_add(nodes::Node<_NodeData>* query,
   }
 }
 
-void generate_intermediate_dewey_ids(
+template<class _NodeData>
+void push_intermediate_dewey_ids(
   const data_structures::DeweyIdentifier& begin,
   const data_structures::DeweyIdentifier& end,
-  std::vector<data_structures::DeweyIdentifier>& to_fill)
+  std::stack<std::pair<data_structures::DeweyIdentifier, std::multiset<_NodeData>>>& s)
 {
   if ((begin.length() >= end.length())
       || (!begin.empty() && ((end.length() - begin.length()) <= 1)))
@@ -95,10 +96,13 @@ void generate_intermediate_dewey_ids(
     (begin.empty() ? data_structures::DeweyIdentifier(1) : begin);
 
   // TODO: verify predecessor definition with Nikolaus
-  to_fill.push_back(prefix);
+  s.push(std::make_pair(prefix, std::multiset<_NodeData>{ }));
   for (int i = prefix.length(); i < end.length() - 1; ++i) {
-    to_fill.push_back(data_structures::DeweyIdentifier(prefix, end.at(i)));
-    prefix = to_fill.back();
+    s.push(std::make_pair(
+      data_structures::DeweyIdentifier(prefix, end.at(i)), 
+      std::multiset<_NodeData>{ }
+    ));
+    prefix = s.top().first;
   }
   //to_fill.push_back(end);
 }
@@ -193,18 +197,7 @@ data_structures::KHeap<wrappers::NodeDistancePair<_NodeData>> naive_search(
     }
 
 
-    std::vector<data_structures::DeweyIdentifier> intermediate_dewey_ids;
-    generate_intermediate_dewey_ids(top_dewey_id, current_dewey_id,
-      intermediate_dewey_ids
-    );
-
-    for (const data_structures::DeweyIdentifier& id: intermediate_dewey_ids) {
-      std::cout << "Pushing (";
-      for (const int& i: id.id_) { std::cout << i << "."; }
-      std::cout << ", { }) onto the stack." << std::endl;
-
-      s.push(std::make_pair(id, std::multiset<_NodeData>{ }));
-    }
+    push_intermediate_dewey_ids(top_dewey_id, current_dewey_id, s);
 
     std::cout << "Pushing (";
     for (const int& i: current_dewey_id.id_) { std::cout << i << "."; }
