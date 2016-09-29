@@ -104,15 +104,10 @@ void generate_intermediate_dewey_ids(
 }
 
 template<class _NodeData>
-data_structures::KHeap<wrappers::NodeDistancePair<_NodeData>> naive_search(
-  nodes::Node<_NodeData>* query, std::vector<nodes::Node<_NodeData>*> trees,
-  int& m, const int& k,
+void initialize_posting_lists(std::multiset<_NodeData>& labels_query,
   data_structures::BTree<_NodeData, std::list<data_structures::DeweyIdentifier>>& label_index,
-  data_structures::BTree<data_structures::DeweyIdentifier, wrappers::NodeIndexValue<_NodeData>>& node_index,
-  std::multiset<_NodeData>& labels_query)
+  data_structures::PostingListContainer<_NodeData>& pl)
 {
-  data_structures::PostingListContainer<_NodeData> pl;
-
   std::pair<bool, std::pair<_NodeData, std::list<data_structures::DeweyIdentifier>>> fp;
   for (auto& label: labels_query) {
     fp = label_index.search(label);
@@ -122,7 +117,22 @@ data_structures::KHeap<wrappers::NodeDistancePair<_NodeData>> naive_search(
     }
   }
 
+  // debug
   std::cout << pl.size() << std::endl;
+}
+
+template<class _NodeData>
+data_structures::KHeap<wrappers::NodeDistancePair<_NodeData>> naive_search(
+  nodes::Node<_NodeData>* query, std::vector<nodes::Node<_NodeData>*> trees,
+  int& m, const int& k,
+  data_structures::BTree<_NodeData, std::list<data_structures::DeweyIdentifier>>& label_index,
+  data_structures::BTree<data_structures::DeweyIdentifier, wrappers::NodeIndexValue<_NodeData>>& node_index,
+  std::multiset<_NodeData>& labels_query)
+{
+  data_structures::PostingListContainer<_NodeData> pl;
+
+  initialize_posting_lists(labels_query, label_index, pl);
+
   std::stack<std::pair<data_structures::DeweyIdentifier, std::multiset<_NodeData>>> s;
   data_structures::KHeap<wrappers::NodeDistancePair<_NodeData>> ranking(k);
 
@@ -132,8 +142,8 @@ data_structures::KHeap<wrappers::NodeDistancePair<_NodeData>> naive_search(
     auto p = pl.next();
     labels = { };
 
+    // debug
     std::cout << "m = " << m << std::endl;
-
     std::cout << "d = ";
     for (const int& i: p.first.id_) { std::cout << i << "."; }
     std::cout << std::endl;
@@ -141,8 +151,11 @@ data_structures::KHeap<wrappers::NodeDistancePair<_NodeData>> naive_search(
     _NodeData& current_data = p.second;
     data_structures::DeweyIdentifier& current_dewey_id = p.first;
 
-    while (!s.empty() && !(previous = s.top()).first.is_prefix(p.first)) {
+    while (!s.empty() && !(previous = s.top()).first.is_prefix(current_dewey_id))
+    {
+      // debug
       std::cout << "Popping (1)." << std::endl;
+
       s.pop();
 
       // TODO: is this the best/fastet way to build the union of 2 multisets
@@ -159,12 +172,15 @@ data_structures::KHeap<wrappers::NodeDistancePair<_NodeData>> naive_search(
     if (!s.empty()) {
       previous = s.top();
 
+      // debug
       std::cout << "Popping (2)." << std::endl;
+
       s.pop();
 
       std::multiset<_NodeData> labels_union = { labels };
       labels_union.insert(previous.second.begin(), previous.second.end());
 
+      // debug
       std::cout << "Pushing (";
       for (const int& i: previous.first.id_) { std::cout << i << "."; }
       std::cout << ", ";
