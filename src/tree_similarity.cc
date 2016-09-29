@@ -21,94 +21,24 @@ int main (int argc, char* argv[]) {
     // variables needed for parser functions to create trees
     parser::LabelIDMap hashtable_label_to_id;
     int node_id_counter = 1;
-
-    // root nodes of the test trees (arguments 4 & 5 in bracket notation)
+    // root nodes of the test trees (arguments 3 & 4 in bracket notation)
     nodes::Node<nodes::StringNodeData>* test_tree1 = parser::create_tree_from_string(argv[2],
       hashtable_label_to_id, node_id_counter);
     nodes::Node<nodes::StringNodeData>* test_tree2 = parser::create_tree_from_string(argv[3],
       hashtable_label_to_id, node_id_counter);
 
     try {
-      int tree1_size = rted::get_tree_size(test_tree1);
-      int tree2_size = rted::get_tree_size(test_tree2);
-      rted::NodeInfo<nodes::StringNodeData>* tree_info_array_preorder1 = new rted::NodeInfo<nodes::StringNodeData>[tree1_size];
-      rted::NodeInfo<nodes::StringNodeData>* tree_info_array_preorder2 = new rted::NodeInfo<nodes::StringNodeData>[tree2_size];
-
-      //gathering info - storing in params tree_info_array_preorder
-      rted::gather_tree_info(test_tree1, tree_info_array_preorder1, tree1_size);
-      rted::gather_tree_info(test_tree2, tree_info_array_preorder2, tree2_size);
-
-      //printing
-      /*std::cout << "\nposition:label" << std::endl;
-      for(int i = 0; i < tree1_size; i++) { //printing preordered nodes array in form position:label
-        std::cout << i << ":" << tree_info_array_preorder1[i].nodeData->get_label() << " | " << std::flush;
-      }
-      std::cout << std::endl;
-
-      std::cout << "\nposition:subtree_size" << std::endl;
-      for(int i = 0; i < tree1_size; i++) { //printing tree info array in form position:subtree_size
-        std::cout <<  i << ":" << tree_info_array_preorder1[i].subtree_size << " | ";
-      }
-      std::cout << std::endl;
-
-      std::cout << "\nposition:parent_id" << std::endl;
-      for(int i = 0; i < tree1_size; i++) { //printing tree info array in form position:parent_id
-        std::cout <<  i << ":" << tree_info_array_preorder1[i].parent_id << " | ";
-      }
-      std::cout << std::endl;
-
-      std::cout << "\nposition:full_decomp_size" << std::endl;
-      for(int i = 0; i < tree1_size; i++) { //printing tree info array in form position:parent_id
-        std::cout <<  i << ":" << tree_info_array_preorder1[i].full_decomp_size << " | ";
-      }
-      std::cout << std::endl;
-
-      std::cout << "\nposition:left_decomp_size" << std::endl;
-      for(int i = 0; i < tree1_size; i++) { //printing tree info array in form position:parent_id
-        std::cout <<  i << ":" << tree_info_array_preorder1[i].left_decomp_size << " | ";
-      }
-      std::cout << std::endl;
-
-      std::cout << "\nposition:right_decomp_size" << std::endl;
-      for(int i = 0; i < tree1_size; i++) { //printing tree info array in form position:parent_id
-        std::cout <<  i << ":" << tree_info_array_preorder1[i].right_decomp_size << " | ";
-      }
-      std::cout << std::endl;
-
-      std::cout << "\nposition:l_to_r" << std::endl;
-      for(int i = 0; i < tree1_size; i++) { //printing tree info array in form position:parent_id
-        std::cout <<  i << ":" << tree_info_array_preorder1[i].l_to_r << " | ";
-      }
-      std::cout << std::endl;
-
-      std::cout << "\nposition:r_to_l" << std::endl;
-      for(int i = 0; i < tree1_size; i++) { //printing tree info array in form position:parent_id
-        std::cout <<  i << ":" << tree_info_array_preorder1[i].r_to_l << " | ";
-      }
-      std::cout << std::endl;
-
-      std::cout << "\nposition:child_position:preorder_id_child" << std::endl;
-      for(int i = 0; i < tree1_size; ++i) { //printing tree info array in form position:parent_id
-        for(int j = 0; j < tree_info_array_preorder1[i].number_of_children; ++j) {
-          std::cout <<  i << ":" <<  j << ":" << tree_info_array_preorder1[i].children[j] << " | ";
-        }
-      }
-      std::cout << std::endl;
-
-      std::cout << std::endl << std::endl << "rted is being invoked." << std::endl << std::endl;*/
-
       double rted_output = rted::compute_rted(test_tree1, test_tree2); //TODO test with costs
-
       std::cout << "ted: " << rted_output << std::endl;
-
-      delete[] tree_info_array_preorder1; // deletes the NodeInfo pointer array
-      delete[] tree_info_array_preorder2; // deletes the NodeInfo pointer array
 
     } catch(char const *e) { //catches manually thrwon undefined exception
       std::cerr << "Exception caught: " << e << std::endl;
     } catch(std::exception &e) { //catches all std exceptions
       std::cerr << e.what() << std::endl;
     }
+
+    delete test_tree1;
+    delete test_tree2;
 
     return 0; //terminate programm
   }

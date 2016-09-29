@@ -48,8 +48,13 @@ int get_tree_size(nodes::Node<_NodeData>* tree) {
  */
 template<class _NodeData = nodes::StringNodeData, class _Costs = nodes::Costs<_NodeData>>
 double spfG(NodeInfo<_NodeData>* ia1, NodeInfo<_NodeData>* ia2, int root_node1, int root_node2,
-  data_structures::Array2D<double>* str, bool swapped)
+  int pathId, data_structures::Array2D<double>* str, bool swapped)
   {
+
+  // Line 1: Initialize memoization tables S, T and Q
+  // Line 2: Add dummy node e to the leaf of path gamma
+  // rted::NodeInfo<_NodeData> dummyNode;
+  // dummyNode.parent_id = pathId; // This makes it to a child of the leave node of the path
 
 }
 
@@ -215,10 +220,17 @@ double compute_rted(nodes::Node<_NodeData>* tree1, nodes::Node<_NodeData>* tree2
 
   data_structures::Array2D<double>* str = compute_strategy_right_to_left_preorder(tree1_info_array, tree2_info_array);
 
-  return gted(tree1_info_array, tree2_info_array, 0, 0, str, costs);
+  double ted = gted(tree1_info_array, tree2_info_array, 0, 0, str, costs);
+
+  delete[] tree1_info_array;
+  delete[] tree2_info_array;
+  delete str;
+
+  return ted;
 }
 
 /* Returns the size of a given tree
+ * FIXME sum_of_subtree_sizes and postorder_id should be deleted anywhere (is on the heap)
  *
  * Params:  tree                        The root node of the tree of type nodes::Node<nodes::StringNodeData>*
  *          nodes_array_preorder        The array in which the nodes should be stored in preorder (size must be at least size of tree!)
@@ -235,7 +247,7 @@ double compute_rted(nodes::Node<_NodeData>* tree1, nodes::Node<_NodeData>* tree2
 template<class _NodeData = nodes::StringNodeData>
 int gather_tree_info(nodes::Node<_NodeData>* tree, NodeInfo<_NodeData>* node_info_array_preorder,
     int total_tree_size, int preorder_id = 0, int preorder_id_parent = -1, int* sum_of_subtree_sizes = new int(),
-    int* postorder_id = new int(0), int has_left_or_right_sibling = -2) { //TODO sum_of_subtree_sizes and postorder_id should be deleted anywhere (is on the heap)
+    int* postorder_id = new int(0), int has_left_or_right_sibling = -2) {
 
   // Check if the arguments are valid
   if(!tree || !node_info_array_preorder || !total_tree_size) { // has to be checked, because otherwise there is a segfault below in the code
@@ -509,6 +521,12 @@ data_structures::Array2D<double>* compute_strategy_right_to_left_preorder(
       reusable_rows_i.push(i1[lv]);
     }
   }
+
+  delete[] l2;
+  delete[] r2;
+  delete[] i2;
+  delete[] leaf_row;
+  delete[] path2;
 
   return str; // Line 39
 }
