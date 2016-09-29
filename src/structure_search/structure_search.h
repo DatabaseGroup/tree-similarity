@@ -47,7 +47,9 @@ void filter_and_add(nodes::Node<_NodeData>* query,
     (node_information.size() - intersection_size)
   );
   // TODO: replace 3 by depth of the query
-  int depth_diff = static_cast<int>(std::abs(3 - node_information.depth()));
+  int depth_diff = static_cast<int>(
+    std::abs(3 - static_cast<int>(node_information.depth()))
+  );
 
   std::cout << "FilterAndAdd: labelDiff = " << label_diff << ", depth_diff = " << depth_diff << std::endl;
 
@@ -68,6 +70,10 @@ void filter_and_add(nodes::Node<_NodeData>* query,
       }
     }
   }
+
+  // debug
+  std::cout << "ranking.size() = " << ranking.size() << ", ranking.full() = " << ranking.full() << std::endl;
+  std::cout << "m_new = " << ranking.front().get_distance() << std::endl;
 
   if (ranking.full()) {
     m = ranking.front().get_distance();
@@ -196,21 +202,25 @@ data_structures::KHeap<wrappers::NodeDistancePair<_NodeData>> naive_search(
       top_dewey_id = previous.first;
     }
 
-
     push_intermediate_dewey_ids(top_dewey_id, current_dewey_id, s);
 
+    // debug
     std::cout << "Pushing (";
     for (const int& i: current_dewey_id.id_) { std::cout << i << "."; }
     std::cout << ", " << current_data.get_label() << ") onto the stack." << std::endl;
 
     s.push(std::make_pair(current_dewey_id, std::multiset<_NodeData>{ current_data }));
 
+    // debug
     std::cout << "Stack: size = " << s.size() << std::endl;
   }
 
   labels = { };
   while (!s.empty()) {
+    // debug
     std::cout << "Popping (3)." << std::endl;
+
+    previous = s.top();
     s.pop();
 
     // TODO: is this the best/fastet way to build the union of 2 multisets
