@@ -1,3 +1,24 @@
+// The MIT License (MIT)
+// Copyright (c) 2016 Maximilian Fridrich
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #ifndef RTED_RTED_H
 #define RTED_RTED_H
 
@@ -48,14 +69,87 @@ int get_tree_size(nodes::Node<_NodeData>* tree) {
  */
 template<class _NodeData = nodes::StringNodeData, class _Costs = nodes::Costs<_NodeData>>
 double spfG(NodeInfo<_NodeData>* ia1, NodeInfo<_NodeData>* ia2, int root_node1, int root_node2,
-  int pathId, data_structures::Array2D<double>* str, bool swapped)
+  int path_id, data_structures::Array2D<double>* str, bool swapped)
   {
+
+  int tree1_size = ia1[root_node1].subtree_size;
+  int tree2_size = ia2[root_node2].subtree_size;
+
+  int v = 2147483647;
+  int l_v, r_v, l_v_last, l_v_prime;
+  NodeInfo<_NodeData>* g_prime = new NodeInfo<_NodeData>[tree2_size];
 
   // Line 1: Initialize memoization tables S, T and Q
   // Line 2: Add dummy node e to the leaf of path gamma
-  // rted::NodeInfo<_NodeData> dummyNode;
-  // dummyNode.parent_id = pathId; // This makes it to a child of the leave node of the path
-
+  rted::NodeInfo<_NodeData> dummyNode;
+  dummyNode.parent_id = path_id; // This makes it to a child of the leave node of the path
+  // Line 3: Walk up the path in the left hand tree starting from the dummy node to the root
+  while(v >= root_node1) { // Loop A
+    // Line 4-6: Set variables G', l_v_last, l'v
+    l_v_last = ia1[v].parent_id + 1; // If condition of Line 10 is not met, l_v_last remains that and Loop C stops here
+    l_v_prime = v;
+    // Line 7: Check if the path is a right or an inner path
+    if((ia1[root_node1].l_to_r + tree1_size -1) != ia1[path_id].l_to_r) {
+      // Line 8: Iterate over the right hand tree in reverse right-to-left-preorder
+      for(int r_w = ia2[root_node2].l_to_r + tree2_size - 1; r_w >= ia2[root_node2].l_to_r; --r_w) { // Loop B
+        // Line 9: Check if the path is a right path
+        if(root_node1 + tree1_size -1 == path_id) {
+          // Line 10: Set l_v_last to parent of v
+          l_v_last = ia1[v].parent_id;
+          // Line 11: Check if the current node of the right hand tree (index r_w) is a rightmost child of its parent
+          if(r_w == ia2[ia2[ia2[r_w].r_to_l].parent_id].l_to_r + 1) {
+            // Set G' to G of the parent of r_w
+          } else {
+            // Set G' to 0 (empty tree)
+          }
+        }
+        // Line 12: Set r_v to v
+        r_v = ia1[v].l_to_r; // Verify the ordering of r_v TODO
+        // Line 13: Loop over all nodes left of v and its parent and l_v_last in reverse left-to-right-preorder
+        for(l_v = v - 1; l_v >= l_v_last; --l_v) { // Loop C
+          // Line 14: Check if l_v is the parent of v
+          if(l_v == ia1[v].parent_id) {
+            r_v = ia1[v].parent_id;
+          }
+          // Line 15: Iterate over ? in reverse left-to-right-preorder Loop D
+            // Line 16: compute TED and store in S - section 8
+          // Line 17: set l_v_prime to l_v
+          l_v_prime = l_v;
+        }
+        // Line 18: Copy values from S to T, Q and D - section 8
+      }
+    }
+    // Line 19: Check if the path is a left or an inner path
+    if((ia1[root_node1] + tree1_size -1) != ia1[path_id]) {
+      // Line 20: Iterate over the right hand tree in reverse left-to-right-preorder
+      for(int l_w = ia2[root_node2] + tree2_size - 1; l_w >= root_node2; --l_w) { // Loop B'
+        // Line 21: Check if the path is a left path
+        if(root_node1 + tree1_size -1 == path_id) {
+          // Line 22: Check if the current node of the right hand tree (index l_w) is a leftmost child of its parent
+          if(l_w == ia2[l_w].parent_id + 1) {
+            // Set G' to G of the parent of l_w
+          } else {
+            // Set G' to 0
+          }
+        }
+        // Line 23: set l_v to l_v_prime
+        l_v = l_v_prime;
+        // Line 24: Loop over all nodes right of v and its parent and the parent itself in reverse right-to-left-preorder
+        for(r_v = ia1[v].l_to_r - 1; l_v >= ia1[ia1[v].parent_id].l_to_r; --l_v) { // Loop C'
+          // Line 25: Check if l_v is the parent of v
+          if(ia1[r_v].r_to_l == ia1[v].parent_id) {
+            l_v = ia1[v].parent_id;
+          }
+          // Line 26: Iterate over ? in reverse right-to-left-preorder Loop D'
+            // Line 27: compute TED and store in S - section 8
+        }
+        // Line 28: Copy values from S to T, Q and D - section 8
+      }
+    }
+    v = ia1[v].parent_id; // Incrementing loop counter of loop A
+  }
+  // Line 29
+  return 0.0;
 }
 
 /*
