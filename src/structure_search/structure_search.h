@@ -21,7 +21,8 @@ void filter_and_add(nodes::Node<_NodeData>* query,
   std::multiset<_NodeData>& labels, std::multiset<_NodeData>& labels_query,
   data_structures::DeweyIdentifier& dewey_id, int& m,
   data_structures::KHeap<wrappers::NodeDistancePair<_NodeData>>& ranking,
-  data_structures::BTree<data_structures::DeweyIdentifier, wrappers::NodeIndexValue<_NodeData>>& node_index)
+  data_structures::BTree<data_structures::DeweyIdentifier, wrappers::NodeIndexValue<_NodeData>>& node_index,
+  int& ted_count)
 {
   std::multiset<_NodeData> intersection;
   std::set_intersection(labels.begin(), labels.end(), labels_query.begin(),
@@ -60,6 +61,7 @@ void filter_and_add(nodes::Node<_NodeData>* query,
         query, node_information.root()
       )
     );
+    ++ted_count;
     std::cout << "FilterAndAdd: ted = " << ted << std::endl;
 
     if ((ted < m) || ((ted == m) && !ranking.full())) {
@@ -140,7 +142,6 @@ data_structures::KHeap<wrappers::NodeDistancePair<_NodeData>> naive_search(
   std::multiset<_NodeData>& labels_query)
 {
   data_structures::PostingListContainer<_NodeData> pl;
-
   initialize_posting_lists(labels_query, label_index, pl);
 
   std::stack<std::pair<data_structures::DeweyIdentifier, std::multiset<_NodeData>>> s;
@@ -148,6 +149,7 @@ data_structures::KHeap<wrappers::NodeDistancePair<_NodeData>> naive_search(
 
   std::pair<data_structures::DeweyIdentifier, std::multiset<_NodeData>> previous;
   std::multiset<_NodeData> labels;
+  int ted_count = 0;
   while (!pl.empty()) {
     auto p = pl.next();
     labels = { };
@@ -175,7 +177,7 @@ data_structures::KHeap<wrappers::NodeDistancePair<_NodeData>> naive_search(
       labels.insert(previous.second.begin(), previous.second.end());
 
       // no return value, m is modified since it's passed by reference
-      filter_and_add(query, labels, labels_query, previous.first, m, ranking, node_index);
+      filter_and_add(query, labels, labels_query, previous.first, m, ranking, node_index, ted_count);
     }
 
     data_structures::DeweyIdentifier top_dewey_id{};
@@ -227,8 +229,10 @@ data_structures::KHeap<wrappers::NodeDistancePair<_NodeData>> naive_search(
     labels.insert(previous.second.begin(), previous.second.end());
 
     // no return value, m is modified since it's passed by reference
-    filter_and_add(query, labels, labels_query, previous.first, m, ranking, node_index);
+    filter_and_add(query, labels, labels_query, previous.first, m, ranking, node_index, ted_count);
   }
+
+  std::cout << "TED Computation Count: " << ted_count << std::endl;
 
   return ranking;
 }
