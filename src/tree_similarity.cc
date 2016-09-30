@@ -10,7 +10,6 @@
 // TODO: tobi: put everything in a method e.g. called get_sbs_fs(node* t1, node* t2)
 //
 int main (int argc, char* argv[]) {
-  /*
   if(argc != 3 && argc != 4 && argc != 5 && argc != 6) {
     std::cout << "TODO print a help message" << std::endl;
     return 0;
@@ -44,7 +43,7 @@ int main (int argc, char* argv[]) {
 
     return 0; //terminate programm
   }
-
+/*
   std::cout << argv[1] << " " << argv[2] << std::endl;
   // TODO replace hashtable with a custom node class that sup. strings as labels
   parser::LabelIDMap hashtable_label_to_id;
@@ -368,7 +367,6 @@ int main (int argc, char* argv[]) {
   btree_odd_m.insert(9, "Nine"); btree_odd_m.print();
   btree_odd_m.insert(11, "Eleven"); btree_odd_m.print();
   btree_odd_m.insert(12, "Twelve"); btree_odd_m.print();
-  */
 
   int runs = 10;
   int i = 0;
@@ -377,6 +375,7 @@ int main (int argc, char* argv[]) {
   const int m = 16;
 
   test_btree<int, m>(mt);
+*/
 
   return 0;
 }
