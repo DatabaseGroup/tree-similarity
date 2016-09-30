@@ -4,6 +4,7 @@
 #include <fstream>
 #include <exception>
 #include <random>
+#include <iomanip>
 
 #include "tree_similarity.h"
 
@@ -16,7 +17,30 @@ void test_ss_naive();
 int main (int argc, char* argv[]) {
   //if(argc != 3 && argc != 4 && argc != 5 && argc != 6) {
   if (argc <= 1) {
-    std::cout << "TODO print a help message" << std::endl;
+    std::cout << "Usage: ./tree_similarity [OPTION] [input-tree-1] [input-tree-2]"
+      << std::endl << std::endl;
+    
+    std::cout << "  --apted" << std::setw(12) << "";
+    std::cout << "Execute APTED algorithm to compute the tree edit distance "
+      << "between input-tree-1 and input-tree-2." << std::endl;
+    std::cout << std::setw(21) << "" << "Both trees have to be given in the "
+      << "brackets notation." << std::endl;
+
+    std::cout << "  --zzted" << std::setw(12) << "";
+    std::cout << "Execute Zhang & Shasha algorithm to compute the tree edit "
+      << "distance between input-tree-1 and input-tree-2." << std::endl;
+    std::cout << std::setw(21) << "" << "Both trees have to be given in the "
+      << "brackets notation." << std::endl;
+
+    std::cout << "  --tasm-test" << std::setw(8) << "";
+    std::cout << "Execute hard-coded test cases of the TASM algorithm to compute "
+      << "the Top-k most similar subtrees." << std::endl;
+
+    std::cout << "  --ss-naive-test" << std::setw(4) << "";
+    std::cout << "Execute hard-coded test cases of the naive version of the "
+      << "StructureSearch algorithm to compute the Top-k most similar subtrees."
+      << std::endl;
+
     return 0;
   }
   // passing too big trees from command line could exceed the stack size and cause
