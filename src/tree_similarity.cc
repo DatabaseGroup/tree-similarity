@@ -7,6 +7,7 @@
 
 #include "tree_similarity.h"
 
+void run_zhang_shasha(char* tree_string_1, char* tree_string_2);
 void test_tasm();
 void test_ss_naive();
 
@@ -46,77 +47,18 @@ int main (int argc, char* argv[]) {
     delete test_tree2;
 
     return 0; //terminate programm
-  } else if (argv[1] == std::string("--tasm")) {
+  } else if (argv[1] == std::string("--zzted")) {
+    run_zhang_shasha(argv[1], argv[2]);
+    return 0;
+  } else if (argv[1] == std::string("--tasm-test")) {
     test_tasm();
     return 0;
-  } else if (argv[1] == std::string("--ss-naive")) {
+  } else if (argv[1] == std::string("--ss-naive-test")) {
     test_ss_naive();
     return 0;
   }
+
 /*
-  std::cout << argv[1] << " " << argv[2] << std::endl;
-  // TODO replace hashtable with a custom node class that sup. strings as labels
-  parser::LabelIDMap hashtable_label_to_id;
-  common::IDLabelMap hashtable_id_to_label;
-  int node_id_counter = 1;
-  nodes::Node<nodes::StringNodeData>* tree1 = parser::create_tree_from_string(argv[1], hashtable_label_to_id,
-    node_id_counter
-  );
-  nodes::Node<nodes::StringNodeData>* tree2 = parser::create_tree_from_string(argv[2], hashtable_label_to_id,
-    node_id_counter
-  );
-
-  for ( auto it = hashtable_label_to_id.begin();
-        it != hashtable_label_to_id.end(); ++it )
-  {
-    hashtable_id_to_label.emplace(it->second, it->first);
-  }
-
-  std::vector<nodes::Node<nodes::StringNodeData>*>* tree1_postorder = common::generate_postorder(tree1);
-  std::vector<nodes::Node<nodes::StringNodeData>*>* tree2_postorder = common::generate_postorder(tree2);
-
-  // Zhang and Shasha cost = 1 (insert), 1 (delete), 1 (rename)
-  // compute distance using basic nodes and basic cost model
-  // no need to generate basic cost model since it is set as default template
-  // parameter
-
-  nodes::Node<nodes::StringNodeData>* a1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("a"));
-  nodes::Node<nodes::StringNodeData>* r1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("r"));
-  nodes::Node<nodes::StringNodeData>* d1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("d"));
-  nodes::Node<nodes::StringNodeData>* e1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("d"));
-  nodes::Node<nodes::StringNodeData>* i1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("i"));
-  nodes::Node<nodes::StringNodeData>* l1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("l"));
-  nodes::Node<nodes::StringNodeData>* t1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("t"));
-  nodes::Node<nodes::StringNodeData>* k1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("k"));
-  nodes::Node<nodes::StringNodeData>* g1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("g"));
-  nodes::Node<nodes::StringNodeData>* h1 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("h"));
-
-  nodes::Node<nodes::StringNodeData>* stree1 = a1;
-  stree1->add_child(r1);
-  stree1->add_child(d1);
-  stree1->add_child(e1);
-  e1->add_child(i1);
-  e1->add_child(l1);
-  e1->add_child(t1);
-  t1->add_child(k1);
-  t1->add_child(g1);
-  t1->add_child(h1);
-
-  nodes::Node<nodes::StringNodeData>* x2 = new nodes::Node<nodes::StringNodeData>(new nodes::StringNodeData("x"));
-  nodes::Node<nodes::StringNodeData>* stree2 = x2;
-
-  // distance between stree1 and stree2 should be 10 (using StringCosts)
-
-  std::cout
-    << "Distance (string-labeled tree, string-labeled cost model, Zhang Shasha):\t"
-    << zhang_shasha::compute_zhang_shasha<nodes::StringNodeData, nodes::StringCosts<nodes::StringNodeData>>(tree1, tree2)
-    << std::endl;
-
-  std::cout
-    << "Distance (string-labeled tree, string-labeled cost model, RTED):\t"
-    << rted::compute_rted<nodes::StringNodeData, nodes::StringCosts<nodes::StringNodeData>>(tree1, tree2)
-    << std::endl;
-
   // TOBIAS PART - TO BE RESOLVED/REMOVE/CLEANED BY TOBIAS
   //
   std::vector<std::array<nodes::Node*, 2> > edit_mapping =
@@ -172,6 +114,37 @@ int main (int argc, char* argv[]) {
 */
 
   return 0;
+}
+
+void run_zhang_shasha(char* tree_string_1, char* tree_string_2) {
+  // TODO replace hashtable with a custom node class that sup. strings as labels
+  parser::LabelIDMap hashtable_label_to_id;
+  common::IDLabelMap hashtable_id_to_label;
+  int node_id_counter = 1;
+  nodes::Node<nodes::StringNodeData>* tree1 = parser::create_tree_from_string(
+    tree_string_1, hashtable_label_to_id, node_id_counter
+  );
+  nodes::Node<nodes::StringNodeData>* tree2 = parser::create_tree_from_string(
+    tree_string_2, hashtable_label_to_id, node_id_counter
+  );
+
+  for ( auto it = hashtable_label_to_id.begin();
+        it != hashtable_label_to_id.end(); ++it )
+  {
+    hashtable_id_to_label.emplace(it->second, it->first);
+  }
+
+  // Zhang and Shasha cost = 1 (insert), 1 (delete), 1 (rename)
+  // compute distance using basic nodes and basic cost model
+  // no need to generate basic cost model since it is set as default template
+  // parameter
+
+  // distance between stree1 and stree2 should be 10 (using StringCosts)
+
+  std::cout
+    << "Distance (string-labeled tree, string-labeled cost model, Zhang Shasha):\t"
+    << zhang_shasha::compute_zhang_shasha<nodes::StringNodeData, nodes::StringCosts<nodes::StringNodeData>>(tree1, tree2)
+    << std::endl;
 }
 
 void test_tasm() {
