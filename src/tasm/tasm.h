@@ -94,9 +94,7 @@ data_structures::KHeap<wrappers::NodeDistancePair<_NodeData>> naive(
     common::generate_postorder(&document);
 
   for (nodes::Node<_NodeData>* subtree: *postorder_document) {
-    //std::cout << "BEF " << subtree->get_data()->get_label() << std::endl;
     ted = zhang_shasha::compute_zhang_shasha<_NodeData, _Costs>(&query, subtree);
-    //std::cout << "AFT " << std::endl;
     if (ranking.size() < k || ted < ranking.front().get_distance()) {
       wrappers::NodeDistancePair<_NodeData> in_ranking(*subtree, ted);
       if (!ranking.insert(in_ranking)) {
@@ -353,13 +351,11 @@ data_structures::KHeap<wrappers::NodeDistancePair<_NodeData>> tasm_postorder(
   std::queue<nodes::Node<_NodeData>>& postorder_queue, const int& k)
 {
   data_structures::KHeap<wrappers::NodeDistancePair<_NodeData>> ranking(k);
-
   int query_size = query.get_subtree_size();
   int tau =  query_size *
     (compute_max_cost<_NodeData, _Costs>(query) + 1) +
     k * compute_max_cost<_NodeData, _Costs>(postorder_queue.back(), k);
   int tau_adapted = tau;
-
   size_t buffer_size = k + 1;
   nodes::Node<_NodeData>* ring_buffer = new nodes::Node<_NodeData>[buffer_size];
   size_t* prefix_array = new size_t[buffer_size];
@@ -388,7 +384,7 @@ data_structures::KHeap<wrappers::NodeDistancePair<_NodeData>> tasm_postorder(
         tasm_dynamic_plus<_NodeData, _Costs>(query, subtree, k, ranking);
         candidate_subroot = candidate_subroot - subtree_size;
       } else {
-        ++candidate_subroot;
+        --candidate_subroot;
       }
     }
 
