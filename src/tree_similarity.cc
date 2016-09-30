@@ -23,7 +23,8 @@ int main (int argc, char* argv[]) {
   // a stack overflow because argv and argc are passed like normal function
   // parameters via the stack - get the maximum argument length under linux via
   // $ getconf ARG_MAX
-  if (argv[1] == std::string("--apted")) { // option to test apted
+  if ((argc >= 4) && (argv[1] == std::string("--apted"))) {
+    // option to test apted
     // variables needed for parser functions to create trees
     parser::LabelIDMap hashtable_label_to_id;
     int node_id_counter = 1;
@@ -47,7 +48,7 @@ int main (int argc, char* argv[]) {
     delete test_tree2;
 
     return 0; //terminate programm
-  } else if (argv[1] == std::string("--zzted")) {
+  } else if ((argc >= 4) && (argv[1] == std::string("--zzted"))) {
     run_zhang_shasha(argv[1], argv[2]);
     return 0;
   } else if (argv[1] == std::string("--tasm-test")) {
