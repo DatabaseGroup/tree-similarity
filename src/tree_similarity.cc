@@ -73,7 +73,7 @@ int main (int argc, char* argv[]) {
 
     return 0; //terminate programm
   } else if ((argc >= 4) && (argv[1] == std::string("--zzted"))) {
-    run_zhang_shasha(argv[1], argv[2]);
+    run_zhang_shasha(argv[2], argv[3]);
     return 0;
   } else if (argv[1] == std::string("--tasm-test")) {
     test_tasm();
