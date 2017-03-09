@@ -1,0 +1,21 @@
+*.class
+*.war
+*.direcotry
+*.sw?
+*.png
+.DS_Store
+
+TreeSimilarity
+tree_similarity
+*.o
+*~
+
+build/
+
+# CMake
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Makefile
+cmake_install.cmake
+install_manifest.txt
