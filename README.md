@@ -9,7 +9,8 @@ final state of msc-kocher).
 2. Add a meaningful documentation to all parts of the codebase.
 3. Refactor parts of the codebase if necessary.
 4. Enforce (and probably extend) the coding policy/style described on the `master`
-branch.
+branch and create a [clang-format](https://clang.llvm.org/docs/ClangFormat.html)
+configuration to simplify enforcing the coding style for future collaborators.
 
 This branch will **not** include the work of bsc-auinger as Tobias currently tries
 to reimplement his part of the codebase (see `visualization` branch). This part
