@@ -1,0 +1,73 @@
+# Requires at least clang-format in version >= 3.4.
+# See http://releases.llvm.org/3.4/tools/clang/docs/ClangFormatStyleOptions.html
+# for detailed information (e.g., how to use clang-format within your IDE).
+#
+# clang-format is supposed to support enforcing a predefined coding style.
+# However, it DOES NOT enforce all stylistic features to full extend. Hence, 
+# please use clang-format this way and (1) read the coding style guide before
+# you start coding, and (2) try to stick to it as much as possible.
+#
+# Author: Daniel Kocher (dkocher [at] cosy.sbg.ac.at)
+
+---
+
+BasedOnStyle: LLVM
+
+AccessModifierOffset: -4
+AlignEscapedNewlinesLeft: false
+AlignTrailingComments: false
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakBeforeMultilineStrings: false
+AlwaysBreakTemplateDeclarations: true
+
+BinPackParameters: true
+BreakBeforeBinaryOperators: false
+BreakBeforeBraces: Attach
+BreakBeforeTernaryOperators: false
+BreakConstructorInitializersBeforeComma: false
+
+ColumnLimit: 80
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+ConstructorInitializerIndentWidth: 4
+ContinuationIndentWidth: 4
+Cpp11BracedListStyle: false
+
+DerivePointerBinding: false
+
+ExperimentalAutoDetectBinPacking: false
+
+IndentCaseLabels: true
+IndentFunctionDeclarationAfterType: false
+IndentWidth: 4
+
+MaxEmptyLinesToKeep: 1
+
+NamespaceIndentation: None
+
+ObjCSpaceBeforeProtocolList: true
+
+PenaltyBreakBeforeFirstCallParameter: 19
+PenaltyBreakComment: 60
+PenaltyBreakString: 1000
+PenaltyBreakFirstLessLess: 120
+PenaltyExcessCharacter: 1000000
+PenaltyReturnTypeOnItsOwnLine: 60
+PointerBindsToType: true
+
+SpaceAfterControlStatementKeyword: true
+SpaceBeforeAssignmentOperators: true
+SpaceInEmptyParentheses: false
+SpacesBeforeTrailingComments: 1
+SpacesInCStyleCastParentheses: false
+SpacesInParentheses: false
+Standard: Cpp11
+SpacesInAngles: false
+
+TabWidth: 4
+
+UseTab: Never
+
+...
+
