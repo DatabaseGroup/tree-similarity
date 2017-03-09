@@ -1,6 +1,6 @@
 *.class
 *.war
-*.direcotry
+*.directory
 *.sw?
 *.png
 .DS_Store
