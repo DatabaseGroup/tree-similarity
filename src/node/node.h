@@ -56,32 +56,32 @@ template <class _LabelData>
 class Node {
 public:
     Node(_LabelData* data = new _LabelData());
-    
+    Node(const Node<_LabelData>& other); // copy constr.
     ~Node();
-    
+
     /// Gets and sets members.
     /// @{
-    inline _LabelData* data() const;
+    inline const _LabelData* data() const;
     inline void data(_LabelData* data);
-    inline std::vector<Node<_LabelData>*>& children() const;
+    inline const std::vector<Node<_LabelData>*>& children() const;
     inline void children(std::vector<Node<_LabelData>*>& children);
     /// @}
 
     /// Retrieves current number of children.
     ///
     /// \return Current number of children (i.e., entries in children_).
-    int get_children_number() const;
+    inline int get_children_number() const;
 
     /// Adds a child at last position.
     ///
     /// \param child Pointer to the node to be added.
-    void add_child(Node<_LabelData>* child);
+    inline void add_child(Node<_LabelData>* child);
 
     /// Gets the position-th child of this node (i.e., the n-th child).
     ///
     /// \param position Number of the child.
     /// \return Pointer to the position-th child.
-    Node<_LabelData>* get_child(int position) const;
+    inline const Node<_LabelData>* get_child(int position) const;
 
     /// Gets size of subtree rooted at this node.
     ///
@@ -90,8 +90,9 @@ public:
 
     /// Operator overloadings.
     /// @{
-    bool operator<(const Node<_LabelData>& other) const;
-    bool operator==(const Node<_LabelData>& other) const;
+    inline const Node<_LabelData>& operator=(const Node<_LabelData>& other);
+    inline bool operator<(const Node<_LabelData>& other) const;
+    inline bool operator==(const Node<_LabelData>& other) const;
     /// @}
 
 private:
@@ -100,6 +101,16 @@ private:
 
     /// Data representing the label of this node.
     _LabelData* data_;
+
+private:
+    /// Computes the size of the subtree rooted at this node iteratively,
+    /// resp. recursively.
+    ///
+    /// \return Size of the subtree rooted at this node (incl. this node).
+    /// @{
+    int get_subtree_size_iterative() const;
+    int get_subtree_size_recursive() const;
+    /// @}
 };
 
 }
