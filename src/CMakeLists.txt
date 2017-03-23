@@ -36,6 +36,7 @@ set(tree_similarity_sources
   tasm/tasm.h
   upper_bound/upper_bound.h
   visualisation/visualisation.h
+  visualisation/visualise.h
   wrappers/node_distance_pair.h
   wrappers/node_index_value.h
   wrappers/node_prefixes_pair.h

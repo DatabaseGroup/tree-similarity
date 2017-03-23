@@ -4,6 +4,7 @@
 #include "common/common.h"
 
 #include "visualisation/visualisation.h"
+#include "visualisation/visualise.h"
 
 #include "data_structures/array_2d.h"
 #include "data_structures/btree.h"
