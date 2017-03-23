@@ -516,8 +516,9 @@ void create_hybrid_graph(nodes::Node<_NodeData>* hybrid,
             else
             {
                 // root of T1 is mapped to a node other than the root of T2
-                // TODO position --> from t2
                 remove_edge_from_to(hybrid, node_mapped, nodeToInfo);
+                int position = compute_position(parent_t2, node_t2, nodeToInfo);
+                insert_edge_from_to(parent_mapped, node_mapped, nodeToInfo, position, _COLOUR_INSERT);
             }
         }
     }
