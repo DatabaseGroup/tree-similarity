@@ -405,13 +405,12 @@ void insert_edge_from_to(nodes::Node<_NodeData>* parent,
     nodes::Node<_NodeData>* child, NodeToInfo<_NodeData>* nodeToInfo,
     int position, char colour)
 {
-    // insert child
-    std::vector<nodes::Node<_NodeData>*> children = parent->children_;
+    // insert child    
     if(position > parent->get_children_number())
     {
         position = parent->get_children_number();
     }
-    children.insert(children.begin()+position, child);
+    parent->children_.insert(parent->children_.begin()+position, child);
 
     // insert edge
     std::vector<char>* edges = nodeToInfo->at(parent)->childEdges;
@@ -477,6 +476,7 @@ template<class _NodeData = nodes::StringNodeData>
 void create_hybrid_graph(nodes::Node<_NodeData>* hybrid,
     nodes::Node<_NodeData>* node_t2, NodeToInfo<_NodeData>* nodeToInfo)
 {
+    std::string debug_label = node_t2->get_data()->get_label();
     // get the mapped node of node_t2 and check if it is mapped
     nodes::Node<_NodeData>* node_mapped = nodeToInfo->at(node_t2)->mappedNode;
     if(node_mapped != nullptr)
@@ -551,8 +551,6 @@ void create_hybrid_graph(nodes::Node<_NodeData>* hybrid,
             // the parent of n is mapped to a node in T1
             int position = compute_position(parent_t2, node_t2, nodeToInfo);
             insert_edge_from_to(parent_mapped, inserted, nodeToInfo, position, _COLOUR_INSERT);
-            nodeToInfo->at(inserted)->parents = new std::vector<nodes::Node<_NodeData>*>();
-            nodeToInfo->at(inserted)->parents->push_back(parent_mapped); 
         }
         else
         {
@@ -567,6 +565,185 @@ void create_hybrid_graph(nodes::Node<_NodeData>* hybrid,
     {
         create_hybrid_graph(hybrid, node_t2->get_child(i), nodeToInfo);
     }
+}
+
+template<class _NodeData = nodes::StringNodeData>
+void increase_scope(nodes::Node<_NodeData>* n, 
+  NodeToInfo<_NodeData>* nodeToInfo)
+{
+  for(int i = 0; i < n->get_children_number(); i++){
+    if(nodeToInfo->at(n->get_child(i))->level <= nodeToInfo->at(n)->level){
+      nodeToInfo->at(n->get_child(i))->level = nodeToInfo->at(n)->level+1;
+      increase_scope(n->get_child(i), nodeToInfo);
+    }
+  }
+}
+
+template<class _NodeData = nodes::StringNodeData>
+std::string get_json_hybrid_tree(nodes::Node<_NodeData>* hybrid,
+  NodeToInfo<_NodeData>* nodeToInfo, std::vector<std::string>& edges,
+  int pos, std::set<nodes::Node<_NodeData>*>& is_child, char edgecolour = ' ')
+{
+    std::stringstream str;
+    str << "{\"label\":\""<< hybrid->get_data()->get_label() << "\",";
+    if(nodeToInfo->at(hybrid)->colour == _COLOUR_RENAME)
+    {
+        str << "\"label2\":\""<< nodeToInfo->at(hybrid)->label2 << "\",";
+    }
+    str << "\"id\":" << nodeToInfo->at(hybrid)->id << ",\"pos\":" << pos <<
+    ",\"colour\":\"" << nodeToInfo->at(hybrid)->colour << "\"";
+
+    if(edgecolour!=' '){
+        str << ",\"ec\":\""<< edgecolour << "\""; // ec = edge colour
+    }
+
+    if(hybrid->get_children_number()>0){
+        bool empty = true;
+        std::stringstream str_tmp;
+
+        for(int i = 0; i<hybrid->get_children_number(); i++){
+            nodes::Node<_NodeData>* tmp_c = hybrid->get_child(i);
+            if(nodeToInfo->at(tmp_c)->level == nodeToInfo->at(hybrid)->level+1){
+                if(is_child.find(tmp_c) == is_child.end()){
+                    is_child.insert(tmp_c);
+                    if((i != 0 && !empty) || 
+                        (!empty && (i+1) != hybrid->get_children_number())){
+                        str_tmp << ",";
+                    }
+                    str_tmp << get_json_hybrid_tree(tmp_c, nodeToInfo, edges, i, is_child, 
+                    nodeToInfo->at(hybrid)->childEdges->at(i));
+                    empty = false;
+                } else {
+                    std::stringstream k; 
+                    k << "{\"sourceid\":" << nodeToInfo->at(hybrid)->id
+                    << ", \"targetid\":" << nodeToInfo->at(tmp_c)->id << ",\"colour\":\""
+                    << nodeToInfo->at(hybrid)->childEdges->at(i )<<"\"}";
+                    edges.push_back(k.str());
+                }
+            } else {
+                std::stringstream k;
+                k << "{\"sourceid\":" << nodeToInfo->at(hybrid)->id
+                << ", \"targetid\":" << nodeToInfo->at(tmp_c)->id << ",\"colour\":\""
+                << nodeToInfo->at(hybrid)->childEdges->at(i)<<"\"}";
+                edges.push_back(k.str());
+            }
+        }
+        if(!empty) {
+            str << ",\"children\": [" << str_tmp.str() << "]";
+        } else {
+            std::cout << "emtpy?!" << std::endl;
+        }
+    }
+
+    str << "}";
+
+    return str.str();
+}
+  
+template<class _NodeData = nodes::StringNodeData>
+std::string get_json_hybrid(nodes::Node<_NodeData>* hybrid,
+  NodeToInfo<_NodeData>* nodeToInfo)
+{
+    std::stringstream str;
+    std::vector<std::string> edges;
+
+    std::set<nodes::Node<_NodeData>*> is_child;
+    nodeToInfo->at(hybrid)->level=0;
+    increase_scope(hybrid, nodeToInfo);
+    char separator = ' ';
+    int pos = 0;
+    str << "{\"tree\": [";
+    str << get_json_hybrid_tree(hybrid, nodeToInfo, edges, pos, is_child);
+    str << "], \"addlinks\": [";
+    typename std::vector<std::string>::iterator it;
+    for(it = edges.begin(); it != edges.end(); ++it)
+    {
+        std::string e = *it;
+        str << separator << e ;
+        separator = ',';
+    }
+    str << "]}";
+    return str.str();
+}
+
+template<class _NodeData = nodes::StringNodeData>
+bool check_hybrid_with_tree(nodes::Node<_NodeData>* node_hybrid,
+    nodes::Node<_NodeData>* node_tree, NodeToInfo<_NodeData>* nodeToInfo, char allowedcolour)
+{
+    char node_hybrid_colour = nodeToInfo->at(node_hybrid)->colour;
+    if(node_hybrid_colour != _COLOUR_MAPPED &&
+       node_hybrid_colour != _COLOUR_RENAME &&
+       node_hybrid_colour != allowedcolour)
+    {
+        std::cout << "wrong node colour" << std::endl;        
+        return false;
+    }
+
+    if(node_hybrid_colour == _COLOUR_RENAME)
+    {
+        bool check_other_label = node_hybrid->get_data()->get_label() != node_tree->get_data()->get_label();
+        if(check_other_label && nodeToInfo->at(node_hybrid)->label2 != node_tree->get_data()->get_label())
+        {
+            std::cout << "rename failed: ";
+            std::cout << " hybrid: " << nodeToInfo->at(node_hybrid)->label2;
+            std::cout << " other: " << node_tree->get_data()->get_label();
+            std::cout << "" << std::endl;
+            return false;
+        }
+    }
+    else
+    {
+        if(node_hybrid->get_data()->get_label() != node_tree->get_data()->get_label())
+        {
+            std::cout << "wrong label" << std::endl;            
+            return false;
+        }
+    }
+
+    int child_counter = 0;
+    std::vector<char>* edges = nodeToInfo->at(node_hybrid)->childEdges;
+    if(edges != nullptr)
+    {
+        for(int i = 0; i < node_hybrid->get_children_number(); i++)
+        {
+            if(edges->at(i) == _COLOUR_MAPPED ||
+            edges->at(i) == _COLOUR_RENAME ||
+            edges->at(i) == allowedcolour)
+            {
+                ++child_counter;
+            }
+        }
+        if(child_counter != node_tree->get_children_number())
+        { 
+            std::cout << "children number differ: " << node_hybrid->get_children_number() << ", right colour: " << child_counter << " | " << node_tree->get_children_number() << std::endl;
+            std::cout << "label hybrid: " << node_hybrid->get_data()->get_label() << " ";
+            std::cout << "label tree:   " << node_tree->get_data()->get_label() << " " << std::endl;
+            return false;
+        }
+    } else if (node_tree->get_children_number() > 0 && edges == nullptr) {
+        std::cout << "edges are nullptr, but children are > 0" << std::endl;        
+        return false;
+    }
+
+    int tree_child_counter = 0;
+    bool isok = true;
+    for(int i = 0; i < node_hybrid->get_children_number(); i++)
+    {
+        if(edges->at(i) == _COLOUR_MAPPED ||
+        edges->at(i) == _COLOUR_RENAME ||
+        edges->at(i) == allowedcolour)
+        {
+            isok = check_hybrid_with_tree(node_hybrid->get_child(i), 
+                node_tree->get_child(tree_child_counter), nodeToInfo, allowedcolour);
+            ++tree_child_counter;
+            if(!isok)
+            {
+                return false;
+            }
+        }
+    }
+
+    return true;    
 }
 
 // visualise
@@ -608,10 +785,19 @@ std::string visualise(char* type, nodes::Node<_NodeData>* tree1,
         if(!(c1 && c2))
         {
             std::cout << "error copying: " << c1 << ", " << c2 << std::endl;
+            return "error copying";
         }
         _HIGHEST_ID_HYBRID = nodeToInfo->at(hybrid)->id;
         create_hybrid_graph(hybrid, output_tree, nodeToInfo);
-        // get output for hybrid
+        // TODO check if hybrid is ok
+        bool h1 = check_hybrid_with_tree(nodeToNode->at(tree1), tree1, nodeToInfo, _COLOUR_DELETE);
+        bool h2 = check_hybrid_with_tree(nodeToNode->at(tree2), tree2, nodeToInfo, _COLOUR_INSERT);
+        if(!(h1 && h2))
+        {
+            std::cout << "error creating hybrid: " << h1 << ", " << h2 << std::endl;
+            //return "error creating hybrid";
+        }
+        output = get_json_hybrid(hybrid, nodeToInfo);
     } 
     else if (std::string(type) == _type_sbs_fs)
     {
