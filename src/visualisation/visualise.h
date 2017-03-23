@@ -25,6 +25,9 @@ char _COLOUR_MAPPED = 'm';
 char _COLOUR_RENAME = 'r';
 char _COLOUR_DELETE = 'd';
 char _COLOUR_INSERT = 'i';
+// other
+int _POSITION_NOT_FOUND = -1;
+int _HIGHEST_ID_HYBRID = 0;
 ////////////////////////////////////////////////////////////////////////////////
 
 // NodeInfo
@@ -336,14 +339,232 @@ bool is_copy_of_tree(nodes::Node<_NodeData>* node_t1,
 }
 
 template<class _NodeData = nodes::StringNodeData>
-void create_hybrid_graph(nodes::Node<_NodeData>* hybrid,
-    nodes::Node<_NodeData>* tree2, NodeToInfo<_NodeData>* nodeToInfo)
+bool same_labels(nodes::Node<_NodeData>* n1, nodes::Node<_NodeData>* n2)
 {
+    return n1->get_data()->get_label() == n2->get_data()->get_label();
+}
 
-
-    for(int i = 0; i < tree2->get_children_number(); i++)
+template<class _NodeData = nodes::StringNodeData>
+int get_child_position(nodes::Node<_NodeData>* parent,
+  nodes::Node<_NodeData>* child)
+{
+    int position = _POSITION_NOT_FOUND;
+    for(int i = 0; i < parent->get_children_number(); i++)
     {
-        create_hybrid_graph(hybrid, tree2->get_child(i), nodeToInfo);
+        if(child == parent->get_child(i))
+        {
+            return i;
+        }
+    }
+    return position;
+}
+
+template<class _NodeData = nodes::StringNodeData>
+void colour_edge_from_to(nodes::Node<_NodeData>* parent,
+    nodes::Node<_NodeData>* child, NodeToInfo<_NodeData>* nodeToInfo,
+    char colour)
+{
+    int position = get_child_position(parent, child);
+    if(position != _POSITION_NOT_FOUND)
+    {
+        nodeToInfo->at(parent)->childEdges->at(position) = colour;
+    }
+    else
+    {
+        std::cout << "something went wrong, couldnt find position" << std::endl;
+    }
+}
+
+template<class _NodeData = nodes::StringNodeData>
+int compute_position(nodes::Node<_NodeData>* parent,
+    nodes::Node<_NodeData>* child, NodeToInfo<_NodeData>* nodeToInfo)
+{
+    int position = get_child_position(parent, child);
+    if(position==0) { return 0; }
+    else if (position == _POSITION_NOT_FOUND)
+    { 
+        std::cout << "error, couldnt find child, compute pos" << std::endl;
+        return 0;
+    }
+    
+    nodes::Node<_NodeData>* left_sibling = parent->get_child(position-1);
+    nodes::Node<_NodeData>* sibling_mapped = nodeToInfo->at(left_sibling)->mappedNode;
+    nodes::Node<_NodeData>* parent_mapped = nodeToInfo->at(parent)->mappedNode;
+    
+    int mappedPos = get_child_position(parent_mapped, sibling_mapped);
+    if(mappedPos == _POSITION_NOT_FOUND)
+    {
+        std::cout << "error, couldnt find mapped sibling, compute pos" << std::endl;
+        return 0;
+    }
+    return mappedPos;
+}
+
+template<class _NodeData = nodes::StringNodeData>
+void insert_edge_from_to(nodes::Node<_NodeData>* parent,
+    nodes::Node<_NodeData>* child, NodeToInfo<_NodeData>* nodeToInfo,
+    int position, char colour)
+{
+    // insert child
+    std::vector<nodes::Node<_NodeData>*> children = parent->children_;
+    if(position > parent->get_children_number())
+    {
+        position = parent->get_children_number();
+    }
+    children.insert(children.begin()+position, child);
+
+    // insert edge
+    std::vector<char>* edges = nodeToInfo->at(parent)->childEdges;
+    if(edges == nullptr)
+    {
+        nodeToInfo->at(parent)->childEdges = new std::vector<char>();
+        edges = nodeToInfo->at(parent)->childEdges;
+    }
+    edges->insert(edges->begin()+position, colour);
+
+    // insert the parent
+    std::vector<nodes::Node<_NodeData>*>* parents = nodeToInfo->at(child)->parents;
+    if(parents == nullptr)
+    {
+        nodeToInfo->at(child)->parents = new std::vector<nodes::Node<_NodeData>*>();
+        parents = nodeToInfo->at(child)->parents;
+    }
+    parents->push_back(parent);
+}
+
+template<class _NodeData = nodes::StringNodeData>
+void remove_edge_from_to(nodes::Node<_NodeData>* parent,
+    nodes::Node<_NodeData>* child, NodeToInfo<_NodeData>* nodeToInfo)
+{
+    // get the position
+    int position = get_child_position(parent, child);
+
+    if(position==_POSITION_NOT_FOUND)
+    {
+        std::cout << "error, couldnt find child, shouldnt happen" << std::endl;
+        return;
+    }
+
+    // remove child
+    std::vector<nodes::Node<_NodeData>*> children = parent->children_;
+    children.erase(children.begin()+position);
+
+    // remove edge
+    std::vector<char>* edges = nodeToInfo->at(parent)->childEdges;
+    if(edges != nullptr)
+    {
+        edges->erase(edges->begin()+position);
+        if(edges->size()==0)
+        {
+            nodeToInfo->at(parent)->childEdges = nullptr;
+        }
+    }
+
+    // remove the parent
+    std::vector<nodes::Node<_NodeData>*>* parents = nodeToInfo->at(child)->parents;
+    if(parents != nullptr)
+    {
+        parents = nodeToInfo->at(child)->parents;
+        parents->erase(find(parents->begin(), parents->end(), parent));
+        if(parents->size()==0)
+        {
+            nodeToInfo->at(child)->parents = nullptr;
+        }
+    }
+}
+
+template<class _NodeData = nodes::StringNodeData>
+void create_hybrid_graph(nodes::Node<_NodeData>* hybrid,
+    nodes::Node<_NodeData>* node_t2, NodeToInfo<_NodeData>* nodeToInfo)
+{
+    // get the mapped node of node_t2 and check if it is mapped
+    nodes::Node<_NodeData>* node_mapped = nodeToInfo->at(node_t2)->mappedNode;
+    if(node_mapped != nullptr)
+    {
+        // node is mapped
+        // colour the node to mapped
+        nodeToInfo->at(node_mapped)->colour = _COLOUR_MAPPED;
+        // check if the labels differ
+        if(! same_labels(node_mapped, node_t2))
+        {
+            // labels differ, colour the node + "rename"
+            nodeToInfo->at(node_mapped)->colour = _COLOUR_RENAME;
+            nodeToInfo->at(node_mapped)->label2 = node_t2->get_data()->get_label();
+        }
+        // check if the node_t2 has a parent, else it is the root of T2
+        if(nodeToInfo->at(node_t2)->parents!=nullptr)
+        {
+            // get the parent of node_t2
+            nodes::Node<_NodeData>* parent_t2 = nodeToInfo->at(node_t2)->parents->front(); 
+            // get the mapped node of parent_t2 and check if it is mapped
+            nodes::Node<_NodeData>* parent_mapped = nodeToInfo->at(parent_t2)->mappedNode;
+            if(nodeToInfo->at(node_mapped)->parents != nullptr)
+            {
+                nodes::Node<_NodeData>* node_mapped_parent = nodeToInfo->at(node_mapped)->parents->front();
+                if(node_mapped_parent==parent_mapped)
+                {
+                    // colour the edge from node_mapped_parent to node_mapped _COLOUR_MAPPED
+                    colour_edge_from_to(node_mapped_parent, node_mapped, nodeToInfo, _COLOUR_MAPPED);
+                }
+                else
+                {
+                    // leave the edge from node_mapped_parent to node_mapped _COLOUR_DELETE
+                    int position = compute_position(parent_t2, node_t2, nodeToInfo);
+                    insert_edge_from_to(parent_mapped, node_mapped, nodeToInfo, position, _COLOUR_INSERT);
+                }
+            }
+            else
+            {
+                // root of T1 is mapped to a node other than the root of T2
+                // TODO position --> from t2
+                remove_edge_from_to(hybrid, node_mapped, nodeToInfo);
+            }
+        }
+    }
+    else
+    {
+        // node is not mapped, but inserted
+        nodes::Node<_NodeData>* inserted = new nodes::Node<_NodeData>(new _NodeData(node_t2->get_data()->get_label()));
+        NodeInfo<_NodeData>* nodeInfo = new NodeInfo<_NodeData>();
+        // set the parents to nullptr --> no parent
+        nodeInfo->parents = nullptr;
+        nodeInfo->childEdges = nullptr;
+        nodeInfo->mappedNode = node_t2;
+        nodeToInfo->at(node_t2)->mappedNode = inserted;
+
+        ++_HIGHEST_ID_HYBRID;
+        nodeInfo->id = _HIGHEST_ID_HYBRID;
+        nodeToInfo->emplace(inserted, nodeInfo);
+
+        nodes::Node<_NodeData>* parent_mapped = nullptr;
+        nodes::Node<_NodeData>* parent_t2 = nullptr;
+        if(nodeToInfo->at(node_t2)->parents != nullptr)
+        {
+            // get the parent of node_t2
+            parent_t2 = nodeToInfo->at(node_t2)->parents->front(); 
+            // get the mapped node of parent_t2
+            parent_mapped = nodeToInfo->at(parent_t2)->mappedNode;
+        }
+        if(parent_mapped!=nullptr)
+        {
+            // the parent of n is mapped to a node in T1
+            int position = compute_position(parent_t2, node_t2, nodeToInfo);
+            insert_edge_from_to(parent_mapped, inserted, nodeToInfo, position, _COLOUR_INSERT);
+            nodeToInfo->at(inserted)->parents = new std::vector<nodes::Node<_NodeData>*>();
+            nodeToInfo->at(inserted)->parents->push_back(parent_mapped); 
+        }
+        else
+        {
+            // n is the new root of the hybrid graph
+            insert_edge_from_to(inserted, hybrid, nodeToInfo, 0, _COLOUR_INSERT);
+            hybrid = inserted;
+        }
+    }
+
+    // preorder - tree2
+    for(int i = 0; i < node_t2->get_children_number(); i++)
+    {
+        create_hybrid_graph(hybrid, node_t2->get_child(i), nodeToInfo);
     }
 }
 
@@ -387,6 +608,7 @@ std::string visualise(char* type, nodes::Node<_NodeData>* tree1,
         {
             std::cout << "error copying: " << c1 << ", " << c2 << std::endl;
         }
+        _HIGHEST_ID_HYBRID = nodeToInfo->at(hybrid)->id;
         create_hybrid_graph(hybrid, output_tree, nodeToInfo);
         // get output for hybrid
     } 
