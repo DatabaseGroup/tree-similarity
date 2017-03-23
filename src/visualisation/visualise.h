@@ -118,6 +118,64 @@ void fill_map_nodeInfo(nodes::Node<_NodeData>* root, int& id_counter,
     nodeToInfo->emplace(root, nodeInfo);
 }
 
+template<class _NodeData = nodes::StringNodeData>
+nodes::Node<_NodeData>* copy_tree_for_hybrid (
+  nodes::Node<_NodeData>* parent, nodes::Node<_NodeData>* node,
+  NodeToInfo<_NodeData>* nodeToInfo, 
+  NodeToNode<_NodeData, _NodeData>* nodeToNode, int& id_counter, 
+  int level, char colour = char(0))
+{
+    NodeInfo<_NodeData>* nodeInfo = new NodeInfo<_NodeData>();
+
+    // set the level
+    nodeInfo->level = level;
+    // get the label of the "original" node
+    std::string label = node->get_data()->get_label();
+    // check if a parent is set
+    if(parent!=nullptr)
+    {
+        // set the parent
+        nodeInfo->parents = new std::vector<nodes::Node<_NodeData>*>();
+        nodeInfo->parents->push_back(parent);
+    } 
+    else
+    {
+        // set the parent to nullptr --> no parent
+        nodeInfo->parents = nullptr;
+    }
+
+    // create the new node with the label of the "original" node
+    nodes::Node<_NodeData>* newNode = 
+        new nodes::Node<_NodeData>(new _NodeData(label));
+    // set the childEdges to nullptr --> no coloured edges
+    nodeInfo->childEdges = nullptr;
+
+    // copy each child node
+    for(int i = 0; i < node->get_children_number(); i++){
+        nodes::Node<_NodeData>* tmp = (copy_tree_for_hybrid(newNode, 
+            node->get_child(i), nodeToInfo, nodeToNode, id_counter, level+1, colour));
+        newNode->add_child(tmp);
+    }
+
+    // if a colour is set, colour the node and the edges
+    if(colour != char(0)) {
+        nodeInfo->childEdges = new std::vector<char>();
+        nodeInfo->colour = colour;
+        for(int i = 0; i < newNode->get_children_number(); i++){
+            nodeInfo->childEdges->push_back(colour);
+        }
+    }
+    // postorder id
+    nodeInfo->id = id_counter;
+    ++id_counter;
+
+    // set the mapping for the "old"/"original" node and the new node
+    nodeToInfo->emplace(newNode, nodeInfo);
+    nodeToNode->emplace(node, newNode);
+
+    return (newNode);
+}
+
 // fill_mappedNodes_nodeToInfo (hybrid)
 // fills the nodeToInfo mapping
 // params:  edm - edit mapping (vector of array of nodes)
@@ -158,50 +216,6 @@ void fill_mappedNodes_nodeToInfo(
     }
 }
 
-// visualise
-// creates the visualisation for the two trees string depending on the type
-// params:  type - visualisation type (string)
-//          tree1 - the input tree (node)
-//          tree2   - the output tree (node)
-//
-// returns the visualisation string (string)
-template<class _NodeData = nodes::StringNodeData, 
-    class _costs = nodes::Costs<_NodeData>>
-std::string visualise(char* type, nodes::Node<_NodeData>* tree1,
-    nodes::Node<_NodeData>* tree2)
-{
-    // TODO remove string "end" and
-    std::string output = "end";
-    NodeToInfo<_NodeData>* nodeToInfo = new NodeToInfo<_NodeData>();
-    std::vector<std::array<nodes::Node<_NodeData>*, 2> > edm =
-        zhang_shasha::compute_edit_mapping<_NodeData, 
-        nodes::StringCosts<_NodeData>>(tree1, tree2);
-
-    if(std::string(type) == _type_hybrid)
-    {
-        // create nodeToInfo
-        // create_hybrid
-        // get output for hybrid
-    } 
-    else if (std::string(type) == _type_sbs_fs)
-    {
-        // id counter since the initial node has no id anymore
-        int id_counter = 0;
-        // nodeInfo for tree 1 (input tree)
-        fill_map_nodeInfo(tree1, id_counter, nodeToInfo);
-        // reset the id_counter
-        id_counter = 0; 
-        // nodeInfo for tree 2 (output tree)
-        fill_map_nodeInfo(tree2, id_counter, nodeToInfo);
-        // fill the mapped node for each node
-        fill_mappedNodes_nodeToInfo(edm, nodeToInfo);
-        // get output for sbs_fs
-        output = get_side_by_side_indented(tree1,tree2,nodeToInfo);
-        delete nodeToInfo;
-    }
-
-    return output;
-}
 
 // get_json_string_side_by_side_indented
 // params:  tree - the current node we need to acquire information about
@@ -253,8 +267,7 @@ std::string get_json_string_side_by_side_indented(nodes::Node<_NodeData>* tree,
 // params:  a
 //
 // returns the json string for the visualisation type sbs_fs
-template<class _NodeData = nodes::StringNodeData, 
-  class _costs = nodes::Costs<_NodeData>>
+template<class _NodeData = nodes::StringNodeData>
 std::string get_side_by_side_indented(nodes::Node<_NodeData>* tree1,
   nodes::Node<_NodeData>* tree2, NodeToInfo<_NodeData>* nodeToInfo)
 {
@@ -265,6 +278,136 @@ std::string get_side_by_side_indented(nodes::Node<_NodeData>* tree1,
             nodeToInfo->at(tree1)->id);
     res += "]";
     return res;
+}
+
+// is_copy_of_tree
+// checks if the trees are identical to structure, label and colour,
+//      starts at tree2's mapped node 
+// params:  tree1 - the first tree (node) 
+//              ! tree1 should be COLOURED COPY OF TREE2 !
+//          tree2 - the second tree (node) 
+//          nodeToInfo - where the additional info is stored in
+//          nodeToNode - the mapping of the nodes (tree1<->tree2)
+//          colour - (opt) the colour the nodes/edges are allowed to have
+//          
+// returns (bool) whether the trees are the same (structure + label)
+template<class _NodeData = nodes::StringNodeData>
+bool is_copy_of_tree(nodes::Node<_NodeData>* node_t1,
+    nodes::Node<_NodeData>* node_t2, NodeToInfo<_NodeData>* nodeToInfo,
+    NodeToNode<_NodeData, _NodeData>* nodeToNode, char colour = char(0))
+{
+    nodes::Node<_NodeData>* mappedNode = nodeToNode->at(node_t2);
+    // check if the mapping is ok
+    if(node_t1 != mappedNode)
+        { return false; }
+    
+    // check label
+    if(node_t1->get_data()->get_label() != node_t2->get_data()->get_label())
+        {return false; }
+
+    // check the colour
+    if(nodeToInfo->at(node_t1)->colour != colour)
+        { return false; }
+    
+    // check the number of children
+    if(node_t1->get_children_number() != node_t2->get_children_number())
+        { return false; }
+    
+    if(node_t1->get_children_number() > 0)
+    {
+        // size of the child edge array has to equal the children number
+        if(node_t1->get_children_number() != nodeToInfo->at(node_t1)->childEdges->size())
+           {return false; }
+        bool result = true;
+        // check edges + child nodes
+        for(int i = 0; i < node_t1->get_children_number(); i++)
+        {
+            // check edge colour
+            if(nodeToInfo->at(node_t1)->childEdges->at(i) != colour) { return false; }
+            // check it for every node
+            result = is_copy_of_tree(node_t1->get_child(i), node_t2->get_child(i),
+                nodeToInfo, nodeToNode, colour);
+            if(!result) { return false; }
+        }
+        
+    }
+    
+    return true;
+}
+
+template<class _NodeData = nodes::StringNodeData>
+void create_hybrid_graph(nodes::Node<_NodeData>* hybrid,
+    nodes::Node<_NodeData>* tree2, NodeToInfo<_NodeData>* nodeToInfo)
+{
+
+
+    for(int i = 0; i < tree2->get_children_number(); i++)
+    {
+        create_hybrid_graph(hybrid, tree2->get_child(i), nodeToInfo);
+    }
+}
+
+// visualise
+// creates the visualisation for the two trees string depending on the type
+// params:  type - visualisation type (string)
+//          tree1 - the input tree (node)
+//          tree2   - the output tree (node)
+//
+// returns the visualisation string (string)
+template<class _NodeData = nodes::StringNodeData>
+std::string visualise(char* type, nodes::Node<_NodeData>* tree1,
+    nodes::Node<_NodeData>* tree2, 
+    std::vector<std::array<nodes::Node<_NodeData>*, 2> > edm)
+{
+    // TODO remove string "end" and
+    std::string output = "end";
+    NodeToInfo<_NodeData>* nodeToInfo = new NodeToInfo<_NodeData>();
+
+    if(std::string(type) == _type_hybrid)
+    {
+        int id_counter = 0;
+        // mapping of old to new
+        NodeToNode<_NodeData, _NodeData>* nodeToNode = 
+            new NodeToNode<_NodeData, _NodeData>();
+        // copy tree1, colour delete
+        nodes::Node<_NodeData>* hybrid = 
+            copy_tree_for_hybrid(static_cast<nodes::Node<_NodeData>*>(nullptr),
+            tree1, nodeToInfo, nodeToNode, id_counter, 0, _COLOUR_DELETE);
+        // copy tree2, colour insert
+        nodes::Node<_NodeData>* output_tree = 
+            copy_tree_for_hybrid(static_cast<nodes::Node<_NodeData>*>(nullptr),
+            tree2, nodeToInfo, nodeToNode, id_counter, 0, _COLOUR_INSERT);
+        // fill the mappedNodes
+        fill_mappedNodes_nodeToInfo(edm, nodeToInfo, nodeToNode);
+        
+        // DEBUG TODO REMOVE - checks if the copy is correct
+        bool c1 = is_copy_of_tree(hybrid, tree1, nodeToInfo, nodeToNode, _COLOUR_DELETE);
+        bool c2 = is_copy_of_tree(output_tree, tree2, nodeToInfo, nodeToNode, _COLOUR_INSERT);
+        if(!(c1 && c2))
+        {
+            std::cout << "error copying: " << c1 << ", " << c2 << std::endl;
+        }
+        create_hybrid_graph(hybrid, output_tree, nodeToInfo);
+        // get output for hybrid
+    } 
+    else if (std::string(type) == _type_sbs_fs)
+    {
+        // id counter since the initial node has no id anymore
+        int id_counter = 0;
+        // nodeInfo for tree 1 (input tree)
+        fill_map_nodeInfo(tree1, id_counter, nodeToInfo);
+        // reset the id_counter
+        id_counter = 0; 
+        // nodeInfo for tree 2 (output tree)
+        fill_map_nodeInfo(tree2, id_counter, nodeToInfo);
+        // fill the mapped node for each node
+        fill_mappedNodes_nodeToInfo(edm, nodeToInfo);
+        // get output for sbs_fs
+        output = get_side_by_side_indented(tree1,tree2,nodeToInfo);
+        delete nodeToInfo;
+    }
+
+    return output;
 }
 
 // visualise_string
@@ -289,8 +432,13 @@ std::string visualise_string (char* type, char* str_t1, char* str_t2)
         parser::create_tree_from_string<_NodeData>(str_t2, 
         hashtable_label_to_id, node_id);
     
+    // compute the edm
+    std::vector<std::array<nodes::Node<_NodeData>*, 2> > edm =
+        zhang_shasha::compute_edit_mapping<_NodeData,
+        nodes::StringCosts<_NodeData>>(tree1, tree2);
+
     std::string output;
-    output = visualise(type, tree1, tree2);
+    output = visualise(type, tree1, tree2, edm);
 
     return output;
 }
