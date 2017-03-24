@@ -37,7 +37,7 @@ int main (int argc, char* argv[]) {
         out.open(file, std::fstream::in | std::fstream::out | std::fstream::trunc);
         if (out.is_open()){
           // DEBUG OUTPUT
-          // out << output << std::endl;
+          out << output << std::endl;
           std::cout << "writing to the file: " << file << std::endl;
         }
         out.close();
