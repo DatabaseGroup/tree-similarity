@@ -15,6 +15,38 @@ void test_ss_naive();
 // TODO: tobi: put everything in a method e.g. called get_sbs_fs(node* t1, node* t2)
 //
 int main (int argc, char* argv[]) {
+  
+  if(argc >= 5 && argv[1] == std::string("--visualise"))
+  {
+    char* type = argv[2];
+    char* tree1 = argv[3];
+    char* tree2 = argv[4];
+    
+    std::string output;
+
+    output = visualise::visualise_string(type, tree1, tree2);
+    if(argc >= 7 && argv[5] == std::string("--file")
+      && argv[6] != nullptr && output != "")
+    {
+      char* filename = argv[6];
+      if(filename == nullptr)
+      { return 0; }
+        std::cout << output << std::endl;
+        std::fstream out;
+        std::string file = std::string(filename) + ".tree";
+        out.open(file, std::fstream::in | std::fstream::out | std::fstream::trunc);
+        if (out.is_open()){
+          // DEBUG OUTPUT
+          // out << output << std::endl;
+          std::cout << "writing to the file: " << file << std::endl;
+        }
+        out.close();
+        output.clear();
+    }
+    return 0;
+  }
+
+  
   //if(argc != 3 && argc != 4 && argc != 5 && argc != 6) {
   if (argc <= 1) {
     std::cout << "Usage: ./tree_similarity [OPTION] [input-tree-1] [input-tree-2]"
@@ -82,62 +114,7 @@ int main (int argc, char* argv[]) {
     test_ss_naive();
     return 0;
   }
-
-/*
-  // TOBIAS PART - TO BE RESOLVED/REMOVE/CLEANED BY TOBIAS
-  //
-  std::vector<std::array<nodes::Node*, 2> > edit_mapping =
-    zs::compute_edit_mapping<nodes::Node, Costs<nodes::Node>>(tree1, tree2);
-  if(argc > 3) {
-    std::string output;
-    //std::cout << "'" << argv[3] << "'" << std::endl;
-    if(argv[3] == std::string("-hybrid")){
-      std::vector<int> edm;
-      nodes::Node* hybrid = common::create_hybrid_graph(tree1, tree2, edit_mapping, hashtable_id_to_label);
-      output = common::get_json_hybrid_graph_tree(hybrid, hashtable_id_to_label);
-      //delete hybrid;
-    } else if(strcmp(argv[3],"-sbs_fs")==0){
-      std::cout << "sbs" << std::endl;
-      int *edit_mapping_int_array[2];
-      int max_nodes = std::max(tree1->get_subtree_size(), tree2->get_subtree_size());
-
-      edit_mapping_int_array[0] = new int[max_nodes + 1];
-      edit_mapping_int_array[1] = new int[max_nodes + 1];
-      for (int i = 0; i < 2; ++i) {
-        for (int j = 0; j <= max_nodes; ++j) {
-          edit_mapping_int_array[i][j] = 0;
-        }
-      }
-      zs::get_edit_mapping_int_array<nodes::Node>(edit_mapping, edit_mapping_int_array);
-
-      output = common::get_json_side_by_side(tree1, tree2,
-        hashtable_id_to_label, edit_mapping_int_array);
-        for (int i = 0; i < 2; ++i){
-          delete[] edit_mapping_int_array[i];
-        }
-    }
-    std::cout << output << std::endl;
-    //std::cout << "output check" << std::endl;
-    if(argc>=6 && (strcmp(argv[4],"-f") == 0)){
-      std::fstream out;
-      std::string filename = argv[5];
-      filename += ".tree";
-      out.open(filename, std::fstream::in | std::fstream::out | std::fstream::trunc);
-      if (out.is_open()){
-        out << output << std::endl;
-        std::cout << "writing to the file: " << filename << std::endl;
-      }
-      out.close();
-      output.clear();
-    }
-  }
-
-  delete tree1;
-  delete tree2;
-  delete tree1_postorder;
-  delete tree2_postorder;
-*/
-
+  
   return 0;
 }
 
