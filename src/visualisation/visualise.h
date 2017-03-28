@@ -531,8 +531,8 @@ void create_hybrid_graph(nodes::Node<_NodeData>* hybrid,
         nodeInfo->parents = nullptr;
         nodeInfo->childEdges = nullptr;
         nodeInfo->mappedNode = node_t2;
+        nodeInfo->colour = _COLOUR_INSERT;
         nodeToInfo->at(node_t2)->mappedNode = inserted;
-
         ++_HIGHEST_ID_HYBRID;
         nodeInfo->id = _HIGHEST_ID_HYBRID;
         nodeToInfo->emplace(inserted, nodeInfo);
@@ -574,8 +574,8 @@ void increase_scope(nodes::Node<_NodeData>* n,
   for(int i = 0; i < n->get_children_number(); i++){
     if(nodeToInfo->at(n->get_child(i))->level <= nodeToInfo->at(n)->level){
       nodeToInfo->at(n->get_child(i))->level = nodeToInfo->at(n)->level+1;
-      increase_scope(n->get_child(i), nodeToInfo);
     }
+    increase_scope(n->get_child(i), nodeToInfo);
   }
 }
 
@@ -742,7 +742,6 @@ bool check_hybrid_with_tree(nodes::Node<_NodeData>* node_hybrid,
             }
         }
     }
-
     return true;    
 }
 
@@ -795,7 +794,7 @@ std::string visualise(char* type, nodes::Node<_NodeData>* tree1,
         if(!(h1 && h2))
         {
             std::cout << "error creating hybrid: " << h1 << ", " << h2 << std::endl;
-            //return "error creating hybrid";
+            return "error creating hybrid";
         }
         output = get_json_hybrid(hybrid, nodeToInfo);
     } 

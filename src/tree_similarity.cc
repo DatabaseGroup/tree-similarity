@@ -31,13 +31,14 @@ int main (int argc, char* argv[]) {
       char* filename = argv[6];
       if(filename == nullptr)
       { return 0; }
-        std::cout << output << std::endl;
+        // uncomment to print json:
+        //std::cout << output << std::endl;
         std::fstream out;
         std::string file = std::string(filename) + ".tree";
         out.open(file, std::fstream::in | std::fstream::out | std::fstream::trunc);
         if (out.is_open()){
-          // DEBUG OUTPUT
           out << output << std::endl;
+          // DEBUG OUTPUT/INFORMATION, comment if not needed
           std::cout << "writing to the file: " << file << std::endl;
         }
         out.close();
