@@ -397,7 +397,7 @@ int compute_position(nodes::Node<_NodeData>* parent,
         std::cout << "error, couldnt find mapped sibling, compute pos" << std::endl;
         return 0;
     }
-    return mappedPos;
+    return mappedPos+1;
 }
 
 template<class _NodeData = nodes::StringNodeData>
@@ -788,12 +788,12 @@ std::string visualise(char* type, nodes::Node<_NodeData>* tree1,
         }
         _HIGHEST_ID_HYBRID = nodeToInfo->at(hybrid)->id;
         create_hybrid_graph(hybrid, output_tree, nodeToInfo);
-        // TODO check if hybrid is ok
+        // check if hybrid is ok
         bool h1 = check_hybrid_with_tree(nodeToNode->at(tree1), tree1, nodeToInfo, _COLOUR_DELETE);
-        bool h2 = check_hybrid_with_tree(nodeToNode->at(tree2), tree2, nodeToInfo, _COLOUR_INSERT);
+        bool h2 = check_hybrid_with_tree(nodeToInfo->at(output_tree)->mappedNode, output_tree, nodeToInfo, _COLOUR_INSERT);
         if(!(h1 && h2))
         {
-            std::cout << "error creating hybrid: " << h1 << ", " << h2 << std::endl;
+            std::cout << "error creating hybrid: h1: " << h1 << ", h2: " << h2 << "; //<1 = ok, 0 = error>" << std::endl;
             return "error creating hybrid";
         }
         output = get_json_hybrid(hybrid, nodeToInfo);

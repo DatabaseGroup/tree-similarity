@@ -32,7 +32,7 @@ int main (int argc, char* argv[]) {
       if(filename == nullptr)
       { return 0; }
         // uncomment to print json:
-        //std::cout << output << std::endl;
+        // std::cout << output << std::endl;
         std::fstream out;
         std::string file = std::string(filename) + ".tree";
         out.open(file, std::fstream::in | std::fstream::out | std::fstream::trunc);
