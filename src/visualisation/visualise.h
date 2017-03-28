@@ -244,7 +244,7 @@ std::string get_json_string_side_by_side_indented(nodes::Node<_NodeData>* tree,
     if(nodeToInfo->at(tree)->mappedNode){
         str << nodeToInfo->at(nodeToInfo->at(tree)->mappedNode)->id;
     } else {
-        str << "0";
+        str << "-1";
     }
     str << ",\"children\":";
     if(tree->get_children_number() > 0){
