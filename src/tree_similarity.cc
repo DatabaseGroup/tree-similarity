@@ -25,6 +25,15 @@ int main (int argc, char* argv[]) {
     std::string output;
 
     output = visualise::visualise_string(type, tree1, tree2);
+    if(output == "error creating hybrid" || output == "error copying")
+    {
+      std::cout << "NOT OK <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< " << output << std::endl;
+      std::cout << "input: " << std::string(tree1) << std::endl;
+      std::cout << "output: " << std::string(tree2) << std::endl;
+    }
+    else {
+      std::cout << "ok" << std::endl;
+    }
     if(argc >= 7 && argv[5] == std::string("--file")
       && argv[6] != nullptr && output != "")
     {

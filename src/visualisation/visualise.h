@@ -405,6 +405,7 @@ void insert_edge_from_to(nodes::Node<_NodeData>* parent,
     nodes::Node<_NodeData>* child, NodeToInfo<_NodeData>* nodeToInfo,
     int position, char colour)
 {
+    // std::cout << "ins edge, parent:" << parent->get_data()->get_label() << " (" << parent << "), child: " << child->get_data()->get_label() << " (" << child << ")" << std::endl;    
     // insert child    
     if(position > parent->get_children_number())
     {
@@ -435,6 +436,7 @@ template<class _NodeData = nodes::StringNodeData>
 void remove_edge_from_to(nodes::Node<_NodeData>* parent,
     nodes::Node<_NodeData>* child, NodeToInfo<_NodeData>* nodeToInfo)
 {
+    // std::cout << "removing, parent:" << parent->get_data()->get_label() << " (" << parent << "), child: " << child->get_data()->get_label() << " (" << child << ")" << std::endl;
     // get the position
     int position = get_child_position(parent, child);
 
@@ -445,27 +447,23 @@ void remove_edge_from_to(nodes::Node<_NodeData>* parent,
     }
 
     // remove child
-    std::vector<nodes::Node<_NodeData>*> children = parent->children_;
-    children.erase(children.begin()+position);
+    parent->children_.erase(parent->children_.begin()+position);
 
     // remove edge
-    std::vector<char>* edges = nodeToInfo->at(parent)->childEdges;
-    if(edges != nullptr)
+    if(nodeToInfo->at(parent)->childEdges != nullptr)
     {
-        edges->erase(edges->begin()+position);
-        if(edges->size()==0)
+        nodeToInfo->at(parent)->childEdges->erase(nodeToInfo->at(parent)->childEdges->begin()+position);
+        if(nodeToInfo->at(parent)->childEdges->size()==0)
         {
             nodeToInfo->at(parent)->childEdges = nullptr;
         }
     }
 
     // remove the parent
-    std::vector<nodes::Node<_NodeData>*>* parents = nodeToInfo->at(child)->parents;
-    if(parents != nullptr)
+    if(nodeToInfo->at(child)->parents != nullptr)
     {
-        parents = nodeToInfo->at(child)->parents;
-        parents->erase(find(parents->begin(), parents->end(), parent));
-        if(parents->size()==0)
+        nodeToInfo->at(child)->parents->erase(find(nodeToInfo->at(child)->parents->begin(), nodeToInfo->at(child)->parents->end(), parent));
+        if(nodeToInfo->at(child)->parents->size()==0)
         {
             nodeToInfo->at(child)->parents = nullptr;
         }
@@ -508,6 +506,11 @@ nodes::Node<_NodeData>* create_hybrid_graph(nodes::Node<_NodeData>* hybrid,
                 else
                 {
                     // leave the edge from node_mapped_parent to node_mapped _COLOUR_DELETE
+                    int wrongEdgePos = get_child_position(node_mapped_parent,node_mapped);
+                    if(nodeToInfo->at(node_mapped_parent)->childEdges->at(wrongEdgePos) == _COLOUR_INSERT)
+                    {
+                        remove_edge_from_to(node_mapped_parent, node_mapped, nodeToInfo);
+                    }
                     int position = compute_position(parent_t2, node_t2, nodeToInfo);
                     insert_edge_from_to(parent_mapped, node_mapped, nodeToInfo, position, _COLOUR_INSERT);
                 }
@@ -547,12 +550,14 @@ nodes::Node<_NodeData>* create_hybrid_graph(nodes::Node<_NodeData>* hybrid,
         }
         if(parent_mapped!=nullptr)
         {
+            // std::cout << "ins, p n.n:" << parent_mapped->get_data()->get_label() << " (" << parent_mapped << "), child: " << inserted->get_data()->get_label() << " (" << inserted << ")" << std::endl;
             // the parent of n is mapped to a node in T1
             int position = compute_position(parent_t2, node_t2, nodeToInfo);
             insert_edge_from_to(parent_mapped, inserted, nodeToInfo, position, _COLOUR_INSERT);
         }
         else
         {
+            // std::cout << "new hybrid:" << inserted->get_data()->get_label() << " (" << inserted << "), child: " << hybrid->get_data()->get_label() << " (" << hybrid << ")" << std::endl;
             // n is the new root of the hybrid graph
             insert_edge_from_to(inserted, hybrid, nodeToInfo, 0, _COLOUR_INSERT);
             hybrid = inserted;
@@ -631,7 +636,7 @@ std::string get_json_hybrid_tree(nodes::Node<_NodeData>* hybrid,
         if(!empty) {
             str << ",\"children\": [" << str_tmp.str() << "]";
         } else {
-            std::cout << "emtpy?!" << std::endl;
+            // std::cout << "emtpy?!" << std::endl;
         }
     }
 
@@ -664,6 +669,23 @@ std::string get_json_hybrid(nodes::Node<_NodeData>* hybrid,
     }
     str << "]}";
     return str.str();
+}
+
+template<class _NodeData = nodes::StringNodeData>
+void print_tree_indented(nodes::Node<_NodeData>* n, int level,
+  NodeToInfo<_NodeData>* nodeToInfo, char colour)
+{
+  if(nodeToInfo->at(n)->colour == _COLOUR_MAPPED || nodeToInfo->at(n)->colour == _COLOUR_RENAME || nodeToInfo->at(n)->colour == colour){
+    for(int i = 0; i < level; i++){
+      std::cout << ".";
+    }
+    std::cout << n->get_data()->get_label() << " (c: " << nodeToInfo->at(n)->colour << "), n: " << n << std::endl;
+    for(int i = 0; i < n->get_children_number(); i++){
+      if(nodeToInfo->at(n)->childEdges != nullptr && (nodeToInfo->at(n)->childEdges->at(i) == _COLOUR_MAPPED || nodeToInfo->at(n)->childEdges->at(i) == colour)){
+        print_tree_indented(n->get_child(i), (level+1),nodeToInfo, colour);
+      }
+    }
+  }
 }
 
 template<class _NodeData = nodes::StringNodeData>
@@ -715,7 +737,7 @@ bool check_hybrid_with_tree(nodes::Node<_NodeData>* node_hybrid,
         }
         if(child_counter != node_tree->get_children_number())
         { 
-            std::cout << "children number differ: " << node_hybrid->get_children_number() << ", right colour: " << child_counter << " | " << node_tree->get_children_number() << std::endl;
+            std::cout << "children number differ: " << node_hybrid->get_children_number() << ", right counter: " << child_counter << " | " << node_tree->get_children_number() << std::endl;
             std::cout << "label hybrid: " << node_hybrid->get_data()->get_label() << " ";
             std::cout << "label tree:   " << node_tree->get_data()->get_label() << " " << std::endl;
             return false;
@@ -794,6 +816,22 @@ std::string visualise(char* type, nodes::Node<_NodeData>* tree1,
         if(!(h1 && h2))
         {
             std::cout << "error creating hybrid: h1: " << h1 << ", h2: " << h2 << "; //<1 = ok, 0 = error>" << std::endl;
+            std::cout << "--------------------------" << std::endl;
+            if(!h1)
+            {
+                print_tree_indented(hybrid,0,nodeToInfo,_COLOUR_DELETE);
+                nodes::Node<_NodeData>* input_tree = 
+                    copy_tree_for_hybrid(static_cast<nodes::Node<_NodeData>*>(nullptr),
+                    tree1, nodeToInfo, nodeToNode, id_counter, 0, _COLOUR_DELETE);
+                std::cout << "--------------------------" << std::endl;
+                print_tree_indented(input_tree, 0, nodeToInfo,_COLOUR_DELETE);
+            } else if(!h2)
+            {
+                print_tree_indented(hybrid,0,nodeToInfo,_COLOUR_INSERT);
+                std::cout << "--------------------------" << std::endl;
+                print_tree_indented(output_tree, 0, nodeToInfo,_COLOUR_INSERT);
+            }
+            std::cout << "--------------------------" << std::endl;            
             return "error creating hybrid";
         }
         output = get_json_hybrid(hybrid, nodeToInfo);
