@@ -473,10 +473,9 @@ void remove_edge_from_to(nodes::Node<_NodeData>* parent,
 }
 
 template<class _NodeData = nodes::StringNodeData>
-void create_hybrid_graph(nodes::Node<_NodeData>* hybrid,
+nodes::Node<_NodeData>* create_hybrid_graph(nodes::Node<_NodeData>* hybrid,
     nodes::Node<_NodeData>* node_t2, NodeToInfo<_NodeData>* nodeToInfo)
 {
-    std::string debug_label = node_t2->get_data()->get_label();
     // get the mapped node of node_t2 and check if it is mapped
     nodes::Node<_NodeData>* node_mapped = nodeToInfo->at(node_t2)->mappedNode;
     if(node_mapped != nullptr)
@@ -565,6 +564,7 @@ void create_hybrid_graph(nodes::Node<_NodeData>* hybrid,
     {
         create_hybrid_graph(hybrid, node_t2->get_child(i), nodeToInfo);
     }
+    return hybrid;
 }
 
 template<class _NodeData = nodes::StringNodeData>
@@ -787,7 +787,7 @@ std::string visualise(char* type, nodes::Node<_NodeData>* tree1,
             return "error copying";
         }
         _HIGHEST_ID_HYBRID = nodeToInfo->at(hybrid)->id;
-        create_hybrid_graph(hybrid, output_tree, nodeToInfo);
+        hybrid = create_hybrid_graph(hybrid, output_tree, nodeToInfo);
         // check if hybrid is ok
         bool h1 = check_hybrid_with_tree(nodeToNode->at(tree1), tree1, nodeToInfo, _COLOUR_DELETE);
         bool h2 = check_hybrid_with_tree(nodeToInfo->at(output_tree)->mappedNode, output_tree, nodeToInfo, _COLOUR_INSERT);
