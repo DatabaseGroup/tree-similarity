@@ -7,6 +7,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++11 -Wall -O3")
 include_directories(
   ${CMAKE_BINARY_DIR}
   node
+  label
+  cost_model
 )
 
 # the set of all source files
@@ -14,6 +16,9 @@ set(tree_similarity_sources
   tree_similarity.h
   tree_similarity.cc
   node/node.h
+  label/string_label.h
+  label/string_label.cc
+  cost_model/unit_cost_model.h
 )
 
 # build executable
