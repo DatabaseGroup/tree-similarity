@@ -30,6 +30,7 @@
 #define TREE_SIMILARITY_NODE_NODE_H
 
 #include <vector>
+#include <memory>
 
 namespace node {
 
@@ -37,8 +38,8 @@ namespace node {
 ///
 /// \details
 /// Represents a node in a tree. Every node holds some satellite data
-/// representing the label (_NodeData).
-/// The type of the label is parameterized using _NodeData and can be of
+/// representing the label (_Label).
+/// The type of the label is parameterized using _Label and can be of
 /// arbitrary type as long as the requirements for computing the tree edit
 /// distance are met. We refer to the Costs class (in this file) for further
 /// information on the requirements.
@@ -51,100 +52,55 @@ namespace node {
 /// any means. If one decides to modify this class it may actually break some
 /// tree algorithms, so be careful.
 ///
-/// \tparam _NodeData Satellite data associated with the node.
-template <class _NodeData>
+/// \tparam _Label Satellite data associated with the node.
+template <class _Label>
 class Node {
 public:
-    Node(_NodeData* data = new _NodeData());
-    Node(const Node<_NodeData>& other); // copy constr.
-    ~Node();
+  /*using LabelUniquePtr = std::unique_ptr<_Label>;
+  using LabelReference = _Label&;
+  using ConstLabelReference = const LabelReference;
 
-    /// Gets and sets members.
-    /// @{
-    inline const _NodeData* data() const;
-    inline void data(_NodeData* data);
-    inline const std::vector<Node<_NodeData>*>& children() const;
-    inline void children(std::vector<Node<_NodeData>*>& children);
-    /// @}
+  using NodeUniquePtr = std::unique_ptr<Node<_Label>>;
+  using NodeReference = Node<_Label>&;
+  using ConstNodeReference = const NodeReference;
 
-    /// Retrieves current number of children.
-    ///
-    /// \return Current number of children (i.e., entries in children_).
-    inline int get_children_number() const;
+  using SizeType = typename std::vector<NodeUniquePtr>::size_type;*/
 
-    /// Adds a child at last position.
-    ///
-    /// \param child Pointer to the node to be added.
-    inline void add_child(Node<_NodeData>* child);
+public:
+  Node(_Label data);
 
-    /// Gets the position-th child of this node (i.e., the n-th child).
-    ///
-    /// \param position Number of the child.
-    /// \return Pointer to the position-th child.
-    inline const Node<_NodeData>* get_child(int position) const;
+  /// Retrieves current number of children.
+  ///
+  /// \return Current number of children (i.e., entries in children_).
+  int children_number() const;
 
-    /// Gets size of subtree rooted at this node.
-    ///
-    /// \return Size of the subtree rooted at this node (incl. this node).
-    int get_subtree_size() const;
+  ///
+  const _Label& label() const;
 
-    /// Operator overloadings.
-    /// @{
-    inline const Node<_NodeData>& operator=(const Node<_NodeData>& other);
-    inline bool operator<(const Node<_NodeData>& other) const;
-    inline bool operator==(const Node<_NodeData>& other) const;
-    /// @}
+  /// Adds a child at last position.
+  ///
+  /// \param child Pointer to the node to be added.
+  void add_child(std::unique_ptr<Node<_Label>> child);
 
 private:
-    /// Pointers to all children of this node.
-    std::vector<Node<_NodeData>*> children_;
+  /// Pointers to all children of this node.
+  std::vector<std::unique_ptr<Node<_Label>>> children_;
 
-    /// Data representing the label of this node.
-    _NodeData* data_;
+  /// Data representing the label of this node. Only this Node object owns it.
+  _Label label_;
 
 private:
-    /// Computes the size of the subtree rooted at this node iteratively,
-    /// resp. recursively.
-    ///
-    /// \return Size of the subtree rooted at this node (incl. this node).
-    /// @{
-    int get_subtree_size_iterative() const;
-    int get_subtree_size_recursive() const;
-    /// @}
+  /// Computes the size of the subtree rooted at this node iteratively,
+  /// resp. recursively.
+  ///
+  /// \return Size of the subtree rooted at this node (incl. this node).
+  /// @{
+  //SizeType subtree_size_iterative() const;
+  //SizeType subtree_size_recursive() const;
+  /// @}
 };
 
-/// \class Costs
-///
-/// \details
-/// Represents the cost model to be used for the distance computation.
-/// Costs are generic for different node classes. A cost model has to provide
-/// three cost functions:
-///  - ren(n1, n2); cost of updating the data (label) of n1 to the data (label)
-///    of n2.
-///  - del(n); cost of deleting node n.
-///  - ins(n); cost of inserting node n.
-/// All three cost functions must return an integer.
-template <typename _NodeData>
-struct Costs {
-    /// Basic rename cost function (unit cost model).
-    ///
-    /// \param node1 The node to be renamed.
-    /// \param node2  The node having the desired name.
-    /// \return Integer cost of renaming node1 to node2.
-    virtual inline int ren(const _NodeData* node1, const _NodeData* node2) = 0;
-
-    /// Basic delete cost function.
-    ///
-    /// \param node The node to be deleted.
-    /// \return Integer cost of deleting node.
-    virtual inline int del(const _NodeData* node) = 0;
-
-    /// Basic insert cost function.
-    ///
-    /// \param node The node to be inserted.
-    /// \return Integer cost of inserting node.
-    virtual inline int ins(const _NodeData* node) = 0;
-};
+#include "node_impl.h"
 
 }
 
