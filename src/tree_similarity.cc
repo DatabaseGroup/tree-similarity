@@ -1,5 +1,5 @@
 // The MIT License (MIT)
-// Copyright (c) 2017 Daniel Kocher, Mateusz Pawlik, and Nikolaus Augsten
+// Copyright (c) 2017 Mateusz Pawlik, Nikolaus Augsten, and Daniel Kocher.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
 // of this software and associated documentation files (the "Software"), to deal
@@ -35,9 +35,9 @@ int main(int argc, char** argv) {
     using Label = label::StringLabel;
     
 
-    node::Node<Label> root(Label(std::string("abc")));
-    node::Node<Label> root2(Label(std::string("abcd")));
-    node::Node<Label> root3(Label(std::string("abc")));
+    node::Node<Label> root(Label("abc"));
+    node::Node<Label> root2(Label("abcd"));
+    node::Node<Label> root3(Label("abc"));
 
     CostModel<Label> cost_model;
 
@@ -47,6 +47,48 @@ int main(int argc, char** argv) {
     std::cout << cost_model.ren(root2, root3) << std::endl;
     std::cout << cost_model.ren(root3, root) << std::endl;
     std::cout << cost_model.ren(root3, root2) << std::endl;
+
+    std::cout << "root: " << root.children_number() << std::endl;
+
+    node::Node<Label> child1(Label("def"));
+
+    child1.add_child(node::Node<Label>(Label("d")));
+    child1.add_child(node::Node<Label>(Label("e")));
+    child1.add_child(node::Node<Label>(Label("f")));
+
+    std::cout << "child1: " << child1.children_number() << std::endl;
+
+    node::Node<Label> child2(Label("gh"));
+
+    child2.add_child(node::Node<Label>(Label("g")));
+    child2.add_child(node::Node<Label>(Label("h")));
+
+    std::cout << "child2: " << child2.children_number() << std::endl;
+
+    node::Node<Label> child3(Label("ijkl"));
+
+    child3.add_child(node::Node<Label>(Label("i")));
+    child3.add_child(node::Node<Label>(Label("j")));
+    child3.add_child(node::Node<Label>(Label("k")));
+    child3.add_child(node::Node<Label>(Label("l")));
+
+    std::cout << "child3: " << child3.children_number() << std::endl;
+
+    root.add_child(std::move(child1));
+    root.add_child(std::move(child2));
+    root.add_child(std::move(child3));
+
+    std::cout << "root: " << root.children_number() << std::endl;
+    std::cout << "child1: " << child1.children_number() << std::endl;
+    std::cout << "child2: " << child2.children_number() << std::endl;
+    std::cout << "child3: " << child3.children_number() << std::endl;
+
+    for (auto child: root.children_) {
+        std::cout << child.label().label() << ": " << child.children_number() << std::endl;
+        for (auto child2: child.children_) {
+            std::cout << child2.label().label() << ": " << child2.children_number() << std::endl;
+        }
+    }
 
     return 0;
 }

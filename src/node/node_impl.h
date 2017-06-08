@@ -1,5 +1,5 @@
 // The MIT License (MIT)
-// Copyright (c) 2017 Daniel Kocher, Mateusz Pawlik, and Nikolaus Augsten
+// Copyright (c) 2017 Mateusz Pawlik, Nikolaus Augsten, and Daniel Kocher.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -27,21 +27,21 @@
 #ifndef TREE_SIMILARITY_NODE_NODE_IMPL_H
 #define TREE_SIMILARITY_NODE_NODE_IMPL_H
 
-template<class _Label>
-Node<_Label>::Node(_Label label) : label_(std::move(label)) {}
+template<class Label>
+Node<Label>::Node(ConstReference label) : label_(label) {}
 
-template<class _Label>
-int Node<_Label>::children_number() const {
+template<class Label>
+typename Node<Label>::SizeType Node<Label>::children_number() const {
   return children_.size();
 }
 
-template<class _Label>
-const _Label& Node<_Label>::label() const {
+template<class Label>
+typename Node<Label>::ConstReference Node<Label>::label() const {
   return label_;
 }
 
-template<class _Label>
-void Node<_Label>::add_child(std::unique_ptr<Node<_Label>> child) {
+template<class Label>
+void Node<Label>::add_child(const Node<Label>& child) {
   children_.push_back(child);
 }
 

@@ -1,5 +1,5 @@
 // The MIT License (MIT)
-// Copyright (c) 2017 Daniel Kocher, Mateusz Pawlik, and Nikolaus Augsten
+// Copyright (c) 2017 Mateusz Pawlik, Nikolaus Augsten, and Daniel Kocher.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,9 +22,7 @@
 /// \file node/node.h
 ///
 /// \details
-/// Contains two class declarations:
-///  1. Node (represents a node in a tree)
-///  2. Costs (a basic cost model)
+/// Contains the declaration of the Node class (represents a node in a tree).
 
 #ifndef TREE_SIMILARITY_NODE_NODE_H
 #define TREE_SIMILARITY_NODE_NODE_H
@@ -32,14 +30,16 @@
 #include <vector>
 #include <memory>
 
+#include <iostream>
+
 namespace node {
 
 /// \class Node
 ///
 /// \details
 /// Represents a node in a tree. Every node holds some satellite data
-/// representing the label (_Label).
-/// The type of the label is parameterized using _Label and can be of
+/// representing the label (Label).
+/// The type of the label is parameterized using Label and can be of
 /// arbitrary type as long as the requirements for computing the tree edit
 /// distance are met. We refer to the Costs class (in this file) for further
 /// information on the requirements.
@@ -52,43 +52,42 @@ namespace node {
 /// any means. If one decides to modify this class it may actually break some
 /// tree algorithms, so be careful.
 ///
-/// \tparam _Label Satellite data associated with the node.
-template <class _Label>
+/// \tparam Label Satellite data associated with the node.
+template <class Label>
 class Node {
+/// Types and type aliases
 public:
-  /*using LabelUniquePtr = std::unique_ptr<_Label>;
-  using LabelReference = _Label&;
-  using ConstLabelReference = const LabelReference;
+  using Reference = Label&;
+  using ConstReference = const Label&;
 
-  using NodeUniquePtr = std::unique_ptr<Node<_Label>>;
-  using NodeReference = Node<_Label>&;
-  using ConstNodeReference = const NodeReference;
+  using SizeType = typename std::vector<Node<Label>>::size_type;
 
-  using SizeType = typename std::vector<NodeUniquePtr>::size_type;*/
-
+/// Member functions
 public:
-  Node(_Label data);
+  Node(ConstReference label);
 
   /// Retrieves current number of children.
   ///
   /// \return Current number of children (i.e., entries in children_).
-  int children_number() const;
+  SizeType children_number() const;
 
   ///
-  const _Label& label() const;
+  ConstReference label() const;
 
   /// Adds a child at last position.
   ///
   /// \param child Pointer to the node to be added.
-  void add_child(std::unique_ptr<Node<_Label>> child);
+  void add_child(const Node<Label>& child);
 
-private:
+/// Member variables
+public:
   /// Pointers to all children of this node.
-  std::vector<std::unique_ptr<Node<_Label>>> children_;
+  std::vector<Node<Label>> children_;
 
   /// Data representing the label of this node. Only this Node object owns it.
-  _Label label_;
+  Label label_;
 
+/// Member functions
 private:
   /// Computes the size of the subtree rooted at this node iteratively,
   /// resp. recursively.

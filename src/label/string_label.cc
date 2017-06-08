@@ -1,5 +1,5 @@
 // The MIT License (MIT)
-// Copyright (c) 2017 Daniel Kocher, Mateusz Pawlik, and Nikolaus Augsten
+// Copyright (c) 2017 Mateusz Pawlik, Nikolaus Augsten, and Daniel Kocher.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
 // of this software and associated documentation files (the "Software"), to deal
@@ -19,7 +19,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/// \file node/string_node_data.cc
+/// \file label/string_label.cc
 ///
 /// \details
 /// Contains the implementation of the StringLabel class.
@@ -29,8 +29,7 @@
 
 namespace label {
 
-//StringLabel::StringLabel(const std::string& label) : label_(label) { std::cout << "Def" << std::endl; }
-StringLabel::StringLabel(std::string&& label) : label_(std::move(label)) {}
+StringLabel::StringLabel(const std::string& label) : label_(label) {}
 
 const std::string& StringLabel::label() const {
     return label_;

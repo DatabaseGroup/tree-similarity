@@ -1,5 +1,5 @@
 // The MIT License (MIT)
-// Copyright (c) 2017 Daniel Kocher, Mateusz Pawlik, and Nikolaus Augsten
+// Copyright (c) 2017 Mateusz Pawlik, Nikolaus Augsten, and Daniel Kocher.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
 // of this software and associated documentation files (the "Software"), to deal
@@ -19,10 +19,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/// \file node/string_node_data.h
+/// \file label/string_label.h
 ///
 /// \details
-/// Contains the declaration of the StringNodeData class (represents string data
+/// Contains the declaration of the StringLabel class (represents string data
 /// which is associated with a Node). For example, if one wants a tree with
 /// strings as labels, one could use this class as a template argument for the
 /// Node class to accomplish this.
@@ -34,7 +34,7 @@
 
 namespace label {
 
-/// \class StringNodeData
+/// \class StringLabel
 ///
 /// \details
 /// Represents the (satellite) data a node can hold. This class only serves as
@@ -45,17 +45,12 @@ namespace label {
 /// suffice his/her application area, e.g., holding a sequence of sequences of
 /// <needed-type> to encode their data properly. One needs at least to implement
 /// the following member functions such that it does not break the framework:
-///     - Ctor taking no arguments (or one with default arguments).
-///     - inline bool operator<(...) const; // aka the 'less' operator.
-///     - inline bool operator==(...) const; // aka the 'equals' operator.
+///     - bool operator==(...) const; // aka the 'equals' operator.
 /// The member function to get the member are optional but may be necessary if
 /// one wants to use a specialized cost model.
-/// For an example of another data class, please see custom_node_data.h and
-/// custom_node_data_impl.h, respectively.
 class StringLabel {
 public:
-    //StringLabel(const std::string& label);
-    StringLabel(std::string&& label);
+    StringLabel(const std::string& label);
 
     /// Gets members.
     /// @{
