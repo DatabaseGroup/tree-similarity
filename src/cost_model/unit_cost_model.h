@@ -31,7 +31,7 @@
 
 namespace cost_model {
 
-/// \class UnitCosts
+/// \class UnitCostModel
 ///
 /// \details
 /// Represents the unit cost model to be used for the distance computation.
@@ -64,7 +64,7 @@ struct UnitCostModel {
     int ins(const node::Node<Label>& node);
 };
 
-/// Implementational details
+// Implementational details
 #include "unit_cost_model_impl.h"
 
 }

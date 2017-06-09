@@ -19,7 +19,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/// \file cost_model/unit_cost_model.h
+/// \file cost_model/unit_cost_model_impl.h
 ///
 /// \details
 /// Contains the implementation of a basic cost model, i.e., the unit costs.
