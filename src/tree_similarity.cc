@@ -83,12 +83,5 @@ int main(int argc, char** argv) {
     std::cout << "child2: " << child2.children_number() << std::endl;
     std::cout << "child3: " << child3.children_number() << std::endl;
 
-    for (auto child: root.children_) {
-        std::cout << child.label().label() << ": " << child.children_number() << std::endl;
-        for (auto child2: child.children_) {
-            std::cout << child2.label().label() << ": " << child2.children_number() << std::endl;
-        }
-    }
-
     return 0;
 }
