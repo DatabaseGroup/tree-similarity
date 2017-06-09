@@ -42,26 +42,26 @@ namespace cost_model {
 ///  - del(n); cost of deleting node n.
 ///  - ins(n); cost of inserting node n.
 /// All three cost functions must return an integer.
-template <class _Label>
+template <class Label>
 struct UnitCostModel {
     /// Basic rename cost function (unit cost model).
     ///
     /// \param node1 The node to be renamed.
     /// \param node2  The node having the desired name.
     /// \return Integer cost of renaming node1 to node2.
-    int ren(const node::Node<_Label>& node1, const node::Node<_Label>& node2);
+    int ren(const node::Node<Label>& node1, const node::Node<Label>& node2);
 
     /// Basic delete cost function.
     ///
     /// \param node The node to be deleted.
     /// \return Integer cost of deleting node.
-    int del(const node::Node<_Label>& node);
+    int del(const node::Node<Label>& node);
 
     /// Basic insert cost function.
     ///
     /// \param node The node to be inserted.
     /// \return Integer cost of inserting node.
-    int ins(const node::Node<_Label>& node);
+    int ins(const node::Node<Label>& node);
 };
 
 /// Implementational details

@@ -27,10 +27,10 @@
 #ifndef TREE_SIMILARITY_COST_MODEL_UNIT_COST_MODEL_IMPL_H
 #define TREE_SIMILARITY_COST_MODEL_UNIT_COST_MODEL_IMPL_H
 
-template <class _Label>
-int UnitCostModel<_Label>::ren(
-    const node::Node<_Label>& node1,
-    const node::Node<_Label>& node2) {
+template <class Label>
+int UnitCostModel<Label>::ren(
+    const node::Node<Label>& node1,
+    const node::Node<Label>& node2) {
   if (node1.label() == node2.label()) {
     return 0;
   }
@@ -38,13 +38,13 @@ int UnitCostModel<_Label>::ren(
   return 1;
 }
 
-template <class _Label>
-int UnitCostModel<_Label>::del(const node::Node<_Label>& node) {
+template <class Label>
+int UnitCostModel<Label>::del(const node::Node<Label>& node) {
   return 1;
 }
 
-template <class _Label>
-int UnitCostModel<_Label>::ins(const node::Node<_Label>& node) {
+template <class Label>
+int UnitCostModel<Label>::ins(const node::Node<Label>& node) {
   return 1;
 }
 
