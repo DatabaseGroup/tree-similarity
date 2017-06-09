@@ -25,7 +25,6 @@
 /// Contains the implementation of the StringLabel class.
 
 #include "string_label.h"
-#include <iostream>
 
 namespace label {
 
