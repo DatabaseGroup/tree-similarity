@@ -28,9 +28,6 @@
 #define TREE_SIMILARITY_NODE_NODE_H
 
 #include <vector>
-#include <memory>
-
-#include <iostream>
 
 namespace node {
 
@@ -55,14 +52,14 @@ namespace node {
 /// \tparam Label Satellite data associated with the node.
 template <class Label>
 class Node {
-/// Types and type aliases
+// Types and type aliases
 public:
   using Reference = Label&;
   using ConstReference = const Label&;
 
   using SizeType = typename std::vector<Node<Label>>::size_type;
 
-/// Member functions
+// Member functions
 public:
   Node(ConstReference label);
 
@@ -71,7 +68,9 @@ public:
   /// \return Current number of children (i.e., entries in children_).
   SizeType children_number() const;
 
+  /// Retrieves the label.
   ///
+  /// \return The label of this node.
   ConstReference label() const;
 
   /// Adds a child at last position.
@@ -79,15 +78,15 @@ public:
   /// \param child Pointer to the node to be added.
   void add_child(const Node<Label>& child);
 
-/// Member variables
-public:
+// Member variables
+private:
   /// Pointers to all children of this node.
   std::vector<Node<Label>> children_;
 
   /// Data representing the label of this node. Only this Node object owns it.
   Label label_;
 
-/// Member functions
+// Member functions
 private:
   /// Computes the size of the subtree rooted at this node iteratively,
   /// resp. recursively.
@@ -99,6 +98,7 @@ private:
   /// @}
 };
 
+// Implementation details
 #include "node_impl.h"
 
 }
