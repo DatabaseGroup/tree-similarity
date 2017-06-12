@@ -6,7 +6,7 @@ This branch is supposed to replace the master branch at some point.
 
 1. Clean up the repository (from the state of the `xml_parser` branch, i.e., the
 final state of msc-kocher).
-2. Add a meaningful documentation to all parts of the codebase in the [https://www.stack.nl/~dimitri/doxygen/manual/docblocks.html](Doxygen format).
+2. Add a meaningful documentation to all parts of the codebase in the [Doxygen format](https://www.stack.nl/~dimitri/doxygen/manual/docblocks.html).
 3. Refactor parts of the codebase if necessary.
 4. Enforce (and probably extend) the coding policy/style described on the `master`
 branch and create a [clang-format](https://clang.llvm.org/docs/ClangFormat.html)
