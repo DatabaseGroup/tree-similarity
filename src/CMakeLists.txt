@@ -9,6 +9,7 @@ include_directories(
   node
   label
   cost_model
+  zhang_shasha
 )
 
 # the set of all source files
@@ -19,6 +20,7 @@ set(tree_similarity_sources
   label/string_label.h
   label/string_label.cc
   cost_model/unit_cost_model.h
+  zhang_shasha/zhang_shasha.h
 )
 
 # build executable
