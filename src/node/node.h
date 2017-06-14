@@ -1,20 +1,20 @@
 // The MIT License (MIT)
 // Copyright (c) 2017 Mateusz Pawlik, Nikolaus Augsten, and Daniel Kocher.
-// 
-// Permission is hereby granted, free of charge, to any person obtaining a copy 
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights 
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-// copies of the Software, and to permit persons to whom the Software is 
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
@@ -43,7 +43,7 @@ namespace node {
 /// The children of a node are stored in a dynamic array of Node pointers. This
 /// class provides all necessary methods for the tree algorithms. All fields are
 /// declared
-/// 
+///
 /// \remark
 /// Typically, the user of this framework does not need to modify this class by
 /// any means. If one decides to modify this class it may actually break some
@@ -77,6 +77,17 @@ public:
   ///
   /// \param child Pointer to the node to be added.
   void add_child(const Node<Label>& child);
+
+  /// Returns the reference to children_ vector.
+  ///
+  /// \return Reference to children_ vector.
+  const std::vector<Node<Label>>& get_children() const;
+
+  /// Calculates the size (number of nodes) in tree rooted at this. It traverses
+  /// the entire subtree recursively.
+  ///
+  /// \return Size of subtree rooted at this.
+  int get_tree_size() const;
 
 // Member variables
 private:

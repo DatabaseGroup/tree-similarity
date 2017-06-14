@@ -45,4 +45,18 @@ void Node<Label>::add_child(const Node<Label>& child) {
   children_.push_back(child);
 }
 
+template<class Label>
+const std::vector<Node<Label>>& Node<Label>::get_children() const {
+  return children_;
+}
+
+template<class Label>
+int Node<Label>::get_tree_size() const {
+  int size = 1;
+  for (auto child : children_) {
+    size += child.get_tree_size();
+  }
+  return size;
+}
+
 #endif // TREE_SIMILARITY_NODE_NODE_IMPL_H
