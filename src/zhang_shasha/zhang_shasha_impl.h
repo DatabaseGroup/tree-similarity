@@ -1,5 +1,5 @@
 // The MIT License (MIT)
-// Copyright (c) 2017 Daniel Kocher, Mateusz Pawlik
+// Copyright (c) 2017 Mateusz Pawlik, Nikolaus Augsten, and Daniel Kocher.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -19,34 +19,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/// \file zhang_shasha/zhang_shasha.h
+/// \file zhang_shasha/zhang_shasha_impl.h
 ///
 /// \details
-/// Implements the tree edit distance algorithm by Zhang and Shasha. K.Zhang and
-/// D.Shasha. Simple fast algorithms for the editing distance between trees and
-/// related problems. SIAM J. Comput. 1989.
+/// Contains the implementation of the Zhang and Shasha algorithm.
 
-#ifndef TREE_SIMILARITY_ZHANG_SHASHA_ZHANG_SHASHA_H
-#define TREE_SIMILARITY_ZHANG_SHASHA_ZHANG_SHASHA_H
-
-#include "node.h"
-
-#include <iostream>
-
-namespace zhang_shasha {
+#ifndef TREE_SIMILARITY_ZHANG_SHASHA_ZHANG_SHASHA_IMPL_H
+#define TREE_SIMILARITY_ZHANG_SHASHA_ZHANG_SHASHA_IMPL_H
 
 template <typename Label>
-void traverse_subtree(node::Node<Label>& node);
-
-template <typename Label>
-void get_key_roots(node::Node<Label>& root);
-
-template <typename Label, typename CostModel>
-double zhang_shasha_ted(node::Node<Label>& t1, node::Node<Label>& t2, CostModel& c);
-
+void zhang_shasha::traverse_subtree(node::Node<Label>& node) {
+  std::cout << "-- node : " << node.label().label() << std::endl;
+  for (auto child : node.get_children()) {
+    traverse_subtree(child);
+  }
 }
 
-// Implementation details.
-#include "zhang_shasha_impl.h"
+template <typename Label>
+void zhang_shasha::get_key_roots(node::Node<Label>& root) {
+  std::cout << "--- get_key_roots ---" << std::endl;
+  traverse_subtree(root);
+}
 
-#endif // TREE_SIMILARITY_ZHANG_SHASHA_ZHANG_SHASHA_H
+template <typename Label, typename CostModel>
+double zhang_shasha::zhang_shasha_ted(node::Node<Label>& t1, node::Node<Label>& t2, CostModel& c) {
+  std::cout << "=== zhang_shasha_ted ===" << std::endl;
+  std::cout << "--- tree size : " << t1.get_tree_size() << std::endl;
+  get_key_roots(t1);
+  return 5.0;
+}
+
+#endif // TREE_SIMILARITY_ZHANG_SHASHA_ZHANG_SHASHA_IMPL_H
