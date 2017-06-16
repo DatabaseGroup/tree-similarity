@@ -27,22 +27,22 @@
 #ifndef TREE_SIMILARITY_ZHANG_SHASHA_ZHANG_SHASHA_IMPL_H
 #define TREE_SIMILARITY_ZHANG_SHASHA_ZHANG_SHASHA_IMPL_H
 
-template <typename Label>
-void zhang_shasha::traverse_subtree(node::Node<Label>& node) {
+template <typename Label, typename CostModel>
+void Algorithm<Label, CostModel>::traverse_subtree(node::Node<Label>& node) {
   std::cout << "-- node : " << node.label().label() << std::endl;
   for (auto child : node.get_children()) {
     traverse_subtree(child);
   }
 }
 
-template <typename Label>
-void zhang_shasha::get_key_roots(node::Node<Label>& root) {
+template <typename Label, typename CostModel>
+void Algorithm<Label, CostModel>::get_key_roots(node::Node<Label>& root) {
   std::cout << "--- get_key_roots ---" << std::endl;
   traverse_subtree(root);
 }
 
 template <typename Label, typename CostModel>
-double zhang_shasha::zhang_shasha_ted(node::Node<Label>& t1, node::Node<Label>& t2, CostModel& c) {
+double Algorithm<Label, CostModel>::zhang_shasha_ted(node::Node<Label>& t1, node::Node<Label>& t2, CostModel& c) {
   std::cout << "=== zhang_shasha_ted ===" << std::endl;
   std::cout << "--- tree size : " << t1.get_tree_size() << std::endl;
   get_key_roots(t1);

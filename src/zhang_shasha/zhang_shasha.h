@@ -35,18 +35,24 @@
 
 namespace zhang_shasha {
 
-template <typename Label>
-void traverse_subtree(node::Node<Label>& node);
-
-template <typename Label>
-void get_key_roots(node::Node<Label>& root);
-
 template <typename Label, typename CostModel>
-double zhang_shasha_ted(node::Node<Label>& t1, node::Node<Label>& t2, CostModel& c);
-
-}
+class Algorithm {
+// Member functions.
+public:
+  // template <typename Label, typename CostModel>
+  double zhang_shasha_ted(node::Node<Label>& t1, node::Node<Label>& t2, CostModel& c);
+// Member variables.
+// Member functions.
+private:
+  // template <typename Label>
+  void traverse_subtree(node::Node<Label>& node);
+  // template <typename Label>
+  void get_key_roots(node::Node<Label>& root);
+};
 
 // Implementation details.
 #include "zhang_shasha_impl.h"
+
+}
 
 #endif // TREE_SIMILARITY_ZHANG_SHASHA_ZHANG_SHASHA_H

@@ -83,7 +83,8 @@ int main(int argc, char** argv) {
     std::cout << "child2: " << child2.children_number() << std::endl;
     std::cout << "child3: " << child3.children_number() << std::endl;
 
-    std::cout << zhang_shasha::zhang_shasha_ted(root, root, cost_model) << std::endl;
+    zhang_shasha::Algorithm<Label, CostModel<Label>> zs_ted;
+    std::cout << zs_ted.zhang_shasha_ted(root, root, cost_model) << std::endl;
 
     return 0;
 }
