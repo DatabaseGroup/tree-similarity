@@ -52,6 +52,8 @@ public:
   double zhang_shasha_ted(const node::Node<Label>& t1, const node::Node<Label>& t2, const CostModel& c);
 // Member variables.
 private:
+  // TODO: push_back to kr works.
+  // TODO: lld have to be initialised.
   /// Key root nodes of the source tree.
   std::vector<int> kr1_;
   /// Key root nodes of the destination tree.
