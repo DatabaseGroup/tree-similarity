@@ -31,17 +31,39 @@ template <typename Label, typename CostModel>
 void Algorithm<Label, CostModel>::index_nodes_recursion(const node::Node<Label>& node, int& start_postorder, int& start_preorder) {
   // TODO: The call node.label().label() looks little bit odd.
   std::cout << "-- node : " << node.label().label() << std::endl;
-  // start_preorder holds this node's preorder id here.
+  // Here, start_preorder holds this node's preorder id here.
   std::cout << "-- preorder : " << start_preorder << std::endl;
   // Increment start_preorder for the consecutive node in preorder have the
   // correct id.
   start_preorder++;
-  // Recursion to childen nodes.
-  for (auto child : node.get_children()) {
-    index_nodes_recursion(child, start_postorder, start_preorder);
+  // Recursions to childen nodes.
+  auto children_start_it = std::begin(node.get_children());
+  auto children_end_it=std::end(node.get_children());
+  // Treat the first child separately (non-key-root, updates parent's lld).
+  if (children_start_it != children_end_it) {
+    index_nodes_recursion(*children_start_it, start_postorder, start_preorder);
+    // Here, start_postorder-1 is the postorder of the current child.
+    // Set this node's lld to its first child's lld.
+    // TODO: Implement
+    // TODO: lld have to be initialised.
+    // Continue to consecutive children.
+    ++children_start_it;
   }
-  // start_postorder holds this node's postorder id here.
+  while (children_start_it != children_end_it) {
+    index_nodes_recursion(*children_start_it, start_postorder, start_preorder);
+    // Here, start_postorder-1 is the postorder of the current child.
+    // Add current child to kr.
+    kr1_.push_back(start_postorder-1);
+    // Continue to consecutive children.
+    ++children_start_it;
+  }
+  // Here, start_postorder holds this node's postorder id here.
   std::cout << "-- postorder : " << start_postorder << std::endl;
+  std::cout << "-- leaf : " << node.is_leaf() << std::endl;
+  if (node.is_leaf()) {
+    // Set lld of this node to this node's postorer.
+    lld1_.push_back(start_postorder);
+  }
   // Increment start_postorder for the consecutive node in postorder have the
   // correct id.
   start_postorder++;
@@ -50,9 +72,29 @@ void Algorithm<Label, CostModel>::index_nodes_recursion(const node::Node<Label>&
 template <typename Label, typename CostModel>
 void Algorithm<Label, CostModel>::index_nodes(const node::Node<Label>& root) {
   std::cout << "--- index_nodes ---" << std::endl;
+
+  // Orders start with '1'. If '0' is needed, either index_nodes_recursion must
+  // be modified (placement of increments must change), or we start with '-1'.
+  // The order-variables are modified by index_nodes_recursion.
   int start_postorder = 1;
+  // TODO: Preorder is not used in Zhang and Shasha. Remove start_preorder. Or
+  //       move the template traversal with postorder and preorder to some notes
+  //       of how to traverse trees.
   int start_preorder = 1;
   index_nodes_recursion(root, start_postorder, start_preorder);
+
+  // Here, start_postorder and start_preorder store the size of tree minus 1.
+
+  // Add root to kr - not added in the recursion.
+  kr1_.push_back(start_postorder-1);
+
+  // Print stuff.
+  std::cout << "-- lld1_ : ";
+  for (auto e : lld1_) std::cout << e << ' ';
+  std::cout << std::endl;
+  std::cout << "-- kr1_ : ";
+  for (auto e : kr1_) std::cout << e << ' ';
+  std::cout << std::endl;
 }
 
 template <typename Label, typename CostModel>

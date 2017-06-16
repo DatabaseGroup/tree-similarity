@@ -63,10 +63,10 @@ public:
 public:
   Node(ConstReference label);
 
-  /// Retrieves current number of children.
+  /// Returns the number of children of this node.
   ///
-  /// \return Current number of children (i.e., entries in children_).
-  SizeType children_number() const;
+  /// \return Number of children (i.e., entries in children_).
+  SizeType children_count() const;
 
   /// Retrieves the label.
   ///
@@ -88,6 +88,11 @@ public:
   ///
   /// \return Size of subtree rooted at this.
   int get_tree_size() const;
+
+  /// Verifies if this node is a leaf.
+  ///
+  /// \return True if this node is leaf, false otherwise.
+  bool is_leaf() const;
 
 // Member variables
 private:

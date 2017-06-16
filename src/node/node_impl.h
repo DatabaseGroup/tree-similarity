@@ -31,7 +31,7 @@ template<class Label>
 Node<Label>::Node(ConstReference label) : label_(label) {}
 
 template<class Label>
-typename Node<Label>::SizeType Node<Label>::children_number() const {
+typename Node<Label>::SizeType Node<Label>::children_count() const {
   return children_.size();
 }
 
@@ -57,6 +57,11 @@ int Node<Label>::get_tree_size() const {
     size += child.get_tree_size();
   }
   return size;
+}
+
+template<class Label>
+bool Node<Label>::is_leaf() const {
+  return children_.size() == 0;
 }
 
 #endif // TREE_SIMILARITY_NODE_NODE_IMPL_H

@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
     std::cout << cost_model.ren(root3, root) << std::endl;
     std::cout << cost_model.ren(root3, root2) << std::endl;
 
-    std::cout << "root: " << root.children_number() << std::endl;
+    std::cout << "root: " << root.children_count() << std::endl;
 
     node::Node<Label> child1(Label("def"));
 
@@ -56,14 +56,14 @@ int main(int argc, char** argv) {
     child1.add_child(node::Node<Label>(Label("e")));
     child1.add_child(node::Node<Label>(Label("f")));
 
-    std::cout << "child1: " << child1.children_number() << std::endl;
+    std::cout << "child1: " << child1.children_count() << std::endl;
 
     node::Node<Label> child2(Label("gh"));
 
     child2.add_child(node::Node<Label>(Label("g")));
     child2.add_child(node::Node<Label>(Label("h")));
 
-    std::cout << "child2: " << child2.children_number() << std::endl;
+    std::cout << "child2: " << child2.children_count() << std::endl;
 
     node::Node<Label> child3(Label("ijkl"));
 
@@ -72,16 +72,16 @@ int main(int argc, char** argv) {
     child3.add_child(node::Node<Label>(Label("k")));
     child3.add_child(node::Node<Label>(Label("l")));
 
-    std::cout << "child3: " << child3.children_number() << std::endl;
+    std::cout << "child3: " << child3.children_count() << std::endl;
 
     root.add_child(std::move(child1));
     root.add_child(std::move(child2));
     root.add_child(std::move(child3));
 
-    std::cout << "root: " << root.children_number() << std::endl;
-    std::cout << "child1: " << child1.children_number() << std::endl;
-    std::cout << "child2: " << child2.children_number() << std::endl;
-    std::cout << "child3: " << child3.children_number() << std::endl;
+    std::cout << "root: " << root.children_count() << std::endl;
+    std::cout << "child1: " << child1.children_count() << std::endl;
+    std::cout << "child2: " << child2.children_count() << std::endl;
+    std::cout << "child3: " << child3.children_count() << std::endl;
 
     zhang_shasha::Algorithm<Label, CostModel<Label>> zs_ted;
     std::cout << zs_ted.zhang_shasha_ted(root, root, cost_model) << std::endl;
