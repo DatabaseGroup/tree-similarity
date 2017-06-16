@@ -28,24 +28,37 @@
 #define TREE_SIMILARITY_ZHANG_SHASHA_ZHANG_SHASHA_IMPL_H
 
 template <typename Label, typename CostModel>
-void Algorithm<Label, CostModel>::traverse_subtree(node::Node<Label>& node) {
+void Algorithm<Label, CostModel>::index_nodes_recursion(const node::Node<Label>& node, int& start_postorder, int& start_preorder) {
+  // TODO: The call node.label().label() looks little bit odd.
   std::cout << "-- node : " << node.label().label() << std::endl;
+  // start_preorder holds this node's preorder id here.
+  std::cout << "-- preorder : " << start_preorder << std::endl;
+  // Increment start_preorder for the consecutive node in preorder have the
+  // correct id.
+  start_preorder++;
+  // Recursion to childen nodes.
   for (auto child : node.get_children()) {
-    traverse_subtree(child);
+    index_nodes_recursion(child, start_postorder, start_preorder);
   }
+  // start_postorder holds this node's postorder id here.
+  std::cout << "-- postorder : " << start_postorder << std::endl;
+  // Increment start_postorder for the consecutive node in postorder have the
+  // correct id.
+  start_postorder++;
 }
 
 template <typename Label, typename CostModel>
-void Algorithm<Label, CostModel>::get_key_roots(node::Node<Label>& root) {
-  std::cout << "--- get_key_roots ---" << std::endl;
-  traverse_subtree(root);
+void Algorithm<Label, CostModel>::index_nodes(const node::Node<Label>& root) {
+  std::cout << "--- index_nodes ---" << std::endl;
+  int start_postorder = 1;
+  int start_preorder = 1;
+  index_nodes_recursion(root, start_postorder, start_preorder);
 }
 
 template <typename Label, typename CostModel>
-double Algorithm<Label, CostModel>::zhang_shasha_ted(node::Node<Label>& t1, node::Node<Label>& t2, CostModel& c) {
+double Algorithm<Label, CostModel>::zhang_shasha_ted(const node::Node<Label>& t1, const node::Node<Label>& t2, const CostModel& c) {
   std::cout << "=== zhang_shasha_ted ===" << std::endl;
-  std::cout << "--- tree size : " << t1.get_tree_size() << std::endl;
-  get_key_roots(t1);
+  index_nodes(t1);
   return 5.0;
 }
 

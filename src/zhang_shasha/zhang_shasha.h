@@ -29,6 +29,7 @@
 #ifndef TREE_SIMILARITY_ZHANG_SHASHA_ZHANG_SHASHA_H
 #define TREE_SIMILARITY_ZHANG_SHASHA_ZHANG_SHASHA_H
 
+#include <vector>
 #include "node.h"
 
 #include <iostream>
@@ -39,15 +40,45 @@ template <typename Label, typename CostModel>
 class Algorithm {
 // Member functions.
 public:
-  // template <typename Label, typename CostModel>
-  double zhang_shasha_ted(node::Node<Label>& t1, node::Node<Label>& t2, CostModel& c);
+  // TODO: Do we need a Constructor?
+  // Algorithm();
+
+  /// Computes the tree edit distance between two trees.
+  ///
+  /// \param t1 Source tree.
+  /// \param t2 Destination tree.
+  /// \param c Cost model with the costs of edit operations.
+  /// \return Tree edit distance value.
+  double zhang_shasha_ted(const node::Node<Label>& t1, const node::Node<Label>& t2, const CostModel& c);
 // Member variables.
+private:
+  /// Key root nodes of the source tree.
+  std::vector<int> kr1_;
+  /// Key root nodes of the destination tree.
+  std::vector<int> kr2_;
+  /// Stores the postorder of the leftmost leaf descendant for each node of the
+  /// source tree.
+  /// Index in postorder.
+  std::vector<int> lld1_;
+  /// Stores the postorder of the leftmost leaf descendant for each node of the
+  /// destination tree.
+  /// Index in postorder.
+  std::vector<int> lld2_;
 // Member functions.
 private:
-  // template <typename Label>
-  void traverse_subtree(node::Node<Label>& node);
-  // template <typename Label>
-  void get_key_roots(node::Node<Label>& root);
+  /// Indexes the nodes of an input tree. Wrapper for the recursive
+  /// index_nodes_recursion.
+  /// Call this method to index nodes.
+  ///
+  /// \param root The root node of the tree to index.
+  void index_nodes(const node::Node<Label>& root);
+  /// Traverses an input tree rooted at root recursively and collects
+  /// information into index structures.
+  ///
+  /// \param start_postorder Stores the postorder id of a node during traversal.
+  /// \param start_preorder Stores the preorder id of a node during traversal.
+  /// \param root The root node of the tree to index.
+  void index_nodes_recursion(const node::Node<Label>& root, int& start_postorder, int& start_preorder);
 };
 
 // Implementation details.
