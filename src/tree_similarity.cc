@@ -83,8 +83,22 @@ int main(int argc, char** argv) {
     std::cout << "child2: " << child2.children_count() << std::endl;
     std::cout << "child3: " << child3.children_count() << std::endl;
 
+    node::Node<Label> r_1(Label("a"));
+    node::Node<Label> n_2(Label("a"));
+    node::Node<Label> n_3(Label("a"));
+    node::Node<Label> n_4(Label("a"));
+    node::Node<Label> n_5(Label("a"));
+    node::Node<Label> n_6(Label("a"));
+    node::Node<Label> n_7(Label("a"));
+    n_5.add_child(std::move(n_7));
+    n_3.add_child(std::move(n_4));
+    n_3.add_child(std::move(n_5));
+    n_3.add_child(std::move(n_6));
+    r_1.add_child(std::move(n_2));
+    r_1.add_child(std::move(n_3));
+
     zhang_shasha::Algorithm<Label, CostModel<Label>> zs_ted;
-    std::cout << zs_ted.zhang_shasha_ted(root, root, cost_model) << std::endl;
+    std::cout << zs_ted.zhang_shasha_ted(r_1, r_1, cost_model) << std::endl;
 
     return 0;
 }

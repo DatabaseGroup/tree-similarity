@@ -29,6 +29,7 @@
 
 template <typename Label, typename CostModel>
 void Algorithm<Label, CostModel>::index_nodes_recursion(const node::Node<Label>& node, int& start_postorder, int& start_preorder) {
+  // TODO: kr and lld must be passed by reference.
   // TODO: The call node.label().label() looks little bit odd.
   std::cout << "-- node : " << node.label().label() << std::endl;
   // Here, start_preorder holds this node's preorder id here.
@@ -40,12 +41,12 @@ void Algorithm<Label, CostModel>::index_nodes_recursion(const node::Node<Label>&
   auto children_start_it = std::begin(node.get_children());
   auto children_end_it=std::end(node.get_children());
   // Treat the first child separately (non-key-root, updates parent's lld).
+  int first_child_postorder = -1;
   if (children_start_it != children_end_it) {
     index_nodes_recursion(*children_start_it, start_postorder, start_preorder);
     // Here, start_postorder-1 is the postorder of the current child.
     // Set this node's lld to its first child's lld.
-    // TODO: Implement
-    // TODO: lld have to be initialised.
+    first_child_postorder = start_postorder-1;
     // Continue to consecutive children.
     ++children_start_it;
   }
@@ -63,6 +64,12 @@ void Algorithm<Label, CostModel>::index_nodes_recursion(const node::Node<Label>&
   if (node.is_leaf()) {
     // Set lld of this node to this node's postorer.
     lld1_.push_back(start_postorder);
+  } else {
+    std::cout << "-- first_child_postorder : " << first_child_postorder << std::endl;
+    std::cout << "-- lld1_.size : " << lld1_.size() << std::endl;
+    // This node's lld must be pushed after its childrens llds.
+    // lld is indexed starting with 0, thus first_child_postorder-1.
+    lld1_.push_back(lld1_.at(first_child_postorder-1));
   }
   // Increment start_postorder for the consecutive node in postorder have the
   // correct id.
@@ -82,7 +89,6 @@ void Algorithm<Label, CostModel>::index_nodes(const node::Node<Label>& root) {
   //       of how to traverse trees.
   int start_preorder = 1;
   index_nodes_recursion(root, start_postorder, start_preorder);
-
   // Here, start_postorder and start_preorder store the size of tree minus 1.
 
   // Add root to kr - not added in the recursion.
