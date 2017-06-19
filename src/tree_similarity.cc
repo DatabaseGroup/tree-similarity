@@ -97,8 +97,8 @@ int main(int argc, char** argv) {
     r_1.add_child(std::move(n_2));
     r_1.add_child(std::move(n_3));
 
-    zhang_shasha::Algorithm<Label, CostModel<Label>> zs_ted;
-    std::cout << zs_ted.zhang_shasha_ted(r_1, r_1, cost_model) << std::endl;
+    zhang_shasha::Algorithm<Label, CostModel<Label>> zs_ted(r_1, r_1, cost_model);
+    std::cout << zs_ted.zhang_shasha_ted() << std::endl;
 
     return 0;
 }

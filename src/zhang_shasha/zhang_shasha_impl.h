@@ -28,6 +28,17 @@
 #define TREE_SIMILARITY_ZHANG_SHASHA_ZHANG_SHASHA_IMPL_H
 
 template <typename Label, typename CostModel>
+Algorithm<Label, CostModel>::Algorithm(const node::Node<Label>& t1, const node::Node<Label>& t2, const CostModel& c)
+  : t1_(t1), t2_(t2), c_(c)
+{
+  // TODO: The default constructor of Matrix is called while constructing ZS-Algorithm.
+  t1_size_ = t1.get_tree_size();
+  t2_size_ = t2.get_tree_size();
+  td_ = data_structures::Matrix<double>(t1_size_+1, t2_size_+1);
+  fd_ = data_structures::Matrix<double>(t1_size_+1, t2_size_+1);
+}
+
+template <typename Label, typename CostModel>
 void Algorithm<Label, CostModel>::index_nodes_recursion(const node::Node<Label>& node, std::vector<int>& lld, std::vector<int>& kr, int& start_postorder, int& start_preorder) {
   // TODO: The call node.label().label() looks little bit odd.
   std::cout << "-- node : " << node.label().label() << std::endl;
@@ -106,36 +117,32 @@ void Algorithm<Label, CostModel>::index_nodes(const node::Node<Label>& root, std
 }
 
 template <typename Label, typename CostModel>
-double Algorithm<Label, CostModel>::zhang_shasha_ted(const node::Node<Label>& t1, const node::Node<Label>& t2, const CostModel& c) {
+double Algorithm<Label, CostModel>::zhang_shasha_ted() {
   std::cout << "=== zhang_shasha_ted ===" << std::endl;
-  int t1_size = t1.get_tree_size();
-  int t2_size = t2.get_tree_size();
 
   // TODO: It is better to allocate the vector with tree sizes and fill them in.
   //       Currently lld-values are pushed-back. That results in linear-number
   //       of push_back invocations.
   //       Simmilar approach could be used for kr-values, but the current index
   //       has to be maintained outside recursion.
-  index_nodes(t1, lld1_, kr1_);
-  index_nodes(t2, lld2_, kr2_);
-
-  data_structures::Matrix<double> td = data_structures::Matrix<double>(t1_size+1, t2_size+1);
-  data_structures::Matrix<double> fd = data_structures::Matrix<double>(t1_size+1, t2_size+1);
+  index_nodes(t1_, lld1_, kr1_);
+  index_nodes(t2_, lld2_, kr2_);
 
   // Nested loop over key-root node pairs.
   for (auto kr1 : kr1_) {
     for (auto kr2 : kr2_) {
-      forest_distance(td, fd, kr1, kr2);
+      forest_distance(kr1, kr2);
     }
   }
 
-  return td[t1_size][t2_size];
+  return td_.at(t1_size_, t2_size_);
 }
 
 template <typename Label, typename CostModel>
-void Algorithm<Label, CostModel>::forest_distance(data_structures::Matrix<double>& td, data_structures::Matrix<double>& fd, int kr1, int kr2) {
-  td[kr1][kr2] = 1.1;
-  std::cout << "--- td[" << kr1 << "][" << kr2 << "] = " << td[kr1][kr2] << std::endl;
+void Algorithm<Label, CostModel>::forest_distance(int kr1, int kr2) {
+  td_.at(kr1, kr2) = 1.1;
+  fd_.at(kr1, kr2) = 1.1;
+  std::cout << "--- td[" << kr1 << "][" << kr2 << "] = " << td_.at(kr1, kr2) << std::endl;
 }
 
 #endif // TREE_SIMILARITY_ZHANG_SHASHA_ZHANG_SHASHA_IMPL_H

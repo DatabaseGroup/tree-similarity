@@ -41,18 +41,21 @@ template <typename Label, typename CostModel>
 class Algorithm {
 // Member functions.
 public:
-  // TODO: Do we need a Constructor?
-  // Algorithm();
-
+  // Constructor.
+  Algorithm(const node::Node<Label>& t1, const node::Node<Label>& t2, const CostModel& c);
   /// Computes the tree edit distance between two trees.
   ///
   /// \param t1 Source tree.
   /// \param t2 Destination tree.
   /// \param c Cost model with the costs of edit operations.
   /// \return Tree edit distance value.
-  double zhang_shasha_ted(const node::Node<Label>& t1, const node::Node<Label>& t2, const CostModel& c);
+  double zhang_shasha_ted();
 // Member variables.
 private:
+  /// Size of the source tree.
+  int t1_size_;
+  /// Size of the destination tree.
+  int t2_size_;
   /// Key-root nodes of the source tree.
   std::vector<int> kr1_;
   /// Key-root nodes of the destination tree.
@@ -66,8 +69,15 @@ private:
   /// Index in postorder.
   std::vector<int> lld2_;
   /// Matrix storing subtree distances.
-
+  data_structures::Matrix<double> td_;
   /// Matrix storing subforest distances.
+  data_structures::Matrix<double> fd_;
+  /// Source tree.
+  const node::Node<Label>& t1_;
+  /// Destination tree.
+  const node::Node<Label>& t2_;
+  /// Cost model.
+  const CostModel& c_;
 // Member functions.
 private:
   /// Indexes the nodes of an input tree. Wrapper for the recursive
@@ -93,7 +103,7 @@ private:
   /// \param fd Matrix storing subforest distances - not to create it each time forest_distance is executed.
   /// \param kr1 Current key-root node in source tree.
   /// \param kr2 Current key-root node in destination tree.
-  void forest_distance(data_structures::Matrix<double>& td, data_structures::Matrix<double>& fd, int kr1, int kr2);
+  void forest_distance(int kr1, int kr2);
 };
 
 // Implementation details.
