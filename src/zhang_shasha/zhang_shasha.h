@@ -52,9 +52,9 @@ public:
   double zhang_shasha_ted(const node::Node<Label>& t1, const node::Node<Label>& t2, const CostModel& c);
 // Member variables.
 private:
-  /// Key root nodes of the source tree.
+  /// Key-root nodes of the source tree.
   std::vector<int> kr1_;
-  /// Key root nodes of the destination tree.
+  /// Key-root nodes of the destination tree.
   std::vector<int> kr2_;
   /// Stores the postorder of the leftmost leaf descendant for each node of the
   /// source tree.
@@ -71,14 +71,18 @@ private:
   /// Call this method to index nodes.
   ///
   /// \param root The root node of the tree to index.
-  void index_nodes(const node::Node<Label>& root);
+  /// \param lld Vector with postorder ids of the leftmost leaf descendants.
+  /// \param kr Vector with postorder ids of the key-root nodes.
+  void index_nodes(const node::Node<Label>& root, std::vector<int>& lld, std::vector<int>& kr);
   /// Traverses an input tree rooted at root recursively and collects
   /// information into index structures.
   ///
+  /// \param root The root node of the tree to index.
+  /// \param lld Vector with postorder ids of the leftmost leaf descendants.
+  /// \param kr Vector with postorder ids of the key-root nodes.
   /// \param start_postorder Stores the postorder id of a node during traversal.
   /// \param start_preorder Stores the preorder id of a node during traversal.
-  /// \param root The root node of the tree to index.
-  void index_nodes_recursion(const node::Node<Label>& root, int& start_postorder, int& start_preorder);
+  void index_nodes_recursion(const node::Node<Label>& root, std::vector<int>& lld, std::vector<int>& kr, int& start_postorder, int& start_preorder);
 };
 
 // Implementation details.

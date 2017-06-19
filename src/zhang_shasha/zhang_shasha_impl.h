@@ -28,8 +28,7 @@
 #define TREE_SIMILARITY_ZHANG_SHASHA_ZHANG_SHASHA_IMPL_H
 
 template <typename Label, typename CostModel>
-void Algorithm<Label, CostModel>::index_nodes_recursion(const node::Node<Label>& node, int& start_postorder, int& start_preorder) {
-  // TODO: kr and lld must be passed by reference.
+void Algorithm<Label, CostModel>::index_nodes_recursion(const node::Node<Label>& node, std::vector<int>& lld, std::vector<int>& kr, int& start_postorder, int& start_preorder) {
   // TODO: The call node.label().label() looks little bit odd.
   std::cout << "-- node : " << node.label().label() << std::endl;
   // Here, start_preorder holds this node's preorder id here.
@@ -43,7 +42,7 @@ void Algorithm<Label, CostModel>::index_nodes_recursion(const node::Node<Label>&
   // Treat the first child separately (non-key-root, updates parent's lld).
   int first_child_postorder = -1;
   if (children_start_it != children_end_it) {
-    index_nodes_recursion(*children_start_it, start_postorder, start_preorder);
+    index_nodes_recursion(*children_start_it, lld, kr, start_postorder, start_preorder);
     // Here, start_postorder-1 is the postorder of the current child.
     // Set this node's lld to its first child's lld.
     first_child_postorder = start_postorder-1;
@@ -51,10 +50,10 @@ void Algorithm<Label, CostModel>::index_nodes_recursion(const node::Node<Label>&
     ++children_start_it;
   }
   while (children_start_it != children_end_it) {
-    index_nodes_recursion(*children_start_it, start_postorder, start_preorder);
+    index_nodes_recursion(*children_start_it, lld, kr, start_postorder, start_preorder);
     // Here, start_postorder-1 is the postorder of the current child.
     // Add current child to kr.
-    kr1_.push_back(start_postorder-1);
+    kr.push_back(start_postorder-1);
     // Continue to consecutive children.
     ++children_start_it;
   }
@@ -63,13 +62,13 @@ void Algorithm<Label, CostModel>::index_nodes_recursion(const node::Node<Label>&
   std::cout << "-- leaf : " << node.is_leaf() << std::endl;
   if (node.is_leaf()) {
     // Set lld of this node to this node's postorer.
-    lld1_.push_back(start_postorder);
+    lld.push_back(start_postorder);
   } else {
     std::cout << "-- first_child_postorder : " << first_child_postorder << std::endl;
-    std::cout << "-- lld1_.size : " << lld1_.size() << std::endl;
+    std::cout << "-- lld.size : " << lld.size() << std::endl;
     // This node's lld must be pushed after its childrens llds.
     // lld is indexed starting with 0, thus first_child_postorder-1.
-    lld1_.push_back(lld1_.at(first_child_postorder-1));
+    lld.push_back(lld.at(first_child_postorder-1));
   }
   // Increment start_postorder for the consecutive node in postorder have the
   // correct id.
@@ -77,8 +76,10 @@ void Algorithm<Label, CostModel>::index_nodes_recursion(const node::Node<Label>&
 }
 
 template <typename Label, typename CostModel>
-void Algorithm<Label, CostModel>::index_nodes(const node::Node<Label>& root) {
-  std::cout << "--- index_nodes ---" << std::endl;
+void Algorithm<Label, CostModel>::index_nodes(const node::Node<Label>& root, std::vector<int>& lld, std::vector<int>& kr) {
+
+  // Index nodes of the source tree.
+  std::cout << "--- index_nodes : source tree ---" << std::endl;
 
   // Orders start with '1'. If '0' is needed, either index_nodes_recursion must
   // be modified (placement of increments must change), or we start with '-1'.
@@ -88,25 +89,27 @@ void Algorithm<Label, CostModel>::index_nodes(const node::Node<Label>& root) {
   //       move the template traversal with postorder and preorder to some notes
   //       of how to traverse trees.
   int start_preorder = 1;
-  index_nodes_recursion(root, start_postorder, start_preorder);
+  index_nodes_recursion(root, lld, kr, start_postorder, start_preorder);
   // Here, start_postorder and start_preorder store the size of tree minus 1.
 
   // Add root to kr - not added in the recursion.
-  kr1_.push_back(start_postorder-1);
+  kr.push_back(start_postorder-1);
 
   // Print stuff.
-  std::cout << "-- lld1_ : ";
-  for (auto e : lld1_) std::cout << e << ' ';
+  std::cout << "--- printing stuff ---" << std::endl;
+  std::cout << "-- lld : ";
+  for (auto e : lld) std::cout << e << ' ';
   std::cout << std::endl;
-  std::cout << "-- kr1_ : ";
-  for (auto e : kr1_) std::cout << e << ' ';
+  std::cout << "-- kr : ";
+  for (auto e : kr) std::cout << e << ' ';
   std::cout << std::endl;
 }
 
 template <typename Label, typename CostModel>
 double Algorithm<Label, CostModel>::zhang_shasha_ted(const node::Node<Label>& t1, const node::Node<Label>& t2, const CostModel& c) {
   std::cout << "=== zhang_shasha_ted ===" << std::endl;
-  index_nodes(t1);
+  index_nodes(t1, lld1_, kr1_);
+  index_nodes(t2, lld2_, kr2_);
   return 5.0;
 }
 
