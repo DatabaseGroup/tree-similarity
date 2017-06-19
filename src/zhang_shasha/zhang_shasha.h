@@ -87,10 +87,13 @@ private:
   /// \param start_postorder Stores the postorder id of a node during traversal.
   /// \param start_preorder Stores the preorder id of a node during traversal.
   void index_nodes_recursion(const node::Node<Label>& root, std::vector<int>& lld, std::vector<int>& kr, int& start_postorder, int& start_preorder);
-  /// Calculate distances for subforests and store distances for subtrees.
+  /// Calculate distances for subforests and stores distances for subtrees.
   ///
-  ///
-  void forest_distance();
+  /// \param td Matrix storing subtree distances.
+  /// \param fd Matrix storing subforest distances - not to create it each time forest_distance is executed.
+  /// \param kr1 Current key-root node in source tree.
+  /// \param kr2 Current key-root node in destination tree.
+  void forest_distance(data_structures::Matrix<double>& td, data_structures::Matrix<double>& fd, int kr1, int kr2);
 };
 
 // Implementation details.

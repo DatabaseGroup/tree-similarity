@@ -119,17 +119,23 @@ double Algorithm<Label, CostModel>::zhang_shasha_ted(const node::Node<Label>& t1
   index_nodes(t1, lld1_, kr1_);
   index_nodes(t2, lld2_, kr2_);
 
-  data_structures::Matrix<double> td = data_structures::Matrix<double>(t1_size, t2_size);
+  data_structures::Matrix<double> td = data_structures::Matrix<double>(t1_size+1, t2_size+1);
+  data_structures::Matrix<double> fd = data_structures::Matrix<double>(t1_size+1, t2_size+1);
 
   // Nested loop over key-root node pairs.
   for (auto kr1 : kr1_) {
     for (auto kr2 : kr2_) {
-      td[kr1][kr2] = 1.1;
-      std::cout << "--- td[" << kr1 << "][" << kr2 << "] = " << td[kr1][kr2] << std::endl;
+      forest_distance(td, fd, kr1, kr2);
     }
   }
 
-  return 5.0;
+  return td[t1_size][t2_size];
+}
+
+template <typename Label, typename CostModel>
+void Algorithm<Label, CostModel>::forest_distance(data_structures::Matrix<double>& td, data_structures::Matrix<double>& fd, int kr1, int kr2) {
+  td[kr1][kr2] = 1.1;
+  std::cout << "--- td[" << kr1 << "][" << kr2 << "] = " << td[kr1][kr2] << std::endl;
 }
 
 #endif // TREE_SIMILARITY_ZHANG_SHASHA_ZHANG_SHASHA_IMPL_H
