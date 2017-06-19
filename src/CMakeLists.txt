@@ -10,6 +10,7 @@ include_directories(
   label
   cost_model
   zhang_shasha
+  data_structures
 )
 
 # the set of all source files
@@ -21,6 +22,7 @@ set(tree_similarity_sources
   label/string_label.cc
   cost_model/unit_cost_model.h
   zhang_shasha/zhang_shasha.h
+  data_structures/matrix.h
 )
 
 # build executable
