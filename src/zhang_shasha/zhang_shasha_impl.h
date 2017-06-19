@@ -39,7 +39,7 @@ Algorithm<Label, CostModel>::Algorithm(const node::Node<Label>& t1, const node::
 }
 
 template <typename Label, typename CostModel>
-void Algorithm<Label, CostModel>::index_nodes_recursion(const node::Node<Label>& node, std::vector<int>& lld, std::vector<int>& kr, int& start_postorder, int& start_preorder) {
+void Algorithm<Label, CostModel>::index_nodes_recursion(const node::Node<Label>& node, std::vector<int>& lld, std::vector<int>& kr, std::vector<node::Node<Label>*>& nodes, int& start_postorder, int& start_preorder) {
   // TODO: The call node.label().label() looks little bit odd.
   std::cout << "-- node : " << node.label().label() << std::endl;
   // Here, start_preorder holds this node's preorder id here.
@@ -53,7 +53,7 @@ void Algorithm<Label, CostModel>::index_nodes_recursion(const node::Node<Label>&
   // Treat the first child separately (non-key-root, updates parent's lld).
   int first_child_postorder = -1;
   if (children_start_it != children_end_it) {
-    index_nodes_recursion(*children_start_it, lld, kr, start_postorder, start_preorder);
+    index_nodes_recursion(*children_start_it, lld, kr, nodes, start_postorder, start_preorder);
     // Here, start_postorder-1 is the postorder of the current child.
     // Set this node's lld to its first child's lld.
     first_child_postorder = start_postorder-1;
@@ -61,7 +61,7 @@ void Algorithm<Label, CostModel>::index_nodes_recursion(const node::Node<Label>&
     ++children_start_it;
   }
   while (children_start_it != children_end_it) {
-    index_nodes_recursion(*children_start_it, lld, kr, start_postorder, start_preorder);
+    index_nodes_recursion(*children_start_it, lld, kr, nodes, start_postorder, start_preorder);
     // Here, start_postorder-1 is the postorder of the current child.
     // Add current child to kr.
     kr.push_back(start_postorder-1);
@@ -81,13 +81,16 @@ void Algorithm<Label, CostModel>::index_nodes_recursion(const node::Node<Label>&
     // lld is indexed starting with 0, thus first_child_postorder-1.
     lld.push_back(lld.at(first_child_postorder-1));
   }
+  // Add current node to the nodes vector.
+  // TODO: Compiler errors here. It's a tricky one.
+  nodes.push_back(&node);
   // Increment start_postorder for the consecutive node in postorder have the
   // correct id.
   start_postorder++;
 }
 
 template <typename Label, typename CostModel>
-void Algorithm<Label, CostModel>::index_nodes(const node::Node<Label>& root, std::vector<int>& lld, std::vector<int>& kr) {
+void Algorithm<Label, CostModel>::index_nodes(const node::Node<Label>& root, std::vector<int>& lld, std::vector<int>& kr, std::vector<node::Node<Label>*>& nodes) {
 
   // Index nodes of the source tree.
   std::cout << "--- index_nodes : source tree ---" << std::endl;
@@ -100,7 +103,7 @@ void Algorithm<Label, CostModel>::index_nodes(const node::Node<Label>& root, std
   //       move the template traversal with postorder and preorder to some notes
   //       of how to traverse trees.
   int start_preorder = 1;
-  index_nodes_recursion(root, lld, kr, start_postorder, start_preorder);
+  index_nodes_recursion(root, lld, kr, nodes, start_postorder, start_preorder);
   // Here, start_postorder and start_preorder store the size of tree minus 1.
 
   // Add root to kr - not added in the recursion.
@@ -125,12 +128,12 @@ double Algorithm<Label, CostModel>::zhang_shasha_ted() {
   //       of push_back invocations.
   //       Simmilar approach could be used for kr-values, but the current index
   //       has to be maintained outside recursion.
-  index_nodes(t1_, lld1_, kr1_);
-  index_nodes(t2_, lld2_, kr2_);
+  index_nodes(t1_, t1_lld_, t1_kr_, t1_node_);
+  index_nodes(t2_, t2_lld_, t2_kr_, t2_node_);
 
   // Nested loop over key-root node pairs.
-  for (auto kr1 : kr1_) {
-    for (auto kr2 : kr2_) {
+  for (auto kr1 : t1_kr_) {
+    for (auto kr2 : t2_kr_) {
       forest_distance(kr1, kr2);
     }
   }
@@ -140,8 +143,16 @@ double Algorithm<Label, CostModel>::zhang_shasha_ted() {
 
 template <typename Label, typename CostModel>
 void Algorithm<Label, CostModel>::forest_distance(int kr1, int kr2) {
-  td_.at(kr1, kr2) = 1.1;
-  fd_.at(kr1, kr2) = 1.1;
+  int kr1_lld = t1_lld_[kr1];
+  int kr2_lld = t2_lld_[kr2];
+  // Distance between two empty forests.
+  fd_.at(kr1_lld - 1, kr2_lld - 1) = 0.0;
+  // Distances between a source forest and an empty forest.
+  for (int i = kr1_lld; i <= kr1; ++i) {
+    fd_.at(i, kr2_lld - 1) = fd_.at(i - 1, kr2_lld - 1);// + c_.del();
+  }
+  // Distances between a destination forest and an empty forest.
+
   std::cout << "--- td[" << kr1 << "][" << kr2 << "] = " << td_.at(kr1, kr2) << std::endl;
 }
 

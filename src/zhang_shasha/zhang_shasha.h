@@ -57,17 +57,22 @@ private:
   /// Size of the destination tree.
   int t2_size_;
   /// Key-root nodes of the source tree.
-  std::vector<int> kr1_;
+  std::vector<int> t1_kr_;
   /// Key-root nodes of the destination tree.
-  std::vector<int> kr2_;
+  std::vector<int> t2_kr_;
   /// Stores the postorder of the leftmost leaf descendant for each node of the
   /// source tree.
   /// Index in postorder.
-  std::vector<int> lld1_;
+  std::vector<int> t1_lld_;
   /// Stores the postorder of the leftmost leaf descendant for each node of the
   /// destination tree.
   /// Index in postorder.
-  std::vector<int> lld2_;
+  std::vector<int> t2_lld_;
+  /// Stores pointers to nodes of the source tree. Indexed in postorder.
+  // TODO: It seems that now we need pointers. Which ones and how.
+  std::vector<node::Node<Label>*> t1_node_;
+  /// Stores pointers to nodes of the destination tree. Indexed in postorder.
+  std::vector<node::Node<Label>*> t2_node_;
   /// Matrix storing subtree distances.
   data_structures::Matrix<double> td_;
   /// Matrix storing subforest distances.
@@ -87,7 +92,7 @@ private:
   /// \param root The root node of the tree to index.
   /// \param lld Vector with postorder ids of the leftmost leaf descendants.
   /// \param kr Vector with postorder ids of the key-root nodes.
-  void index_nodes(const node::Node<Label>& root, std::vector<int>& lld, std::vector<int>& kr);
+  void index_nodes(const node::Node<Label>& root, std::vector<int>& lld, std::vector<int>& kr, std::vector<node::Node<Label>*>& nodes);
   /// Traverses an input tree rooted at root recursively and collects
   /// information into index structures.
   ///
@@ -96,7 +101,7 @@ private:
   /// \param kr Vector with postorder ids of the key-root nodes.
   /// \param start_postorder Stores the postorder id of a node during traversal.
   /// \param start_preorder Stores the preorder id of a node during traversal.
-  void index_nodes_recursion(const node::Node<Label>& root, std::vector<int>& lld, std::vector<int>& kr, int& start_postorder, int& start_preorder);
+  void index_nodes_recursion(const node::Node<Label>& root, std::vector<int>& lld, std::vector<int>& kr, std::vector<node::Node<Label>*>& nodes, int& start_postorder, int& start_preorder);
   /// Calculate distances for subforests and stores distances for subtrees.
   ///
   /// \param td Matrix storing subtree distances.
