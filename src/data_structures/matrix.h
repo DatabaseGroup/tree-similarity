@@ -36,6 +36,7 @@
 #define MATRIX_H
 
 #include <memory>
+#include <vector>
 
 namespace data_structures {
 
@@ -43,48 +44,35 @@ template<typename ElementType>
 class Matrix {
 // Member variables.
 private:
-  // consecutive allocated memory: rows * columns
+  /// Number of rows in the matrix.
   size_t rows_;
+  /// Number of columns in the matrix.
   size_t columns_;
-  // consecutive allocated row containing the array elements
-  ElementType* data_;
+  /// Consecutive-allocated long vector containing the matrix elements.
+  std::vector<ElementType> data_;
 // Member functions.
 public:
   /// Constructor(s).
+  Matrix() = default; // Used while constructing ZS-Algorithm.
   Matrix(size_t rows, size_t columns);
-  Matrix(const Matrix& other);
-  /// Destructor.
-  ~Matrix();
   /// Returns the number of rows.
   size_t get_rows() const;
   /// Returns the number of columns.
   size_t get_columns() const;
-  /// Enable access as usual using the [][] notation.
+  /// Accesses the element of specific row and column.
   ///
   /// \param row The row to be accessed.
+  /// \param col The column to be accessed.
   ///
-  /// \return A pointer to the beginning of the row to be accessed.
-  ElementType* operator[](size_t row);
+  /// \return Reference to the specified element.
+  ElementType& at(size_t row, size_t col);
 };
 
 template<typename ElementType>
 Matrix<ElementType>::Matrix(size_t rows, size_t columns)
-  : rows_(rows), columns_(columns), data_(nullptr)
+  : rows_(rows), columns_(columns)
 {
-  // allocate array and initialize to zero
-  data_ = new ElementType[rows_ * columns_] { };
-}
-
-// template<typename ElementType>
-// Matrix<ElementType>::Matrix(const Matrix& other)
-//   : Matrix(other.get_rows(), other.get_columns())
-// {
-//   std::copy(other.data, other.data + (rows_ * columns_), data_);
-// }
-
-template<typename ElementType>
-Matrix<ElementType>::~Matrix() {
-  delete[] data_;
+  data_.resize(rows_ * columns_);
 }
 
 template<typename ElementType>
@@ -98,8 +86,9 @@ size_t Matrix<ElementType>::get_columns() const {
 }
 
 template<typename ElementType>
-ElementType* Matrix<ElementType>::operator[](size_t row) {
-  return data_ + row * columns_;
+ElementType& Matrix<ElementType>::at(size_t row, size_t col) {
+  // TODO: Bounds are not checked, nor exception is caught.
+  return data_[row * columns_ + col];
 }
 
 } // namespace data_structures
