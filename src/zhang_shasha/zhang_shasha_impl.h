@@ -108,8 +108,27 @@ void Algorithm<Label, CostModel>::index_nodes(const node::Node<Label>& root, std
 template <typename Label, typename CostModel>
 double Algorithm<Label, CostModel>::zhang_shasha_ted(const node::Node<Label>& t1, const node::Node<Label>& t2, const CostModel& c) {
   std::cout << "=== zhang_shasha_ted ===" << std::endl;
+  int t1_size = t1.get_tree_size();
+  int t2_size = t2.get_tree_size();
+
+  // TODO: It is better to allocate the vector with tree sizes and fill them in.
+  //       Currently lld-values are pushed-back. That results in linear-number
+  //       of push_back invocations.
+  //       Simmilar approach could be used for kr-values, but the current index
+  //       has to be maintained outside recursion.
   index_nodes(t1, lld1_, kr1_);
   index_nodes(t2, lld2_, kr2_);
+
+  data_structures::Matrix<double> td = data_structures::Matrix<double>(t1_size, t2_size);
+
+  // Nested loop over key-root node pairs.
+  for (auto kr1 : kr1_) {
+    for (auto kr2 : kr2_) {
+      td[kr1][kr2] = 1.1;
+      std::cout << "--- td[" << kr1 << "][" << kr2 << "] = " << td[kr1][kr2] << std::endl;
+    }
+  }
+
   return 5.0;
 }
 

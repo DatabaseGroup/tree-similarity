@@ -31,6 +31,7 @@
 
 #include <vector>
 #include "node.h"
+#include "matrix.h"
 
 #include <iostream>
 
@@ -64,6 +65,9 @@ private:
   /// destination tree.
   /// Index in postorder.
   std::vector<int> lld2_;
+  /// Matrix storing subtree distances.
+
+  /// Matrix storing subforest distances.
 // Member functions.
 private:
   /// Indexes the nodes of an input tree. Wrapper for the recursive
@@ -83,6 +87,10 @@ private:
   /// \param start_postorder Stores the postorder id of a node during traversal.
   /// \param start_preorder Stores the preorder id of a node during traversal.
   void index_nodes_recursion(const node::Node<Label>& root, std::vector<int>& lld, std::vector<int>& kr, int& start_postorder, int& start_preorder);
+  /// Calculate distances for subforests and store distances for subtrees.
+  ///
+  ///
+  void forest_distance();
 };
 
 // Implementation details.
