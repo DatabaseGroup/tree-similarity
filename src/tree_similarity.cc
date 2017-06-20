@@ -83,21 +83,35 @@ int main(int argc, char** argv) {
     std::cout << "child2: " << child2.children_count() << std::endl;
     std::cout << "child3: " << child3.children_count() << std::endl;
 
-    node::Node<Label> r_1(Label("a"));
-    node::Node<Label> n_2(Label("a"));
-    node::Node<Label> n_3(Label("a"));
-    node::Node<Label> n_4(Label("a"));
-    node::Node<Label> n_5(Label("a"));
-    node::Node<Label> n_6(Label("a"));
-    node::Node<Label> n_7(Label("a"));
-    n_5.add_child(std::move(n_7));
-    n_3.add_child(std::move(n_4));
-    n_3.add_child(std::move(n_5));
-    n_3.add_child(std::move(n_6));
-    r_1.add_child(std::move(n_2));
-    r_1.add_child(std::move(n_3));
+    node::Node<Label> r1_1(Label("a"));
+    node::Node<Label> n1_2(Label("a"));
+    node::Node<Label> n1_3(Label("a"));
+    node::Node<Label> n1_4(Label("a"));
+    node::Node<Label> n1_5(Label("a"));
+    node::Node<Label> n1_6(Label("a"));
+    node::Node<Label> n1_7(Label("a"));
+    n1_5.add_child(std::move(n1_7));
+    n1_3.add_child(std::move(n1_4));
+    n1_3.add_child(std::move(n1_5));
+    n1_3.add_child(std::move(n1_6));
+    r1_1.add_child(std::move(n1_2));
+    r1_1.add_child(std::move(n1_3));
 
-    zhang_shasha::Algorithm<Label, CostModel<Label>> zs_ted(r_1, r_1, cost_model);
+    node::Node<Label> r2_1(Label("b"));
+    node::Node<Label> n2_2(Label("a"));
+    node::Node<Label> n2_3(Label("a"));
+    node::Node<Label> n2_4(Label("b"));
+    node::Node<Label> n2_5(Label("a"));
+    node::Node<Label> n2_6(Label("b"));
+    node::Node<Label> n2_7(Label("a"));
+    n2_5.add_child(std::move(n2_7));
+    n2_3.add_child(std::move(n2_4));
+    n2_3.add_child(std::move(n2_5));
+    n2_3.add_child(std::move(n2_6));
+    r2_1.add_child(std::move(n2_2));
+    r2_1.add_child(std::move(n2_3));
+
+    zhang_shasha::Algorithm<Label, CostModel<Label>> zs_ted(r1_1, r2_1, cost_model);
     std::cout << zs_ted.zhang_shasha_ted() << std::endl;
 
     return 0;
