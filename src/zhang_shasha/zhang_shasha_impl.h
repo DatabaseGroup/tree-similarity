@@ -150,16 +150,37 @@ double Algorithm<Label, CostModel>::zhang_shasha_ted() {
 
 template <typename Label, typename CostModel>
 void Algorithm<Label, CostModel>::forest_distance(int kr1, int kr2) {
-  int kr1_lld = t1_lld_[kr1];
-  int kr2_lld = t2_lld_[kr2];
+  const int kKr1Lld = t1_lld_[kr1 - 1]; // See declaration of t1_lld_.
+  const int kKr2Lld = t2_lld_[kr2 - 1];
+  const int kT1Empty = kKr1Lld - 1;
+  const int kT2Empty = kKr2Lld - 1;
   // Distance between two empty forests.
-  fd_.at(kr1_lld - 1, kr2_lld - 1) = 0.0;
+  fd_.at(kT1Empty, kT2Empty) = 0.0;
   // Distances between a source forest and an empty forest.
-  for (int i = kr1_lld; i <= kr1; ++i) {
-    fd_.at(i, kr2_lld - 1) = fd_.at(i - 1, kr2_lld - 1) + c_.del(t1_node_[i]);
+  for (int i = kKr1Lld; i <= kr1; ++i) {
+    fd_.at(i, kT2Empty) = fd_.at(i - 1, kT2Empty) + c_.del(t1_node_[i - 1]);
+    // For t1_node_[i - 1] see declaration of t1_node_.
   }
   // Distances between a destination forest and an empty forest.
-
+  for (int j = kKr2Lld; j <= kr2; ++j) {
+    fd_.at(kT1Empty, j) = fd_.at(kT1Empty, j - 1) + c_.ins(t2_node_[j - 1]);
+  }
+  // Distances between non-empty forests.
+  for (int i = kKr1Lld; i <= kr1; ++i) {
+    for (int j = kKr2Lld; j <= kr2; ++j) {
+      // If we have two subtrees.
+      if (t1_lld_[i - 1] == kKr1Lld && t2_lld_[j - 1] == kKr2Lld) {
+        fd_.at(i, j) = std::min({fd_.at(i - 1, j) + c_.del(t1_node_[i - 1]),
+                                 fd_.at(i, j - 1) + c_.ins(t2_node_[j - 1]),
+                                 fd_.at(i - 1, j - 1) + c_.ren(t1_node_[i - 1], t2_node_[j - 1])});
+        td_.at(i, j) = fd_.at(i, j);
+      } else { // We have two forests.
+        fd_.at(i, j) = std::min({fd_.at(i - 1, j) + c_.del(t1_node_[i - 1]),
+                                 fd_.at(i, j - 1) + c_.ins(t2_node_[j - 1]),
+                                 fd_.at(t1_lld_[i - 1] - 1, t2_lld_[j - 1] - 1) + td_.at(i, j)});
+      }
+    }
+  }
   std::cout << "--- td[" << kr1 << "][" << kr2 << "] = " << td_.at(kr1, kr2) << std::endl;
 }
 

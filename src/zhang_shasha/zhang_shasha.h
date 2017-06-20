@@ -63,18 +63,18 @@ private:
   std::vector<int> t2_kr_;
   /// Stores the postorder of the leftmost leaf descendant for each node of the
   /// source tree.
-  /// Index in postorder.
+  /// Indexed in postorder-1.
   std::vector<int> t1_lld_;
   /// Stores the postorder of the leftmost leaf descendant for each node of the
   /// destination tree.
-  /// Index in postorder.
+  /// Indexed in postorder-1.
   std::vector<int> t2_lld_;
-  /// Stores pointers to nodes of the source tree. Indexed in postorder.
+  /// Stores pointers to nodes of the source tree. Indexed in postorder-1.
   // NOTE: We use reference_wrapper for const references to nodes. For now, we
   // decided not to use raw pointers. Other pointers introduce ownership, but
   // this vector is only an observer from a logical pont of view.
   std::vector<std::reference_wrapper<const node::Node<Label>>> t1_node_;
-  /// Stores pointers to nodes of the destination tree. Indexed in postorder.
+  /// Stores pointers to nodes of the destination tree. Indexed in postorder-1.
   std::vector<std::reference_wrapper<const node::Node<Label>>> t2_node_;
   /// Matrix storing subtree distances.
   data_structures::Matrix<double> td_;
