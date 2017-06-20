@@ -87,8 +87,8 @@ size_t Matrix<ElementType>::get_columns() const {
 
 template<typename ElementType>
 ElementType& Matrix<ElementType>::at(size_t row, size_t col) {
-  // NOTE: Bounds are not checked, nor exception is caught.
-  return data_[row * columns_ + col];
+  // NOTE: Using at() for checking bounds.
+  return data_.at(row * columns_ + col);
 }
 
 } // namespace data_structures
