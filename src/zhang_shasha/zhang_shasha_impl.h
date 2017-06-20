@@ -28,9 +28,10 @@
 #define TREE_SIMILARITY_ZHANG_SHASHA_ZHANG_SHASHA_IMPL_H
 
 template <typename Label, typename CostModel>
-Algorithm<Label, CostModel>::Algorithm(const node::Node<Label>& t1, const node::Node<Label>& t2, const CostModel& c)
-  : t1_(t1), t2_(t2), c_(c)
-{
+Algorithm<Label, CostModel>::Algorithm(const node::Node<Label>& t1,
+                                       const node::Node<Label>& t2,
+                                       const CostModel& c) :
+                                       t1_(t1), t2_(t2), c_(c) {
   // TODO: The default constructor of Matrix is called while constructing ZS-Algorithm.
   t1_size_ = t1.get_tree_size();
   t2_size_ = t2.get_tree_size();
@@ -39,7 +40,10 @@ Algorithm<Label, CostModel>::Algorithm(const node::Node<Label>& t1, const node::
 }
 
 template <typename Label, typename CostModel>
-void Algorithm<Label, CostModel>::index_nodes_recursion(const node::Node<Label>& node, std::vector<int>& lld, std::vector<int>& kr, std::vector<node::Node<Label>*>& nodes, int& start_postorder, int& start_preorder) {
+void Algorithm<Label, CostModel>::index_nodes_recursion(
+    const node::Node<Label>& node, std::vector<int>& lld, std::vector<int>& kr,
+    std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
+    int& start_postorder, int& start_preorder) {
   // TODO: The call node.label().label() looks little bit odd.
   std::cout << "-- node : " << node.label().label() << std::endl;
   // Here, start_preorder holds this node's preorder id here.
@@ -53,7 +57,8 @@ void Algorithm<Label, CostModel>::index_nodes_recursion(const node::Node<Label>&
   // Treat the first child separately (non-key-root, updates parent's lld).
   int first_child_postorder = -1;
   if (children_start_it != children_end_it) {
-    index_nodes_recursion(*children_start_it, lld, kr, nodes, start_postorder, start_preorder);
+    index_nodes_recursion(*children_start_it, lld, kr, nodes, start_postorder,
+                          start_preorder);
     // Here, start_postorder-1 is the postorder of the current child.
     // Set this node's lld to its first child's lld.
     first_child_postorder = start_postorder-1;
@@ -61,7 +66,8 @@ void Algorithm<Label, CostModel>::index_nodes_recursion(const node::Node<Label>&
     ++children_start_it;
   }
   while (children_start_it != children_end_it) {
-    index_nodes_recursion(*children_start_it, lld, kr, nodes, start_postorder, start_preorder);
+    index_nodes_recursion(*children_start_it, lld, kr, nodes, start_postorder,
+                          start_preorder);
     // Here, start_postorder-1 is the postorder of the current child.
     // Add current child to kr.
     kr.push_back(start_postorder-1);
@@ -82,15 +88,16 @@ void Algorithm<Label, CostModel>::index_nodes_recursion(const node::Node<Label>&
     lld.push_back(lld.at(first_child_postorder-1));
   }
   // Add current node to the nodes vector.
-  // TODO: Compiler errors here. It's a tricky one.
-  nodes.push_back(&node);
+  nodes.push_back(std::ref(node));
   // Increment start_postorder for the consecutive node in postorder have the
   // correct id.
   start_postorder++;
 }
 
 template <typename Label, typename CostModel>
-void Algorithm<Label, CostModel>::index_nodes(const node::Node<Label>& root, std::vector<int>& lld, std::vector<int>& kr, std::vector<node::Node<Label>*>& nodes) {
+void Algorithm<Label, CostModel>::index_nodes(const node::Node<Label>& root,
+    std::vector<int>& lld, std::vector<int>& kr,
+    std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes) {
 
   // Index nodes of the source tree.
   std::cout << "--- index_nodes : source tree ---" << std::endl;
@@ -99,7 +106,7 @@ void Algorithm<Label, CostModel>::index_nodes(const node::Node<Label>& root, std
   // be modified (placement of increments must change), or we start with '-1'.
   // The order-variables are modified by index_nodes_recursion.
   int start_postorder = 1;
-  // TODO: Preorder is not used in Zhang and Shasha. Remove start_preorder. Or
+  // NOTE: Preorder is not used in Zhang and Shasha. Remove start_preorder. Or
   //       move the template traversal with postorder and preorder to some notes
   //       of how to traverse trees.
   int start_preorder = 1;
@@ -149,7 +156,7 @@ void Algorithm<Label, CostModel>::forest_distance(int kr1, int kr2) {
   fd_.at(kr1_lld - 1, kr2_lld - 1) = 0.0;
   // Distances between a source forest and an empty forest.
   for (int i = kr1_lld; i <= kr1; ++i) {
-    fd_.at(i, kr2_lld - 1) = fd_.at(i - 1, kr2_lld - 1);// + c_.del();
+    fd_.at(i, kr2_lld - 1) = fd_.at(i - 1, kr2_lld - 1) + c_.del(t1_node_[i]);
   }
   // Distances between a destination forest and an empty forest.
 

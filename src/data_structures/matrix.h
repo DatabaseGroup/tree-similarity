@@ -87,7 +87,7 @@ size_t Matrix<ElementType>::get_columns() const {
 
 template<typename ElementType>
 ElementType& Matrix<ElementType>::at(size_t row, size_t col) {
-  // TODO: Bounds are not checked, nor exception is caught.
+  // NOTE: Bounds are not checked, nor exception is caught.
   return data_[row * columns_ + col];
 }
 
