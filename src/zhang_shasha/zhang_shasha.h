@@ -33,7 +33,6 @@
 #include <memory>
 #include "node.h"
 #include "matrix.h"
-
 #include <iostream>
 
 namespace zhang_shasha {

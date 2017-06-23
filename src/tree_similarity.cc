@@ -25,7 +25,6 @@
 /// Entry point of the tree similarity command-line interface.
 
 #include "tree_similarity.h"
-
 #include <iostream>
 
 template<class _Label> using CostModel = cost_model::UnitCostModel<_Label>;

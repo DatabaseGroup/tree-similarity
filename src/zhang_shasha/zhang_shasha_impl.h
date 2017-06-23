@@ -133,8 +133,8 @@ double Algorithm<Label, CostModel>::zhang_shasha_ted() {
   // TODO: It is better to allocate the vector with tree sizes and fill them in.
   //       Currently lld-values are pushed-back. That results in linear-number
   //       of push_back invocations.
-  //       Simmilar approach could be used for kr-values, but the current index
-  //       has to be maintained outside recursion.
+  //       Simmilar approach could be used for kr-values, but the current index,
+  //       of a kr-value to set has, to be maintained outside recursion.
   index_nodes(t1_, t1_lld_, t1_kr_, t1_node_);
   index_nodes(t2_, t2_lld_, t2_kr_, t2_node_);
 
@@ -170,14 +170,16 @@ void Algorithm<Label, CostModel>::forest_distance(int kr1, int kr2) {
     for (int j = kKr2Lld; j <= kr2; ++j) {
       // If we have two subtrees.
       if (t1_lld_[i - 1] == kKr1Lld && t2_lld_[j - 1] == kKr2Lld) {
-        fd_.at(i, j) = std::min({fd_.at(i - 1, j) + c_.del(t1_node_[i - 1]),
-                                 fd_.at(i, j - 1) + c_.ins(t2_node_[j - 1]),
-                                 fd_.at(i - 1, j - 1) + c_.ren(t1_node_[i - 1], t2_node_[j - 1])});
+        fd_.at(i, j) = std::min(
+            {fd_.at(i - 1, j) + c_.del(t1_node_[i - 1]), // Delete root node in source subtree.
+             fd_.at(i, j - 1) + c_.ins(t2_node_[j - 1]), // Insert root node in destination subtree.
+             fd_.at(i - 1, j - 1) + c_.ren(t1_node_[i - 1], t2_node_[j - 1])}); // Rename the root nodes.
         td_.at(i, j) = fd_.at(i, j);
       } else { // We have two forests.
-        fd_.at(i, j) = std::min({fd_.at(i - 1, j) + c_.del(t1_node_[i - 1]),
-                                 fd_.at(i, j - 1) + c_.ins(t2_node_[j - 1]),
-                                 fd_.at(t1_lld_[i - 1] - 1, t2_lld_[j - 1] - 1) + td_.at(i, j)});
+        fd_.at(i, j) = std::min(
+            {fd_.at(i - 1, j) + c_.del(t1_node_[i - 1]), // Delete rightmost root node in source subforest.
+             fd_.at(i, j - 1) + c_.ins(t2_node_[j - 1]), // Insert rightmost root node in destination subforest.
+             fd_.at(t1_lld_[i - 1] - 1, t2_lld_[j - 1] - 1) + td_.at(i, j)}); // Delete the rightmost subtrees + keep the rightmost subtrees.
       }
     }
   }
