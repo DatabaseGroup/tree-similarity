@@ -51,6 +51,11 @@ const std::vector<Node<Label>>& Node<Label>::get_children() const {
 }
 
 template<class Label>
+Node<Label>& Node<Label>::get_last_childs_ref() {
+  return children_.back();
+}
+
+template<class Label>
 int Node<Label>::get_tree_size() const {
   int size = 1;
   for (auto child : children_) {
