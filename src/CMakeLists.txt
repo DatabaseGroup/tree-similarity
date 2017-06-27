@@ -11,6 +11,7 @@ include_directories(
   cost_model
   zhang_shasha
   data_structures
+  parser
 )
 
 # the set of all source files
@@ -23,6 +24,7 @@ set(tree_similarity_sources
   cost_model/unit_cost_model.h
   zhang_shasha/zhang_shasha.h
   data_structures/matrix.h
+  parser/bracket_notation_parser.h
 )
 
 # build executable

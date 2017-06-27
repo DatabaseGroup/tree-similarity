@@ -25,6 +25,7 @@
 /// Entry point of the tree similarity command-line interface.
 
 #include "tree_similarity.h"
+#include "bracket_notation_parser.h"
 #include <iostream>
 
 template<class _Label> using CostModel = cost_model::UnitCostModel<_Label>;
@@ -112,6 +113,10 @@ int main(int argc, char** argv) {
 
     zhang_shasha::Algorithm<Label, CostModel<Label>> zs_ted(r1_1, r2_1, cost_model);
     std::cout << zs_ted.zhang_shasha_ted() << std::endl;
+
+    const std::string s("{\"a\"{\"\\{[b],\\{key:\\\"value\\\"\\}\\}\"{\"\"}}}");
+    parser::BracketNotationParser bnp;
+    node::Node<Label> parsed_tree = bnp.parse_string(s);
 
     return 0;
 }
