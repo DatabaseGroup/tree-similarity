@@ -1,22 +1,14 @@
-cmake_minimum_required(VERSION 2.8)
+# Move the executable into other directory.
+set(EXECUTABLE_OUTPUT_PATH ..)
 
-# compiler flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++11 -Wall -O3")
-
-# directories - for header files
-include_directories(
-  node
-  label
-  cost_model
-  zhang_shasha
-  data_structures
-  parser
-)
-
-# the set of all source files (only the cc files)
+# The set of all source files (only the cc files).
+# In this case the single file could be explicitly passes to add_executable().
 set(tree_similarity_sources
   tree_similarity.cc
 )
 
-# build executable
+# Build executable for out tool.
 add_executable(${PROJECT_NAME} ${tree_similarity_sources})
+
+# Let the compiler know to find the header files in TreeSimilarity library.
+target_link_libraries(${PROJECT_NAME} TreeSimilarity)
