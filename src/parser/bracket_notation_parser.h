@@ -24,6 +24,8 @@
 /// \details
 /// Implements the parser for bracket notation of the form:
 ///
+/// TODO: Decide on the format. It this ok, or we need something simpler.
+///
 /// {"LABEL"{"LABEL"}{"LABEL"}}
 ///
 /// where LABEL allows any character between the quotes BUT the three characters
