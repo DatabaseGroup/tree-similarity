@@ -63,8 +63,7 @@ const node::Node<BracketNotationParser::Label>& BracketNotationParser::parse_str
       std::cout << "N:start" << std::endl;
       std::cout << "N:label = " << match_str << std::endl;
 
-      // TODO: n is destroyed after each loop?!?!
-      node::Node<Label> n(Label(match_str.substr(1,match_str.size())));
+      node::Node<Label> n(Label(match_str.substr(1,match_str.size()))); // TODO: Verify if quotes are part of stored label.
 
       std::cout << "PARENT = " << node_stack.back().get().label().label() << std::endl;
 
