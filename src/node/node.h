@@ -74,9 +74,12 @@ public:
   ConstReference label() const;
 
   /// Adds a child at last position.
+  /// TODO: Verify this definition. Can we improve it with const or &? It is
+  ///       used to build the tree in a parser.
+  /// TODO: Verify if child is copied or moved.
   ///
-  /// \param child Pointer to the node to be added.
-  void add_child(const Node<Label>& child);
+  /// \param Node to be added.
+  void add_child(Node<Label> child);
 
   /// Returns the reference to children_ vector.
   ///

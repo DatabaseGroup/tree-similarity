@@ -66,9 +66,11 @@ public:
   /// Takes the string of a tree in bracket notation, parses it to the Node
   /// structure with StringLabels, and returns refeence to the root.
   ///
+  /// TODO: Verify if the returned object is not copied.
+  ///
   /// \param tree_string The string holding the tree in bracket notation.
   /// \return Reference to the root node.
-  const node::Node<Label>& parse_string(const std::string& tree_string);
+  const node::Node<Label> parse_string(const std::string& tree_string);
 
 // Member variables
 private:

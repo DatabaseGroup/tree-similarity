@@ -27,7 +27,7 @@
 #ifndef BRACKET_NOTATION_PARSER_IMPL_H
 #define BRACKET_NOTATION_PARSER_IMPL_H
 
-const node::Node<BracketNotationParser::Label>& BracketNotationParser::parse_string(
+const node::Node<BracketNotationParser::Label> BracketNotationParser::parse_string(
     const std::string& tree_string) {
 
   // Tokenize the input string - get iterator over tokens.
@@ -68,7 +68,7 @@ const node::Node<BracketNotationParser::Label>& BracketNotationParser::parse_str
       std::cout << "PARENT = " << node_stack.back().get().label().label() << std::endl;
 
       // Move n to become a child.
-      node_stack.back().get().add_child(std::move(n));
+      node_stack.back().get().add_child(n);
 
       // Put a reference to just-moved n (last child of its parent) on a stack.
       node_stack.push_back(std::ref(node_stack.back().get().get_last_childs_ref()));
@@ -84,7 +84,9 @@ const node::Node<BracketNotationParser::Label>& BracketNotationParser::parse_str
   std::cout << "NODE_STACK_SIZE = " << node_stack.size() << std::endl;
   std::cout << "TREE_SIZE = " << root.get_tree_size() << std::endl;
 
-  return std::move(root);
+  // NOTE: std::move(root) is not necessary.
+  //       The language already knows root is a move candidate.
+  return root;
 }
 
 #endif // BRACKET_NOTATION_PARSER_IMPL_H

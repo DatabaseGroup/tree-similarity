@@ -41,7 +41,7 @@ typename Node<Label>::ConstReference Node<Label>::label() const {
 }
 
 template<class Label>
-void Node<Label>::add_child(const Node<Label>& child) {
+void Node<Label>::add_child(Node<Label> child) {
   children_.push_back(child);
 }
 
