@@ -186,4 +186,9 @@ void Algorithm<Label, CostModel>::forest_distance(int kr1, int kr2) {
   std::cout << "--- td[" << kr1 << "][" << kr2 << "] = " << td_.at(kr1, kr2) << std::endl;
 }
 
+template <typename Label, typename CostModel>
+const std::vector<int>& Algorithm<Label, CostModel>::get_t1_kr_() const {
+  return t1_kr_;
+}
+
 #endif // TREE_SIMILARITY_ZHANG_SHASHA_ZHANG_SHASHA_IMPL_H

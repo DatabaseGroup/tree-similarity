@@ -50,6 +50,8 @@ public:
   /// \param c Cost model with the costs of edit operations.
   /// \return Tree edit distance value.
   double zhang_shasha_ted();
+
+  const std::vector<int>& get_t1_kr_() const;
 // Member variables.
 private:
   /// Size of the source tree.
