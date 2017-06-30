@@ -1,14 +1,18 @@
+# Bracket notation parser tests.
+
+# Testing tree size after parsing.
+
 add_executable(
-  parsing_bracket_notation_size_test_driver
-  parsing_bracket_notation_size_test.cc
+  parsing_bracket_notation_size_test_driver # EXECUTABLE NAME
+  parsing_bracket_notation_size_test.cc     # EXECUTABLE SOURCE
 )
 
 target_link_libraries(
-  parsing_bracket_notation_size_test_driver
-  TreeSimilarity
+  parsing_bracket_notation_size_test_driver # EXECUTABLE NAME
+  TreeSimilarity                            # LIBRARY NAME
 )
 
 add_test(
-  NAME parsing_bracket_notation_size_test
-  COMMAND parsing_bracket_notation_size_test_driver
+  NAME parsing_bracket_notation_size_test           # TEST NAME
+  COMMAND parsing_bracket_notation_size_test_driver # EXECUTABLE NAME
 )
