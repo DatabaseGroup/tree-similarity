@@ -28,22 +28,33 @@
 #define TREE_SIMILARITY_ZHANG_SHASHA_ZHANG_SHASHA_IMPL_H
 
 template <typename Label, typename CostModel>
-Algorithm<Label, CostModel>::Algorithm(const node::Node<Label>& t1,
-                                       const node::Node<Label>& t2,
-                                       const CostModel& c) :
-                                       t1_(t1), t2_(t2), c_(c) {
+Algorithm<Label, CostModel>::Algorithm(
+    const node::Node<Label>& t1,
+    const node::Node<Label>& t2,
+    const CostModel& c)
+    : t1_(t1), t2_(t2), c_(c) {
+  using data_structures::Matrix;
+
+  // TODO: Remove the constructor parameters.
+  //       - Input trees should be parameters to zs_ted().
+  //       - Cost model can be created inside constructor based on CostModel
+  //         template parameter.
+
   // TODO: The default constructor of Matrix is called while constructing ZS-Algorithm.
   t1_size_ = t1.get_tree_size();
   t2_size_ = t2.get_tree_size();
-  td_ = data_structures::Matrix<double>(t1_size_+1, t2_size_+1);
-  fd_ = data_structures::Matrix<double>(t1_size_+1, t2_size_+1);
+  td_ = Matrix<double>(t1_size_+1, t2_size_+1);
+  fd_ = Matrix<double>(t1_size_+1, t2_size_+1);
 }
 
 template <typename Label, typename CostModel>
 void Algorithm<Label, CostModel>::index_nodes_recursion(
-    const node::Node<Label>& node, std::vector<int>& lld, std::vector<int>& kr,
+    const node::Node<Label>& node,
+    std::vector<int>& lld,
+    std::vector<int>& kr,
     std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
-    int& start_postorder, int& start_preorder) {
+    int& start_postorder,
+    int& start_preorder) {
   // TODO: The call node.label().label() looks little bit odd.
   std::cout << "-- node : " << node.label().label() << std::endl;
   // Here, start_preorder holds this node's preorder id here.
@@ -65,6 +76,7 @@ void Algorithm<Label, CostModel>::index_nodes_recursion(
     // Continue to consecutive children.
     ++children_start_it;
   }
+
   while (children_start_it != children_end_it) {
     index_nodes_recursion(*children_start_it, lld, kr, nodes, start_postorder,
                           start_preorder);
@@ -77,6 +89,7 @@ void Algorithm<Label, CostModel>::index_nodes_recursion(
   // Here, start_postorder holds this node's postorder id here.
   std::cout << "-- postorder : " << start_postorder << std::endl;
   std::cout << "-- leaf : " << node.is_leaf() << std::endl;
+
   if (node.is_leaf()) {
     // Set lld of this node to this node's postorer.
     lld.push_back(start_postorder);
@@ -95,8 +108,10 @@ void Algorithm<Label, CostModel>::index_nodes_recursion(
 }
 
 template <typename Label, typename CostModel>
-void Algorithm<Label, CostModel>::index_nodes(const node::Node<Label>& root,
-    std::vector<int>& lld, std::vector<int>& kr,
+void Algorithm<Label, CostModel>::index_nodes(
+    const node::Node<Label>& root,
+    std::vector<int>& lld,
+    std::vector<int>& kr,
     std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes) {
 
   // Index nodes of the source tree.
@@ -149,22 +164,27 @@ double Algorithm<Label, CostModel>::zhang_shasha_ted() {
 }
 
 template <typename Label, typename CostModel>
-void Algorithm<Label, CostModel>::forest_distance(int kr1, int kr2) {
+void Algorithm<Label, CostModel>::forest_distance(
+    int kr1,
+    int kr2) {
   const int kKr1Lld = t1_lld_[kr1 - 1]; // See declaration of t1_lld_.
   const int kKr2Lld = t2_lld_[kr2 - 1];
   const int kT1Empty = kKr1Lld - 1;
   const int kT2Empty = kKr2Lld - 1;
   // Distance between two empty forests.
   fd_.at(kT1Empty, kT2Empty) = 0.0;
+
   // Distances between a source forest and an empty forest.
   for (int i = kKr1Lld; i <= kr1; ++i) {
     fd_.at(i, kT2Empty) = fd_.at(i - 1, kT2Empty) + c_.del(t1_node_[i - 1]);
     // For t1_node_[i - 1] see declaration of t1_node_.
   }
+
   // Distances between a destination forest and an empty forest.
   for (int j = kKr2Lld; j <= kr2; ++j) {
     fd_.at(kT1Empty, j) = fd_.at(kT1Empty, j - 1) + c_.ins(t2_node_[j - 1]);
   }
+
   // Distances between non-empty forests.
   for (int i = kKr1Lld; i <= kr1; ++i) {
     for (int j = kKr2Lld; j <= kr2; ++j) {

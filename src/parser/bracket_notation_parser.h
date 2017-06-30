@@ -45,14 +45,15 @@
 /// TODO: This parses to StringLabel only. Should the label's type be assigned
 ///       based on user's choice?
 
-#ifndef BRACKET_NOTATION_PARSER_H
-#define BRACKET_NOTATION_PARSER_H
+#ifndef TREE_SIMILARITY_PARSER_BRACKET_NOTATION_PARSER_H
+#define TREE_SIMILARITY_PARSER_BRACKET_NOTATION_PARSER_H
+
+#include "node.h"
+#include "string_label.h"
 
 #include <iostream>
 #include <string>
 #include <regex>
-#include "../node/node.h"
-#include "../label/string_label.h"
 
 namespace parser {
 
@@ -64,11 +65,12 @@ public:
 // Member functions
 public:
   /// Takes the string of a tree in bracket notation, parses it to the Node
-  /// structure with StringLabels, and returns refeence to the root.
+  /// structure with StringLabels, and returns reference to the root.
   ///
   /// TODO: Verify if the returned object is not copied.
   ///
   /// \param tree_string The string holding the tree in bracket notation.
+  ///
   /// \return Reference to the root node.
   const node::Node<Label> parse_string(const std::string& tree_string);
 
@@ -109,4 +111,4 @@ private:
 
 }
 
-#endif // BRACKET_NOTATION_PARSER_H
+#endif // TREE_SIMILARITY_PARSER_BRACKET_NOTATION_PARSER_H

@@ -24,8 +24,8 @@
 /// \details
 /// Contains the implementation of the BracketNotationParser class.
 
-#ifndef BRACKET_NOTATION_PARSER_IMPL_H
-#define BRACKET_NOTATION_PARSER_IMPL_H
+#ifndef TREE_SIMILARITY_PARSER_BRACKET_NOTATION_PARSER_IMPL_H
+#define TREE_SIMILARITY_PARSER_BRACKET_NOTATION_PARSER_IMPL_H
 
 const node::Node<BracketNotationParser::Label> BracketNotationParser::parse_string(
     const std::string& tree_string) {
@@ -41,10 +41,10 @@ const node::Node<BracketNotationParser::Label> BracketNotationParser::parse_stri
   std::string match_str = match.str();
   std::cout << "N:root:start" << std::endl;
   std::cout << "N:label = " << match_str << std::endl;
-  node::Node<Label> root(Label(match_str.substr(1,match_str.size())));
+  node::Node<Label> root(Label(match_str.substr(1, match_str.size())));
   node_stack.push_back(std::ref(root)); // TODO: This passes root by value.
-  // Not exactly, becuase std:ref()'s signature defines argument passed by reference.
-  // Later std::ref() is called passing a reference to last child.
+  // Not exactly, because std:ref()'s signature defines argument passed by
+  // reference. Later std::ref() is called passing a reference to last child.
 
   ++tokens_begin; // Advance tokens to next node.
 
@@ -63,11 +63,15 @@ const node::Node<BracketNotationParser::Label> BracketNotationParser::parse_stri
       std::cout << "N:start" << std::endl;
       std::cout << "N:label = " << match_str << std::endl;
 
-      node::Node<Label> n(Label(match_str.substr(1,match_str.size()))); // TODO: Verify if quotes are part of stored label.
+      // TODO: Verify if quotes are part of stored label.
+      node::Node<Label> n(Label(match_str.substr(1, match_str.size())));
 
-      std::cout << "PARENT = " << node_stack.back().get().label().label() << std::endl;
+      std::cout << "PARENT = " << node_stack.back().get().label().label()
+        << std::endl;
 
       // Move n to become a child.
+      // TODO: Return reference from add_child to the 'new-located' object.
+      //       TO use it for putting on the stack.
       node_stack.back().get().add_child(n);
 
       // Put a reference to just-moved n (last child of its parent) on a stack.
@@ -75,6 +79,7 @@ const node::Node<BracketNotationParser::Label> BracketNotationParser::parse_stri
 
       std::cout << "ADD_CHILD" << std::endl;
     }
+
     if (match_str == kRightBracket) { // Exit node.
       std::cout << "N:end" << std::endl;
       node_stack.pop_back();
@@ -89,4 +94,4 @@ const node::Node<BracketNotationParser::Label> BracketNotationParser::parse_stri
   return root;
 }
 
-#endif // BRACKET_NOTATION_PARSER_IMPL_H
+#endif // TREE_SIMILARITY_PARSER_BRACKET_NOTATION_PARSER_IMPL_H

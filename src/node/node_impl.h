@@ -31,7 +31,7 @@ template<class Label>
 Node<Label>::Node(ConstReference label) : label_(label) {}
 
 template<class Label>
-typename Node<Label>::SizeType Node<Label>::children_count() const {
+const typename Node<Label>::SizeType Node<Label>::children_count() const {
   return children_.size();
 }
 

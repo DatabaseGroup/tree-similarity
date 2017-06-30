@@ -51,6 +51,10 @@ public:
   /// \return Tree edit distance value.
   double zhang_shasha_ted();
 
+  /// TODO: Function for testing-only purposes.
+  /// TODO: Return a struct with const references to items we test on?
+  ///       - get_test_state()
+  ///       - get_test_items()
   const std::vector<int>& get_t1_kr_() const;
 // Member variables.
 private:
@@ -72,8 +76,8 @@ private:
   std::vector<int> t2_lld_;
   /// Stores pointers to nodes of the source tree. Indexed in postorder-1.
   // NOTE: We use reference_wrapper for const references to nodes. For now, we
-  // decided not to use raw pointers. Other pointers introduce ownership, but
-  // this vector is only an observer from a logical pont of view.
+  // decided not to use raw pointers. Smart pointers introduce ownership, but
+  // this vector is only an observer from a logical point of view.
   std::vector<std::reference_wrapper<const node::Node<Label>>> t1_node_;
   /// Stores pointers to nodes of the destination tree. Indexed in postorder-1.
   std::vector<std::reference_wrapper<const node::Node<Label>>> t2_node_;

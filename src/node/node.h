@@ -66,7 +66,7 @@ public:
   /// Returns the number of children of this node.
   ///
   /// \return Number of children (i.e., entries in children_).
-  SizeType children_count() const;
+  const SizeType children_count() const;
 
   /// Retrieves the label.
   ///
@@ -74,7 +74,7 @@ public:
   ConstReference label() const;
 
   /// Adds a child at last position.
-  /// TODO: Verify this definition. Can we improve it with const or &? It is
+  /// TODO: Verify this definition. Can we improve it with & or &&? It is
   ///       used to build the tree in a parser.
   /// TODO: Verify if child is copied or moved.
   ///
@@ -87,7 +87,8 @@ public:
   const std::vector<Node<Label>>& get_children() const;
 
   /// Returns the reference to the last child of this node.
-  /// Currently, used exclusively in the bracket notation parser.
+  /// Currently, used exclusively in the bracket notation parser to build
+  /// the input tree.
   ///
   /// \return Reference to the last child as children_.back().
   Node<Label>& get_last_childs_ref();
@@ -105,22 +106,11 @@ public:
 
 // Member variables
 private:
-  /// Pointers to all children of this node.
+  /// All children of this node.
   std::vector<Node<Label>> children_;
 
   /// Data representing the label of this node. Only this Node object owns it.
   Label label_;
-
-// Member functions
-private:
-  /// Computes the size of the subtree rooted at this node iteratively,
-  /// resp. recursively.
-  ///
-  /// \return Size of the subtree rooted at this node (incl. this node).
-  /// @{
-  //SizeType subtree_size_iterative() const;
-  //SizeType subtree_size_recursive() const;
-  /// @}
 };
 
 // Implementation details
