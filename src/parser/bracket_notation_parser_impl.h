@@ -38,10 +38,12 @@ const node::Node<BracketNotationParser::Label> BracketNotationParser::parse_stri
   // Deal with the root node separately.
   ++tokens_begin; // Advance tokens to label.
   std::smatch match = *tokens_begin;
-  std::string match_str = match.str();
+  std::string match_str = match.str(1); // Return only group 1 - characters between the quotes.
   std::cout << "N:root:start" << std::endl;
   std::cout << "N:label = " << match_str << std::endl;
-  node::Node<Label> root(Label(match_str.substr(1, match_str.size())));
+  // node::Node<Label> root(Label(match_str.substr(1, match_str.size()-2))); // Trim the quotes.
+  Label root_label(match_str);
+  node::Node<Label> root(root_label);
   node_stack.push_back(std::ref(root)); // TODO: This passes root by value.
   // Not exactly, because std:ref()'s signature defines argument passed by
   // reference. Later std::ref() is called passing a reference to last child.
@@ -58,13 +60,15 @@ const node::Node<BracketNotationParser::Label> BracketNotationParser::parse_stri
     if (match_str == kLeftBracket) { // Enter node.
       ++tokens_begin; // Advance tokens to label.
       match = *tokens_begin;
-      match_str = match.str();
+      match_str = match.str(1); // Return only group 1 - characters between the quotes.
 
       std::cout << "N:start" << std::endl;
       std::cout << "N:label = " << match_str << std::endl;
 
       // TODO: Verify if quotes are part of stored label.
-      node::Node<Label> n(Label(match_str.substr(1, match_str.size())));
+      // node::Node<Label> n(Label(match_str.substr(1, match_str.size()-2)));
+      Label node_label(match_str);
+      node::Node<Label> n(node_label);
 
       std::cout << "PARENT = " << node_stack.back().get().label().label()
         << std::endl;
