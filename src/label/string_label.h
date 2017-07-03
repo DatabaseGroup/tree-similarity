@@ -52,15 +52,22 @@ class StringLabel {
 public:
     StringLabel(const std::string& label);
 
-    /// Gets members.
-    /// @{
-    const std::string& label() const;
-    /// @}
+    // // TODO: This method may be obsolete. to_string() should be used instead.
+    // //       For the cost model we only have to use == operator.
+    // /// Gets members.
+    // /// @{
+    // const std::string& label() const;
+    // /// @}
 
     /// Operator overloadings.
     /// @{
     bool operator==(const StringLabel& other) const;
     /// @}
+
+    /// Generates a string representation of the label.
+    ///
+    /// \return String representation of the label.
+    const std::string& to_string() const;
 
 private:
     /// The label to be associated with a node.

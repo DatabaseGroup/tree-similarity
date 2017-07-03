@@ -51,7 +51,8 @@ const node::Node<BracketNotationParser::Label> BracketNotationParser::parse_stri
   ++tokens_begin; // Advance tokens to next node.
 
   // Sometimes get() has to be used on reference_wrapper to deduce the correct type.
-  std::cout << "PARENT = " << node_stack.back().get().label().label() << std::endl;
+  std::cout << "PARENT = " << node_stack.back().get().label().to_string()
+      << std::endl;
 
   for (; tokens_begin != tokens_end; ++tokens_begin) {
     match = *tokens_begin;
@@ -70,8 +71,8 @@ const node::Node<BracketNotationParser::Label> BracketNotationParser::parse_stri
       Label node_label(match_str);
       node::Node<Label> n(node_label);
 
-      std::cout << "PARENT = " << node_stack.back().get().label().label()
-        << std::endl;
+      std::cout << "PARENT = " << node_stack.back().get().label().to_string()
+          << std::endl;
 
       // Move n to become a child.
       // TODO: Return reference from add_child to the 'new-located' object.

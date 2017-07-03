@@ -55,8 +55,7 @@ void Algorithm<Label, CostModel>::index_nodes_recursion(
     std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
     int& start_postorder,
     int& start_preorder) {
-  // TODO: The call node.label().label() looks little bit odd.
-  std::cout << "-- node : " << node.label().label() << std::endl;
+  std::cout << "-- node : " << node.label().to_string() << std::endl;
   // Here, start_preorder holds this node's preorder id here.
   std::cout << "-- preorder : " << start_preorder << std::endl;
   // Increment start_preorder for the consecutive node in preorder have the
