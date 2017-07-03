@@ -65,6 +65,20 @@ int Node<Label>::get_tree_size() const {
 }
 
 template<class Label>
+const std::vector<std::string> Node<Label>::get_all_labels() const {
+  std::vector<std::string> labels;
+  get_all_labels_recursion(labels);
+  return labels;
+}
+template<class Label>
+void Node<Label>::get_all_labels_recursion(std::vector<std::string>& labels) const {
+  labels.push_back(label_.to_string());
+  for (auto child : children_) {
+    child.get_all_labels_recursion(labels);
+  }
+}
+
+template<class Label>
 bool Node<Label>::is_leaf() const {
   return children_.size() == 0;
 }

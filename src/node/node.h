@@ -28,6 +28,7 @@
 #define TREE_SIMILARITY_NODE_NODE_H
 
 #include <vector>
+#include <string>
 
 namespace node {
 
@@ -98,6 +99,12 @@ public:
   ///
   /// \return Size of subtree rooted at this.
   int get_tree_size() const;
+
+  /// Traverses the tree and collects string representations of all labels.
+  ///
+  /// \return Vector with labels of all nodes.
+  const std::vector<std::string> get_all_labels() const;
+  void get_all_labels_recursion(std::vector<std::string>& labels) const;
 
   /// Verifies if this node is a leaf.
   ///
