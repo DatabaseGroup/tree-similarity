@@ -39,6 +39,13 @@ namespace zhang_shasha {
 
 template <typename Label, typename CostModel>
 class Algorithm {
+// Member struct.
+public:
+  /// Holds internal items of the algorithms that are tested for correctness.
+  struct TestItems {
+    const std::vector<int>& t1_kr;
+    const std::vector<int>& t1_lld;
+  };
 // Member functions.
 public:
   // Constructor.
@@ -50,12 +57,10 @@ public:
   /// \param c Cost model with the costs of edit operations.
   /// \return Tree edit distance value.
   double zhang_shasha_ted();
-
-  /// TODO: Function for testing-only purposes.
-  /// TODO: Return a struct with const references to items we test on?
-  ///       - get_test_state()
-  ///       - get_test_items()
-  const std::vector<int>& get_t1_kr_() const;
+  /// Creates a TestItems object and returns it.
+  ///
+  /// \return A TestItem object.
+  const TestItems get_test_items() const;
 // Member variables.
 private:
   /// Size of the source tree.

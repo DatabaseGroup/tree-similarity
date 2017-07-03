@@ -206,8 +206,12 @@ void Algorithm<Label, CostModel>::forest_distance(
 }
 
 template <typename Label, typename CostModel>
-const std::vector<int>& Algorithm<Label, CostModel>::get_t1_kr_() const {
-  return t1_kr_;
+const typename Algorithm<Label, CostModel>::TestItems Algorithm<Label, CostModel>::get_test_items() const {
+  TestItems test_items = {
+    t1_kr_,
+    t1_lld_,
+  };
+  return test_items;
 }
 
 #endif // TREE_SIMILARITY_ZHANG_SHASHA_ZHANG_SHASHA_IMPL_H

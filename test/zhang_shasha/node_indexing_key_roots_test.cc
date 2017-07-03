@@ -58,7 +58,9 @@ int main() {
       // Execute the algorithm to perform node indexing.
       zs_ted.zhang_shasha_ted();
 
-      std::string computed_results = vector_to_string(zs_ted.get_t1_kr_());
+      auto zs_test_items = zs_ted.get_test_items();
+
+      std::string computed_results = vector_to_string(zs_test_items.t1_kr);
 
       if (correct_result != computed_results) {
         // TODO: Print test case input.
