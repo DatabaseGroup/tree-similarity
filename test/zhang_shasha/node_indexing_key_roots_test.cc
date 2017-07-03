@@ -12,14 +12,14 @@
 ///
 /// \param v Vector of int values.
 /// \return String representation of v.
-const std::string& vector_to_string(const std::vector<int>& v) {
+const std::string vector_to_string(const std::vector<int>& v) {
   std::string s("{");
   for (auto e : v) {
     s += std::to_string(e) + ",";
   }
   s.pop_back();
   s += "}";
-  return std::move(s);
+  return s;
 }
 
 int main() {
@@ -36,7 +36,12 @@ int main() {
   //       - postorder -> node (node's label)
 
   // Parse test cases from file.
-  std::ifstream test_cases_file("key_roots_test_data.txt");
+  // TODO: Do something that we don't have to give a relative path to the input file.
+  std::ifstream test_cases_file("../../../test/zhang_shasha/key_roots_test_data.txt");
+  if (!test_cases_file.is_open()) {
+    std::cerr << "Error while opening file." << std::endl;
+    return -1;
+  }
   for (std::string line; std::getline( test_cases_file, line);) {
     if (line[0] == '#') {
       std::getline(test_cases_file, line);
