@@ -52,13 +52,6 @@ class StringLabel {
 public:
     StringLabel(const std::string& label);
 
-    // // TODO: This method may be obsolete. to_string() should be used instead.
-    // //       For the cost model we only have to use == operator.
-    // /// Gets members.
-    // /// @{
-    // const std::string& label() const;
-    // /// @}
-
     /// Operator overloadings.
     /// @{
     bool operator==(const StringLabel& other) const;

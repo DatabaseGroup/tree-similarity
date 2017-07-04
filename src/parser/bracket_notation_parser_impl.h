@@ -66,8 +66,6 @@ const node::Node<BracketNotationParser::Label> BracketNotationParser::parse_stri
       std::cout << "N:start" << std::endl;
       std::cout << "N:label = " << match_str << std::endl;
 
-      // TODO: Verify if quotes are part of stored label.
-      // node::Node<Label> n(Label(match_str.substr(1, match_str.size()-2)));
       Label node_label(match_str);
       node::Node<Label> n(node_label);
 

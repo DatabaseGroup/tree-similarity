@@ -29,12 +29,6 @@ int main() {
 
   CostModel cost_model;
 
-  // TODO: Add test cases for node indexing.
-  //       - Standard tree.
-  //       - key-root nodes
-  //       - leftmost leaf descendands
-  //       - postorder -> node (node's label)
-
   // Parse test cases from file.
   // TODO: Do something that we don't have to give a relative path to the input file.
   std::ifstream test_cases_file("../../../test/zhang_shasha/lld_test_data.txt");

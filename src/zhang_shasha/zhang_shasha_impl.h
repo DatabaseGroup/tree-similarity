@@ -130,9 +130,11 @@ double Algorithm<Label, CostModel>::zhang_shasha_ted(const node::Node<Label>& t1
 
   using data_structures::Matrix;
 
-  // TODO: The default constructor of Matrix is called while constructing ZS-Algorithm.
   const int kT1Size = t1.get_tree_size();
   const int kT2Size = t2.get_tree_size();
+
+  // NOTE: The default constructor of Matrix is called while constructing ZS-Algorithm.
+  // NOTE: Shouldn't we implement Matrix::resize() instead of constructing matrix again?
   td_ = Matrix<double>(kT1Size+1, kT2Size+1);
   fd_ = Matrix<double>(kT1Size+1, kT2Size+1);
 
