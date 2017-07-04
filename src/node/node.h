@@ -80,19 +80,12 @@ public:
   /// TODO: Verify if child is copied or moved.
   ///
   /// \param Node to be added.
-  void add_child(Node<Label> child);
+  Node<Label>& add_child(Node<Label> child);
 
   /// Returns the reference to children_ vector.
   ///
   /// \return Reference to children_ vector.
   const std::vector<Node<Label>>& get_children() const;
-
-  /// Returns the reference to the last child of this node.
-  /// Currently, used exclusively in the bracket notation parser to build
-  /// the input tree.
-  ///
-  /// \return Reference to the last child as children_.back().
-  Node<Label>& get_last_childs_ref();
 
   /// Calculates the size (number of nodes) in tree rooted at this. It traverses
   /// the entire subtree recursively.

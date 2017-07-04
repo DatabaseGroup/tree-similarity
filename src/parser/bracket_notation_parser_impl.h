@@ -39,20 +39,13 @@ const node::Node<BracketNotationParser::Label> BracketNotationParser::parse_stri
   ++tokens_begin; // Advance tokens to label.
   std::smatch match = *tokens_begin;
   std::string match_str = match.str(1); // Return only group 1 - characters between the quotes.
-  std::cout << "N:root:start" << std::endl;
-  std::cout << "N:label = " << match_str << std::endl;
   Label root_label(match_str);
   node::Node<Label> root(root_label);
-  node_stack.push_back(std::ref(root)); // TODO: This passes root by value.
-  // Not exactly, because std:ref()'s signature defines argument passed by
-  // reference. Later std::ref() is called passing a reference to last child.
+  node_stack.push_back(std::ref(root));
 
   ++tokens_begin; // Advance tokens to next node.
 
-  // Sometimes get() has to be used on reference_wrapper to deduce the correct type.
-  std::cout << "PARENT = " << node_stack.back().get().label().to_string()
-      << std::endl;
-
+  // Iterate all tokens.
   for (; tokens_begin != tokens_end; ++tokens_begin) {
     match = *tokens_begin;
     match_str = match.str();
@@ -62,34 +55,20 @@ const node::Node<BracketNotationParser::Label> BracketNotationParser::parse_stri
       match = *tokens_begin;
       match_str = match.str(1); // Return only group 1 - characters between the quotes.
 
-      std::cout << "N:start" << std::endl;
-      std::cout << "N:label = " << match_str << std::endl;
-
+      // Create new node.
       Label node_label(match_str);
       node::Node<Label> n(node_label);
 
-      std::cout << "PARENT = " << node_stack.back().get().label().to_string()
-          << std::endl;
-
       // Move n to become a child.
-      // TODO: Return reference from add_child to the 'new-located' object.
-      //       TO use it for putting on the stack.
-      node_stack.back().get().add_child(n);
-
+      // Return reference from add_child to the 'new-located' object.
       // Put a reference to just-moved n (last child of its parent) on a stack.
-      node_stack.push_back(std::ref(node_stack.back().get().get_last_childs_ref()));
-
-      std::cout << "ADD_CHILD" << std::endl;
+      node_stack.push_back(std::ref(node_stack.back().get().add_child(n)));
     }
 
     if (match_str == kRightBracket) { // Exit node.
-      std::cout << "N:end" << std::endl;
       node_stack.pop_back();
     }
   }
-
-  std::cout << "NODE_STACK_SIZE = " << node_stack.size() << std::endl;
-  std::cout << "TREE_SIZE = " << root.get_tree_size() << std::endl;
 
   return root;
 }

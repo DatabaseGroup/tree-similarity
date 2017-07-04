@@ -41,18 +41,14 @@ typename Node<Label>::ConstReference Node<Label>::label() const {
 }
 
 template<class Label>
-void Node<Label>::add_child(Node<Label> child) {
+Node<Label>& Node<Label>::add_child(Node<Label> child) {
   children_.push_back(child);
+  return children_.back();
 }
 
 template<class Label>
 const std::vector<Node<Label>>& Node<Label>::get_children() const {
   return children_;
-}
-
-template<class Label>
-Node<Label>& Node<Label>::get_last_childs_ref() {
-  return children_.back();
 }
 
 template<class Label>
