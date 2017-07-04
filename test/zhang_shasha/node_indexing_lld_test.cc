@@ -63,8 +63,8 @@ int main() {
       std::string computed_results = vector_to_string(zs_test_items.t1_lld);
 
       if (correct_result != computed_results) {
-        // TODO: Print test case input.
         std::cerr << "Incorrect lld result: " << computed_results << " instead of " << correct_result << std::endl;
+        std::cerr << input_tree << std::endl;
         return -1;
       }
     }

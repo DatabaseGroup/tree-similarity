@@ -22,13 +22,13 @@ int main() {
 
       // Parse test tree.
       parser::BracketNotationParser bnp;
-      node::Node<Label> t1 = bnp.parse_string(input_tree);
+      node::Node<Label> t = bnp.parse_string(input_tree);
 
-      int computed_results = t1.get_tree_size();
+      int computed_results = t.get_tree_size();
 
       if (correct_result != computed_results) {
-        // TODO: Print test case input.
         std::cerr << "Incorrect number of nodes: " << computed_results << " instead of " << correct_result << std::endl;
+        std::cerr << input_tree << std::endl;
         return -1;
       }
     }

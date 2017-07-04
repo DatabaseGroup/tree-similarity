@@ -38,13 +38,13 @@ int main() {
 
       // Parse test tree.
       parser::BracketNotationParser bnp;
-      node::Node<Label> t1 = bnp.parse_string(input_tree);
+      node::Node<Label> t = bnp.parse_string(input_tree);
 
-      std::string computed_results = vector_to_string(t1.get_all_labels());
+      std::string computed_results = vector_to_string(t.get_all_labels());
 
       if (correct_result != computed_results) {
-        // TODO: Print test case input.
         std::cerr << "Incorrect labels: " << computed_results << " instead of " << correct_result << std::endl;
+        std::cerr << input_tree << std::endl;
         return -1;
       }
     }

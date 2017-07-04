@@ -42,8 +42,9 @@ int main() {
       double computed_results = zs_ted.zhang_shasha_ted();
 
       if (correct_result != computed_results) {
-        // TODO: Print test case input.
         std::cerr << "Incorrect TED result: " << computed_results << " instead of " << correct_result << std::endl;
+        std::cerr << input_tree_1_string << std::endl;
+        std::cerr << input_tree_2_string << std::endl;
         return -1;
       }
     }
