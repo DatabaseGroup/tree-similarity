@@ -48,10 +48,8 @@ public:
   };
 // Member functions.
 public:
-  /// Constructor.
-  ///
-  /// \param c Cost model with the costs of edit operations.
-  Algorithm(const CostModel& c);
+  /// Constructor. Creates the cost model based on the template.
+  Algorithm();
   /// Computes the tree edit distance between two trees.
   ///
   /// \param t1 Source tree.
@@ -88,7 +86,7 @@ private:
   /// Matrix storing subforest distances.
   data_structures::Matrix<double> fd_;
   /// Cost model.
-  const CostModel& c_;
+  const CostModel c_;
 // Member functions.
 private:
   /// Indexes the nodes of an input tree. Wrapper for the recursive

@@ -13,8 +13,6 @@ int main() {
   using Label = label::StringLabel;
   using CostModel = cost_model::UnitCostModel<Label>;
 
-  CostModel cost_model;
-
   // Parse test cases from file.
   // TODO: Do something that we don't have to give a relative path to the input file.
   std::ifstream test_cases_file("../../../test/zhang_shasha/ted_test_data.txt");
@@ -24,7 +22,7 @@ int main() {
   }
 
   // Initialise ZS algorithm.
-  zhang_shasha::Algorithm<Label, CostModel> zs_ted(cost_model);
+  zhang_shasha::Algorithm<Label, CostModel> zs_ted;
 
   // Read test cases from a file line by line.
   for (std::string line; std::getline( test_cases_file, line);) {

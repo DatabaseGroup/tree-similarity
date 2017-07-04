@@ -28,11 +28,7 @@
 #define TREE_SIMILARITY_ZHANG_SHASHA_ZHANG_SHASHA_IMPL_H
 
 template <typename Label, typename CostModel>
-Algorithm<Label, CostModel>::Algorithm(const CostModel& c) : c_(c) {
-  // TODO: Remove the constructor parameters.
-  //       - Cost model can be created inside constructor based on CostModel
-  //         template parameter.
-}
+Algorithm<Label, CostModel>::Algorithm() : c_() {}
 
 template <typename Label, typename CostModel>
 void Algorithm<Label, CostModel>::index_nodes_recursion(

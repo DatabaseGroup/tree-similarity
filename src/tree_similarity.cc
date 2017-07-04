@@ -31,7 +31,7 @@
 template<class _Label> using CostModel = cost_model::UnitCostModel<_Label>;
 
 int main(int argc, char** argv) {
-    // TODO: using Parser = ;
+
     using Label = label::StringLabel;
 
 
@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
     r2_1.add_child(std::move(n2_2));
     r2_1.add_child(std::move(n2_3));
 
-    zhang_shasha::Algorithm<Label, CostModel<Label>> zs_ted(cost_model);
+    zhang_shasha::Algorithm<Label, CostModel<Label>> zs_ted;
     std::cout << zs_ted.zhang_shasha_ted(r1_1, r2_1) << std::endl;
 
     const std::string s("{\"a\"{\"\\{[b],\\{key:\\\"value\\\"\\}\\}\"{\"\"}}}");
