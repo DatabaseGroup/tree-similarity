@@ -28,23 +28,10 @@
 #define TREE_SIMILARITY_ZHANG_SHASHA_ZHANG_SHASHA_IMPL_H
 
 template <typename Label, typename CostModel>
-Algorithm<Label, CostModel>::Algorithm(
-    const node::Node<Label>& t1,
-    const node::Node<Label>& t2,
-    const CostModel& c)
-    : t1_(t1), t2_(t2), c_(c) {
-  using data_structures::Matrix;
-
+Algorithm<Label, CostModel>::Algorithm(const CostModel& c) : c_(c) {
   // TODO: Remove the constructor parameters.
-  //       - Input trees should be parameters to zs_ted().
   //       - Cost model can be created inside constructor based on CostModel
   //         template parameter.
-
-  // TODO: The default constructor of Matrix is called while constructing ZS-Algorithm.
-  t1_size_ = t1.get_tree_size();
-  t2_size_ = t2.get_tree_size();
-  td_ = Matrix<double>(t1_size_+1, t2_size_+1);
-  fd_ = Matrix<double>(t1_size_+1, t2_size_+1);
 }
 
 template <typename Label, typename CostModel>
@@ -141,16 +128,32 @@ void Algorithm<Label, CostModel>::index_nodes(
 }
 
 template <typename Label, typename CostModel>
-double Algorithm<Label, CostModel>::zhang_shasha_ted() {
+double Algorithm<Label, CostModel>::zhang_shasha_ted(const node::Node<Label>& t1,
+                                                     const node::Node<Label>& t2) {
   std::cout << "=== zhang_shasha_ted ===" << std::endl;
 
+  using data_structures::Matrix;
+
+  // TODO: The default constructor of Matrix is called while constructing ZS-Algorithm.
+  const int kT1Size = t1.get_tree_size();
+  const int kT2Size = t2.get_tree_size();
+  td_ = Matrix<double>(kT1Size+1, kT2Size+1);
+  fd_ = Matrix<double>(kT1Size+1, kT2Size+1);
+
+  // Cleanup node indexes for consecutive use of the algorithm.
+  t1_lld_.clear();
+  t2_lld_.clear();
+  t1_kr_.clear();
+  t2_kr_.clear();
+  t1_node_.clear();
+  t2_node_.clear();
   // TODO: It is better to allocate the vector with tree sizes and fill them in.
   //       Currently lld-values are pushed-back. That results in linear-number
   //       of push_back invocations.
   //       Simmilar approach could be used for kr-values, but the current index,
   //       of a kr-value to set has, to be maintained outside recursion.
-  index_nodes(t1_, t1_lld_, t1_kr_, t1_node_);
-  index_nodes(t2_, t2_lld_, t2_kr_, t2_node_);
+  index_nodes(t1, t1_lld_, t1_kr_, t1_node_);
+  index_nodes(t2, t2_lld_, t2_kr_, t2_node_);
 
   // Nested loop over key-root node pairs.
   for (auto kr1 : t1_kr_) {
@@ -159,7 +162,7 @@ double Algorithm<Label, CostModel>::zhang_shasha_ted() {
     }
   }
 
-  return td_.at(t1_size_, t2_size_);
+  return td_.at(kT1Size, kT2Size);
 }
 
 template <typename Label, typename CostModel>

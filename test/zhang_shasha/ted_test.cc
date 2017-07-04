@@ -22,8 +22,14 @@ int main() {
     std::cerr << "Error while opening file." << std::endl;
     return -1;
   }
+
+  // Initialise ZS algorithm.
+  zhang_shasha::Algorithm<Label, CostModel> zs_ted(cost_model);
+
+  // Read test cases from a file line by line.
   for (std::string line; std::getline( test_cases_file, line);) {
     if (line[0] == '#') {
+      // Read the single test case.
       std::getline(test_cases_file, line);
       std::string input_tree_1_string = line;
       std::getline(test_cases_file, line);
@@ -36,10 +42,8 @@ int main() {
       node::Node<Label> t1 = bnp.parse_string(input_tree_1_string);
       node::Node<Label> t2 = bnp.parse_string(input_tree_2_string);
 
-      // Initialise ZS algorithm.
-      zhang_shasha::Algorithm<Label, CostModel> zs_ted(t1, t2, cost_model);
-      // Execute the algorithm to perform node indexing.
-      double computed_results = zs_ted.zhang_shasha_ted();
+      // Execute the algorithm.
+      double computed_results = zs_ted.zhang_shasha_ted(t1, t2);
 
       if (correct_result != computed_results) {
         std::cerr << "Incorrect TED result: " << computed_results << " instead of " << correct_result << std::endl;

@@ -48,25 +48,22 @@ public:
   };
 // Member functions.
 public:
-  // Constructor.
-  Algorithm(const node::Node<Label>& t1, const node::Node<Label>& t2, const CostModel& c);
+  /// Constructor.
+  ///
+  /// \param c Cost model with the costs of edit operations.
+  Algorithm(const CostModel& c);
   /// Computes the tree edit distance between two trees.
   ///
   /// \param t1 Source tree.
   /// \param t2 Destination tree.
-  /// \param c Cost model with the costs of edit operations.
   /// \return Tree edit distance value.
-  double zhang_shasha_ted();
+  double zhang_shasha_ted(const node::Node<Label>& t1, const node::Node<Label>& t2);
   /// Creates a TestItems object and returns it.
   ///
   /// \return A TestItem object.
   const TestItems get_test_items() const;
 // Member variables.
 private:
-  /// Size of the source tree.
-  int t1_size_;
-  /// Size of the destination tree.
-  int t2_size_;
   /// Key-root nodes of the source tree.
   std::vector<int> t1_kr_;
   /// Key-root nodes of the destination tree.
@@ -90,10 +87,6 @@ private:
   data_structures::Matrix<double> td_;
   /// Matrix storing subforest distances.
   data_structures::Matrix<double> fd_;
-  /// Source tree.
-  const node::Node<Label>& t1_;
-  /// Destination tree.
-  const node::Node<Label>& t2_;
   /// Cost model.
   const CostModel& c_;
 // Member functions.
