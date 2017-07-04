@@ -22,14 +22,16 @@
 /// \file tree_similarity.h
 ///
 /// \details
-/// Includes all header files of the tree similarity framework.
+/// Command-line tool for executing Tree Edit Distance.
 
-#ifndef TREE_SIMILARITY_TREE_SIMILARITY_H
-#define TREE_SIMILARITY_TREE_SIMILARITY_H
+#ifndef TREE_SIMILARITY_TED_H
+#define TREE_SIMILARITY_TED_H
 
 #include "node.h"
 #include "string_label.h"
 #include "unit_cost_model.h"
 #include "zhang_shasha.h"
+#include "bracket_notation_parser.h"
+#include <iostream>
 
-#endif // TREE_SIMILARITY_TREE_SIMILARITY_H
+#endif // TREE_SIMILARITY_TED_H

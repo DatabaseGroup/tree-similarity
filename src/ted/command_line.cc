@@ -19,104 +19,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/// \file tree_similarity.cc
+/// \file command_line.cc
 ///
 /// \details
 /// Entry point of the tree similarity command-line interface.
 
 #include "command_line.h"
-#include "bracket_notation_parser.h"
-#include <iostream>
-
-template<class _Label> using CostModel = cost_model::UnitCostModel<_Label>;
 
 int main(int argc, char** argv) {
 
-    using Label = label::StringLabel;
+  // const std::string s("{\"a\"{\"\\{[b],\\{key:\\\"value\\\"\\}\\}\"{\"\"}}}");
 
+  using Label = label::StringLabel;
+  using CostModel = cost_model::UnitCostModel<Label>;
 
-    node::Node<Label> root(Label("abc"));
-    node::Node<Label> root2(Label("abcd"));
-    node::Node<Label> root3(Label("abc"));
+  // Verify parameters.
+  if (argc != 3) {
+    std::cerr << "Incorrect number of parameters." << std::endl;
+    return -1;
+  }
 
-    CostModel<Label> cost_model;
+  // TODO: Trees passed as command-line arguments must escape label-quotes.
 
-    std::cout << cost_model.ren(root, root2) << std::endl;
-    std::cout << cost_model.ren(root, root3) << std::endl;
-    std::cout << cost_model.ren(root2, root) << std::endl;
-    std::cout << cost_model.ren(root2, root3) << std::endl;
-    std::cout << cost_model.ren(root3, root) << std::endl;
-    std::cout << cost_model.ren(root3, root2) << std::endl;
+  std::cout << "Source tree: " << argv[1] << std::endl;
+  std::cout << "Destination tree: " << argv[2] << std::endl;
 
-    std::cout << "root: " << root.children_count() << std::endl;
+  // TODO: Implement verification of the input format!
 
-    node::Node<Label> child1(Label("def"));
+  parser::BracketNotationParser bnp;
+  const node::Node<Label> source_tree = bnp.parse_string(argv[1]);
+  const node::Node<Label> destination_tree = bnp.parse_string(argv[2]);
 
-    child1.add_child(node::Node<Label>(Label("d")));
-    child1.add_child(node::Node<Label>(Label("e")));
-    child1.add_child(node::Node<Label>(Label("f")));
+  zhang_shasha::Algorithm<Label, CostModel> zs_ted;
+  std::cout << "TED = " << zs_ted.zhang_shasha_ted(source_tree, destination_tree) << std::endl;
 
-    std::cout << "child1: " << child1.children_count() << std::endl;
-
-    node::Node<Label> child2(Label("gh"));
-
-    child2.add_child(node::Node<Label>(Label("g")));
-    child2.add_child(node::Node<Label>(Label("h")));
-
-    std::cout << "child2: " << child2.children_count() << std::endl;
-
-    node::Node<Label> child3(Label("ijkl"));
-
-    child3.add_child(node::Node<Label>(Label("i")));
-    child3.add_child(node::Node<Label>(Label("j")));
-    child3.add_child(node::Node<Label>(Label("k")));
-    child3.add_child(node::Node<Label>(Label("l")));
-
-    std::cout << "child3: " << child3.children_count() << std::endl;
-
-    root.add_child(std::move(child1));
-    root.add_child(std::move(child2));
-    root.add_child(std::move(child3));
-
-    std::cout << "root: " << root.children_count() << std::endl;
-    std::cout << "child1: " << child1.children_count() << std::endl;
-    std::cout << "child2: " << child2.children_count() << std::endl;
-    std::cout << "child3: " << child3.children_count() << std::endl;
-
-    node::Node<Label> r1_1(Label("a"));
-    node::Node<Label> n1_2(Label("a"));
-    node::Node<Label> n1_3(Label("a"));
-    node::Node<Label> n1_4(Label("a"));
-    node::Node<Label> n1_5(Label("a"));
-    node::Node<Label> n1_6(Label("a"));
-    node::Node<Label> n1_7(Label("a"));
-    n1_5.add_child(std::move(n1_7));
-    n1_3.add_child(std::move(n1_4));
-    n1_3.add_child(std::move(n1_5));
-    n1_3.add_child(std::move(n1_6));
-    r1_1.add_child(std::move(n1_2));
-    r1_1.add_child(std::move(n1_3));
-
-    node::Node<Label> r2_1(Label("b"));
-    node::Node<Label> n2_2(Label("a"));
-    node::Node<Label> n2_3(Label("a"));
-    node::Node<Label> n2_4(Label("b"));
-    node::Node<Label> n2_5(Label("a"));
-    node::Node<Label> n2_6(Label("b"));
-    node::Node<Label> n2_7(Label("a"));
-    n2_5.add_child(std::move(n2_7));
-    n2_3.add_child(std::move(n2_4));
-    n2_3.add_child(std::move(n2_5));
-    n2_3.add_child(std::move(n2_6));
-    r2_1.add_child(std::move(n2_2));
-    r2_1.add_child(std::move(n2_3));
-
-    zhang_shasha::Algorithm<Label, CostModel<Label>> zs_ted;
-    std::cout << zs_ted.zhang_shasha_ted(r1_1, r2_1) << std::endl;
-
-    const std::string s("{\"a\"{\"\\{[b],\\{key:\\\"value\\\"\\}\\}\"{\"\"}}}");
-    parser::BracketNotationParser bnp;
-    node::Node<Label> parsed_tree = bnp.parse_string(s);
-
-    return 0;
+  return 0;
 }

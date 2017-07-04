@@ -100,10 +100,6 @@ private:
   /// A regex to match either left bracket or label or right bracket.
   const std::regex kR = std::regex(kMatchLeftBracket + "|" + kMatchStringLabel
                                    + "|" + kMatchRightBracket);
-
-// Member functions
-private:
-  // TODO: Implement verification of the input format!
 };
 
 // Implementation details
