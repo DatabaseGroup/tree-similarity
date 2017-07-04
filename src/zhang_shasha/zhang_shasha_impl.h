@@ -38,9 +38,9 @@ void Algorithm<Label, CostModel>::index_nodes_recursion(
     std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
     int& start_postorder,
     int& start_preorder) {
-  std::cout << "-- node : " << node.label().to_string() << std::endl;
+  // std::cout << "-- node : " << node.label().to_string() << std::endl;
   // Here, start_preorder holds this node's preorder id here.
-  std::cout << "-- preorder : " << start_preorder << std::endl;
+  // std::cout << "-- preorder : " << start_preorder << std::endl;
   // Increment start_preorder for the consecutive node in preorder have the
   // correct id.
   start_preorder++;
@@ -69,15 +69,15 @@ void Algorithm<Label, CostModel>::index_nodes_recursion(
     ++children_start_it;
   }
   // Here, start_postorder holds this node's postorder id here.
-  std::cout << "-- postorder : " << start_postorder << std::endl;
-  std::cout << "-- leaf : " << node.is_leaf() << std::endl;
+  // std::cout << "-- postorder : " << start_postorder << std::endl;
+  // std::cout << "-- leaf : " << node.is_leaf() << std::endl;
 
   if (node.is_leaf()) {
     // Set lld of this node to this node's postorer.
     lld.push_back(start_postorder);
   } else {
-    std::cout << "-- first_child_postorder : " << first_child_postorder << std::endl;
-    std::cout << "-- lld.size : " << lld.size() << std::endl;
+    // std::cout << "-- first_child_postorder : " << first_child_postorder << std::endl;
+    // std::cout << "-- lld.size : " << lld.size() << std::endl;
     // This node's lld must be pushed after its childrens llds.
     // lld is indexed starting with 0, thus first_child_postorder-1.
     lld.push_back(lld.at(first_child_postorder-1));
@@ -97,7 +97,7 @@ void Algorithm<Label, CostModel>::index_nodes(
     std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes) {
 
   // Index nodes of the source tree.
-  std::cout << "--- index_nodes : source tree ---" << std::endl;
+  // std::cout << "--- index_nodes : source tree ---" << std::endl;
 
   // Orders start with '1'. If '0' is needed, either index_nodes_recursion must
   // be modified (placement of increments must change), or we start with '-1'.
@@ -113,20 +113,20 @@ void Algorithm<Label, CostModel>::index_nodes(
   // Add root to kr - not added in the recursion.
   kr.push_back(start_postorder-1);
 
-  // Print stuff.
-  std::cout << "--- printing stuff ---" << std::endl;
-  std::cout << "-- lld : ";
-  for (auto e : lld) std::cout << e << ' ';
-  std::cout << std::endl;
-  std::cout << "-- kr : ";
-  for (auto e : kr) std::cout << e << ' ';
-  std::cout << std::endl;
+  // // Print stuff.
+  // std::cout << "--- printing stuff ---" << std::endl;
+  // std::cout << "-- lld : ";
+  // for (auto e : lld) std::cout << e << ' ';
+  // std::cout << std::endl;
+  // std::cout << "-- kr : ";
+  // for (auto e : kr) std::cout << e << ' ';
+  // std::cout << std::endl;
 }
 
 template <typename Label, typename CostModel>
 double Algorithm<Label, CostModel>::zhang_shasha_ted(const node::Node<Label>& t1,
                                                      const node::Node<Label>& t2) {
-  std::cout << "=== zhang_shasha_ted ===" << std::endl;
+  // std::cout << "=== zhang_shasha_ted ===" << std::endl;
 
   using data_structures::Matrix;
 
@@ -201,9 +201,10 @@ void Algorithm<Label, CostModel>::forest_distance(
              fd_.at(i, j - 1) + c_.ins(t2_node_[j - 1]), // Insert rightmost root node in destination subforest.
              fd_.at(t1_lld_[i - 1] - 1, t2_lld_[j - 1] - 1) + td_.at(i, j)}); // Delete the rightmost subtrees + keep the rightmost subtrees.
       }
+      // std::cout << "--- fd[" << i << "][" << j << "] = " << fd_.at(i, j) << std::endl;
     }
   }
-  std::cout << "--- td[" << kr1 << "][" << kr2 << "] = " << td_.at(kr1, kr2) << std::endl;
+  // std::cout << "--- td[" << kr1 << "][" << kr2 << "] = " << td_.at(kr1, kr2) << std::endl;
 }
 
 template <typename Label, typename CostModel>
