@@ -2,6 +2,12 @@
 
 # Key-root nodes testing.
 
+# Copy test cases.
+file(
+  COPY key_roots_test_data.txt
+  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+)
+
 add_executable(
   node_indexing_key_roots_test_driver # EXECUTABLE NAME
   node_indexing_key_roots_test.cc     # EXECUTABLE SOURCE
@@ -19,6 +25,12 @@ add_test(
 
 # Leftmost leaf descendants testing.
 
+# Copy test cases.
+file(
+  COPY lld_test_data.txt
+  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+)
+
 add_executable(
   node_indexing_lld_test_driver # EXECUTABLE NAME
   node_indexing_lld_test.cc     # EXECUTABLE SOURCE
@@ -35,6 +47,12 @@ add_test(
 )
 
 # TED testing.
+
+# Copy test cases.
+file(
+  COPY ted_test_data.txt
+  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+)
 
 add_executable(
   ted_test_driver # EXECUTABLE NAME

@@ -27,8 +27,7 @@ int main() {
   using Label = label::StringLabel;
 
   // Parse test cases from file.
-  // TODO: Do something that we don't have to give a relative path to the input file.
-  std::ifstream test_cases_file("../../../test/parser/labels_test_data.txt");
+  std::ifstream test_cases_file("labels_test_data.txt");
   for (std::string line; std::getline( test_cases_file, line);) {
     if (line[0] == '#') {
       std::getline(test_cases_file, line);

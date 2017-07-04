@@ -27,15 +27,16 @@ int main() {
   using Label = label::StringLabel;
   using CostModel = cost_model::UnitCostModel<Label>;
 
-  CostModel cost_model;
-
   // Parse test cases from file.
-  // TODO: Do something that we don't have to give a relative path to the input file.
-  std::ifstream test_cases_file("../../../test/zhang_shasha/lld_test_data.txt");
+  std::ifstream test_cases_file("lld_test_data.txt");
   if (!test_cases_file.is_open()) {
     std::cerr << "Error while opening file." << std::endl;
     return -1;
   }
+
+  // Initialise ZS algorithm.
+  zhang_shasha::Algorithm<Label, CostModel> zs_ted;
+
   for (std::string line; std::getline( test_cases_file, line);) {
     if (line[0] == '#') {
       std::getline(test_cases_file, line);
@@ -47,10 +48,8 @@ int main() {
       parser::BracketNotationParser bnp;
       node::Node<Label> t1 = bnp.parse_string(input_tree);
 
-      // Initialise ZS algorithm.
-      zhang_shasha::Algorithm<Label, CostModel> zs_ted(t1, t1, cost_model);
       // Execute the algorithm to perform node indexing.
-      zs_ted.zhang_shasha_ted();
+      zs_ted.zhang_shasha_ted(t1, t1);
 
       auto zs_test_items = zs_ted.get_test_items();
 

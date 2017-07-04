@@ -14,8 +14,7 @@ int main() {
   using CostModel = cost_model::UnitCostModel<Label>;
 
   // Parse test cases from file.
-  // TODO: Do something that we don't have to give a relative path to the input file.
-  std::ifstream test_cases_file("../../../test/zhang_shasha/ted_test_data.txt");
+  std::ifstream test_cases_file("ted_test_data.txt");
   if (!test_cases_file.is_open()) {
     std::cerr << "Error while opening file." << std::endl;
     return -1;

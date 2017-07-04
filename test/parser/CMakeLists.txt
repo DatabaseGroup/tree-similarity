@@ -2,6 +2,12 @@
 
 # Testing tree size after parsing.
 
+# Copy test cases.
+file(
+  COPY size_test_data.txt
+  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+)
+
 add_executable(
   parsing_bracket_notation_size_test_driver # EXECUTABLE NAME
   parsing_bracket_notation_size_test.cc     # EXECUTABLE SOURCE
@@ -18,6 +24,12 @@ add_test(
 )
 
 # Testing parsed labels.
+
+# Copy test cases.
+file(
+  COPY labels_test_data.txt
+  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+)
 
 add_executable(
   parsing_bracket_notation_labels_test_driver # EXECUTABLE NAME
