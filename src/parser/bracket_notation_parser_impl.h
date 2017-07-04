@@ -41,7 +41,6 @@ const node::Node<BracketNotationParser::Label> BracketNotationParser::parse_stri
   std::string match_str = match.str(1); // Return only group 1 - characters between the quotes.
   std::cout << "N:root:start" << std::endl;
   std::cout << "N:label = " << match_str << std::endl;
-  // node::Node<Label> root(Label(match_str.substr(1, match_str.size()-2))); // Trim the quotes.
   Label root_label(match_str);
   node::Node<Label> root(root_label);
   node_stack.push_back(std::ref(root)); // TODO: This passes root by value.
@@ -92,8 +91,6 @@ const node::Node<BracketNotationParser::Label> BracketNotationParser::parse_stri
   std::cout << "NODE_STACK_SIZE = " << node_stack.size() << std::endl;
   std::cout << "TREE_SIZE = " << root.get_tree_size() << std::endl;
 
-  // NOTE: std::move(root) is not necessary.
-  //       The language already knows root is a move candidate.
   return root;
 }
 
