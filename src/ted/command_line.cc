@@ -24,7 +24,7 @@
 /// \details
 /// Entry point of the tree similarity command-line interface.
 
-#include "tree_similarity.h"
+#include "command_line.h"
 #include "bracket_notation_parser.h"
 #include <iostream>
 
