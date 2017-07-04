@@ -33,3 +33,20 @@ add_test(
   NAME node_indexing_lld_test           # TEST NAME
   COMMAND node_indexing_lld_test_driver # EXECUTABLE NAME
 )
+
+# TED testing.
+
+add_executable(
+  ted_test_driver # EXECUTABLE NAME
+  ted_test.cc     # EXECUTABLE SOURCE
+)
+
+target_link_libraries(
+  ted_test_driver # EXECUTABLE NAME
+  TreeSimilarity  # LIBRARY NAME
+)
+
+add_test(
+  NAME ted_test           # TEST NAME
+  COMMAND ted_test_driver # EXECUTABLE NAME
+)
