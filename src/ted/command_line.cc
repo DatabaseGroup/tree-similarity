@@ -22,7 +22,7 @@
 /// \file command_line.cc
 ///
 /// \details
-/// Entry point of the tree similarity command-line interface.
+/// TED command-line interface.
 
 #include "command_line.h"
 
@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
     return -1;
   }
 
-  // TODO: Trees passed as command-line arguments must escape label-quotes.
+  // TODO: Trees passed as command-line arguments must be sorrounded with ''.
 
   std::cout << "Source tree: " << argv[1] << std::endl;
   std::cout << "Destination tree: " << argv[2] << std::endl;
