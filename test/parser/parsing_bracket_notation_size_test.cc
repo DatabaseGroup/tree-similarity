@@ -12,6 +12,11 @@ int main() {
 
   // Parse test cases from file.
   std::ifstream test_cases_file("size_test_data.txt");
+
+  if (!test_cases_file) {
+    std::cerr << "ERROR: Problem reading the test file." << std::endl;
+  }
+
   for (std::string line; std::getline( test_cases_file, line);) {
     if (line[0] == '#') {
       std::getline(test_cases_file, line);
