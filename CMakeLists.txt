@@ -33,7 +33,7 @@ target_include_directories(TreeSimilarity INTERFACE
   src/parser
 )
 
-# For using add_tes().
+# For using add_test().
 enable_testing()
 
 # Let CMake know about subdirectories.

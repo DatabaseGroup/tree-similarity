@@ -38,22 +38,33 @@ const node::Node<BracketNotationParser::Label> BracketNotationParser::parse_stri
   // Deal with the root node separately.
   ++tokens_begin; // Advance tokens to label.
   std::smatch match = *tokens_begin;
-  std::string match_str = match.str(1); // Return only group 1 - characters between the quotes.
+  std::string match_str = match.str();
+  if (match_str == kLeftBracket || match_str == kRightBracket) { // Root has an empty label.
+    match_str = "";
+    // Do not advance tokens - we're already at kLeftBracket or kRightBracket.
+  } else { // Non-empty label.
+    ++tokens_begin; // Advance tokens.
+  }
   Label root_label(match_str);
   node::Node<Label> root(root_label);
   node_stack.push_back(std::ref(root));
 
-  ++tokens_begin; // Advance tokens to next node.
-
-  // Iterate all tokens.
-  for (; tokens_begin != tokens_end; ++tokens_begin) {
+  // Iterate all remaining tokens.
+  while (tokens_begin != tokens_end) {
     match = *tokens_begin;
     match_str = match.str();
 
     if (match_str == kLeftBracket) { // Enter node.
       ++tokens_begin; // Advance tokens to label.
       match = *tokens_begin;
-      match_str = match.str(1); // Return only group 1 - characters between the quotes.
+      match_str = match.str();
+
+      if (match_str == kLeftBracket || match_str == kRightBracket) { // Node has an empty label.
+        match_str = "";
+        // Do not advance tokens - we're already at kLeftBracket or kRightBracket.
+      } else { // Non-empty label.
+        ++tokens_begin; // Advance tokens.
+      }
 
       // Create new node.
       Label node_label(match_str);
@@ -67,10 +78,29 @@ const node::Node<BracketNotationParser::Label> BracketNotationParser::parse_stri
 
     if (match_str == kRightBracket) { // Exit node.
       node_stack.pop_back();
+      ++tokens_begin; // Advance tokens.
     }
   }
-
   return root;
+}
+
+const std::vector<std::string> BracketNotationParser::get_tokens(const std::string& tree_string) {
+  std::vector<std::string> tokens;
+
+  // Tokenize the input string - get iterator over tokens.
+  auto tokens_begin = std::sregex_iterator(tree_string.begin(),
+                                           tree_string.end(), kR);
+  auto tokens_end = std::sregex_iterator();
+
+  // Iterate all tokens and collect.
+  for (std::sregex_iterator i = tokens_begin; i != tokens_end; ++i) {
+    std::smatch match = *i;
+    std::string match_str = match.str();
+    tokens.push_back(match_str);
+    std::cout << match_str << std::endl;
+  }
+
+  return tokens;
 }
 
 #endif // TREE_SIMILARITY_PARSER_BRACKET_NOTATION_PARSER_IMPL_H

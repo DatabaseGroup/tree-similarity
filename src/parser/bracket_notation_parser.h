@@ -24,23 +24,21 @@
 /// \details
 /// Implements the parser for bracket notation of the form:
 ///
-/// TODO: Decide on the format. It this ok, or we need something simpler.
+/// {LABEL{LABEL}{LABEL}}
 ///
-/// {"LABEL"{"LABEL"}{"LABEL"}}
-///
-/// where LABEL allows any character between the quotes BUT the three characters
-/// "{} must be escaped as follows: \" \{ \}.
+/// where LABEL allows any character BUT the the structure brackets (by default
+/// the curly brackets: {}) must be escaped as follows: \{ \}.
 ///
 /// Example input with complex labels:
-/// std::string s("{\"a\"{\"\\{[b],\\{key:\\\"value\\\"\\}\\}\"{\"\"}}}");
+/// {a{\{[b],\{key:"value"\}\}{}}}
 /// which is a path of three nodes with labels as follows:
 ///
-///                                target LABEL (after removing escapes):
-/// "a"                         -> a
-///  |
-/// "\{[b],\{key:\"value\"\}\}" -> {[b],{key:"value"}}
-///  |
-/// ""                          -> an empty label
+///                         target LABEL (after removing escapes):
+/// a                       -> a
+/// |
+/// \{[b],\{key:"value"\}\} -> {[b],{key:"value"}}
+/// |
+/// ""                      -> an empty label
 /// TODO: Should the matched label be cleaned by removing escapes?
 /// TODO: This parses to StringLabel only. Should the label's type be assigned
 ///       based on user's choice?
@@ -74,6 +72,12 @@ public:
   /// \return Reference to the root node.
   const node::Node<Label> parse_string(const std::string& tree_string);
 
+  /// Generates the tokens for the input string.
+  ///
+  /// \param tree_string The string holding the tree in bracket notation.
+  /// \return Vector with all tokens.
+  const std::vector<std::string> get_tokens(const std::string& tree_string);
+
 // Member variables
 private:
   /// A stack to store nodes on a path to the root from the current node in the
@@ -81,8 +85,8 @@ private:
   /// while parsing.
   std::vector<std::reference_wrapper<node::Node<Label>>> node_stack;
 
-  /// Brackets for representing nodes relationships. Could be modified to
-  /// other types of paretheses if necessary.
+  /// Structure brackets for representing nodes relationships. Could be
+  /// modified to other types of paretheses if necessary.
   const std::string kLeftBracket = "{";
   const std::string kRightBracket = "}";
 
@@ -90,12 +94,13 @@ private:
   const std::string kMatchLeftBracket = "\\" + kLeftBracket;
   const std::string kMatchRightBracket = "\\" + kRightBracket;
 
-  /// A regex string to match two quotes surrounding zero or more of:
-  /// - any character that's not a quote or a backslash or a curly bracket,
+  /// A regex string to match labels:
+  /// - a backslash followed by any character,
   /// OR
-  /// - a backslash followed by any character.
-  const std::string kMatchStringLabel = "\"([^\"\\\\" + kLeftBracket
-      + kRightBracket + "]|\\\\.)*\"";
+  /// - any character that's not a structure bracket.
+  /// Empty labels are dealt with while parsing.
+  const std::string kMatchStringLabel = "(\\\\.|[^" + kLeftBracket
+      + kRightBracket + "])+";
 
   /// A regex to match either left bracket or label or right bracket.
   const std::regex kR = std::regex(kMatchLeftBracket + "|" + kMatchStringLabel
