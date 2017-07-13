@@ -103,4 +103,22 @@ const std::vector<std::string> BracketNotationParser::get_tokens(const std::stri
   return tokens;
 }
 
+bool BracketNotationParser::validate_input(const std::string& tree_string) const {
+  int bracket_counter = 0;
+  // Loop over all characters.
+  for(auto it = tree_string.begin(); it != tree_string.end(); ++it) {
+    if (*it == kEscapeChar) { // Skip next character if kEscapeChar is found.
+      ++it;
+    } else if (*it == kLeftBracket[0]) { // Increase bracket_counter when kLeftBracket found.
+      bracket_counter++;
+    } else if (*it == kRightBracket[0]) { // Decrease bracket_counter when kRightBracket found.
+      bracket_counter--;
+    }
+  }
+  if (bracket_counter != 0) {
+    return false;
+  }
+  return true;
+};
+
 #endif // TREE_SIMILARITY_PARSER_BRACKET_NOTATION_PARSER_IMPL_H

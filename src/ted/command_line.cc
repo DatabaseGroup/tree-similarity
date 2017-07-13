@@ -28,8 +28,6 @@
 
 int main(int argc, char** argv) {
 
-  // const std::string s("{\"a\"{\"\\{[b],\\{key:\\\"value\\\"\\}\\}\"{\"\"}}}");
-
   using Label = label::StringLabel;
   using CostModel = cost_model::UnitCostModel<Label>;
 
@@ -39,14 +37,21 @@ int main(int argc, char** argv) {
     return -1;
   }
 
-  // TODO: Trees passed as command-line arguments must be sorrounded with ''.
+  // NOTE: Trees passed as command-line arguments must be sorrounded with ''.
 
   std::cout << "Source tree: " << argv[1] << std::endl;
   std::cout << "Destination tree: " << argv[2] << std::endl;
 
-  // TODO: Implement verification of the input format!
-
   parser::BracketNotationParser bnp;
+  // Verify the input format before parsing.
+  if (!bnp.validate_input(argv[1])) {
+    std::cerr << "Incorrect format of source tree. Is the number of opening and closing brackets equal?" << std::endl;
+    return -1;
+  }
+  if (!bnp.validate_input(argv[2])) {
+    std::cerr << "Incorrect format of destination tree. Is the number of opening and closing brackets equal?" << std::endl;
+    return -1;
+  }
   const node::Node<Label> source_tree = bnp.parse_string(argv[1]);
   const node::Node<Label> destination_tree = bnp.parse_string(argv[2]);
 
