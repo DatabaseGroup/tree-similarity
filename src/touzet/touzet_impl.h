@@ -31,38 +31,42 @@ template <typename Label, typename CostModel>
 Algorithm<Label, CostModel>::Algorithm() : c_() {}
 
 template <typename Label, typename CostModel>
-void Algorithm<Label, CostModel>::index_nodes_recursion(
+int Algorithm<Label, CostModel>::index_nodes_recursion(
     const node::Node<Label>& node,
     std::vector<int>& size,
     std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
     int& start_postorder,
     int& start_preorder) {
 
-  // Here, start_preorder holds this node's preorder id here.
-  // Increment start_preorder for the consecutive node in preorder to have the
-  // correct id.
+  // Stores number of descendants of this node. Incrementally computed while
+  // traversing the children.
+  int desc_sum = 0;
+
+  // Here, start_preorder holds this node's preorder id.
+
+  // Increment start_preorder to hold the correct id of the consecutive node
+  // in preorder.
   start_preorder++;
 
   // Recursions to childen nodes.
   auto children_start_it = std::begin(node.get_children());
   auto children_end_it=std::end(node.get_children());
   while (children_start_it != children_end_it) {
-    index_nodes_recursion(*children_start_it, size, nodes, start_postorder,
-                          start_preorder);
-    // Here, start_postorder-1 is the postorder of the current child.
-
+    desc_sum += index_nodes_recursion(*children_start_it, size, nodes,
+                                      start_postorder, start_preorder);
     // Continue to consecutive children.
     ++children_start_it;
   }
 
-  // Here, start_postorder holds this node's postorder id here.
+  // Here, start_postorder holds this node's postorder id.
 
   if (node.is_leaf()) {
     // Leaf has size 1.
     size.push_back(1);
+  } else {
+    // Inner node has size desc_sum + 1.
+    size.push_back(desc_sum + 1);
   }
-
-  // TODO: Update the parent's subtree size.
 
   // Add current node to the nodes vector.
   nodes.push_back(std::ref(node));
@@ -70,6 +74,9 @@ void Algorithm<Label, CostModel>::index_nodes_recursion(
   // Increment start_postorder for the consecutive node in postorder to have the
   // correct id.
   start_postorder++;
+
+  // Return the number of nodes in the subtree rooted at this node.
+  return desc_sum + 1;
 }
 
 template <typename Label, typename CostModel>

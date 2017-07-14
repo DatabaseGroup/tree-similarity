@@ -103,7 +103,8 @@ private:
   /// \param nodes Vector with references to nodes.
   /// \param start_postorder Stores the postorder id of a node during traversal.
   /// \param start_preorder Stores the preorder id of a node during traversal.
-  void index_nodes_recursion(const node::Node<Label>& root,
+  /// \return Number of nodes in the subtree rooted at the caller node.
+  int index_nodes_recursion(const node::Node<Label>& root,
                              std::vector<int>& size,
                              std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
                              int& start_postorder, int& start_preorder);
