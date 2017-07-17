@@ -34,8 +34,18 @@ int main() {
       std::getline(test_cases_file, line);
       double correct_result = std::stod(line);
 
-      // Parse test tree.
       parser::BracketNotationParser bnp;
+
+      // Validate test trees.
+      if (!bnp.validate_input(input_tree_1_string)) {
+        std::cerr << "Incorrect format of source tree: '" << input_tree_1_string << "'. Is the number of opening and closing brackets equal?" << std::endl;
+        return -1;
+      }
+      if (!bnp.validate_input(input_tree_2_string)) {
+        std::cerr << "Incorrect format of destination tree: '" << input_tree_2_string << "'. Is the number of opening and closing brackets equal?" << std::endl;
+        return -1;
+      }
+      // Parse test tree.
       node::Node<Label> t1 = bnp.parse_string(input_tree_1_string);
       node::Node<Label> t2 = bnp.parse_string(input_tree_2_string);
 
