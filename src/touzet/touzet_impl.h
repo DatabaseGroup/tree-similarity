@@ -119,11 +119,10 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
   t2_size_.clear();
   t1_node_.clear();
   t2_node_.clear();
-  // TODO: It is better to allocate the vector with tree sizes and fill them in.
-  //       Currently lld-values are pushed-back. That results in linear-number
-  //       of push_back invocations.
-  //       Simmilar approach could be used for kr-values, but the current index,
-  //       of a kr-value to set has, to be maintained outside recursion.
+  // NOTE: It may be better to allocate the vectors with tree sizes and fill
+  //       them in. Currently the correct values are collected in postorder and
+  //       pushed-back. That results in linear-number of push_back invocations.
+  //       The efficiency of that approach is unsure.
   index_nodes(t1, t1_size_, t1_node_);
   index_nodes(t2, t2_size_, t2_node_);
 
