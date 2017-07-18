@@ -106,6 +106,8 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
                                                const int& k) {
   using data_structures::Matrix;
 
+  // TODO: If the sizes of index vectors are not initialised, index_nodes
+  //       should be used to get input tree sizes.
   const int kT1Size = t1.get_tree_size();
   const int kT2Size = t2.get_tree_size();
 
@@ -126,7 +128,9 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
   index_nodes(t1, t1_size_, t1_node_);
   index_nodes(t2, t2_size_, t2_node_);
 
-  // Nested loop over all node pairs in k-strip.
+  // Nested loop over all node pairs in k-strip : |x-y|<=k.
+  // TODO: This loop should iterate over all necessary node pairs, and not
+  //       verify the validity of each node pair.
   // for (auto kr1 : t1_kr_) {
   //   for (auto kr2 : t2_kr_) {
   //     forest_distance(kr1, kr2);
