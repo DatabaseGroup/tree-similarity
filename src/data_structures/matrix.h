@@ -66,6 +66,15 @@ public:
   ///
   /// \return Reference to the specified element.
   ElementType& at(size_t row, size_t col);
+
+  /// Reads the element at specific row and column.
+  /// Using this method the element's value cannot be modified.
+  ///
+  /// \param row The row to be accessed.
+  /// \param col The column to be accessed.
+  ///
+  /// \return Reference to the specified element.
+  const ElementType& read_at(size_t row, size_t col) const;
 };
 
 template<typename ElementType>
@@ -88,6 +97,11 @@ size_t Matrix<ElementType>::get_columns() const {
 template<typename ElementType>
 ElementType& Matrix<ElementType>::at(size_t row, size_t col) {
   // NOTE: Using at() for checking bounds.
+  return data_.at(row * columns_ + col);
+}
+
+template<typename ElementType>
+const ElementType& Matrix<ElementType>::read_at(size_t row, size_t col) const {
   return data_.at(row * columns_ + col);
 }
 
