@@ -44,6 +44,7 @@ public:
   /// Holds internal items of the algorithms that are tested for correctness.
   struct TestItems {
     const std::vector<int>& t1_size;
+    const data_structures::Matrix<double>& td;
   };
 // Member functions.
 public:
@@ -66,10 +67,10 @@ public:
 // Member variables.
 private:
   /// Stores the subtree size for each node of the source tree.
-  /// Indexed in postorder-1.
+  /// Indexed in postorder ids starting with 1.
   std::vector<int> t1_size_;
   /// Stores the subtree size for each node of the destination tree.
-  /// Indexed in postorder-1.
+  /// Indexed in postorder ids starting wiht 1.
   std::vector<int> t2_size_;
   /// Stores references to nodes of the source tree. Indexed in postorder-1.
   // NOTE: We use reference_wrapper for const references to nodes. For now, we

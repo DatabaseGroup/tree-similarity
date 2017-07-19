@@ -131,11 +131,14 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
   // Nested loop over all node pairs in k-strip : |x-y|<=k.
   // TODO: This loop should iterate over all necessary node pairs, and not
   //       verify the validity of each node pair.
-  // for (auto kr1 : t1_kr_) {
-  //   for (auto kr2 : t2_kr_) {
-  //     forest_distance(kr1, kr2);
-  //   }
-  // }
+  for (int x = 1; x <= kT1Size; ++x) {
+    // TODO: Verify the boundaries.
+    // TODO: Implement outer loops correctness test. Input: T1,T2,k. Output: (x,y) pairs.
+    for (int y = std::max(1, x - k); y <= std::min(x + k, kT2Size); ++y) {
+      // forest_distance(kr1, kr2);
+      td_.at(x, y) = 1;
+    }
+  }
 
   return td_.at(kT1Size, kT2Size);
 }
@@ -144,6 +147,7 @@ template <typename Label, typename CostModel>
 const typename Algorithm<Label, CostModel>::TestItems Algorithm<Label, CostModel>::get_test_items() const {
   TestItems test_items = {
     t1_size_,
+    td_,
   };
   return test_items;
 }
