@@ -34,6 +34,7 @@
 #include "node.h"
 #include "matrix.h"
 #include <iostream>
+#include <limits>
 
 namespace touzet {
 

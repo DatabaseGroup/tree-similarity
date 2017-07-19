@@ -87,14 +87,15 @@ void Algorithm<Label, CostModel>::index_nodes(
 
   // Index nodes of a tree.
 
+  // TODO: Modify this comment.
   // Orders start with '1'. If '0' is needed, either index_nodes_recursion must
-  // be modified (placement of increments must change), or we start with '-1'.
+  // be modified (placement of increments must change), or we start with '0'.
   // The order-variables are modified by index_nodes_recursion.
-  int start_postorder = 1;
+  int start_postorder = 0;
   // NOTE: Preorder is not used in Touzet. Remove start_preorder. Or
   //       move the template traversal with postorder and preorder to some notes
   //       of how to traverse trees.
-  int start_preorder = 1;
+  int start_preorder = 0;
   index_nodes_recursion(root, size, nodes, start_postorder, start_preorder);
 
   // Here, start_postorder and start_preorder store the size of tree minus 1.
@@ -113,7 +114,7 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
 
   // NOTE: The default constructor of Matrix is called while constructing ZS-Algorithm.
   // NOTE: Shouldn't we implement Matrix::resize() instead of constructing matrix again?
-  td_ = Matrix<double>(kT1Size+1, kT2Size+1);
+  td_ = Matrix<double>(kT1Size, kT2Size);
   fd_ = Matrix<double>(kT1Size+1, kT2Size+1);
 
   // Cleanup node indexes for consecutive use of the algorithm.
@@ -131,16 +132,24 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
   // Nested loop over all node pairs in k-strip : |x-y|<=k.
   // TODO: This loop should iterate over all necessary node pairs, and not
   //       verify the validity of each node pair.
-  for (int x = 1; x <= kT1Size; ++x) {
+  for (int x = 0; x < kT1Size; ++x) {
     // TODO: Verify the boundaries.
     // TODO: Implement outer loops correctness test. Input: T1,T2,k. Output: (x,y) pairs.
-    for (int y = std::max(1, x - k); y <= std::min(x + k, kT2Size); ++y) {
-      // forest_distance(kr1, kr2);
+    // Initialise the entire row to infinity.
+    for (int y = 0; y < kT2Size; ++y) {
+      td_.at(x, y) = std::numeric_limits<double>::infinity();
+    }
+    for (int y = std::max(0, x - k); y <= std::min(x + k, kT2Size-1); ++y) {
+      // TODO: Implement the if below.
+      // if not k-relevant(x, y)
+      //   td(x, y) <- infty
+      // else
+      //   compute td(x, y) with e errors
       td_.at(x, y) = 1;
     }
   }
 
-  return td_.at(kT1Size, kT2Size);
+  return td_.at(kT1Size-1, kT2Size-1);
 }
 
 template <typename Label, typename CostModel>
