@@ -35,6 +35,7 @@
 #include "matrix.h"
 #include <iostream>
 #include <limits>
+#include <cstdlib>
 
 namespace touzet {
 
@@ -88,6 +89,16 @@ private:
   const CostModel c_;
 // Member functions.
 private:
+  /// Verifies if subtrees T1_x and T2_y are k-relevant.
+  ///
+  /// T1_x and T2_y are k-relevant if
+  /// |(|T1|-x)-(|T2|-y)| + ||T1_x|-|T2_y|| + |(x-|T1_x|)-(y-|T2_y|)| < k
+  ///
+  /// \param x postorder id of a node in source tree T1.
+  /// \param y postorder id of a node in destination tree T2.
+  /// \param k maximum number of structural canges.
+  /// \return True if subtrees T1_x and T2_y are k-relevant, and false otherwise.
+  bool k_relevant(const int& x, const int& y, const int& k) const;
   /// Indexes the nodes of an input tree. Wrapper for the recursive
   /// index_nodes_recursion.
   /// Call this method to index nodes.

@@ -141,16 +141,37 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
     }
     for (int y = std::max(0, x - k); y <= std::min(x + k, kT2Size-1); ++y) {
       // TODO: Implement the if below.
-      // if not k-relevant(x, y)
-      //   td(x, y) <- infty
-      // else
-      //   compute td(x, y) with e errors
-      td_.at(x, y) = 1;
+      if (!k_relevant(x, y, k)) {
+        // infinity is already set
+        // td_.at(x, y) = std::numeric_limits<double>::infinity();
+      } else {
+        // compute td(x, y) with e errors
+        td_.at(x, y) = 1;
+      }
     }
   }
 
   return td_.at(kT1Size-1, kT2Size-1);
 }
+
+template <typename Label, typename CostModel>
+bool Algorithm<Label, CostModel>::k_relevant(const int& x, const int& y, const int& k) const {
+  // |(|T1|-x)-(|T2|-y)| + ||T1_x|-|T2_y|| + |(x-|T1_x|)-(y-|T2_y|)| < k
+  int x_size = t1_size_[x];
+  int y_size = t2_size_[y];
+  int lower_bound = std::abs((t1_size_.back() - x) - (t2_size_.back() - y)) +
+                    std::abs(x_size - y_size) +
+                    std::abs((x - x_size) - (y - y_size));
+  // TODO: Verify node ids starting number: 0 or 1?
+  //       It seems that with ids starting at 0, the lower boundn may have some
+  //       negative numbers in it.
+  //       x and y are used to count nodes. If they start with 0, they count
+  //       one node to few.
+  if (lower_bound <= k) {
+    return true;
+  }
+  return false;
+};
 
 template <typename Label, typename CostModel>
 const typename Algorithm<Label, CostModel>::TestItems Algorithm<Label, CostModel>::get_test_items() const {
