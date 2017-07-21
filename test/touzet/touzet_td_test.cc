@@ -15,20 +15,18 @@
 /// \param m Matrix of int values.
 /// \return String representation of v.
 const std::string matrix_to_string(const data_structures::Matrix<double>& m) {
-  std::string s("{");
+  std::string s("");
   for (int x = 0; x < m.get_rows(); ++x){
     for (int y = 0; y < m.get_columns(); ++y){
       double e = m.read_at(x, y);
       if (e == std::numeric_limits<double>::infinity()) {
-        s += "@,";
+        s += "@";
       } else {
         std::string e_string = std::to_string(e);
-        s += e_string.substr(0, e_string.find(".")) + ",";
+        s += e_string.substr(0, e_string.find("."));
       }
     }
   }
-  s.pop_back();
-  s += "}";
   return s;
 }
 
@@ -55,8 +53,20 @@ int main() {
       std::string destination_tree = line;
       std::getline(test_cases_file, line);
       int k_value = std::stoi(line);
+
+      // Read td matrix
+      std::string correct_result = "";
       std::getline(test_cases_file, line);
-      std::string correct_result = line;
+      if (line[0] != '{') {
+        std::cerr << "Error with td matrix format." << std::endl;
+        return -1;
+      } else {
+        std::getline(test_cases_file, line);
+        while (line[0] != '}') {
+          correct_result += line;
+          std::getline(test_cases_file, line);
+        }
+      }
 
       parser::BracketNotationParser bnp;
 
