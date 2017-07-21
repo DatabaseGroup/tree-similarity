@@ -26,7 +26,9 @@ const std::string matrix_to_string(const data_structures::Matrix<double>& m) {
         s += e_string.substr(0, e_string.find("."));
       }
     }
+    s += "\n";
   }
+  s.pop_back();
   return s;
 }
 
@@ -63,9 +65,10 @@ int main() {
       } else {
         std::getline(test_cases_file, line);
         while (line[0] != '}') {
-          correct_result += line;
+          correct_result += line + "\n";
           std::getline(test_cases_file, line);
         }
+        correct_result.pop_back();
       }
 
       parser::BracketNotationParser bnp;
