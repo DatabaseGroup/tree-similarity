@@ -133,9 +133,8 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
   // TODO: This loop should iterate over all necessary node pairs, and not
   //       verify the validity of each node pair.
   for (int x = 0; x < kT1Size; ++x) {
-    // TODO: Verify the boundaries.
-    // TODO: Implement outer loops correctness test. Input: T1,T2,k. Output: (x,y) pairs.
-    // Initialise the entire row to infinity.
+    // Initialise the entire row to infinity - not necessarily needed.
+    // TODO: Verify which td values are used in forest distance.
     for (int y = 0; y < kT2Size; ++y) {
       td_.at(x, y) = std::numeric_limits<double>::infinity();
     }
@@ -156,6 +155,7 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
 
 template <typename Label, typename CostModel>
 bool Algorithm<Label, CostModel>::k_relevant(const int& x, const int& y, const int& k) const {
+  // lower bound formula:
   // |(|T1|-(x+1))-(|T2|-(y+1))| + ||T1_x|-|T2_y|| + |((x+1)-|T1_x|)-((y+1)-|T2_y|)| < k
   int x_size = t1_size_[x];
   int y_size = t2_size_[y];
@@ -163,6 +163,10 @@ bool Algorithm<Label, CostModel>::k_relevant(const int& x, const int& y, const i
                     std::abs(x_size - y_size) +
                     std::abs(((x+1) - x_size) - ((y+1) - y_size));
   std::cout << x << "," << y << "," << x_size << "," << y_size << ":" << lower_bound << std::endl;
+  // NOTE: The pair (x,y) is k-relevant if lower_bound <= k.
+  //       lower_bound < k is not correct because then (x,y) would be
+  //       k-irrelevant for lower_bound = k. That would further mean that the
+  //       subtrees T1_x and T2_y cannot be mapped with the given budget.
   if (lower_bound <= k) {
     return true;
   }
