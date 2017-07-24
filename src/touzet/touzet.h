@@ -92,7 +92,8 @@ private:
   /// Verifies if subtrees T1_x and T2_y are k-relevant.
   ///
   /// T1_x and T2_y are k-relevant if
-  /// |(|T1|-x)-(|T2|-y)| + ||T1_x|-|T2_y|| + |(x-|T1_x|)-(y-|T2_y|)| < k
+  /// |(|T1|-(x+1))-(|T2|-(y+1))| + ||T1_x|-|T2_y|| + |((x+1)-|T1_x|)-((y+1)-|T2_y|)| < k
+  /// x and y are increased by one due to node indexing starting with 0.
   ///
   /// \param x postorder id of a node in source tree T1.
   /// \param y postorder id of a node in destination tree T2.

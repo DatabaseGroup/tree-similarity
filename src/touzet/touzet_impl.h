@@ -156,17 +156,13 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
 
 template <typename Label, typename CostModel>
 bool Algorithm<Label, CostModel>::k_relevant(const int& x, const int& y, const int& k) const {
-  // |(|T1|-x)-(|T2|-y)| + ||T1_x|-|T2_y|| + |(x-|T1_x|)-(y-|T2_y|)| < k
+  // |(|T1|-(x+1))-(|T2|-(y+1))| + ||T1_x|-|T2_y|| + |((x+1)-|T1_x|)-((y+1)-|T2_y|)| < k
   int x_size = t1_size_[x];
   int y_size = t2_size_[y];
-  int lower_bound = std::abs((t1_size_.back() - x) - (t2_size_.back() - y)) +
+  int lower_bound = std::abs((t1_size_.back() - (x+1)) - (t2_size_.back() - (y+1))) +
                     std::abs(x_size - y_size) +
-                    std::abs((x - x_size) - (y - y_size));
-  // TODO: Verify node ids starting number: 0 or 1?
-  //       It seems that with ids starting at 0, the lower boundn may have some
-  //       negative numbers in it.
-  //       x and y are used to count nodes. If they start with 0, they count
-  //       one node to few.
+                    std::abs(((x+1) - x_size) - ((y+1) - y_size));
+  std::cout << x << "," << y << "," << x_size << "," << y_size << ":" << lower_bound << std::endl;
   if (lower_bound <= k) {
     return true;
   }
