@@ -136,13 +136,13 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
     // Initialise the entire row to infinity - not necessarily needed.
     // TODO: Verify which td values are used in forest distance.
     for (int y = 0; y < kT2Size; ++y) {
-      td_.at(x, y) = std::numeric_limits<double>::infinity();
+      td_.at(x, y) = std::numeric_limits<double>::signaling_NaN();
     }
     for (int y = std::max(0, x - k); y <= std::min(x + k, kT2Size-1); ++y) {
       // TODO: Implement the if below.
       if (!k_relevant(x, y, k)) {
         // infinity is already set
-        // td_.at(x, y) = std::numeric_limits<double>::infinity();
+        td_.at(x, y) = std::numeric_limits<double>::infinity();
       } else {
         // compute td(x, y) with e errors
         td_.at(x, y) = 1;

@@ -3,6 +3,7 @@
 #include <vector>
 #include <fstream>
 #include <limits>
+#include <cmath>
 #include "unit_cost_model.h"
 #include "string_label.h"
 #include "node.h"
@@ -21,6 +22,8 @@ const std::string matrix_to_string(const data_structures::Matrix<double>& m) {
       double e = m.read_at(x, y);
       if (e == std::numeric_limits<double>::infinity()) {
         s += "@";
+      } else if (std::isnan(e)) {
+        s += "-";
       } else {
         std::string e_string = std::to_string(e);
         s += e_string.substr(0, e_string.find("."));
