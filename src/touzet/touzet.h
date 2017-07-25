@@ -89,6 +89,32 @@ private:
   const CostModel c_;
 // Member functions.
 private:
+  /// Verifies if a given pair (i,j) is in k-strip(T1,T2) and in e-strip(x,y).
+  ///
+  /// NOTE: i and j are new objects.
+  ///
+  bool k_strip_e_strip(const int& x, const int& y, int i, int j,
+                     const int& k, const int& e);
+  /// Calculates the distance between two subforests using previously computed
+  /// results stored in td_ and fd_ matrices.
+  ///
+  /// NOTE: x, y, i, j are copied.
+  ///
+  double forest_dist(const int& x, const int& y, const int& i, const int& j,
+                     const int& k, const int& e);
+  /// Calculates the tree edit distance between two subtrees with the remaining
+  /// budget of errors, e.
+  ///
+  /// NOTE: x, y are copied.
+  ///
+  double tree_dist(const int& x, const int& y, const int& k, const int& e);
+  /// Calculates e(x,y) - a budget of the remaining number of errors
+  /// (deletions and insertions) that are left for the pair of subtrees
+  /// (T1_x,T2_y) after computing the lower bound for the nodes around them.
+  ///
+  /// e(x,y) = k - |(|T1|-(x+1))-(|T2|-(y+1))| - |((x+1)-|T1_x|)-((y+1)-|T2_y|)|
+  ///
+  int e(const int& x, const int& y, const int& k) const;
   /// Verifies if subtrees T1_x and T2_y are k-relevant.
   ///
   /// T1_x and T2_y are k-relevant if

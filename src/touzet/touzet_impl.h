@@ -107,6 +107,8 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
                                                const int& k) {
   using data_structures::Matrix;
 
+  std::cout << "--- touzet_ted ---" << std::endl;
+
   // TODO: If the sizes of index vectors are not initialised, index_nodes
   //       should be used to get input tree sizes.
   const int kT1Size = t1.get_tree_size();
@@ -130,8 +132,8 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
   index_nodes(t2, t2_size_, t2_node_);
 
   // Nested loop over all node pairs in k-strip : |x-y|<=k.
-  // TODO: This loop should iterate over all necessary node pairs, and not
-  //       verify the validity of each node pair.
+  // NOTE: This loop iterates over all node pairs from k-strip, and verifies
+  //       their k-relevancy.
   for (int x = 0; x < kT1Size; ++x) {
     // Initialise the entire row to infinity - not necessarily needed.
     // TODO: Verify which td values are used in forest distance.
@@ -141,17 +143,102 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
     for (int y = std::max(0, x - k); y <= std::min(x + k, kT2Size-1); ++y) {
       // TODO: Implement the if below.
       if (!k_relevant(x, y, k)) {
-        // infinity is already set
+        // Overwrite NaN to infinity.
         td_.at(x, y) = std::numeric_limits<double>::infinity();
       } else {
         // compute td(x, y) with e errors
-        td_.at(x, y) = 1;
+        int e_errors = e(x, y, k);
+        // td_.at(x, y) = 1;
+        std::cout << "td(" << x << "," << y << ") = " << std::endl;
+        td_.at(x, y) = tree_dist(x, y, k, e_errors);
+        std::cout << td_.read_at(x, y) << std::endl;
       }
     }
   }
 
   return td_.at(kT1Size-1, kT2Size-1);
-}
+};
+
+template <typename Label, typename CostModel>
+bool Algorithm<Label, CostModel>::k_strip_e_strip(const int& x, const int& y,
+                                                  int i, int j, const int& k,
+                                                  const int& e) {
+  // Add +1 to i and j to omit the negative numbers, for example, 0-|0|;
+  int ij_diff = std::abs((i+1) - (j+1));
+  if (ij_diff <= k) {   // k-strip(T1,T2)
+    if (ij_diff <= e) { // e-strip(x,y)
+      return true;
+    }
+  }
+  return false;
+};
+
+template <typename Label, typename CostModel>
+double Algorithm<Label, CostModel>::forest_dist(const int& x, const int& y,
+                                                const int& i, const int& j,
+                                                const int& k, const int& e) {
+  int x_size = t1_size_[x];
+  int y_size = t2_size_[y];
+  // Initial cases.
+  if (i == x - x_size && j == y - y_size) {
+    return 0.0;
+  }
+  if (i == x - x_size) {
+    return fd_.read_at(i+1, j - 1+1) + c_.ins(t2_node_[j]);
+  }
+  if (j == y - y_size) {
+    return fd_.read_at(i - 1+1, j+1) + c_.del(t1_node_[i]);
+  }
+  // General case.
+  double result = std::numeric_limits<double>::infinity();
+  if (k_strip_e_strip(x, y, i - t1_size_[i], j - t2_size_[j], k, e)) {
+    result = td_.read_at(i, j) + fd_.read_at(i - t1_size_[i]+1, j - t2_size_[j]+1);
+  }
+  if (k_strip_e_strip(x, y, i - 1, j, k, e)) {
+    result = std::min(result, fd_.read_at(i - 1+1, j+1) + c_.del(t1_node_[i]));
+  }
+  if (k_strip_e_strip(x, y, i, j - 1, k, e)) {
+    result = std::min(result, fd_.read_at(i+1, j - 1+1) + c_.ins(t2_node_[j]));;
+  }
+  return result;
+};
+
+template <typename Label, typename CostModel>
+double Algorithm<Label, CostModel>::tree_dist(const int& x, const int& y,
+                                              const int& k, const int& e) {
+  int x_size = t1_size_[x];
+  int y_size = t2_size_[y];
+  // Nested loop over postorder prefixes of the subtrees T1_x, T2_y.
+  // NOTE: We add +1 when accessing fd matrix not to get -1.
+  for (int i = x - x_size; i <= x; ++i) {
+    for (int j = y - y_size; j <= y; ++j) { // (i,j) \in (k-strip(T1,T2) \cap e-strip(x,y))
+      if (!k_strip_e_strip(x, y, i, j, k, e)) {
+        continue;
+      }
+      if (i == x && j == y) { // Last value computed in return statement.
+        break;
+      }
+      std::cout << "fd(" << i << "," << j << ") = ";
+      fd_.at(i+1, j+1) = forest_dist(x, y, i, j, k, e);
+      std::cout << fd_.read_at(i+1, j+1) << std::endl;
+    }
+  }
+  return std::min({
+    fd_.read_at(x - 1+1, y+1) + c_.del(t1_node_[x]),                 // Delete root in source subtree.
+    fd_.read_at(x+1, y - 1+1) + c_.ins(t2_node_[y]),                 // Insert root in destination subtree.
+    fd_.read_at(x - 1+1, y - 1+1) + c_.ren(t1_node_[x], t2_node_[y]) // Rename root nodes of the subtrees.
+  });
+};
+
+template <typename Label, typename CostModel>
+int Algorithm<Label, CostModel>::e(const int& x, const int& y, const int& k) const {
+  // e(x,y) = k - |(|T1|-(x+1))-(|T2|-(y+1))| - |((x+1)-|T1_x|)-((y+1)-|T2_y|)|
+  int x_size = t1_size_[x];
+  int y_size = t2_size_[y];
+  int lower_bound = std::abs((t1_size_.back() - (x+1)) - (t2_size_.back() - (y+1))) +
+                    std::abs(((x+1) - x_size) - ((y+1) - y_size));
+  return (k - lower_bound);
+};
 
 template <typename Label, typename CostModel>
 bool Algorithm<Label, CostModel>::k_relevant(const int& x, const int& y, const int& k) const {
@@ -162,7 +249,7 @@ bool Algorithm<Label, CostModel>::k_relevant(const int& x, const int& y, const i
   int lower_bound = std::abs((t1_size_.back() - (x+1)) - (t2_size_.back() - (y+1))) +
                     std::abs(x_size - y_size) +
                     std::abs(((x+1) - x_size) - ((y+1) - y_size));
-  std::cout << x << "," << y << "," << x_size << "," << y_size << ":" << lower_bound << std::endl;
+  // std::cout << x << "," << y << "," << x_size << "," << y_size << ":" << lower_bound << std::endl;
   // NOTE: The pair (x,y) is k-relevant if lower_bound <= k.
   //       lower_bound < k is not correct because then (x,y) would be
   //       k-irrelevant for lower_bound = k. That would further mean that the
