@@ -31,6 +31,7 @@
 #include "string_label.h"
 #include "unit_cost_model.h"
 #include "zhang_shasha.h"
+#include "touzet.h"
 #include "bracket_notation_parser.h"
 #include <iostream>
 

@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
   using CostModel = cost_model::UnitCostModel<Label>;
 
   // Verify parameters.
-  if (argc != 3) {
+  if (argc != 3 && argc != 4) {
     std::cerr << "Incorrect number of parameters." << std::endl;
     return -1;
   }
@@ -55,8 +55,15 @@ int main(int argc, char** argv) {
   const node::Node<Label> source_tree = bnp.parse_string(argv[1]);
   const node::Node<Label> destination_tree = bnp.parse_string(argv[2]);
 
-  zhang_shasha::Algorithm<Label, CostModel> zs_ted;
-  std::cout << "TED = " << zs_ted.zhang_shasha_ted(source_tree, destination_tree) << std::endl;
-
+  if (argc == 3) {
+    zhang_shasha::Algorithm<Label, CostModel> zs_ted;
+    std::cout << "TED = " << zs_ted.zhang_shasha_ted(source_tree, destination_tree) << std::endl;
+  }
+  if (argc == 4) {
+    int k = std::stoi(argv[3]);
+    std::cout << "k: " << argv[3] << std::endl;
+    touzet::Algorithm<Label, CostModel> touzet_ted;
+    std::cout << "TED = " << touzet_ted.touzet_ted(source_tree, destination_tree, k) << std::endl;
+  }
   return 0;
 }
