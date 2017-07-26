@@ -5,6 +5,13 @@
 {
 1
 }
+# Test case 1a - single node
+{a}
+{b}
+1
+{
+1
+}
 # Test case 2 - two equal paths
 {a{b{c{d}}}}
 {a{b{c{d}}}}

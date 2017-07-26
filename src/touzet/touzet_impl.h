@@ -180,13 +180,13 @@ double Algorithm<Label, CostModel>::tree_dist(const int& x, const int& y,
   for (int j = 1; j <= std::min(y_size, e); ++j) { // i = 0; only j that are within e-strip.
     fd_.at(0, j) = fd_.read_at(0, j - 1) + c_.ins(t2_node_[j + y_off]);
   }
-  if (e <= y_size) {
+  if (e + 1 <= y_size) {
     fd_.at(0, e + 1) = std::numeric_limits<double>::infinity(); // the first j that is outside e-strip
   }
   for (int i = 1; i <= std::min(x_size, e); ++i) { // j = 0; only i that are within e-strip.
     fd_.at(i, 0) = fd_.read_at(i - 1, 0) + c_.del(t1_node_[i + x_off]);
   }
-  if (e <= x_size) {
+  if (e + 1 <= x_size) {
     fd_.at(e + 1, 0) = std::numeric_limits<double>::infinity(); // the first i that is outside e-strip
   }
 
