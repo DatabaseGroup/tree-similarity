@@ -107,7 +107,7 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
                                                const int& k) {
   using data_structures::Matrix;
 
-  std::cout << "--- touzet_ted ---" << std::endl;
+  // std::cerr << "--- touzet_ted ---" << std::endl;
 
   // TODO: If the sizes of index vectors are not initialised, index_nodes
   //       should be used to get input tree sizes.
@@ -149,9 +149,9 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
         // compute td(x, y) with e errors
         int e_errors = e(x, y, k);
         // td_.at(x, y) = 1;
-        std::cout << "td(" << x << "," << y << ") = " << std::endl;
+        // std::cerr << "td(" << x << "," << y << ") = " << std::endl;
         td_.at(x, y) = tree_dist(x, y, k, e_errors);
-        std::cout << td_.read_at(x, y) << std::endl;
+        // std::cerr << td_.read_at(x, y) << std::endl;
       }
     }
   }
@@ -165,8 +165,8 @@ double Algorithm<Label, CostModel>::tree_dist(const int& x, const int& y,
   int x_size = t1_size_[x];
   int y_size = t2_size_[y];
 
-  std::cout << "IN tree_dist(" << x << "," << y << "," << k << "," << e << std::endl;
-  std::cout << "subtree sizes: " << x_size << "," << y_size << std::endl;
+  // std::cerr << "IN tree_dist(" << x << "," << y << "," << k << "," << e << std::endl;
+  // std::cerr << "subtree sizes: " << x_size << "," << y_size << std::endl;
 
   // QUESTION: If (x,y) mapped to 0..x0.. are not in e-strip, return infinity?
   //           This case is verified with k-relevancy.
@@ -209,7 +209,7 @@ double Algorithm<Label, CostModel>::tree_dist(const int& x, const int& y,
         fd_.read_at(i, j - 1) + c_.ins(t2_node_[j + y_off]),
         fd_.read_at(i - t1_size_[i + x_off], j - t2_size_[j + y_off]) + td_.read_at(i + x_off, j + y_off)
       });
-      std::cout << "fd(" << i << "," << j << ") = " << fd_.read_at(i, j) << std::endl;
+      // std::cerr << "fd(" << i << "," << j << ") = " << fd_.read_at(i, j) << std::endl;
     }
     if (i + e + 1 <= y_size) { // Last j that is outside e-strip.
       fd_.at(i, i + e + 1) = std::numeric_limits<double>::infinity();
@@ -241,7 +241,7 @@ bool Algorithm<Label, CostModel>::k_relevant(const int& x, const int& y, const i
   int lower_bound = std::abs((t1_size_.back() - (x+1)) - (t2_size_.back() - (y+1))) +
                     std::abs(x_size - y_size) +
                     std::abs(((x+1) - x_size) - ((y+1) - y_size));
-  // std::cout << x << "," << y << "," << x_size << "," << y_size << ":" << lower_bound << std::endl;
+  // std::cerr << x << "," << y << "," << x_size << "," << y_size << ":" << lower_bound << std::endl;
   // NOTE: The pair (x,y) is k-relevant if lower_bound <= k.
   //       lower_bound < k is not correct because then (x,y) would be
   //       k-irrelevant for lower_bound = k. That would further mean that the
