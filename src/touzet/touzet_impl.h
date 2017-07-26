@@ -160,73 +160,65 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
 };
 
 template <typename Label, typename CostModel>
-bool Algorithm<Label, CostModel>::k_strip_e_strip(const int& x, const int& y,
-                                                  int i, int j, const int& k,
-                                                  const int& e) {
-  // Add +1 to i and j to omit the negative numbers, for example, 0-|0|;
-  int ij_diff = std::abs((i+1) - (j+1));
-  if (ij_diff <= k) {   // k-strip(T1,T2)
-    if (ij_diff <= e) { // e-strip(x,y)
-      return true;
-    }
-  }
-  return false;
-};
-
-template <typename Label, typename CostModel>
-double Algorithm<Label, CostModel>::forest_dist(const int& x, const int& y,
-                                                const int& i, const int& j,
-                                                const int& k, const int& e) {
-  int x_size = t1_size_[x];
-  int y_size = t2_size_[y];
-  // Initial cases.
-  if (i == x - x_size && j == y - y_size) {
-    return 0.0;
-  }
-  if (i == x - x_size) {
-    return fd_.read_at(i+1, j - 1+1) + c_.ins(t2_node_[j]);
-  }
-  if (j == y - y_size) {
-    return fd_.read_at(i - 1+1, j+1) + c_.del(t1_node_[i]);
-  }
-  // General case.
-  double result = std::numeric_limits<double>::infinity();
-  if (k_strip_e_strip(x, y, i - t1_size_[i], j - t2_size_[j], k, e)) {
-    result = td_.read_at(i, j) + fd_.read_at(i - t1_size_[i]+1, j - t2_size_[j]+1);
-  }
-  if (k_strip_e_strip(x, y, i - 1, j, k, e)) {
-    result = std::min(result, fd_.read_at(i - 1+1, j+1) + c_.del(t1_node_[i]));
-  }
-  if (k_strip_e_strip(x, y, i, j - 1, k, e)) {
-    result = std::min(result, fd_.read_at(i+1, j - 1+1) + c_.ins(t2_node_[j]));;
-  }
-  return result;
-};
-
-template <typename Label, typename CostModel>
 double Algorithm<Label, CostModel>::tree_dist(const int& x, const int& y,
                                               const int& k, const int& e) {
   int x_size = t1_size_[x];
   int y_size = t2_size_[y];
-  // Nested loop over postorder prefixes of the subtrees T1_x, T2_y.
-  // NOTE: We add +1 when accessing fd matrix not to get -1.
-  for (int i = x - x_size; i <= x; ++i) {
-    for (int j = y - y_size; j <= y; ++j) { // (i,j) \in (k-strip(T1,T2) \cap e-strip(x,y))
-      if (!k_strip_e_strip(x, y, i, j, k, e)) {
-        continue;
+
+  std::cout << "IN tree_dist(" << x << "," << y << "," << k << "," << e << std::endl;
+  std::cout << "subtree sizes: " << x_size << "," << y_size << std::endl;
+
+  // QUESTION: If (x,y) mapped to 0..x0.. are not in e-strip, return infinity?
+  //           This case is verified with k-relevancy.
+
+  // Calculates offsets that let us translate i and j to correct postorder ids.
+  int x_off = x - x_size;
+  int y_off = y - y_size;
+
+  // Initial cases.
+  fd_.at(0, 0) = 0.0; // (0,0) is always within e-strip.
+  for (int j = 1; j <= std::min(y_size, e); ++j) { // i = 0; only j that are within e-strip.
+    fd_.at(0, j) = fd_.read_at(0, j - 1) + c_.ins(t2_node_[j + y_off]);
+  }
+  if (e <= y_size) {
+    fd_.at(0, e + 1) = std::numeric_limits<double>::infinity(); // the first j that is outside e-strip
+  }
+  for (int i = 1; i <= std::min(x_size, e); ++i) { // j = 0; only i that are within e-strip.
+    fd_.at(i, 0) = fd_.read_at(i - 1, 0) + c_.del(t1_node_[i + x_off]);
+  }
+  if (e <= x_size) {
+    fd_.at(e + 1, 0) = std::numeric_limits<double>::infinity(); // the first i that is outside e-strip
+  }
+
+  // General cases.
+  for (int i = 1; i <= x_size; ++i) {
+    if (i - e - 1 >= 1) { // First j that is outside e-strip.
+      fd_.at(i, i - e - 1) = std::numeric_limits<double>::infinity();
+    }
+    for (int j = std::max(1, i - e); j <= std::min(i + e, y_size); ++j) { // only (i,j) that are in e-strip
+      // If (i+x_off,j+y_off) are not in k-strip or are not k-relevant, assign infinity to them.
+      if (std::abs((i + x_off) - (j + y_off)) > k || !k_relevant(i + x_off, j + y_off, k)) {
+        fd_.at(i, j) = std::numeric_limits<double>::infinity();
       }
-      if (i == x && j == y) { // Last value computed in return statement.
+      // The td(x_size-1, y_size-1) is computed differently.
+      if (i == x_size && j == std::min(i + e, y_size)) {
         break;
       }
-      std::cout << "fd(" << i << "," << j << ") = ";
-      fd_.at(i+1, j+1) = forest_dist(x, y, i, j, k, e);
-      std::cout << fd_.read_at(i+1, j+1) << std::endl;
+      fd_.at(i, j) = std::min({
+        fd_.read_at(i - 1, j) + c_.del(t1_node_[i + x_off]),
+        fd_.read_at(i, j - 1) + c_.ins(t2_node_[j + y_off]),
+        fd_.read_at(i - t1_size_[i + x_off], j - t2_size_[j + y_off]) + td_.read_at(i + x_off, j + y_off)
+      });
+      std::cout << "fd(" << i << "," << j << ") = " << fd_.read_at(i, j) << std::endl;
+    }
+    if (i + e + 1 <= y_size) { // Last j that is outside e-strip.
+      fd_.at(i, i + e + 1) = std::numeric_limits<double>::infinity();
     }
   }
   return std::min({
-    fd_.read_at(x - 1+1, y+1) + c_.del(t1_node_[x]),                 // Delete root in source subtree.
-    fd_.read_at(x+1, y - 1+1) + c_.ins(t2_node_[y]),                 // Insert root in destination subtree.
-    fd_.read_at(x - 1+1, y - 1+1) + c_.ren(t1_node_[x], t2_node_[y]) // Rename root nodes of the subtrees.
+    fd_.read_at(x_size - 1, y_size) + c_.del(t1_node_[x]),                 // Delete root in source subtree.
+    fd_.read_at(x_size, y_size - 1) + c_.ins(t2_node_[y]),                 // Insert root in destination subtree.
+    fd_.read_at(x_size - 1, y_size - 1) + c_.ren(t1_node_[x], t2_node_[y]) // Rename root nodes of the subtrees.
   });
 };
 

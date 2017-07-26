@@ -89,21 +89,9 @@ private:
   const CostModel c_;
 // Member functions.
 private:
-  /// Verifies if a given pair (i,j) is in k-strip(T1,T2) and in e-strip(x,y).
-  ///
-  /// NOTE: i and j are new objects.
-  ///
-  bool k_strip_e_strip(const int& x, const int& y, int i, int j,
-                     const int& k, const int& e);
-  /// Calculates the distance between two subforests using previously computed
-  /// results stored in td_ and fd_ matrices.
-  ///
-  /// NOTE: x, y, i, j are copied.
-  ///
-  double forest_dist(const int& x, const int& y, const int& i, const int& j,
-                     const int& k, const int& e);
   /// Calculates the tree edit distance between two subtrees with the remaining
-  /// budget of errors, e.
+  /// budget of errors, e. Uses dynamic programming, with previously computed
+  /// results stored in td_. Itself it fills in fd_ matrix.
   ///
   /// NOTE: x, y are copied.
   ///
