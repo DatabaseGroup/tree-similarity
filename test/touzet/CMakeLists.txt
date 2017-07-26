@@ -45,3 +45,26 @@ add_test(
   NAME touzet_td_test           # TEST NAME
   COMMAND touzet_td_test_driver # EXECUTABLE NAME
 )
+
+# TED testing.
+
+# Copy test cases.
+file(
+  COPY touzet_ted_test_data.txt
+  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+add_executable(
+  touzet_ted_test_driver # EXECUTABLE NAME
+  touzet_ted_test.cc     # EXECUTABLE SOURCE
+)
+
+target_link_libraries(
+  touzet_ted_test_driver # EXECUTABLE NAME
+  TreeSimilarity         # LIBRARY NAME
+)
+
+add_test(
+  NAME touzet_ted_test           # TEST NAME
+  COMMAND touzet_ted_test_driver # EXECUTABLE NAME
+)
