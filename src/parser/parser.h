@@ -18,6 +18,7 @@ nodes::Node<_NodeData>* create_tree_from_string(char* str,
   std::vector<nodes::Node<_NodeData>*> scope_parent_list;
   typename std::vector<nodes::Node<_NodeData>*>::const_iterator it;
   std::string label = "";
+  bool is_empty = false;
     
   nodes::Node<_NodeData>* root = new nodes::Node<_NodeData>(new _NodeData());
   for (int i = 0; i < length; i++) {
@@ -26,7 +27,14 @@ nodes::Node<_NodeData>* create_tree_from_string(char* str,
     }
 
     if (str[i] == '{') {
-      if (label.length() != 0) {
+
+      // if clause which recognizes if the label is empty or not
+      if (i > 0 && label == "" && str[i-1] == '{') { // if clause is triggered if '{{' appears
+          is_empty = true;
+      }
+
+      if (label.length() != 0 || is_empty == true) {
+
         if (!hashtable.count(label)) {
           hashtable.emplace(label, labelid++);
         }
@@ -49,10 +57,17 @@ nodes::Node<_NodeData>* create_tree_from_string(char* str,
         }
         
         label = "";
+        is_empty = false; // reset the empty label boolean
       }
       ++scope;
     } else if (str[i] == '}') {
-      if (label.length() != 0) {
+      // if clause which recognizes if the label is empty or not
+      if (i > 0 && label == "" && str[i-1] == '{') { // if clause is triggered if ’{}' appears
+          is_empty = true;
+      }
+
+      if (label.length() != 0 || is_empty == true) {
+
         if (!hashtable.count(label)) {
           hashtable.emplace(label, labelid++);
         }
@@ -75,6 +90,7 @@ nodes::Node<_NodeData>* create_tree_from_string(char* str,
         }
         
         label = "";
+        is_empty = false; // reset the empty label boolean
       }
       scope_parent_list.resize(scope);
       --scope;
@@ -82,6 +98,7 @@ nodes::Node<_NodeData>* create_tree_from_string(char* str,
       label += str[i];
     }
   }
+
   return root;
 }
 
