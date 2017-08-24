@@ -194,6 +194,7 @@ double Algorithm<Label, CostModel>::tree_dist(const int& x, const int& y,
   }
 
   // General cases.
+  double candidate_result = 0.0;
   for (int i = 1; i <= x_size; ++i) {
     if (i - e - 1 >= 1) { // First j that is outside e-strip.
       fd_.at(i, i - e - 1) = std::numeric_limits<double>::infinity();
@@ -218,11 +219,18 @@ double Algorithm<Label, CostModel>::tree_dist(const int& x, const int& y,
       fd_.at(i, i + e + 1) = std::numeric_limits<double>::infinity();
     }
   }
-  return std::min({
+  candidate_result = std::min({
     fd_.read_at(x_size - 1, y_size) + c_.del(t1_node_[x]),                 // Delete root in source subtree.
     fd_.read_at(x_size, y_size - 1) + c_.ins(t2_node_[y]),                 // Insert root in destination subtree.
     fd_.read_at(x_size - 1, y_size - 1) + c_.ren(t1_node_[x], t2_node_[y]) // Rename root nodes of the subtrees.
   });
+  // The distance between two subtrees cannot be greater than e-value for these
+  // subtrees.
+  if (candidate_result > e) {
+    return std::numeric_limits<double>::infinity();
+  } else {
+    return candidate_result;
+  }
 };
 
 template <typename Label, typename CostModel>
