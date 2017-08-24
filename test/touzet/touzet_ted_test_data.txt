@@ -3,26 +3,51 @@
 {f{a}{c{e{b}{d}}}}
 2
 2.0
+# Test case 1a; k=1<TED
+{f{a}{e{c{b}}{d}}}
+{f{a}{c{e{b}{d}}}}
+1
+INF
 # Test case 2
 {a{b}{c{e}{f}}{d}}
 {a{b}{c{e}}{d}}
 1
 1.0
+# Test case 2a; k=0<TED
+{a{b}{c{e}{f}}{d}}
+{a{b}{c{e}}{d}}
+0
+INF
 # Test case 3
 {a{b}{c{e}{f}}{d}}
 {a{b}{c}{d}}
 2
 2.0
+# Test case 3a; k=1<TED
+{a{b}{c{e}{f}}{d}}
+{a{b}{c}{d}}
+1
+INF
 # Test case 4
 {a{x}{c{e}{f}}{d}}
 {a{b}{c}{d}}
 3
 3.0
+# Test case 4a; k=2<TED
+{a{x}{c{e}{f}}{d}}
+{a{b}{c}{d}}
+2
+INF
 # Test case 5
 {a{b}{c{e}{f}}{d}}
 {a{b}{c}}
 3
 3.0
+# Test case 5a; k=2<TED
+{a{b}{c{e}{f}}{d}}
+{a{b}{c}}
+2
+INF
 # Test case 6
 {a{b{i}{j{u}}}{c{d}{e{q{n}{m}}}}{f{w}}}
 {a}
@@ -42,6 +67,11 @@
 {a{b}{c{e}{f}}{d}}
 {a{b}{c{e}{f}}{d}}
 0
+0.0
+# Test case 9a; k=1>TED
+{a{b}{c{e}{f}}{d}}
+{a{b}{c{e}{f}}{d}}
+1
 0.0
 # Test case 10
 {a{b{i}{j}}{c{d}{e}}{f{w}}}
@@ -148,26 +178,51 @@
 {g{h}{i}}
 3
 3.0
+# Test case 30a; k=1<TED
+{b{d}{e}}
+{g{h}{i}}
+1
+INF
 # Test case 31
 {a{b{d}{e}}{c}}
 {f{g{h}{i}}{k}}
 5
 5.0
+# Test case 31a; k=3<TED
+{a{b{d}{e}}{c}}
+{f{g{h}{i}}{k}}
+3
+INF
 # Test case 32
 {f{d{a}{c{b}}}{e}}
 {f{c{d{a}{b}}{e}}}
 2
 2.0
+# Test case 32a; k=1<TED
+{f{d{a}{c{b}}}{e}}
+{f{c{d{a}{b}}{e}}}
+1
+INF
 # Test case 33
 {f{d{a}{c{b}}}{e}}
 {f{c{d{a}{b}}}{x}}
 3
 3.0
+# Test case 33a; k=2<TED
+{f{d{a}{c{b}}}{e}}
+{f{c{d{a}{b}}}{x}}
+2
+INF
 # Test case 34
 {f{d{a}{c{b}}}{e}}
 {f{c{d{a}{b}}}{e}}
 2
 2.0
+# Test case 34a; k=1<TED
+{f{d{a}{c{b}}}{e}}
+{f{c{d{a}{b}}}{e}}
+1
+INF
 # Test case 35
 {a{a{a}{a}}}
 {a{a{a}}}
@@ -178,6 +233,11 @@
 {a{b{c}}{d}{e}}
 2
 2.0
+# Test case 36a; k=1<TED
+{a{b}{c{d}{e}}}
+{a{b{c}}{d}{e}}
+1
+INF
 # Test case 37
 {a{b{c}{d{e}{f}}}{x}}
 {b{c}{d{e}{f}}}
@@ -203,6 +263,11 @@
 {b{c}{a{d}}}
 3
 3.0
+# Test case 41a; k=2<TED
+{a{b{c}}{d}}
+{b{c}{a{d}}}
+2
+INF
 # Test case 42
 {a{b}{c}}
 {b{c}}
@@ -283,6 +348,16 @@
 {b{c}{a{d}}}
 3
 3.0
+# Test case 57a; k=2<TED
+{a{b{c}}{d}}
+{b{c}{a{d}}}
+2
+INF
+# Test case 57b; k=1<TED
+{a{b{c}}{d}}
+{b{c}{a{d}}}
+1
+INF
 # Test case 58
 {a{b{c}{d}}}
 {a{c}{d}}
@@ -318,11 +393,31 @@
 {a{a{a}{a}{a}}{a{a{a}{a}{a}}}}
 3
 3.0
+# Test case 64a; k=2<TED
+{a{a{a}{a{a}{a}}}{a{a}{a{a}}{a}}}
+{a{a{a}{a}{a}}{a{a{a}{a}{a}}}}
+2
+INF
 # Test case 65
 {a{b{d}{e}}{c}}
 {f{g{h}{i}}{k}}
 5
 5.0
+# Test case 65a; k=4<TED
+{a{b{d}{e}}{c}}
+{f{g{h}{i}}{k}}
+4
+INF
+# Test case 65b; k=3<TED
+{a{b{d}{e}}{c}}
+{f{g{h}{i}}{k}}
+3
+INF
+# Test case 65c; k=2<TED
+{a{b{d}{e}}{c}}
+{f{g{h}{i}}{k}}
+2
+INF
 # Test case 66
 {a{b{c}{d{e}{f}}}}
 {b{c}{e}{f}}
@@ -338,6 +433,16 @@
 {f{c{d{a}{b}}}{x}}
 3
 3.0
+# Test case 68a; k=2<TED
+{f{d{a}{c{b}}}{e}}
+{f{c{d{a}{b}}}{x}}
+2
+INF
+# Test case 68b; k=1<TED
+{f{d{a}{c{b}}}{e}}
+{f{c{d{a}{b}}}{x}}
+1
+INF
 # Test case 69
 {f{d{a}{c{b}}}{e}}
 {f{c{d{a}{b}}{e}}}
