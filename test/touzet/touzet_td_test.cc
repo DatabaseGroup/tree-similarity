@@ -100,6 +100,7 @@ int main() {
       if (correct_result != computed_results) {
         std::cerr << "Incorrect values in the td matrix:\n" << computed_results << "\ninstead of\n" << correct_result << std::endl;
         std::cerr << "for input trees: " << source_tree << " | " << destination_tree << std::endl;
+        std::cerr << "and k: " << k_value << std::endl;
         return -1;
       }
     }

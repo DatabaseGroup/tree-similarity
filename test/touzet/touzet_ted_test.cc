@@ -56,8 +56,9 @@ int main() {
 
       if (correct_result != computed_results) {
         std::cerr << "Incorrect TED result: " << computed_results << " instead of " << correct_result << std::endl;
-        std::cerr << input_tree_1_string << std::endl;
-        std::cerr << input_tree_2_string << std::endl;
+        std::cerr << "T1: " << input_tree_1_string << std::endl;
+        std::cerr << "T2: " << input_tree_2_string << std::endl;
+        std::cerr << "k: " << k << std::endl;
         return -1;
       }
     }
