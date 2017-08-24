@@ -114,6 +114,12 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
   const int kT1Size = t1.get_tree_size();
   const int kT2Size = t2.get_tree_size();
 
+  // If the pair of root nodes is not in k-strip (input tree size difference is
+  // greater than k), return infinity.
+  if (std::abs((kT1Size-1) - (kT2Size-1)) > k) {
+    return std::numeric_limits<double>::infinity();
+  }
+
   // NOTE: The default constructor of Matrix is called while constructing ZS-Algorithm.
   // NOTE: Shouldn't we implement Matrix::resize() instead of constructing matrix again?
   td_ = Matrix<double>(kT1Size, kT2Size);
