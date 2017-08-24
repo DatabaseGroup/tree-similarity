@@ -200,19 +200,43 @@ double Algorithm<Label, CostModel>::tree_dist(const int& x, const int& y,
       fd_.at(i, i - e - 1) = std::numeric_limits<double>::infinity();
     }
     for (int j = std::max(1, i - e); j <= std::min(i + e, y_size); ++j) { // only (i,j) that are in e-strip
-      // If (i+x_off,j+y_off) are not in k-strip or are not k-relevant, assign infinity to them.
-      if (std::abs((i + x_off) - (j + y_off)) > k || !k_relevant(i + x_off, j + y_off, k)) {
-        fd_.at(i, j) = std::numeric_limits<double>::infinity();
-      }
       // The td(x_size-1, y_size-1) is computed differently.
       if (i == x_size && j == std::min(i + e, y_size)) {
         break;
       }
-      fd_.at(i, j) = std::min({
-        fd_.read_at(i - 1, j) + c_.del(t1_node_[i + x_off]),
-        fd_.read_at(i, j - 1) + c_.ins(t2_node_[j + y_off]),
-        fd_.read_at(i - t1_size_[i + x_off], j - t2_size_[j + y_off]) + td_.read_at(i + x_off, j + y_off)
-      });
+      // WAS: If (i+x_off,j+y_off) are not in k-strip or are not k-relevant, assign infinity to them.
+      // WAS: if (std::abs((i + x_off) - (j + y_off)) > k || !k_relevant(i + x_off, j + y_off, k)) {
+      // NOTE: It's about existence of a path from (i,j) to (x-x_size,y-y_size).
+      //       It exists only then, if it existed for the neighburing nodes
+      //       adding the costs for coming to (i,j).
+      //       We don't have to verify e-strip because that's ensured with the
+      //       for loop and the first j and the first i outside e-strip.
+      // QUESTION: What about k-strip?
+      //           (i,j), in the input trees scope including offsets, must be
+      //           in k-strip. Otherwise, there is certainly no edit path from
+      //           (i,j) to (0,0). In other words, thre is no edit path from
+      //           (i,j) to (0,0) with the given budget k.
+      // QUESTION: What about k-relevancy?
+      //           Adding this to the condition below makes ted tests fail.
+      //           (a,b) is k-relevant if (T1_a,T2_b) can be mapped based on
+      //           the size lower bound of the nodes around these subtrees.
+      //           Thus, it doesn't fit here.
+      if (std::abs((i + x_off) - (j + y_off)) > k) {
+        fd_.at(i, j) = std::numeric_limits<double>::infinity();
+      } else {
+        candidate_result = std::min({
+          fd_.read_at(i - 1, j) + c_.del(t1_node_[i + x_off]),
+          fd_.read_at(i, j - 1) + c_.ins(t2_node_[j + y_off]),
+          fd_.read_at(i - t1_size_[i + x_off], j - t2_size_[j + y_off]) + td_.read_at(i + x_off, j + y_off)
+        });
+        // None of the values in fd_ can be greater than e-value for this
+        // subtree pair.
+        if (candidate_result > e) {
+          fd_.at(i, j) = std::numeric_limits<double>::infinity();
+        } else {
+          fd_.at(i, j) = candidate_result;
+        }
+      }
       // std::cerr << "fd(" << i << "," << j << ") = " << fd_.read_at(i, j) << std::endl;
     }
     if (i + e + 1 <= y_size) { // Last j that is outside e-strip.
