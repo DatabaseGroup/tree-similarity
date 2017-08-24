@@ -174,9 +174,6 @@ double Algorithm<Label, CostModel>::tree_dist(const int& x, const int& y,
   // std::cerr << "IN tree_dist(" << x << "," << y << "," << k << "," << e << std::endl;
   // std::cerr << "subtree sizes: " << x_size << "," << y_size << std::endl;
 
-  // QUESTION: If (x,y) mapped to 0..x0.. are not in e-strip, return infinity?
-  //           This case is verified with k-relevancy.
-
   // Calculates offsets that let us translate i and j to correct postorder ids.
   int x_off = x - x_size;
   int y_off = y - y_size;
