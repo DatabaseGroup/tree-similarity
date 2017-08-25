@@ -87,9 +87,7 @@ void Algorithm<Label, CostModel>::index_nodes(
 
   // Index nodes of a tree.
 
-  // TODO: Modify this comment.
-  // Orders start with '1'. If '0' is needed, either index_nodes_recursion must
-  // be modified (placement of increments must change), or we start with '0'.
+  // Orders start with '0'.
   // The order-variables are modified by index_nodes_recursion.
   int start_postorder = 0;
   // NOTE: Preorder is not used in Touzet. Remove start_preorder. Or

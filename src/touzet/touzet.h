@@ -69,12 +69,13 @@ public:
 // Member variables.
 private:
   /// Stores the subtree size for each node of the source tree.
-  /// Indexed in postorder ids starting with 1.
+  /// Indexed in postorder ids starting with 0.
   std::vector<int> t1_size_;
   /// Stores the subtree size for each node of the destination tree.
-  /// Indexed in postorder ids starting wiht 1.
+  /// Indexed in postorder ids starting with 0.
   std::vector<int> t2_size_;
-  /// Stores references to nodes of the source tree. Indexed in postorder-1.
+  /// Stores references to nodes of the source tree. Indexed in postorder ids
+  /// starting with 0.
   // NOTE: We use reference_wrapper for const references to nodes. For now, we
   // decided not to use raw pointers. Smart pointers introduce ownership, but
   // this vector is only an observer from a logical point of view.
