@@ -48,7 +48,7 @@ public:
     const std::vector<int>& t1_size;
     const data_structures::Matrix<double>& td;
     const std::vector<int>& t1_depth;
-    // TODO: Add depth inverted list.
+    const std::vector<std::vector<int>>& t1_dil;
   };
 // Member functions.
 public:
@@ -93,6 +93,14 @@ private:
   std::vector<int> t2_depth_;
 
   // TODO: Implement depth inverted list.
+  /// An inverted list that for each depth value in source tree, stores node ids
+  /// of nodes with that depth.
+  /// Indexed in depth value.
+  std::vector<std::vector<int>> t1_dil_;
+  /// An inverted list that for each depth value in source tree, stores node ids
+  /// of nodes with that depth.
+  /// Indexed in depth value.
+  std::vector<std::vector<int>> t2_dil_;
 
   /// Matrix storing subtree distances.
   data_structures::Matrix<double> td_;
