@@ -60,9 +60,10 @@ public:
   /// \param t2 Destination tree.
   /// \param k Maximum number of allowed structural changes (deletions,
   ///          insertions).
+  /// \param d_prunning Enables depth-based prunning (default: false).
   /// \return Tree edit distance regarding k.
   double touzet_ted(const node::Node<Label>& t1, const node::Node<Label>& t2,
-      const int& k);
+      const int& k, const bool d_prunning = false);
   /// Creates a TestItems object and returns it.
   ///
   /// \return A TestItem object.
@@ -101,7 +102,10 @@ private:
   ///
   /// NOTE: x, y are copied.
   ///
-  double tree_dist(const int& x, const int& y, const int& k, const int& e);
+  /// \param d_prunning Enables depth-based prunning. Initialised in the called
+  ///                   of touzet_ted.
+  double tree_dist(const int& x, const int& y, const int& k, const int& e,
+      const bool& d_prunning);
   /// Calculates e(x,y) - a budget of the remaining number of errors
   /// (deletions and insertions) that are left for the pair of subtrees
   /// (T1_x,T2_y) after computing the lower bound for the nodes around them.

@@ -102,7 +102,8 @@ void Algorithm<Label, CostModel>::index_nodes(
 template <typename Label, typename CostModel>
 double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
                                                const node::Node<Label>& t2,
-                                               const int& k) {
+                                               const int& k,
+                                               const bool d_prunning) {
   using data_structures::Matrix;
 
   // std::cerr << "--- touzet_ted ---" << std::endl;
@@ -154,7 +155,7 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
         int e_errors = e(x, y, k);
         // td_.at(x, y) = 1;
         // std::cerr << "td(" << x << "," << y << ") = " << std::endl;
-        td_.at(x, y) = tree_dist(x, y, k, e_errors);
+        td_.at(x, y) = tree_dist(x, y, k, e_errors, d_prunning);
         // std::cerr << td_.read_at(x, y) << std::endl;
       }
     }
@@ -165,7 +166,8 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
 
 template <typename Label, typename CostModel>
 double Algorithm<Label, CostModel>::tree_dist(const int& x, const int& y,
-                                              const int& k, const int& e) {
+                                              const int& k, const int& e,
+                                              const bool& d_prunning) {
   int x_size = t1_size_[x];
   int y_size = t2_size_[y];
 
@@ -192,8 +194,10 @@ double Algorithm<Label, CostModel>::tree_dist(const int& x, const int& y,
     fd_.at(e + 1, 0) = std::numeric_limits<double>::infinity(); // the first i that is outside e-strip
   }
 
-  // General cases.
   double candidate_result = 0.0;
+
+  // General cases - loop WITHOUT depth-based prunning.
+  // TODO: Choose loop based on the d_prunning flag.
   for (int i = 1; i <= x_size; ++i) { // TODO: Implement traversing truncated tree.
     if (i - e - 1 >= 1) { // First j that is outside e-strip.
       fd_.at(i, i - e - 1) = std::numeric_limits<double>::infinity();
@@ -242,6 +246,10 @@ double Algorithm<Label, CostModel>::tree_dist(const int& x, const int& y,
       fd_.at(i, i + e + 1) = std::numeric_limits<double>::infinity();
     }
   }
+
+  // General cases - loop WITH depth-based prunning.
+  // TODO: Implement.
+
   candidate_result = std::min({
     fd_.read_at(x_size - 1, y_size) + c_.del(t1_node_[x]),                 // Delete root in source subtree.
     fd_.read_at(x_size, y_size - 1) + c_.ins(t2_node_[y]),                 // Insert root in destination subtree.
