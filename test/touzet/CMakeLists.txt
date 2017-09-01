@@ -23,6 +23,29 @@ add_test(
   COMMAND touzet_node_indexing_subtree_size_test_driver # EXECUTABLE NAME
 )
 
+# Node depth testing.
+
+# Copy test cases.
+file(
+  COPY touzet_node_depth_test_data.txt
+  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+add_executable(
+  touzet_node_indexing_node_depth_test_driver # EXECUTABLE NAME
+  touzet_node_indexing_node_depth_test.cc     # EXECUTABLE SOURCE
+)
+
+target_link_libraries(
+  touzet_node_indexing_node_depth_test_driver # EXECUTABLE NAME
+  TreeSimilarity                              # LIBRARY NAME
+)
+
+add_test(
+  NAME touzet_node_indexing_node_depth_test           # TEST NAME
+  COMMAND touzet_node_indexing_node_depth_test_driver # EXECUTABLE NAME
+)
+
 # td-matrix testing.
 
 # Copy test cases.

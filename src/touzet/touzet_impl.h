@@ -299,6 +299,7 @@ const typename Algorithm<Label, CostModel>::TestItems Algorithm<Label, CostModel
   TestItems test_items = {
     t1_size_,
     td_,
+    t1_depth_,
   };
   return test_items;
 }

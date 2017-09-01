@@ -47,7 +47,8 @@ public:
   struct TestItems {
     const std::vector<int>& t1_size;
     const data_structures::Matrix<double>& td;
-    // TODO: Add depth index and depth inverted list.
+    const std::vector<int>& t1_depth;
+    // TODO: Add depth inverted list.
   };
 // Member functions.
 public:
@@ -84,8 +85,13 @@ private:
   std::vector<std::reference_wrapper<const node::Node<Label>>> t1_node_;
   /// Stores references to nodes of the destination tree. Indexed in postorder-1.
   std::vector<std::reference_wrapper<const node::Node<Label>>> t2_node_;
+  /// Stores the depth for each node of the source tree.
+  /// Indexed in postorder ids starting with 0.
+  std::vector<int> t1_depth_;
+  /// Stores the depth for each node of the destination tree.
+  /// Indexed in postorder ids starting with 0.
+  std::vector<int> t2_depth_;
 
-  // TODO: Implement depth index.
   // TODO: Implement depth inverted list.
 
   /// Matrix storing subtree distances.
