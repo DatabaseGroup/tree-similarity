@@ -34,9 +34,11 @@ template <typename Label, typename CostModel>
 int Algorithm<Label, CostModel>::index_nodes_recursion(
     const node::Node<Label>& node,
     std::vector<int>& size,
+    std::vector<int>& depth,
     std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
     int& start_postorder,
-    int& start_preorder) {
+    int& start_preorder,
+    int& start_depth) {
 
   // Stores number of descendants of this node. Incrementally computed while
   // traversing the children.
@@ -48,15 +50,22 @@ int Algorithm<Label, CostModel>::index_nodes_recursion(
   // in preorder.
   start_preorder++;
 
+  // Increment the depth for all children.
+  start_depth++;
+
   // Recursions to childen nodes.
   auto children_start_it = std::begin(node.get_children());
   auto children_end_it=std::end(node.get_children());
   while (children_start_it != children_end_it) {
-    desc_sum += index_nodes_recursion(*children_start_it, size, nodes,
-                                      start_postorder, start_preorder);
+    desc_sum += index_nodes_recursion(*children_start_it, size, depth, nodes,
+                                      start_postorder, start_preorder,
+                                      start_depth);
     // Continue to consecutive children.
     ++children_start_it;
   }
+
+  // Decrement the depth after traversing all children.
+  start_depth--;
 
   // Here, start_postorder holds this node's postorder id.
 
@@ -67,6 +76,8 @@ int Algorithm<Label, CostModel>::index_nodes_recursion(
     // Inner node has size desc_sum + 1.
     size.push_back(desc_sum + 1);
   }
+
+  depth.push_back(start_depth);
 
   // Add current node to the nodes vector.
   nodes.push_back(std::ref(node));
@@ -83,6 +94,7 @@ template <typename Label, typename CostModel>
 void Algorithm<Label, CostModel>::index_nodes(
     const node::Node<Label>& root,
     std::vector<int>& size,
+    std::vector<int>& depth,
     std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes) {
 
   // Index nodes of a tree.
@@ -94,7 +106,10 @@ void Algorithm<Label, CostModel>::index_nodes(
   //       move the template traversal with postorder and preorder to some notes
   //       of how to traverse trees.
   int start_preorder = 0;
-  index_nodes_recursion(root, size, nodes, start_postorder, start_preorder);
+  // Root has depth 0.
+  int start_depth = 0;
+  index_nodes_recursion(root, size, depth, nodes, start_postorder,
+      start_preorder, start_depth);
 
   // Here, start_postorder and start_preorder store the size of tree minus 1.
 }
@@ -129,12 +144,15 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
   t2_size_.clear();
   t1_node_.clear();
   t2_node_.clear();
+  t1_depth_.clear();
+  t2_depth_.clear();
+  // TODO: Add depth inverted list.
   // NOTE: It may be better to allocate the vectors with tree sizes and fill
   //       them in. Currently the correct values are collected in postorder and
   //       pushed-back. That results in linear-number of push_back invocations.
   //       The efficiency of that approach is unsure.
-  index_nodes(t1, t1_size_, t1_node_);
-  index_nodes(t2, t2_size_, t2_node_);
+  index_nodes(t1, t1_size_, t1_depth_, t1_node_);
+  index_nodes(t2, t2_size_, t2_depth_, t2_node_);
 
   // Nested loop over all node pairs in k-strip : |x-y|<=k.
   // NOTE: This loop iterates over all node pairs from k-strip, and verifies

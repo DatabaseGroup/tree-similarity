@@ -136,22 +136,27 @@ private:
   ///
   /// \param root The root node of the tree to index.
   /// \param size Vector with subtree sizes.
+  /// \param depth Vector with node depths.
   /// \param nodes Vector with references to nodes.
   void index_nodes(const node::Node<Label>& root, std::vector<int>& size,
+                   std::vector<int>& depth,
                    std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes);
   /// Traverses an input tree rooted at root recursively and collects
   /// information into index structures.
   ///
   /// \param root The root node of the tree to index.
   /// \param size Vector with subtree sizes.
+  /// \param depth Vector with node depths.
   /// \param nodes Vector with references to nodes.
   /// \param start_postorder Stores the postorder id of a node during traversal.
   /// \param start_preorder Stores the preorder id of a node during traversal.
+  /// \param start_depth Stores the depth of a node during traversal.
   /// \return Number of nodes in the subtree rooted at the caller node.
   int index_nodes_recursion(const node::Node<Label>& root,
-                             std::vector<int>& size,
+                             std::vector<int>& size, std::vector<int>& depth,
                              std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
-                             int& start_postorder, int& start_preorder);
+                             int& start_postorder, int& start_preorder,
+                             int& start_depth);
 };
 
 // Implementation details.
