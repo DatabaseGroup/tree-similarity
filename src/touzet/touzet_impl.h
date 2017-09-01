@@ -184,6 +184,7 @@ double Algorithm<Label, CostModel>::tree_dist(const int& x, const int& y,
   if (e + 1 <= y_size) {
     fd_.at(0, e + 1) = std::numeric_limits<double>::infinity(); // the first j that is outside e-strip
   }
+  // TODO: Mind the truncated tree.
   for (int i = 1; i <= std::min(x_size, e); ++i) { // j = 0; only i that are within e-strip.
     fd_.at(i, 0) = fd_.read_at(i - 1, 0) + c_.del(t1_node_[i + x_off]);
   }
@@ -193,7 +194,7 @@ double Algorithm<Label, CostModel>::tree_dist(const int& x, const int& y,
 
   // General cases.
   double candidate_result = 0.0;
-  for (int i = 1; i <= x_size; ++i) {
+  for (int i = 1; i <= x_size; ++i) { // TODO: Implement traversing truncated tree.
     if (i - e - 1 >= 1) { // First j that is outside e-strip.
       fd_.at(i, i - e - 1) = std::numeric_limits<double>::infinity();
     }
@@ -223,7 +224,7 @@ double Algorithm<Label, CostModel>::tree_dist(const int& x, const int& y,
         fd_.at(i, j) = std::numeric_limits<double>::infinity();
       } else {
         candidate_result = std::min({
-          fd_.read_at(i - 1, j) + c_.del(t1_node_[i + x_off]),
+          fd_.read_at(i - 1, j) + c_.del(t1_node_[i + x_off]), // TODO: Value at (i-1,j) may not be calculated due to truncated tree.
           fd_.read_at(i, j - 1) + c_.ins(t2_node_[j + y_off]),
           fd_.read_at(i - t1_size_[i + x_off], j - t2_size_[j + y_off]) + td_.read_at(i + x_off, j + y_off)
         });
