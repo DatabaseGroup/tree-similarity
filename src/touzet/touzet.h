@@ -91,8 +91,6 @@ private:
   /// Stores the depth for each node of the destination tree.
   /// Indexed in postorder ids starting with 0.
   std::vector<int> t2_depth_;
-
-  // TODO: Implement depth inverted list.
   /// An inverted list that for each depth value in source tree, stores node ids
   /// of nodes with that depth.
   /// Indexed in depth value.
@@ -101,7 +99,6 @@ private:
   /// of nodes with that depth.
   /// Indexed in depth value.
   std::vector<std::vector<int>> t2_dil_;
-
   /// Matrix storing subtree distances.
   data_structures::Matrix<double> td_;
   /// Matrix storing subforest distances.
@@ -148,6 +145,7 @@ private:
   /// \param nodes Vector with references to nodes.
   void index_nodes(const node::Node<Label>& root, std::vector<int>& size,
                    std::vector<int>& depth,
+                   std::vector<std::vector<int>>& dil,
                    std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes);
   /// Traverses an input tree rooted at root recursively and collects
   /// information into index structures.
@@ -162,6 +160,7 @@ private:
   /// \return Number of nodes in the subtree rooted at the caller node.
   int index_nodes_recursion(const node::Node<Label>& root,
                              std::vector<int>& size, std::vector<int>& depth,
+                             std::vector<std::vector<int>>& dil,
                              std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
                              int& start_postorder, int& start_preorder,
                              int& start_depth);
