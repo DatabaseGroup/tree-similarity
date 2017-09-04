@@ -166,6 +166,9 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
   index_nodes(t1, t1_size_, t1_depth_, t1_dil_, t1_node_);
   index_nodes(t2, t2_size_, t2_depth_, t2_dil_, t2_node_);
 
+  // Reset subproblem counter.
+  subproblem_counter = 0;
+
   // Nested loop over all node pairs in k-strip : |x-y|<=k.
   // NOTE: This loop iterates over all node pairs from k-strip, and verifies
   //       their k-relevancy.
@@ -217,6 +220,7 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
     fd_.at(0, e + 1) = std::numeric_limits<double>::infinity(); // the first j that is outside e-strip
   }
   // TODO: Mind the truncated tree.
+  // QUESTION: Is it necessary to verify depths here?
   for (int i = 1; i <= std::min(x_size, e); ++i) { // j = 0; only i that are within e-strip.
     fd_.at(i, 0) = fd_.read_at(i - 1, 0) + c_.del(t1_node_[i + x_off]);
   }
@@ -232,12 +236,17 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
     for (int i = 1; i <= x_size; ++i) {
       if (i - e - 1 >= 1) { // First j that is outside e-strip.
         fd_.at(i, i - e - 1) = std::numeric_limits<double>::infinity();
+        subproblem_counter++;
       }
       for (int j = std::max(1, i - e); j <= std::min(i + e, y_size); ++j) { // only (i,j) that are in e-strip
         // The td(x_size-1, y_size-1) is computed differently.
+        // TODO: This condition is evaluated too often but passes only on the
+        //       last i and j. If removed, 'subproblem_counter++' should be
+        //       incremented for max i and j.
         if (i == x_size && j == std::min(i + e, y_size)) {
           break;
         }
+        subproblem_counter++;
         // WAS: If (i+x_off,j+y_off) are not in k-strip or are not k-relevant, assign infinity to them.
         // WAS: if (std::abs((i + x_off) - (j + y_off)) > k || !k_relevant(i + x_off, j + y_off, k)) {
         // NOTE: It's about existence of a path from (i,j) to (x-x_size,y-y_size).
@@ -275,23 +284,33 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
       }
       if (i + e + 1 <= y_size) { // Last j that is outside e-strip.
         fd_.at(i, i + e + 1) = std::numeric_limits<double>::infinity();
+        subproblem_counter++;
       }
     }
   } else {
     // General cases - loop WITH depth-based pruning.
     for (int i = 1; i <= x_size; ++i) { // TODO: (1) Filter out based on depth. (2) Implement traversing truncated tree.
       // Filter out i-values based on depth.
+      // QUESTION: Does i have to be a descendant of x?
+      //           i is always a descendant of x - silly me.
       if (t1_depth_[i + x_off] - t1_depth_[x] > e + 1) {
         continue;
+        // NOTE: 'subproblem_counter++' for these cases will not be needed
+        //       when traversal of truncated tree is implemented.
       }
       if (i - e - 1 >= 1) { // First j that is outside e-strip.
         fd_.at(i, i - e - 1) = std::numeric_limits<double>::infinity();
+        subproblem_counter++;
       }
       for (int j = std::max(1, i - e); j <= std::min(i + e, y_size); ++j) { // only (i,j) that are in e-strip
         // The td(x_size-1, y_size-1) is computed differently.
+        // TODO: This condition is evaluated too often but passes only on the
+        //       last i and j. If removed, 'subproblem_counter++' should be
+        //       incremented for max i and j.
         if (i == x_size && j == std::min(i + e, y_size)) {
           break;
         }
+        subproblem_counter++;
         if (std::abs((i + x_off) - (j + y_off)) > k) {
           fd_.at(i, j) = std::numeric_limits<double>::infinity();
         } else {
@@ -301,7 +320,8 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
           );
           // Value at (i-1,j) may not be calculated due to truncated tree,
           // thus it has to be verified separately.
-          if (t1_depth_[i - 1 + x_off] - t1_depth_[x] <= e + 1) {
+          // TODO: For i=1 there is an out of bound exception.
+          if (i > 1 && t1_depth_.at(i - 1 + x_off) - t1_depth_[x] <= e + 1) {
             candidate_result = std::min(
               candidate_result,
               fd_.read_at(i - 1, j) + c_.del(t1_node_[i + x_off])
@@ -318,10 +338,14 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
       }
       if (i + e + 1 <= y_size) { // Last j that is outside e-strip.
         fd_.at(i, i + e + 1) = std::numeric_limits<double>::infinity();
+        subproblem_counter++;
       }
     }
   }
 
+  subproblem_counter++;
+  // QUESTION: Is it possible that for some e-value an infinity should be
+  //           returned, because the last subproblem is too far away?
   candidate_result = std::min({
     fd_.read_at(x_size - 1, y_size) + c_.del(t1_node_[x]),                 // Delete root in source subtree.
     fd_.read_at(x_size, y_size - 1) + c_.ins(t2_node_[y]),                 // Insert root in destination subtree.
@@ -377,4 +401,8 @@ const typename Algorithm<Label, CostModel>::TestItems Algorithm<Label, CostModel
   return test_items;
 }
 
+template <typename Label, typename CostModel>
+const unsigned long long int Algorithm<Label, CostModel>::get_subproblem_count() const {
+  return subproblem_counter;
+}
 #endif // TREE_SIMILARITY_TOUZET_TOUZET_IMPL_H

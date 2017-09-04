@@ -92,6 +92,29 @@ add_test(
   COMMAND touzet_td_test_driver # EXECUTABLE NAME
 )
 
+# Subproblem count for depth-based prunning testing.
+
+# Copy test cases.
+file(
+  COPY touzet_subproblem_count_depth_pruning_test_data.txt
+  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+add_executable(
+  touzet_subproblem_count_depth_pruning_test_driver # EXECUTABLE NAME
+  touzet_subproblem_count_depth_pruning_test.cc     # EXECUTABLE SOURCE
+)
+
+target_link_libraries(
+  touzet_subproblem_count_depth_pruning_test_driver # EXECUTABLE NAME
+  TreeSimilarity                                    # LIBRARY NAME
+)
+
+add_test(
+  NAME touzet_subproblem_count_depth_pruning_test           # TEST NAME
+  COMMAND touzet_subproblem_count_depth_pruning_test_driver # EXECUTABLE NAME
+)
+
 # TED testing.
 
 # Copy test cases.

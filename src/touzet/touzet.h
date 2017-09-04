@@ -69,6 +69,11 @@ public:
   ///
   /// \return A TestItem object.
   const TestItems get_test_items() const;
+  /// If the TED algorithm has been executed, returns the number of subproblems
+  /// encountered during that execution.
+  ///
+  /// \return The number of subproblems acountered in the last TED computation.
+  const unsigned long long int get_subproblem_count() const;
 // Member variables.
 private:
   /// Stores the subtree size for each node of the source tree.
@@ -105,6 +110,11 @@ private:
   data_structures::Matrix<double> fd_;
   /// Cost model.
   const CostModel c_;
+  /// Subproblem counter - for experiments only. Counts the number of
+  /// non-trivial values filled in fd_ matrix: subproblems where both forests
+  /// are not empty (including storing first infinities outside e-strip), and
+  /// last value computed in fd_.
+  unsigned long long int subproblem_counter;
 // Member functions.
 private:
   /// Calculates the tree edit distance between two subtrees with the remaining
