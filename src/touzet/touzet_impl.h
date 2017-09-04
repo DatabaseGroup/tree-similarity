@@ -226,59 +226,101 @@ double Algorithm<Label, CostModel>::tree_dist(const int& x, const int& y,
 
   double candidate_result = 0.0;
 
-  // General cases - loop WITHOUT depth-based prunning.
-  // TODO: Choose loop based on the d_prunning flag.
-  for (int i = 1; i <= x_size; ++i) { // TODO: Implement traversing truncated tree.
-    if (i - e - 1 >= 1) { // First j that is outside e-strip.
-      fd_.at(i, i - e - 1) = std::numeric_limits<double>::infinity();
-    }
-    for (int j = std::max(1, i - e); j <= std::min(i + e, y_size); ++j) { // only (i,j) that are in e-strip
-      // The td(x_size-1, y_size-1) is computed differently.
-      if (i == x_size && j == std::min(i + e, y_size)) {
-        break;
+  // Choose loop based on the d_prunning flag.
+  if (!d_prunning) {
+    // General cases - loop WITHOUT depth-based prunning.
+    for (int i = 1; i <= x_size; ++i) {
+      if (i - e - 1 >= 1) { // First j that is outside e-strip.
+        fd_.at(i, i - e - 1) = std::numeric_limits<double>::infinity();
       }
-      // WAS: If (i+x_off,j+y_off) are not in k-strip or are not k-relevant, assign infinity to them.
-      // WAS: if (std::abs((i + x_off) - (j + y_off)) > k || !k_relevant(i + x_off, j + y_off, k)) {
-      // NOTE: It's about existence of a path from (i,j) to (x-x_size,y-y_size).
-      //       It exists only then, if it existed for the neighburing nodes
-      //       adding the costs for coming to (i,j).
-      //       We don't have to verify e-strip because that's ensured with the
-      //       for loop and the first j and the first i outside e-strip.
-      // QUESTION: What about k-strip?
-      //           (i,j), in the input trees scope including offsets, must be
-      //           in k-strip. Otherwise, there is certainly no edit path from
-      //           (i,j) to (0,0). In other words, thre is no edit path from
-      //           (i,j) to (0,0) with the given budget k.
-      // QUESTION: What about k-relevancy?
-      //           Adding this to the condition below makes ted tests fail.
-      //           (a,b) is k-relevant if (T1_a,T2_b) can be mapped based on
-      //           the size lower bound of the nodes around these subtrees.
-      //           Thus, it doesn't fit here.
-      if (std::abs((i + x_off) - (j + y_off)) > k) {
-        fd_.at(i, j) = std::numeric_limits<double>::infinity();
-      } else {
-        candidate_result = std::min({
-          fd_.read_at(i - 1, j) + c_.del(t1_node_[i + x_off]), // TODO: Value at (i-1,j) may not be calculated due to truncated tree.
-          fd_.read_at(i, j - 1) + c_.ins(t2_node_[j + y_off]),
-          fd_.read_at(i - t1_size_[i + x_off], j - t2_size_[j + y_off]) + td_.read_at(i + x_off, j + y_off)
-        });
-        // None of the values in fd_ can be greater than e-value for this
-        // subtree pair.
-        if (candidate_result > e) {
+      for (int j = std::max(1, i - e); j <= std::min(i + e, y_size); ++j) { // only (i,j) that are in e-strip
+        // The td(x_size-1, y_size-1) is computed differently.
+        if (i == x_size && j == std::min(i + e, y_size)) {
+          break;
+        }
+        // WAS: If (i+x_off,j+y_off) are not in k-strip or are not k-relevant, assign infinity to them.
+        // WAS: if (std::abs((i + x_off) - (j + y_off)) > k || !k_relevant(i + x_off, j + y_off, k)) {
+        // NOTE: It's about existence of a path from (i,j) to (x-x_size,y-y_size).
+        //       It exists only then, if it existed for the neighburing nodes
+        //       adding the costs for coming to (i,j).
+        //       We don't have to verify e-strip because that's ensured with the
+        //       for loop and the first j and the first i outside e-strip.
+        // QUESTION: What about k-strip?
+        //           (i,j), in the input trees scope including offsets, must be
+        //           in k-strip. Otherwise, there is certainly no edit path from
+        //           (i,j) to (0,0). In other words, thre is no edit path from
+        //           (i,j) to (0,0) with the given budget k.
+        // QUESTION: What about k-relevancy?
+        //           Adding this to the condition below makes ted tests fail.
+        //           (a,b) is k-relevant if (T1_a,T2_b) can be mapped based on
+        //           the size lower bound of the nodes around these subtrees.
+        //           Thus, it doesn't fit here.
+        if (std::abs((i + x_off) - (j + y_off)) > k) {
           fd_.at(i, j) = std::numeric_limits<double>::infinity();
         } else {
-          fd_.at(i, j) = candidate_result;
+          candidate_result = std::min({
+            fd_.read_at(i - 1, j) + c_.del(t1_node_[i + x_off]),
+            fd_.read_at(i, j - 1) + c_.ins(t2_node_[j + y_off]),
+            fd_.read_at(i - t1_size_[i + x_off], j - t2_size_[j + y_off]) + td_.read_at(i + x_off, j + y_off)
+          });
+          // None of the values in fd_ can be greater than e-value for this
+          // subtree pair.
+          if (candidate_result > e) {
+            fd_.at(i, j) = std::numeric_limits<double>::infinity();
+          } else {
+            fd_.at(i, j) = candidate_result;
+          }
+        }
+        // std::cerr << "fd(" << i << "," << j << ") = " << fd_.read_at(i, j) << std::endl;
+      }
+      if (i + e + 1 <= y_size) { // Last j that is outside e-strip.
+        fd_.at(i, i + e + 1) = std::numeric_limits<double>::infinity();
+      }
+    }
+  } else {
+    // General cases - loop WITH depth-based prunning.
+    for (int i = 1; i <= x_size; ++i) { // TODO: (1) Filter out based on depth. (2) Implement traversing truncated tree.
+      // Filter out i-values based on depth.
+      if (t1_depth_[i + x_off] - t1_depth_[x] > e + 1) {
+        continue;
+      }
+      if (i - e - 1 >= 1) { // First j that is outside e-strip.
+        fd_.at(i, i - e - 1) = std::numeric_limits<double>::infinity();
+      }
+      for (int j = std::max(1, i - e); j <= std::min(i + e, y_size); ++j) { // only (i,j) that are in e-strip
+        // The td(x_size-1, y_size-1) is computed differently.
+        if (i == x_size && j == std::min(i + e, y_size)) {
+          break;
+        }
+        if (std::abs((i + x_off) - (j + y_off)) > k) {
+          fd_.at(i, j) = std::numeric_limits<double>::infinity();
+        } else {
+          candidate_result = std::min(
+            fd_.read_at(i, j - 1) + c_.ins(t2_node_[j + y_off]),
+            fd_.read_at(i - t1_size_[i + x_off], j - t2_size_[j + y_off]) + td_.read_at(i + x_off, j + y_off)
+          );
+          // Value at (i-1,j) may not be calculated due to truncated tree,
+          // thus it has to be verified separately.
+          if (t1_depth_[i - 1 + x_off] - t1_depth_[x] <= e + 1) {
+            candidate_result = std::min(
+              candidate_result,
+              fd_.read_at(i - 1, j) + c_.del(t1_node_[i + x_off])
+            );
+          }
+          // None of the values in fd_ can be greater than e-value for this
+          // subtree pair.
+          if (candidate_result > e) {
+            fd_.at(i, j) = std::numeric_limits<double>::infinity();
+          } else {
+            fd_.at(i, j) = candidate_result;
+          }
         }
       }
-      // std::cerr << "fd(" << i << "," << j << ") = " << fd_.read_at(i, j) << std::endl;
-    }
-    if (i + e + 1 <= y_size) { // Last j that is outside e-strip.
-      fd_.at(i, i + e + 1) = std::numeric_limits<double>::infinity();
+      if (i + e + 1 <= y_size) { // Last j that is outside e-strip.
+        fd_.at(i, i + e + 1) = std::numeric_limits<double>::infinity();
+      }
     }
   }
-
-  // General cases - loop WITH depth-based prunning.
-  // TODO: Implement.
 
   candidate_result = std::min({
     fd_.read_at(x_size - 1, y_size) + c_.del(t1_node_[x]),                 // Delete root in source subtree.
