@@ -129,7 +129,7 @@ template <typename Label, typename CostModel>
 double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
                                                const node::Node<Label>& t2,
                                                const int& k,
-                                               const bool d_prunning) {
+                                               const bool d_pruning) {
   using data_structures::Matrix;
 
   // std::cerr << "--- touzet_ted ---" << std::endl;
@@ -185,7 +185,7 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
         int e_errors = e(x, y, k);
         // td_.at(x, y) = 1;
         // std::cerr << "td(" << x << "," << y << ") = " << std::endl;
-        td_.at(x, y) = tree_dist(x, y, k, e_errors, d_prunning);
+        td_.at(x, y) = tree_dist(x, y, k, e_errors, d_pruning);
         // std::cerr << td_.read_at(x, y) << std::endl;
       }
     }
@@ -197,7 +197,7 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
 template <typename Label, typename CostModel>
 double Algorithm<Label, CostModel>::tree_dist(const int& x, const int& y,
                                               const int& k, const int& e,
-                                              const bool& d_prunning) {
+                                              const bool& d_pruning) {
   int x_size = t1_size_[x];
   int y_size = t2_size_[y];
 
@@ -226,9 +226,9 @@ double Algorithm<Label, CostModel>::tree_dist(const int& x, const int& y,
 
   double candidate_result = 0.0;
 
-  // Choose loop based on the d_prunning flag.
-  if (!d_prunning) {
-    // General cases - loop WITHOUT depth-based prunning.
+  // Choose loop based on the d_pruning flag.
+  if (!d_pruning) {
+    // General cases - loop WITHOUT depth-based pruning.
     for (int i = 1; i <= x_size; ++i) {
       if (i - e - 1 >= 1) { // First j that is outside e-strip.
         fd_.at(i, i - e - 1) = std::numeric_limits<double>::infinity();
@@ -278,7 +278,7 @@ double Algorithm<Label, CostModel>::tree_dist(const int& x, const int& y,
       }
     }
   } else {
-    // General cases - loop WITH depth-based prunning.
+    // General cases - loop WITH depth-based pruning.
     for (int i = 1; i <= x_size; ++i) { // TODO: (1) Filter out based on depth. (2) Implement traversing truncated tree.
       // Filter out i-values based on depth.
       if (t1_depth_[i + x_off] - t1_depth_[x] > e + 1) {

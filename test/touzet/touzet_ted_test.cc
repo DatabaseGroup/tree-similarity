@@ -51,19 +51,19 @@ int main() {
       node::Node<Label> t1 = bnp.parse_string(input_tree_1_string);
       node::Node<Label> t2 = bnp.parse_string(input_tree_2_string);
 
-      // Execute the algorithm WITHOUT depth-based prunning.
+      // Execute the algorithm WITHOUT depth-based pruning.
       double computed_results = touzet_ted.touzet_ted(t1, t2, k);
       if (correct_result != computed_results) {
-        std::cerr << "Incorrect TED result (WITHOUT depth-based prunning): " << computed_results << " instead of " << correct_result << std::endl;
+        std::cerr << "Incorrect TED result (WITHOUT depth-based pruning): " << computed_results << " instead of " << correct_result << std::endl;
         std::cerr << "T1: " << input_tree_1_string << std::endl;
         std::cerr << "T2: " << input_tree_2_string << std::endl;
         std::cerr << "k: " << k << std::endl;
         return -1;
       }
-      // Execute the algorithm WITH depth-based prunning.
+      // Execute the algorithm WITH depth-based pruning.
       computed_results = touzet_ted.touzet_ted(t1, t2, k, true);
       if (correct_result != computed_results) {
-        std::cerr << "Incorrect TED result (WITH depth-based prunning): " << computed_results << " instead of " << correct_result << std::endl;
+        std::cerr << "Incorrect TED result (WITH depth-based pruning): " << computed_results << " instead of " << correct_result << std::endl;
         std::cerr << "T1: " << input_tree_1_string << std::endl;
         std::cerr << "T2: " << input_tree_2_string << std::endl;
         std::cerr << "k: " << k << std::endl;
