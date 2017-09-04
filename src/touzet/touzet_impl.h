@@ -128,7 +128,7 @@ void Algorithm<Label, CostModel>::index_nodes(
 template <typename Label, typename CostModel>
 double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
                                                const node::Node<Label>& t2,
-                                               const int& k,
+                                               const int k,
                                                const bool d_pruning) {
   using data_structures::Matrix;
 
@@ -195,9 +195,9 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
 };
 
 template <typename Label, typename CostModel>
-double Algorithm<Label, CostModel>::tree_dist(const int& x, const int& y,
-                                              const int& k, const int& e,
-                                              const bool& d_pruning) {
+double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
+                                              const int k, const int e,
+                                              const bool d_pruning) {
   int x_size = t1_size_[x];
   int y_size = t2_size_[y];
 
@@ -337,7 +337,7 @@ double Algorithm<Label, CostModel>::tree_dist(const int& x, const int& y,
 };
 
 template <typename Label, typename CostModel>
-int Algorithm<Label, CostModel>::e(const int& x, const int& y, const int& k) const {
+int Algorithm<Label, CostModel>::e(const int x, const int y, const int k) const {
   // e(x,y) = k - |(|T1|-(x+1))-(|T2|-(y+1))| - |((x+1)-|T1_x|)-((y+1)-|T2_y|)|
   int x_size = t1_size_[x];
   int y_size = t2_size_[y];
@@ -347,7 +347,7 @@ int Algorithm<Label, CostModel>::e(const int& x, const int& y, const int& k) con
 };
 
 template <typename Label, typename CostModel>
-bool Algorithm<Label, CostModel>::k_relevant(const int& x, const int& y, const int& k) const {
+bool Algorithm<Label, CostModel>::k_relevant(const int x, const int y, const int k) const {
   // lower bound formula:
   // |(|T1|-(x+1))-(|T2|-(y+1))| + ||T1_x|-|T2_y|| + |((x+1)-|T1_x|)-((y+1)-|T2_y|)| < k
   int x_size = t1_size_[x];

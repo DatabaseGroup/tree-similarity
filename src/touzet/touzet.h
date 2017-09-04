@@ -64,7 +64,7 @@ public:
   /// \param d_pruning Enables depth-based pruning (default: false).
   /// \return Tree edit distance regarding k.
   double touzet_ted(const node::Node<Label>& t1, const node::Node<Label>& t2,
-      const int& k, const bool d_pruning = false);
+      const int k, const bool d_pruning = false);
   /// Creates a TestItems object and returns it.
   ///
   /// \return A TestItem object.
@@ -115,15 +115,15 @@ private:
   ///
   /// \param d_pruning Enables depth-based pruning. Initialised in the called
   ///                   of touzet_ted.
-  double tree_dist(const int& x, const int& y, const int& k, const int& e,
-      const bool& d_pruning);
+  double tree_dist(const int x, const int y, const int k, const int e,
+      const bool d_pruning);
   /// Calculates e(x,y) - a budget of the remaining number of errors
   /// (deletions and insertions) that are left for the pair of subtrees
   /// (T1_x,T2_y) after computing the lower bound for the nodes around them.
   ///
   /// e(x,y) = k - |(|T1|-(x+1))-(|T2|-(y+1))| - |((x+1)-|T1_x|)-((y+1)-|T2_y|)|
   ///
-  int e(const int& x, const int& y, const int& k) const;
+  int e(const int x, const int y, const int k) const;
   /// Verifies if subtrees T1_x and T2_y are k-relevant.
   ///
   /// T1_x and T2_y are k-relevant if
@@ -134,7 +134,7 @@ private:
   /// \param y postorder id of a node in destination tree T2.
   /// \param k maximum number of structural canges.
   /// \return True if subtrees T1_x and T2_y are k-relevant, and false otherwise.
-  bool k_relevant(const int& x, const int& y, const int& k) const;
+  bool k_relevant(const int x, const int y, const int k) const;
   /// Indexes the nodes of an input tree. Wrapper for the recursive
   /// index_nodes_recursion.
   /// Call this method to index nodes.
