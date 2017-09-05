@@ -132,10 +132,9 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
                                                const bool d_pruning) {
   using data_structures::Matrix;
 
-  // std::cerr << "--- touzet_ted ---" << std::endl;
-
-  // TODO: If the sizes of index vectors are not initialised, index_nodes
-  //       should be used to get input tree sizes.
+  // NOTE: If the sizes of index vectors are not initialised, index_nodes
+  //       should be used to get input tree sizes. This saves one tree
+  //       traversal.
   const int kT1Size = t1.get_tree_size();
   const int kT2Size = t2.get_tree_size();
 
@@ -146,8 +145,10 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
   }
 
   // TODO: Implement O(nk) matrix size.
-  // NOTE: The default constructor of Matrix is called while constructing ZS-Algorithm.
-  // NOTE: Shouldn't we implement Matrix::resize() instead of constructing matrix again?
+  // NOTE: The default constructor of Matrix is called while constructing
+  //       ZS-Algorithm.
+  // NOTE: Shouldn't we implement Matrix::resize() instead of constructing
+  //       matrix again?
   td_ = Matrix<double>(kT1Size, kT2Size);
   fd_ = Matrix<double>(kT1Size+1, kT2Size+1);
 
@@ -164,6 +165,8 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
   //       them in. Currently the correct values are collected in postorder and
   //       pushed-back. That results in linear-number of push_back invocations.
   //       The efficiency of that approach is unsure.
+  //       However, to get the tree size, one tree traversal is required. See
+  //       the note at 'const int kT1Size'.
   index_nodes(t1, t1_size_, t1_depth_, t1_dil_, t1_node_);
   index_nodes(t2, t2_size_, t2_depth_, t2_dil_, t2_node_);
 
@@ -176,21 +179,18 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
   for (int x = 0; x < kT1Size; ++x) {
     // Initialise the entire row to infinity - not necessarily needed.
     // TODO: Verify which td values are used in forest distance.
+    //       In manual execution, I've never used the values from NaN cells.
     for (int y = 0; y < kT2Size; ++y) {
       td_.at(x, y) = std::numeric_limits<double>::signaling_NaN();
     }
     for (int y = std::max(0, x - k); y <= std::min(x + k, kT2Size-1); ++y) {
-      // TODO: Implement the if below.
       if (!k_relevant(x, y, k)) {
         // Overwrite NaN to infinity.
         td_.at(x, y) = std::numeric_limits<double>::infinity();
       } else {
-        // compute td(x, y) with e errors
+        // Compute td(x, y) with e errors.
         int e_errors = e(x, y, k);
-        // td_.at(x, y) = 1;
-        // std::cerr << "td(" << x << "," << y << ") = " << std::endl;
         td_.at(x, y) = tree_dist(x, y, k, e_errors, d_pruning);
-        // std::cerr << td_.read_at(x, y) << std::endl;
       }
     }
   }
@@ -205,9 +205,6 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
   int x_size = t1_size_[x];
   int y_size = t2_size_[y];
 
-  // std::cerr << "IN tree_dist(" << x << "," << y << "," << k << "," << e << std::endl;
-  // std::cerr << "subtree sizes: " << x_size << "," << y_size << std::endl;
-
   // Calculates offsets that let us translate i and j to correct postorder ids.
   int x_off = x - x_size;
   int y_off = y - y_size;
@@ -220,8 +217,9 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
   if (e + 1 <= y_size) {
     fd_.at(0, e + 1) = std::numeric_limits<double>::infinity(); // the first j that is outside e-strip
   }
-  // TODO: Mind the truncated tree.
   // QUESTION: Is it necessary to verify depths here?
+  //           It is not, because these values will never be used. We write
+  //           them not to verify the condition.
   for (int i = 1; i <= std::min(x_size, e); ++i) { // j = 0; only i that are within e-strip.
     fd_.at(i, 0) = fd_.read_at(i - 1, 0) + c_.del(t1_node_[i + x_off]);
   }
@@ -242,14 +240,11 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
       for (int j = std::max(1, i - e); j <= std::min(i + e, y_size); ++j) { // only (i,j) that are in e-strip
         // The td(x_size-1, y_size-1) is computed differently.
         // TODO: This condition is evaluated too often but passes only on the
-        //       last i and j. If removed, 'subproblem_counter++' should be
-        //       incremented for max i and j.
+        //       last i and j.
         if (i == x_size && j == std::min(i + e, y_size)) {
           break;
         }
         subproblem_counter++;
-        // WAS: If (i+x_off,j+y_off) are not in k-strip or are not k-relevant, assign infinity to them.
-        // WAS: if (std::abs((i + x_off) - (j + y_off)) > k || !k_relevant(i + x_off, j + y_off, k)) {
         // NOTE: It's about existence of a path from (i,j) to (x-x_size,y-y_size).
         //       It exists only then, if it existed for the neighburing nodes
         //       adding the costs for coming to (i,j).
@@ -281,7 +276,6 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
             fd_.at(i, j) = candidate_result;
           }
         }
-        // std::cerr << "fd(" << i << "," << j << ") = " << fd_.read_at(i, j) << std::endl;
       }
       if (i + e + 1 <= y_size) { // Last j that is outside e-strip.
         fd_.at(i, i + e + 1) = std::numeric_limits<double>::infinity();
@@ -290,7 +284,7 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
     }
   } else {
     // General cases - loop WITH depth-based pruning.
-    for (int i = 1; i <= x_size; ++i) { // TODO: (1) Filter out based on depth. (2) Implement traversing truncated tree.
+    for (int i = 1; i <= x_size; ++i) { // TODO: Implement traversing truncated tree.
       // Filter out i-values based on depth.
       // QUESTION: Does i have to be a descendant of x?
       //           i is always a descendant of x - silly me.
@@ -307,8 +301,7 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
       for (int j = std::max(1, i - e); j <= std::min(i + e, y_size); ++j) { // only (i,j) that are in e-strip
         // The td(x_size-1, y_size-1) is computed differently.
         // TODO: This condition is evaluated too often but passes only on the
-        //       last i and j. If removed, 'subproblem_counter++' should be
-        //       incremented for max i and j.
+        //       last i and j.
         if (i == x_size && j == std::min(i + e, y_size)) {
           break;
         }
@@ -375,14 +368,13 @@ int Algorithm<Label, CostModel>::e(const int x, const int y, const int k) const 
 
 template <typename Label, typename CostModel>
 bool Algorithm<Label, CostModel>::k_relevant(const int x, const int y, const int k) const {
-  // lower bound formula:
+  // The lower bound formula:
   // |(|T1|-(x+1))-(|T2|-(y+1))| + ||T1_x|-|T2_y|| + |((x+1)-|T1_x|)-((y+1)-|T2_y|)| < k
   int x_size = t1_size_[x];
   int y_size = t2_size_[y];
   int lower_bound = std::abs((t1_size_.back() - (x+1)) - (t2_size_.back() - (y+1))) +
                     std::abs(x_size - y_size) +
                     std::abs(((x+1) - x_size) - ((y+1) - y_size));
-  // std::cerr << x << "," << y << "," << x_size << "," << y_size << ":" << lower_bound << std::endl;
   // NOTE: The pair (x,y) is k-relevant if lower_bound <= k.
   //       lower_bound < k is not correct because then (x,y) would be
   //       k-irrelevant for lower_bound = k. That would further mean that the
