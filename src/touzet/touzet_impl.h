@@ -320,8 +320,9 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
           );
           // Value at (i-1,j) may not be calculated due to truncated tree,
           // thus it has to be verified separately.
-          // TODO: For i=1 there is an out of bound exception.
-          if (i > 1 && t1_depth_.at(i - 1 + x_off) - t1_depth_[x] <= e + 1) {
+          // NOTE: For i=1 there may be an out of bound exception for depth
+          //       lookup.
+          if (i == 1 || (i > 1 && t1_depth_.at(i - 1 + x_off) - t1_depth_[x] <= e + 1)) {
             candidate_result = std::min(
               candidate_result,
               fd_.read_at(i - 1, j) + c_.del(t1_node_[i + x_off])
