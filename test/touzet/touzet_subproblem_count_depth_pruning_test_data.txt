@@ -18,3 +18,8 @@
 {a{b}{d{c{e}}{f}}}
 2
 73
+# Test case 6; TED=1; k=1=TED
+{a{b}{c{d{e}{f}}}}
+{a{b}{c{e}{f}}}
+1
+35
