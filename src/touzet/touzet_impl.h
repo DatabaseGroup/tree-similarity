@@ -145,6 +145,7 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
     return std::numeric_limits<double>::infinity();
   }
 
+  // TODO: Implement O(nk) matrix size.
   // NOTE: The default constructor of Matrix is called while constructing ZS-Algorithm.
   // NOTE: Shouldn't we implement Matrix::resize() instead of constructing matrix again?
   td_ = Matrix<double>(kT1Size, kT2Size);
@@ -293,6 +294,7 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
       // Filter out i-values based on depth.
       // QUESTION: Does i have to be a descendant of x?
       //           i is always a descendant of x - silly me.
+      // TODO: Figure out why e+1.
       if (t1_depth_[i + x_off] - t1_depth_[x] > e + 1) {
         continue;
         // NOTE: 'subproblem_counter++' for these cases will not be needed
