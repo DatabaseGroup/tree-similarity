@@ -23,3 +23,8 @@
 {a{b}{c{e}{f}}}
 1
 35
+# Test case 4a - standard tree + one node in destination
+{a{b{c}{d{e}}}{f{g}{h{i{j}{k}}}}{l{m}}}
+{a{b{c}{d{x}{e}}}{f{g}{h{i{j}{k}}}}{l{m}}}
+1
+97
