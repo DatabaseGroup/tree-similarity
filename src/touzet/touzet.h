@@ -49,6 +49,7 @@ public:
     const data_structures::Matrix<double>& td;
     const std::vector<int>& t1_depth;
     const std::vector<std::vector<int>>& t1_dil;
+    const std::vector<int>& t1_max_subtree_depth;
   };
 // Member functions.
 public:
@@ -104,6 +105,12 @@ private:
   /// of nodes with that depth.
   /// Indexed in depth value.
   std::vector<std::vector<int>> t2_dil_;
+  /// Stores the maximum depth for each subtree.
+  /// Indexed in postorder ids starting with 0.
+  std::vector<int> t1_subtree_max_depth_;
+  /// Stores the maximum depth for each subtree.
+  /// Indexed in postorder ids starting with 0.
+  std::vector<int> t2_subtree_max_depth_;
   /// Matrix storing subtree distances.
   data_structures::Matrix<double> td_;
   /// Matrix storing subforest distances.
@@ -152,9 +159,11 @@ private:
   /// \param root The root node of the tree to index.
   /// \param size Vector with subtree sizes.
   /// \param depth Vector with node depths.
+  /// \param subtree_max_depth Vector with subtree maximum depths.
   /// \param nodes Vector with references to nodes.
   void index_nodes(const node::Node<Label>& root, std::vector<int>& size,
                    std::vector<int>& depth,
+                   std::vector<int>& subtree_max_depth,
                    std::vector<std::vector<int>>& dil,
                    std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes);
   /// Traverses an input tree rooted at root recursively and collects
@@ -163,17 +172,20 @@ private:
   /// \param root The root node of the tree to index.
   /// \param size Vector with subtree sizes.
   /// \param depth Vector with node depths.
+  /// \param subtree_max_depth Vector with subtree maximum depths.
   /// \param nodes Vector with references to nodes.
   /// \param start_postorder Stores the postorder id of a node during traversal.
   /// \param start_preorder Stores the preorder id of a node during traversal.
-  /// \param start_depth Stores the depth of a node during traversal.
+  /// \param start_depth Stores the depth of a node, incremented during traversal.
+  /// \param parent_max_depth Used ot update parent subtree's max depth.
   /// \return Number of nodes in the subtree rooted at the caller node.
   int index_nodes_recursion(const node::Node<Label>& root,
                              std::vector<int>& size, std::vector<int>& depth,
+                             std::vector<int>& subtree_max_depth,
                              std::vector<std::vector<int>>& dil,
                              std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
                              int& start_postorder, int& start_preorder,
-                             int& start_depth);
+                             int start_depth, int& parent_max_depth);
 };
 
 // Implementation details.

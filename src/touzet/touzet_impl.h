@@ -35,11 +35,13 @@ int Algorithm<Label, CostModel>::index_nodes_recursion(
     const node::Node<Label>& node,
     std::vector<int>& size,
     std::vector<int>& depth,
+    std::vector<int>& subtree_max_depth,
     std::vector<std::vector<int>>& dil,
     std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
     int& start_postorder,
     int& start_preorder,
-    int& start_depth) {
+    int start_depth,
+    int& parent_max_depth) {
 
   // Stores number of descendants of this node. Incrementally computed while
   // traversing the children.
@@ -58,36 +60,39 @@ int Algorithm<Label, CostModel>::index_nodes_recursion(
     dil.push_back(std::vector<int>());
   }
 
-  // Increment the depth for all children.
-  start_depth++;
+  // This node subtree's max depth.
+  int this_subtree_max_depth = 0;
 
   // Recursions to childen nodes.
   auto children_start_it = std::begin(node.get_children());
   auto children_end_it=std::end(node.get_children());
   while (children_start_it != children_end_it) {
-    desc_sum += index_nodes_recursion(*children_start_it, size, depth, dil,
+    desc_sum += index_nodes_recursion(*children_start_it, size, depth, subtree_max_depth, dil,
                                       nodes, start_postorder, start_preorder,
-                                      start_depth);
+                                      start_depth + 1, this_subtree_max_depth);
     // Continue to consecutive children.
     ++children_start_it;
   }
-
-  // Decrement the depth after traversing all children.
-  start_depth--;
 
   // Here, start_postorder holds this node's postorder id.
 
   if (node.is_leaf()) {
     // Leaf has size 1.
     size.push_back(1);
+    // If this node has no children, set the max depth to this node's depth.
+    this_subtree_max_depth = start_depth;
   } else {
     // Inner node has size desc_sum + 1.
     size.push_back(desc_sum + 1);
   }
 
-  // Depth and depth inverted list.
+  // Depth, subtree max depth, and depth inverted list.
   depth.push_back(start_depth);
   dil.at(start_depth).push_back(start_postorder);
+  subtree_max_depth.push_back(this_subtree_max_depth);
+
+  // Update parent subtree's max depth.
+  parent_max_depth = std::max(parent_max_depth, this_subtree_max_depth);
 
   // Add current node to the nodes vector.
   nodes.push_back(std::ref(node));
@@ -105,6 +110,7 @@ void Algorithm<Label, CostModel>::index_nodes(
     const node::Node<Label>& root,
     std::vector<int>& size,
     std::vector<int>& depth,
+    std::vector<int>& subtree_max_depth,
     std::vector<std::vector<int>>& dil,
     std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes) {
 
@@ -117,10 +123,12 @@ void Algorithm<Label, CostModel>::index_nodes(
   //       move the template traversal with postorder and preorder to some notes
   //       of how to traverse trees.
   int start_preorder = 0;
-  // Root has depth 0.
-  int start_depth = 0;
-  index_nodes_recursion(root, size, depth, dil, nodes, start_postorder,
-      start_preorder, start_depth);
+  // // Root has depth 0.
+  // int start_depth = 0;
+  // Maximum input tree depth.
+  int input_max_depth = 0;
+  index_nodes_recursion(root, size, depth, subtree_max_depth, dil, nodes, start_postorder,
+      start_preorder, 0, input_max_depth);
 
   // Here, start_postorder and start_preorder store the size of tree minus 1.
 }
@@ -159,6 +167,8 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
   t2_node_.clear();
   t1_depth_.clear();
   t2_depth_.clear();
+  t1_subtree_max_depth_.clear();
+  t2_subtree_max_depth_.clear();
   t1_dil_.clear();
   t2_dil_.clear();
   // NOTE: It may be better to allocate the vectors with tree sizes and fill
@@ -167,8 +177,8 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
   //       The efficiency of that approach is unsure.
   //       However, to get the tree size, one tree traversal is required. See
   //       the note at 'const int kT1Size'.
-  index_nodes(t1, t1_size_, t1_depth_, t1_dil_, t1_node_);
-  index_nodes(t2, t2_size_, t2_depth_, t2_dil_, t2_node_);
+  index_nodes(t1, t1_size_, t1_depth_, t1_subtree_max_depth_, t1_dil_, t1_node_);
+  index_nodes(t2, t2_size_, t2_depth_, t2_subtree_max_depth_, t2_dil_, t2_node_);
 
   // Reset subproblem counter.
   subproblem_counter = 0;
@@ -392,6 +402,7 @@ const typename Algorithm<Label, CostModel>::TestItems Algorithm<Label, CostModel
     td_,
     t1_depth_,
     t1_dil_,
+    t1_subtree_max_depth_,
   };
   return test_items;
 }
