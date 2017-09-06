@@ -123,9 +123,7 @@ void Algorithm<Label, CostModel>::index_nodes(
   //       move the template traversal with postorder and preorder to some notes
   //       of how to traverse trees.
   int start_preorder = 0;
-  // // Root has depth 0.
-  // int start_depth = 0;
-  // Maximum input tree depth.
+  // Maximum input tree depth - the first reference passed to recursion.
   int input_max_depth = 0;
   index_nodes_recursion(root, size, depth, subtree_max_depth, dil, nodes, start_postorder,
       start_preorder, 0, input_max_depth);
@@ -187,9 +185,10 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
   // NOTE: This loop iterates over all node pairs from k-strip, and verifies
   //       their k-relevancy.
   for (int x = 0; x < kT1Size; ++x) {
-    // Initialise the entire row to infinity - not necessarily needed.
-    // TODO: Verify which td values are used in forest distance.
-    //       In manual execution, I've never used the values from NaN cells.
+    // Initialise the entire row to infinity.
+    // TODO: It seems not necessarily needed. Verify which td values are used
+    //       in forest distance. In manual execution, I've never used the
+    //       values from NaN cells.
     for (int y = 0; y < kT2Size; ++y) {
       td_.at(x, y) = std::numeric_limits<double>::signaling_NaN();
     }
@@ -198,9 +197,8 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
         // Overwrite NaN to infinity.
         td_.at(x, y) = std::numeric_limits<double>::infinity();
       } else {
-        // Compute td(x, y) with e errors.
-        int e_errors = e(x, y, k);
-        td_.at(x, y) = tree_dist(x, y, k, e_errors, d_pruning);
+        // Compute td(x, y) with e errors - the value of e(x, y, k).
+        td_.at(x, y) = tree_dist(x, y, k, e(x, y, k), d_pruning);
       }
     }
   }
@@ -218,6 +216,8 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
   // Calculates offsets that let us translate i and j to correct postorder ids.
   int x_off = x - x_size;
   int y_off = y - y_size;
+
+  // std::cerr << "(x,y) = " << "(" << x << "," << y << ")" << std::endl;
 
   // Initial cases.
   fd_.at(0, 0) = 0.0; // (0,0) is always within e-strip.
@@ -294,16 +294,34 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
     }
   } else {
     // General cases - loop WITH depth-based pruning.
-    for (int i = 1; i <= x_size; ++i) { // TODO: Implement traversing truncated tree.
-      // Filter out i-values based on depth.
-      // QUESTION: Does i have to be a descendant of x?
-      //           i is always a descendant of x - silly me.
-      // TODO: Figure out why e+1.
-      if (t1_depth_[i + x_off] - t1_depth_[x] > e + 1) {
-        continue;
-        // NOTE: 'subproblem_counter++' for these cases will not be needed
-        //       when traversal of truncated tree is implemented.
-      }
+
+    // NOTE: max_depth has to be set to min(depth(x)+e+1, max depth of T1_x)
+    //       because e+1 may exceed the maximum depth of T1_x.
+    // TODO: Figure out why e+1.
+    int max_depth = std::min(t1_depth_.at(x) + e + 1, t1_subtree_max_depth_.at(x));
+
+    int i = 1;
+    int max_depth_it = 0;
+    // Move max_depth_it to point to the first node within this subtree (T1_x).
+    // TODO: This requires a scan of one depth inversted list. Can we do better?
+    while (t1_dil_.at(max_depth).at(max_depth_it) < i + x_off) {
+      max_depth_it++;
+    }
+    // Set the first i-value for the loop
+    // TODO: Make this if more elegant.
+    if (t1_depth_.at(i + x_off) > max_depth) {
+      // x_off has to be substructed to get correct i.
+      i = t1_dil_.at(max_depth).at(max_depth_it) - x_off;
+      max_depth_it++;
+    } else if (t1_depth_.at(i + x_off) == max_depth) {
+      max_depth_it++;
+    }
+    // Traversing truncated tree to filter out i-values based on depth.
+    while (i <= x_size) {
+      // Old if statement for filtering i-values based on depth.
+      // if (t1_depth_[i + x_off] - t1_depth_[x] > e + 1) {
+      //   continue;
+      // }
       if (i - e - 1 >= 1) { // First j that is outside e-strip.
         fd_.at(i, i - e - 1) = std::numeric_limits<double>::infinity();
         subproblem_counter++;
@@ -345,6 +363,21 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
       if (i + e + 1 <= y_size) { // Last j that is outside e-strip.
         fd_.at(i, i + e + 1) = std::numeric_limits<double>::infinity();
         subproblem_counter++;
+      }
+      // Set next i to iterate.
+      i++;
+      // NOTE: i <= x_size verifies depth and dil[max_depth] bounds.
+      // NOTE: For i=x_size (subtree root) the depth is always smaller than
+      //       max_depth.
+      // TODO: Make this if more elegant.
+      if (i <= x_size && t1_depth_.at(i + x_off) > max_depth) {
+        // If depth of i is greater than max_depth, there must be an ancestor
+        // of i with depth equals max_depth, and max_depth_it points to it.
+        // x_off has to be substructed to get correct i.
+        i = t1_dil_.at(max_depth).at(max_depth_it) - x_off;
+        max_depth_it++;
+      } else if (i <= x_size && t1_depth_.at(i + x_off) == max_depth) {
+        max_depth_it++;
       }
     }
   }
