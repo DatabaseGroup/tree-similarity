@@ -28,7 +28,7 @@ int main() {
   using CostModel = cost_model::UnitCostModel<Label>;
 
   // Parse test cases from file.
-  std::ifstream test_cases_file("subtree_size_test_data.txt");
+  std::ifstream test_cases_file("touzet_subtree_size_test_data.txt");
   if (!test_cases_file.is_open()) {
     std::cerr << "Error while opening file." << std::endl;
     return -1;

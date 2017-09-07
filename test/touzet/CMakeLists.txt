@@ -1,162 +1,40 @@
 # Touzet's algorithm tests.
 
-# Subtree sizes testing.
-
-# Copy test cases.
-file(
-  COPY subtree_size_test_data.txt
-  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+# Specify list of test strings.
+set(touzet_test_list
+  touzet_subtree_size_test
+  touzet_node_depth_test
+  touzet_subtree_max_depth_test
+  touzet_depth_inverted_list_test
+  touzet_td_test
+  touzet_subproblem_count_depth_pruning_test
+  touzet_ted_test
 )
 
-add_executable(
-  touzet_node_indexing_subtree_size_test_driver # EXECUTABLE NAME
-  touzet_node_indexing_subtree_size_test.cc     # EXECUTABLE SOURCE
-)
+# Add custom target for building all touzet's tests.
+add_custom_target(touzet_all_tests)
 
-target_link_libraries(
-  touzet_node_indexing_subtree_size_test_driver # EXECUTABLE NAME
-  TreeSimilarity                                # LIBRARY NAME
-)
-
-add_test(
-  NAME touzet_node_indexing_subtree_size_test           # TEST NAME
-  COMMAND touzet_node_indexing_subtree_size_test_driver # EXECUTABLE NAME
-)
-
-# Node depth testing.
-
-# Copy test cases.
-file(
-  COPY touzet_node_depth_test_data.txt
-  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
-)
-
-add_executable(
-  touzet_node_indexing_node_depth_test_driver # EXECUTABLE NAME
-  touzet_node_indexing_node_depth_test.cc     # EXECUTABLE SOURCE
-)
-
-target_link_libraries(
-  touzet_node_indexing_node_depth_test_driver # EXECUTABLE NAME
-  TreeSimilarity                              # LIBRARY NAME
-)
-
-add_test(
-  NAME touzet_node_indexing_node_depth_test           # TEST NAME
-  COMMAND touzet_node_indexing_node_depth_test_driver # EXECUTABLE NAME
-)
-
-# Subtree max depth testing.
-
-# Copy test cases.
-file(
-  COPY touzet_subtree_max_depth_test_data.txt
-  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
-)
-
-add_executable(
-  touzet_node_indexing_subtree_max_depth_test_driver # EXECUTABLE NAME
-  touzet_node_indexing_subtree_max_depth_test.cc     # EXECUTABLE SOURCE
-)
-
-target_link_libraries(
-  touzet_node_indexing_subtree_max_depth_test_driver # EXECUTABLE NAME
-  TreeSimilarity                                     # LIBRARY NAME
-)
-
-add_test(
-  NAME touzet_node_indexing_subtree_max_depth_test           # TEST NAME
-  COMMAND touzet_node_indexing_subtree_max_depth_test_driver # EXECUTABLE NAME
-)
-
-# Depth inverted list testing.
-
-# Copy test cases.
-file(
-  COPY touzet_depth_inverted_list_test_data.txt
-  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
-)
-
-add_executable(
-  touzet_node_indexing_depth_inverted_list_test_driver # EXECUTABLE NAME
-  touzet_node_indexing_depth_inverted_list_test.cc     # EXECUTABLE SOURCE
-)
-
-target_link_libraries(
-  touzet_node_indexing_depth_inverted_list_test_driver # EXECUTABLE NAME
-  TreeSimilarity                                       # LIBRARY NAME
-)
-
-add_test(
-  NAME touzet_node_indexing_depth_inverted_list_test           # TEST NAME
-  COMMAND touzet_node_indexing_depth_inverted_list_test_driver # EXECUTABLE NAME
-)
-
-# td-matrix testing.
-
-# Copy test cases.
-file(
-  COPY td_test_data.txt
-  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
-)
-
-add_executable(
-  touzet_td_test_driver # EXECUTABLE NAME
-  touzet_td_test.cc     # EXECUTABLE SOURCE
-)
-
-target_link_libraries(
-  touzet_td_test_driver # EXECUTABLE NAME
-  TreeSimilarity        # LIBRARY NAME
-)
-
-add_test(
-  NAME touzet_td_test           # TEST NAME
-  COMMAND touzet_td_test_driver # EXECUTABLE NAME
-)
-
-# Subproblem count for depth-based prunning testing.
-
-# Copy test cases.
-file(
-  COPY touzet_subproblem_count_depth_pruning_test_data.txt
-  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
-)
-
-add_executable(
-  touzet_subproblem_count_depth_pruning_test_driver # EXECUTABLE NAME
-  touzet_subproblem_count_depth_pruning_test.cc     # EXECUTABLE SOURCE
-)
-
-target_link_libraries(
-  touzet_subproblem_count_depth_pruning_test_driver # EXECUTABLE NAME
-  TreeSimilarity                                    # LIBRARY NAME
-)
-
-add_test(
-  NAME touzet_subproblem_count_depth_pruning_test           # TEST NAME
-  COMMAND touzet_subproblem_count_depth_pruning_test_driver # EXECUTABLE NAME
-)
-
-# TED testing.
-
-# Copy test cases.
-file(
-  COPY touzet_ted_test_data.txt
-  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
-)
-
-add_executable(
-  touzet_ted_test_driver # EXECUTABLE NAME
-  touzet_ted_test.cc     # EXECUTABLE SOURCE
-)
-
-target_link_libraries(
-  touzet_ted_test_driver # EXECUTABLE NAME
-  TreeSimilarity         # LIBRARY NAME
-)
-
-add_test(
-  NAME touzet_ted_test           # TEST NAME
-  COMMAND touzet_ted_test_driver # EXECUTABLE NAME
-)
+# Specify test strings in the loop.
+foreach(loop_var ${touzet_test_list})
+  file(
+    COPY        ${loop_var}_data.txt
+    DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+  )
+  add_executable(
+    ${loop_var}_driver # EXECUTABLE NAME
+    ${loop_var}.cc     # EXECUTABLE SOURCE
+  )
+  target_link_libraries(
+    ${loop_var}_driver # EXECUTABLE NAME
+    TreeSimilarity     # LIBRARY NAME
+  )
+  add_test(
+    NAME    ${loop_var}        # TEST NAME
+    COMMAND ${loop_var}_driver # EXECUTABLE NAME
+  )
+  # Add this target to touzet_all_tests target.
+  add_dependencies(
+    touzet_all_tests   # TARGET
+    ${loop_var}_driver # TARGET DEPENDENCY
+  )
+endforeach(loop_var)
