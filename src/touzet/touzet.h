@@ -130,8 +130,11 @@ private:
   ///
   /// NOTE: x, y are copied.
   ///
+  /// \param y The original y-coordinate. In memory-optimised version it is
+  ///          translated inside this method for each access to td_.
+  ///
   /// \param d_pruning Enables depth-based pruning. Initialised in the called
-  ///                   of touzet_ted.
+  ///                  of touzet_ted.
   double tree_dist(const int x, const int y, const int k, const int e,
       const bool d_pruning);
   /// Calculates e(x,y) - a budget of the remaining number of errors
@@ -186,6 +189,10 @@ private:
                              std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
                              int& start_postorder, int& start_preorder,
                              int start_depth, int& parent_max_depth);
+  int get_translated_y(int original_y, int original_x, int k) const;
+  int get_original_y(int translated_y, int original_x, int k) const;
+  int get_translated_j(int original_j, int original_i, int e) const;
+  int get_original_j(int translated_j, int original_i, int e) const;
 };
 
 // Implementation details.

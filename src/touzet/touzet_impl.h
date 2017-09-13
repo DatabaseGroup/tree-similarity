@@ -155,7 +155,8 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
   //       ZS-Algorithm.
   // NOTE: Shouldn't we implement Matrix::resize() instead of constructing
   //       matrix again?
-  const int kTdWidth = 2 * k + 1; // NOTE: This may be larger than |T2|.
+  const int kTdWidth = 2 * k + 1; // NOTE: The widths may be larger than |T2|.
+  const int kFdWidth = 2 * (k + 1) + 1;
   td_ = Matrix<double>(kT1Size, kTdWidth);
   fd_ = Matrix<double>(kT1Size+1, kT2Size+1);
 
@@ -197,21 +198,22 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
     // For quadratic memory used: 'for (int y = std::max(0, x - k); y <= std::min(x + k, kT2Size-1); ++y) {'.
     // The width of td_ is modified. We have to ensure that we're accessing all
     // cells from the k-strip.
-    for (int y = std::max(0, k-x); y <= std::min(kTdWidth-1, kT2Size-1-x+k); ++y) {
+    // Shrinked: for (int y = std::max(0, k-x); y <= std::min(kTdWidth-1, kT2Size-1-x+k); ++y) {
+    for (int y = std::max(0, x - k); y <= std::min(x + k, kT2Size-1); ++y) {
       // std::cerr << "(x,y) = " << "(" << x << "," << y << ")" << std::endl;
       // 'y-k+x' translates the y-value in the shrinked td_ to the original y-value.
-      if (!k_relevant(x, y-k+x, k)) {
+      if (!k_relevant(x, y, k)) {
         // Overwrite NaN to infinity.
-        td_.at(x, y) = std::numeric_limits<double>::infinity();
+        td_.at(x, get_translated_y(y, x, k)) = std::numeric_limits<double>::infinity();
       } else {
         // Compute td(x, y) with e errors - the value of e(x, y, k).
         // 'y-k+x' translates the y-value in the shrinked td_ to the original y-value.
-        td_.at(x, y) = tree_dist(x, y, k, e(x, y-k+x, k), d_pruning);
+        td_.at(x, get_translated_y(y, x, k)) = tree_dist(x, y, k, e(x, y, k), d_pruning);
       }
     }
   }
   // 'kT2Size-1-(kT1Size-1)+k)' is the id of the root of T2 in the shrinked td_.
-  return td_.at(kT1Size-1, std::min(kTdWidth-1, kT2Size-1-(kT1Size-1)+k));
+  return td_.at(kT1Size-1, get_translated_y(kT2Size-1, kT1Size-1, k));
 };
 
 template <typename Label, typename CostModel>
@@ -220,14 +222,14 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
                                               const bool d_pruning) {
   int x_size = t1_size_[x];
   // 'y-k+x' translates the y-value in the shrinked td_ to the original y-value.
-  int y_size = t2_size_[y-k+x];
+  int y_size = t2_size_[y];
 
   // std::cerr << "INSIDE (" << x << "," << y << "); original y = " << y-k+x << "; e = " << e << std::endl;
 
   // Calculates offsets that let us translate i and j to correct postorder ids.
   int x_off = x - x_size;
   // 'y-k+x' translates the y-value in the shrinked td_ to the original y-value.
-  int y_off = y-k+x - y_size;
+  int y_off = y - y_size;
 
   // std::cerr << "(x,y) = " << "(" << x << "," << y-k+x << ")" << std::endl;
 
@@ -291,7 +293,7 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
             fd_.read_at(i, j - 1) + c_.ins(t2_node_[j + y_off]),
             // 'j + y_off' is original id of a node in T2.
             // '-(i+x_off)+k' translates that id to the shrinked td_.
-            fd_.read_at(i - t1_size_[i + x_off], j - t2_size_[j + y_off]) + td_.read_at(i + x_off, j + y_off -(i+x_off)+k)
+            fd_.read_at(i - t1_size_[i + x_off], j - t2_size_[j + y_off]) + td_.read_at(i + x_off, get_translated_y(j + y_off, i + x_off, k)) // j + y_off -(i+x_off)+k
           });
           // None of the values in fd_ can be greater than e-value for this
           // subtree pair.
@@ -356,7 +358,7 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
             fd_.read_at(i, j - 1) + c_.ins(t2_node_[j + y_off]),
             // 'j + y_off' is original id of a node in T2.
             // '-(i+x_off)+k' translates that id to the shrinked td_.
-            fd_.read_at(i - t1_size_[i + x_off], j - t2_size_[j + y_off]) + td_.read_at(i + x_off, j + y_off -(i+x_off)+k)
+            fd_.read_at(i - t1_size_[i + x_off], j - t2_size_[j + y_off]) + td_.read_at(i + x_off, get_translated_y(j + y_off, i + x_off, k)) // j + y_off -(i+x_off)+k
           );
           // Value at (i-1,j) may not be calculated due to truncated tree,
           // thus it has to be verified separately.
@@ -405,8 +407,8 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
   // 'y-k+x' translates the y-value in the shrinked td_ to the original y-value.
   candidate_result = std::min({
     fd_.read_at(x_size - 1, y_size) + c_.del(t1_node_[x]),                 // Delete root in source subtree.
-    fd_.read_at(x_size, y_size - 1) + c_.ins(t2_node_[y-k+x]),                 // Insert root in destination subtree.
-    fd_.read_at(x_size - 1, y_size - 1) + c_.ren(t1_node_[x], t2_node_[y-k+x]) // Rename root nodes of the subtrees.
+    fd_.read_at(x_size, y_size - 1) + c_.ins(t2_node_[y]),                 // Insert root in destination subtree.
+    fd_.read_at(x_size - 1, y_size - 1) + c_.ren(t1_node_[x], t2_node_[y]) // Rename root nodes of the subtrees.
   });
   // The distance between two subtrees cannot be greater than e-value for these
   // subtrees.
@@ -463,5 +465,28 @@ const typename Algorithm<Label, CostModel>::TestItems Algorithm<Label, CostModel
 template <typename Label, typename CostModel>
 const unsigned long long int Algorithm<Label, CostModel>::get_subproblem_count() const {
   return subproblem_counter;
+}
+
+template <typename Label, typename CostModel>
+int Algorithm<Label, CostModel>::get_translated_y(int original_y, int original_x, int k) const {
+  // 'j + y_off' is original id of a node in T2.
+  // '-(i+x_off)+k' translates that id to the shrinked td_.
+  return original_y - original_x + k;
+}
+
+template <typename Label, typename CostModel>
+int Algorithm<Label, CostModel>::get_original_y(int translated_y, int original_x, int k) const {
+  // 'translated_y-k+original_x' translates the y-value in the shrinked td_ to the original y-value.
+  return translated_y - k + original_x;
+}
+
+template <typename Label, typename CostModel>
+int Algorithm<Label, CostModel>::get_translated_j(int original_j, int original_i, int e) const {
+  return original_j - original_i + e;
+}
+
+template <typename Label, typename CostModel>
+int Algorithm<Label, CostModel>::get_original_j(int translated_j, int original_i, int e) const {
+  return translated_j - e + original_i;
 }
 #endif // TREE_SIMILARITY_TOUZET_TOUZET_IMPL_H
