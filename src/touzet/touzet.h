@@ -190,9 +190,7 @@ private:
                              int& start_postorder, int& start_preorder,
                              int start_depth, int& parent_max_depth);
   int get_translated_y(int original_y, int original_x, int k) const;
-  int get_original_y(int translated_y, int original_x, int k) const;
   int get_translated_j(int original_j, int original_i, int e) const;
-  int get_original_j(int translated_j, int original_i, int e) const;
 };
 
 // Implementation details.
