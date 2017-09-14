@@ -189,8 +189,9 @@ private:
                              std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
                              int& start_postorder, int& start_preorder,
                              int start_depth, int& parent_max_depth);
-  int get_translated_y(int original_y, int original_x, int k) const;
-  int get_translated_j(int original_j, int original_i, int e) const;
+  // TODO: Move the translation to a specialised matrix.
+  // TODO: Document it (come up with a name for (w)idth).
+  int get_translated_col(int original_col, int original_row, int w) const;
 };
 
 // Implementation details.

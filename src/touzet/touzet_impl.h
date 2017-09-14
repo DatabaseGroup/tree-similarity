@@ -204,16 +204,16 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
       // 'y-k+x' translates the y-value in the shrinked td_ to the original y-value.
       if (!k_relevant(x, y, k)) {
         // Overwrite NaN to infinity.
-        td_.at(x, get_translated_y(y, x, k)) = std::numeric_limits<double>::infinity();
+        td_.at(x, get_translated_col(y, x, k)) = std::numeric_limits<double>::infinity();
       } else {
         // Compute td(x, y) with e errors - the value of e(x, y, k).
         // 'y-k+x' translates the y-value in the shrinked td_ to the original y-value.
-        td_.at(x, get_translated_y(y, x, k)) = tree_dist(x, y, k, e(x, y, k), d_pruning);
+        td_.at(x, get_translated_col(y, x, k)) = tree_dist(x, y, k, e(x, y, k), d_pruning);
       }
     }
   }
   // 'kT2Size-1-(kT1Size-1)+k)' is the id of the root of T2 in the shrinked td_.
-  return td_.at(kT1Size-1, get_translated_y(kT2Size-1, kT1Size-1, k));
+  return td_.at(kT1Size-1, get_translated_col(kT2Size-1, kT1Size-1, k));
 };
 
 template <typename Label, typename CostModel>
@@ -234,21 +234,21 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
   // std::cerr << "(x,y) = " << "(" << x << "," << y-k+x << ")" << std::endl;
 
   // Initial cases.
-  fd_.at(0, get_translated_j(0, 0, e)) = 0.0; // (0,0) is always within e-strip.
+  fd_.at(0, get_translated_col(0, 0, e)) = 0.0; // (0,0) is always within e-strip.
   for (int j = 1; j <= std::min(y_size, e); ++j) { // i = 0; only j that are within e-strip.
-    fd_.at(0, get_translated_j(j, 0, e)) = fd_.read_at(0, get_translated_j(j - 1, 0, e)) + c_.ins(t2_node_[j + y_off]);
+    fd_.at(0, get_translated_col(j, 0, e)) = fd_.read_at(0, get_translated_col(j - 1, 0, e)) + c_.ins(t2_node_[j + y_off]);
   }
   if (e + 1 <= y_size) {
-    fd_.at(0, get_translated_j(e + 1, 0, e)) = std::numeric_limits<double>::infinity(); // the first j that is outside e-strip
+    fd_.at(0, get_translated_col(e + 1, 0, e)) = std::numeric_limits<double>::infinity(); // the first j that is outside e-strip
   }
   // QUESTION: Is it necessary to verify depths here?
   //           It is not, because these values will never be used. We write
   //           them not to verify the condition.
   for (int i = 1; i <= std::min(x_size, e); ++i) { // j = 0; only i that are within e-strip.
-    fd_.at(i, get_translated_j(0, i, e)) = fd_.read_at(i - 1, get_translated_j(0, i - 1, e)) + c_.del(t1_node_[i + x_off]);
+    fd_.at(i, get_translated_col(0, i, e)) = fd_.read_at(i - 1, get_translated_col(0, i - 1, e)) + c_.del(t1_node_[i + x_off]);
   }
   if (e + 1 <= x_size) {
-    fd_.at(e + 1, get_translated_j(0, e + 1, e)) = std::numeric_limits<double>::infinity(); // the first i that is outside e-strip
+    fd_.at(e + 1, get_translated_col(0, e + 1, e)) = std::numeric_limits<double>::infinity(); // the first i that is outside e-strip
   }
 
   double candidate_result = 0.0;
@@ -258,7 +258,7 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
     // General cases - loop WITHOUT depth-based pruning.
     for (int i = 1; i <= x_size; ++i) {
       if (i - e - 1 >= 1) { // First j that is outside e-strip.
-        fd_.at(i, get_translated_j(i - e - 1, i, e)) = std::numeric_limits<double>::infinity();
+        fd_.at(i, get_translated_col(i - e - 1, i, e)) = std::numeric_limits<double>::infinity();
         subproblem_counter++;
       }
       for (int j = std::max(1, i - e); j <= std::min(i + e, y_size); ++j) { // only (i,j) that are in e-strip
@@ -286,26 +286,26 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
         //           the size lower bound of the nodes around these subtrees.
         //           Thus, it doesn't fit here.
         if (std::abs((i + x_off) - (j + y_off)) > k) {
-          fd_.at(i, get_translated_j(j, i, e)) = std::numeric_limits<double>::infinity();
+          fd_.at(i, get_translated_col(j, i, e)) = std::numeric_limits<double>::infinity();
         } else {
           candidate_result = std::min({
-            fd_.read_at(i - 1, get_translated_j(j, i - 1, e)) + c_.del(t1_node_[i + x_off]),
-            fd_.read_at(i, get_translated_j(j - 1, i, e)) + c_.ins(t2_node_[j + y_off]),
+            fd_.read_at(i - 1, get_translated_col(j, i - 1, e)) + c_.del(t1_node_[i + x_off]),
+            fd_.read_at(i, get_translated_col(j - 1, i, e)) + c_.ins(t2_node_[j + y_off]),
             // 'j + y_off' is original id of a node in T2.
             // '-(i+x_off)+k' translates that id to the shrinked td_.
-            fd_.read_at(i - t1_size_[i + x_off], get_translated_j(j - t2_size_[j + y_off], i - t1_size_[i + x_off], e)) + td_.read_at(i + x_off, get_translated_y(j + y_off, i + x_off, k)) // j + y_off -(i+x_off)+k
+            fd_.read_at(i - t1_size_[i + x_off], get_translated_col(j - t2_size_[j + y_off], i - t1_size_[i + x_off], e)) + td_.read_at(i + x_off, get_translated_col(j + y_off, i + x_off, k)) // j + y_off -(i+x_off)+k
           });
           // None of the values in fd_ can be greater than e-value for this
           // subtree pair.
           if (candidate_result > e) {
-            fd_.at(i, get_translated_j(j, i, e)) = std::numeric_limits<double>::infinity();
+            fd_.at(i, get_translated_col(j, i, e)) = std::numeric_limits<double>::infinity();
           } else {
-            fd_.at(i, get_translated_j(j, i, e)) = candidate_result;
+            fd_.at(i, get_translated_col(j, i, e)) = candidate_result;
           }
         }
       }
       if (i + e + 1 <= y_size) { // Last j that is outside e-strip.
-        fd_.at(i, get_translated_j(i + e + 1, i, e)) = std::numeric_limits<double>::infinity();
+        fd_.at(i, get_translated_col(i + e + 1, i, e)) = std::numeric_limits<double>::infinity();
         subproblem_counter++;
       }
     }
@@ -340,7 +340,7 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
       //   continue;
       // }
       if (i - e - 1 >= 1) { // First j that is outside e-strip.
-        fd_.at(i, get_translated_j(i - e - 1, i, e)) = std::numeric_limits<double>::infinity();
+        fd_.at(i, get_translated_col(i - e - 1, i, e)) = std::numeric_limits<double>::infinity();
         subproblem_counter++;
       }
       for (int j = std::max(1, i - e); j <= std::min(i + e, y_size); ++j) { // only (i,j) that are in e-strip
@@ -352,13 +352,13 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
         }
         subproblem_counter++;
         if (std::abs((i + x_off) - (j + y_off)) > k) {
-          fd_.at(i, get_translated_j(j, i, e)) = std::numeric_limits<double>::infinity();
+          fd_.at(i, get_translated_col(j, i, e)) = std::numeric_limits<double>::infinity();
         } else {
           candidate_result = std::min(
-            fd_.read_at(i, get_translated_j(j - 1, i, e)) + c_.ins(t2_node_[j + y_off]),
+            fd_.read_at(i, get_translated_col(j - 1, i, e)) + c_.ins(t2_node_[j + y_off]),
             // 'j + y_off' is original id of a node in T2.
             // '-(i+x_off)+k' translates that id to the shrinked td_.
-            fd_.read_at(i - t1_size_[i + x_off], get_translated_j(j - t2_size_[j + y_off], i - t1_size_[i + x_off], e)) + td_.read_at(i + x_off, get_translated_y(j + y_off, i + x_off, k)) // j + y_off -(i+x_off)+k
+            fd_.read_at(i - t1_size_[i + x_off], get_translated_col(j - t2_size_[j + y_off], i - t1_size_[i + x_off], e)) + td_.read_at(i + x_off, get_translated_col(j + y_off, i + x_off, k)) // j + y_off -(i+x_off)+k
           );
           // Value at (i-1,j) may not be calculated due to truncated tree,
           // thus it has to be verified separately.
@@ -367,20 +367,20 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
           if (i == 1 || (i > 1 && t1_depth_.at(i - 1 + x_off) - t1_depth_[x] <= e + 1)) {
             candidate_result = std::min(
               candidate_result,
-              fd_.read_at(i - 1, get_translated_j(j, i - 1, e)) + c_.del(t1_node_[i + x_off])
+              fd_.read_at(i - 1, get_translated_col(j, i - 1, e)) + c_.del(t1_node_[i + x_off])
             );
           }
           // None of the values in fd_ can be greater than e-value for this
           // subtree pair.
           if (candidate_result > e) {
-            fd_.at(i, get_translated_j(j, i, e)) = std::numeric_limits<double>::infinity();
+            fd_.at(i, get_translated_col(j, i, e)) = std::numeric_limits<double>::infinity();
           } else {
-            fd_.at(i, get_translated_j(j, i, e)) = candidate_result;
+            fd_.at(i, get_translated_col(j, i, e)) = candidate_result;
           }
         }
       }
       if (i + e + 1 <= y_size) { // Last j that is outside e-strip.
-        fd_.at(i, get_translated_j(i + e + 1, i, e)) = std::numeric_limits<double>::infinity();
+        fd_.at(i, get_translated_col(i + e + 1, i, e)) = std::numeric_limits<double>::infinity();
         subproblem_counter++;
       }
       // Set next i to iterate.
@@ -406,9 +406,9 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
   //           returned, because the last subproblem is too far away?
   // 'y-k+x' translates the y-value in the shrinked td_ to the original y-value.
   candidate_result = std::min({
-    fd_.read_at(x_size - 1, get_translated_j(y_size, x_size - 1, e)) + c_.del(t1_node_[x]),                 // Delete root in source subtree.
-    fd_.read_at(x_size, get_translated_j(y_size - 1, x_size, e)) + c_.ins(t2_node_[y]),                 // Insert root in destination subtree.
-    fd_.read_at(x_size - 1, get_translated_j(y_size - 1, x_size - 1, e)) + c_.ren(t1_node_[x], t2_node_[y]) // Rename root nodes of the subtrees.
+    fd_.read_at(x_size - 1, get_translated_col(y_size, x_size - 1, e)) + c_.del(t1_node_[x]),                 // Delete root in source subtree.
+    fd_.read_at(x_size, get_translated_col(y_size - 1, x_size, e)) + c_.ins(t2_node_[y]),                 // Insert root in destination subtree.
+    fd_.read_at(x_size - 1, get_translated_col(y_size - 1, x_size - 1, e)) + c_.ren(t1_node_[x], t2_node_[y]) // Rename root nodes of the subtrees.
   });
   // The distance between two subtrees cannot be greater than e-value for these
   // subtrees.
@@ -468,14 +468,10 @@ const unsigned long long int Algorithm<Label, CostModel>::get_subproblem_count()
 }
 
 template <typename Label, typename CostModel>
-int Algorithm<Label, CostModel>::get_translated_y(int original_y, int original_x, int k) const {
+int Algorithm<Label, CostModel>::get_translated_col(int original_col, int original_row, int w) const {
   // 'j + y_off' is original id of a node in T2.
   // '-(i+x_off)+k' translates that id to the shrinked td_.
-  return original_y - original_x + k;
+  return original_col - original_row + w;
 }
 
-template <typename Label, typename CostModel>
-int Algorithm<Label, CostModel>::get_translated_j(int original_j, int original_i, int e) const {
-  return original_j - original_i + e;
-}
 #endif // TREE_SIMILARITY_TOUZET_TOUZET_IMPL_H
