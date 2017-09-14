@@ -112,9 +112,9 @@ private:
   /// Indexed in postorder ids starting with 0.
   std::vector<int> t2_subtree_max_depth_;
   /// Matrix storing subtree distances.
-  data_structures::Matrix<double> td_;
+  data_structures::BandMatrix<double> td_;
   /// Matrix storing subforest distances.
-  data_structures::Matrix<double> fd_;
+  data_structures::BandMatrix<double> fd_;
   /// Cost model.
   const CostModel c_;
   /// Subproblem counter - for experiments only. Counts the number of
@@ -189,9 +189,6 @@ private:
                              std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
                              int& start_postorder, int& start_preorder,
                              int start_depth, int& parent_max_depth);
-  // TODO: Move the translation to a specialised matrix.
-  // TODO: Document it (come up with a name for (w)idth).
-  int get_translated_col(int original_col, int original_row, int w) const;
 };
 
 // Implementation details.

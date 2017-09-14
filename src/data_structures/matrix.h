@@ -66,7 +66,6 @@ public:
   ///
   /// \return Reference to the specified element.
   ElementType& at(size_t row, size_t col);
-
   /// Reads the element at specific row and column.
   /// Using this method the element's value cannot be modified.
   ///
@@ -74,6 +73,34 @@ public:
   /// \param col The column to be accessed.
   ///
   /// \return Reference to the specified element.
+  const ElementType& read_at(size_t row, size_t col) const;
+};
+
+/// A specialised matrix, where only the elements on the diagonal band matter.
+/// The elements on that band in the BandMatrix are shifted left for reducing
+/// memory usage. In order to access the correct element of a BandMatrix, the
+/// column coordinate has to be translated.
+///
+/// One can use BandMatrix as it was a regular rectangular matrix and the index
+/// translations are transparent. One has to ensure that all accessed elements
+/// are within the band.
+template<typename ElementType>
+class BandMatrix : public Matrix<ElementType> {
+// Member variables.
+private:
+  /// The parameter specifying the width of the diagonal bend which is
+  /// 2*band_width_+1.
+  size_t band_width_;
+// Member functions.
+public:
+  /// Constructor(s).
+  BandMatrix() = default;
+  BandMatrix(size_t rows, size_t band_width);
+  /// Returns the band width parameter.
+  size_t get_band_width() const;
+  /// Overwrites the access methods of the rectangular matrix such that the
+  /// column coordinate is correctly translated to the shifted band.
+  ElementType& at(size_t row, size_t col);
   const ElementType& read_at(size_t row, size_t col) const;
 };
 
@@ -103,6 +130,20 @@ ElementType& Matrix<ElementType>::at(size_t row, size_t col) {
 template<typename ElementType>
 const ElementType& Matrix<ElementType>::read_at(size_t row, size_t col) const {
   return data_.at(row * columns_ + col);
+}
+
+template<typename ElementType>
+BandMatrix<ElementType>::BandMatrix(size_t rows, size_t band_width)
+  : Matrix<ElementType>::Matrix(rows, 2 * band_width + 1), band_width_(band_width) {}
+
+template<typename ElementType>
+ElementType& BandMatrix<ElementType>::at(size_t row, size_t col) {
+  return Matrix<ElementType>::at(row, col - row + band_width_);
+}
+
+template<typename ElementType>
+const ElementType& BandMatrix<ElementType>::read_at(size_t row, size_t col) const {
+  return Matrix<ElementType>::read_at(row, col - row + band_width_);
 }
 
 } // namespace data_structures
