@@ -82,7 +82,7 @@ int Algorithm<Label, CostModel>::index_nodes_recursion(
     // If this node has no children, set the max depth to this node's depth.
     this_subtree_max_depth = start_depth;
   } else {
-    // Inner node has size desc_sum + 1.
+    // Inner node has size desc_sum+1.
     size.push_back(desc_sum + 1);
   }
 
@@ -163,7 +163,7 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
   //       many elements using k instead of e.
   fd_ = BandMatrix<double>(kT1Size + 1, k + 1);
 
-  // Cleanup node indexes for consecutive use of the algorithm.
+  // Cleanup node indices for consecutive use of the algorithm.
   t1_size_.clear();
   t2_size_.clear();
   t1_node_.clear();
@@ -193,14 +193,14 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
     // Initialise the entire row to infinity.
     // TODO: It seems not necessarily needed. Verify which td values are used
     //       in forest distance. In manual execution, I've never used the
-    //       values from NaN cells. NaN used in td tests for marking values
-    //       that are not computed.
+    //       values from NaN cells.
+    // NOTE: NaN used in td tests for marking values that are not computed.
     for (int y = 0; y < td_.get_columns(); ++y) {
-      // NOTE: The base class at has to be called here, not to translate the y-coordinate.
+      // NOTE: The base class at has to be called here, not to translate the
+      //       y-coordinate.
       td_.Matrix::at(x, y) = std::numeric_limits<double>::signaling_NaN();
     }
     for (int y = std::max(0, x - k); y <= std::min(x + k, kT2Size-1); ++y) {
-      // std::cerr << "(x,y) = " << "(" << x << "," << y << ")" << std::endl;
       if (!k_relevant(x, y, k)) {
         // Overwrite NaN to infinity.
         td_.at(x, y) = std::numeric_limits<double>::infinity();
@@ -220,21 +220,17 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
   int x_size = t1_size_[x];
   int y_size = t2_size_[y];
 
-  // std::cerr << "INSIDE (" << x << "," << y << "); original y = " << y-k+x << "; e = " << e << std::endl;
-
   // Calculates offsets that let us translate i and j to correct postorder ids.
   int x_off = x - x_size;
   int y_off = y - y_size;
-
-  // std::cerr << "(x,y) = " << "(" << x << "," << y-k+x << ")" << std::endl;
 
   // Initial cases.
   fd_.at(0, 0) = 0.0; // (0,0) is always within e-strip.
   for (int j = 1; j <= std::min(y_size, e); ++j) { // i = 0; only j that are within e-strip.
     fd_.at(0, j) = fd_.read_at(0, j - 1) + c_.ins(t2_node_[j + y_off]);
   }
-  if (e + 1 <= y_size) {
-    fd_.at(0, e + 1) = std::numeric_limits<double>::infinity(); // the first j that is outside e-strip
+  if (e + 1 <= y_size) { // the first j that is outside e-strip
+    fd_.at(0, e + 1) = std::numeric_limits<double>::infinity();
   }
   // QUESTION: Is it necessary to verify depths here?
   //           It is not, because these values will never be used. We write
@@ -242,13 +238,13 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
   for (int i = 1; i <= std::min(x_size, e); ++i) { // j = 0; only i that are within e-strip.
     fd_.at(i, 0) = fd_.read_at(i - 1, 0) + c_.del(t1_node_[i + x_off]);
   }
-  if (e + 1 <= x_size) {
-    fd_.at(e + 1, 0) = std::numeric_limits<double>::infinity(); // the first i that is outside e-strip
+  if (e + 1 <= x_size) { // the first i that is outside e-strip
+    fd_.at(e + 1, 0) = std::numeric_limits<double>::infinity();
   }
 
   double candidate_result = 0.0;
 
-  // Choose loop based on the d_pruning flag.
+  // Choose the loop version based on the d_pruning flag.
   if (!d_pruning) {
     // General cases - loop WITHOUT depth-based pruning.
     for (int i = 1; i <= x_size; ++i) {
@@ -258,7 +254,6 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
       }
       for (int j = std::max(1, i - e); j <= std::min(i + e, y_size); ++j) { // only (i,j) that are in e-strip
         // The td(x_size-1, y_size-1) is computed differently.
-        // std::cerr << "(i,j) = " << "(" << i << "," << j << ")" << std::endl;
         // TODO: This condition is evaluated too often but passes only on the
         //       last i and j.
         if (i == x_size && j == std::min(i + e, y_size)) {
@@ -286,7 +281,7 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
           candidate_result = std::min({
             fd_.read_at(i - 1, j) + c_.del(t1_node_[i + x_off]),
             fd_.read_at(i, j - 1) + c_.ins(t2_node_[j + y_off]),
-            fd_.read_at(i - t1_size_[i + x_off], j - t2_size_[j + y_off]) + td_.read_at(i + x_off, j + y_off) // j + y_off -(i+x_off)+k
+            fd_.read_at(i - t1_size_[i + x_off], j - t2_size_[j + y_off]) + td_.read_at(i + x_off, j + y_off)
           });
           // None of the values in fd_ can be greater than e-value for this
           // subtree pair.
@@ -329,9 +324,7 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
     // Traversing truncated tree to filter out i-values based on depth.
     while (i <= x_size) {
       // Old if statement for filtering i-values based on depth.
-      // if (t1_depth_[i + x_off] - t1_depth_[x] > e + 1) {
-      //   continue;
-      // }
+      // if (t1_depth_[i + x_off] - t1_depth_[x] > e + 1) { continue; }
       if (i - e - 1 >= 1) { // First j that is outside e-strip.
         fd_.at(i, i - e - 1) = std::numeric_limits<double>::infinity();
         subproblem_counter++;
@@ -349,9 +342,7 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
         } else {
           candidate_result = std::min(
             fd_.read_at(i, j - 1) + c_.ins(t2_node_[j + y_off]),
-            // 'j + y_off' is original id of a node in T2.
-            // '-(i+x_off)+k' translates that id to the shrinked td_.
-            fd_.read_at(i - t1_size_[i + x_off], j - t2_size_[j + y_off]) + td_.read_at(i + x_off, j + y_off) // j + y_off -(i+x_off)+k
+            fd_.read_at(i - t1_size_[i + x_off], j - t2_size_[j + y_off]) + td_.read_at(i + x_off, j + y_off)
           );
           // Value at (i-1,j) may not be calculated due to truncated tree,
           // thus it has to be verified separately.
@@ -405,10 +396,8 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
   // The distance between two subtrees cannot be greater than e-value for these
   // subtrees.
   if (candidate_result > e) {
-    // std::cerr << "TED (" << x << "," << y << ") = inf" << std::endl;
     return std::numeric_limits<double>::infinity();
   } else {
-    // std::cerr << "TED (" << x << "," << y << ") = " << candidate_result << std::endl;
     return candidate_result;
   }
 };
