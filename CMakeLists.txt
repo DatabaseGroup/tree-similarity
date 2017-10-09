@@ -7,7 +7,7 @@ project(tree_similarity)
 # Compiler flags.
 # MUST be declared after project().
 # TODO: Explain the flags.
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++11 -Wall -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
 
 # directories - for header files
 #include_directories(
