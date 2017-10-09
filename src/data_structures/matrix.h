@@ -136,6 +136,11 @@ template<typename ElementType>
 BandMatrix<ElementType>::BandMatrix(size_t rows, size_t band_width)
   : Matrix<ElementType>::Matrix(rows, 2 * band_width + 1), band_width_(band_width) {}
 
+// TODO: The current implementation of the following two methods causes two
+//       method calls for accessing the cells.
+//       IDEA: Implement access directly without calling methods of the base
+//             class. Or read about inlining.
+
 template<typename ElementType>
 ElementType& BandMatrix<ElementType>::at(size_t row, size_t col) {
   return Matrix<ElementType>::at(row, col - row + band_width_);
