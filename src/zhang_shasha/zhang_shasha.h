@@ -60,6 +60,12 @@ public:
   ///
   /// \return A TestItem object.
   const TestItems get_test_items() const;
+  /// If the TED algorithm has been executed, returns the number of subproblems
+  /// encountered during that execution.
+  ///
+  /// \return The number of subproblems acountered in the last TED computation.
+  const unsigned long long int get_subproblem_count() const;
+// Member variables.
 // Member variables.
 private:
   /// Key-root nodes of the source tree.
@@ -87,6 +93,10 @@ private:
   data_structures::Matrix<double> fd_;
   /// Cost model.
   const CostModel c_;
+  /// Subproblem counter - for experiments only. Counts the number of
+  /// non-trivial values filled in fd_ matrix: subproblems where both forests
+  /// are not empty.
+  unsigned long long int subproblem_counter;
 // Member functions.
 private:
   /// Indexes the nodes of an input tree. Wrapper for the recursive

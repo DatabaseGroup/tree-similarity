@@ -153,6 +153,9 @@ double Algorithm<Label, CostModel>::zhang_shasha_ted(const node::Node<Label>& t1
   index_nodes(t1, t1_lld_, t1_kr_, t1_node_);
   index_nodes(t2, t2_lld_, t2_kr_, t2_node_);
 
+  // Reset subproblem counter.
+  subproblem_counter = 0;
+
   // Nested loop over key-root node pairs.
   for (auto kr1 : t1_kr_) {
     for (auto kr2 : t2_kr_) {
@@ -188,6 +191,7 @@ void Algorithm<Label, CostModel>::forest_distance(
   // Distances between non-empty forests.
   for (int i = kKr1Lld; i <= kr1; ++i) {
     for (int j = kKr2Lld; j <= kr2; ++j) {
+      subproblem_counter++;
       // If we have two subtrees.
       if (t1_lld_[i - 1] == kKr1Lld && t2_lld_[j - 1] == kKr2Lld) {
         fd_.at(i, j) = std::min(
@@ -214,6 +218,11 @@ const typename Algorithm<Label, CostModel>::TestItems Algorithm<Label, CostModel
     t1_lld_,
   };
   return test_items;
+}
+
+template <typename Label, typename CostModel>
+const unsigned long long int Algorithm<Label, CostModel>::get_subproblem_count() const {
+  return subproblem_counter;
 }
 
 #endif // TREE_SIMILARITY_ZHANG_SHASHA_ZHANG_SHASHA_IMPL_H
