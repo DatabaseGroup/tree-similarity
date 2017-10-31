@@ -43,7 +43,7 @@ void Algorithm<Label, CostModel>::index_nodes_recursion(
   // std::cout << "-- preorder : " << start_preorder << std::endl;
   // Increment start_preorder for the consecutive node in preorder have the
   // correct id.
-  start_preorder++;
+  ++start_preorder;
   // Recursions to childen nodes.
   auto children_start_it = std::begin(node.get_children());
   auto children_end_it=std::end(node.get_children());
@@ -86,7 +86,7 @@ void Algorithm<Label, CostModel>::index_nodes_recursion(
   nodes.push_back(std::ref(node));
   // Increment start_postorder for the consecutive node in postorder have the
   // correct id.
-  start_postorder++;
+  ++start_postorder;
 }
 
 template <typename Label, typename CostModel>
@@ -191,7 +191,7 @@ void Algorithm<Label, CostModel>::forest_distance(
   // Distances between non-empty forests.
   for (int i = kKr1Lld; i <= kr1; ++i) {
     for (int j = kKr2Lld; j <= kr2; ++j) {
-      subproblem_counter++;
+      ++subproblem_counter;
       // If we have two subtrees.
       if (t1_lld_[i - 1] == kKr1Lld && t2_lld_[j - 1] == kKr2Lld) {
         fd_.at(i, j) = std::min(

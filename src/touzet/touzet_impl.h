@@ -51,7 +51,7 @@ int Algorithm<Label, CostModel>::index_nodes_recursion(
 
   // Increment start_preorder to hold the correct id of the consecutive node
   // in preorder.
-  start_preorder++;
+  ++start_preorder;
 
   // Add a vector for depth=start_depth in depth inverted list.
   // NOTE: dil.size() returns an unsigned int. If dil.size = 0, then
@@ -99,7 +99,7 @@ int Algorithm<Label, CostModel>::index_nodes_recursion(
 
   // Increment start_postorder for the consecutive node in postorder to have the
   // correct id.
-  start_postorder++;
+  ++start_postorder;
 
   // Return the number of nodes in the subtree rooted at this node.
   return desc_sum + 1;
@@ -250,7 +250,7 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
     for (int i = 1; i <= x_size; ++i) {
       if (i - e - 1 >= 1) { // First j that is outside e-strip.
         fd_.at(i, i - e - 1) = std::numeric_limits<double>::infinity();
-        subproblem_counter++;
+        ++subproblem_counter;
       }
       for (int j = std::max(1, i - e); j <= std::min(i + e, y_size); ++j) { // only (i,j) that are in e-strip
         // The td(x_size-1, y_size-1) is computed differently.
@@ -259,7 +259,7 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
         if (i == x_size && j == std::min(i + e, y_size)) {
           break;
         }
-        subproblem_counter++;
+        ++subproblem_counter;
         // NOTE: It's about existence of a path from (i,j) to (x-x_size,y-y_size).
         //       It exists only then, if it existed for the neighburing nodes
         //       adding the costs for coming to (i,j).
@@ -294,7 +294,7 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
       }
       if (i + e + 1 <= y_size) { // Last j that is outside e-strip.
         fd_.at(i, i + e + 1) = std::numeric_limits<double>::infinity();
-        subproblem_counter++;
+        ++subproblem_counter;
       }
     }
   } else {
@@ -310,16 +310,16 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
     // Move max_depth_it to point to the first node within this subtree (T1_x).
     // TODO: This requires a scan of one depth inversted list. Can we do better?
     while (t1_dil_.at(max_depth).at(max_depth_it) < i + x_off) {
-      max_depth_it++;
+      ++max_depth_it;
     }
     // Set the first i-value for the loop
     // TODO: Make this if more elegant.
     if (t1_depth_.at(i + x_off) > max_depth) {
       // x_off has to be substructed to get correct i.
       i = t1_dil_.at(max_depth).at(max_depth_it) - x_off;
-      max_depth_it++;
+      ++max_depth_it;
     } else if (t1_depth_.at(i + x_off) == max_depth) {
-      max_depth_it++;
+      ++max_depth_it;
     }
     // Traversing truncated tree to filter out i-values based on depth.
     while (i <= x_size) {
@@ -327,7 +327,7 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
       // if (t1_depth_[i + x_off] - t1_depth_[x] > e + 1) { continue; }
       if (i - e - 1 >= 1) { // First j that is outside e-strip.
         fd_.at(i, i - e - 1) = std::numeric_limits<double>::infinity();
-        subproblem_counter++;
+        ++subproblem_counter;
       }
       for (int j = std::max(1, i - e); j <= std::min(i + e, y_size); ++j) { // only (i,j) that are in e-strip
         // The td(x_size-1, y_size-1) is computed differently.
@@ -336,7 +336,7 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
         if (i == x_size && j == std::min(i + e, y_size)) {
           break;
         }
-        subproblem_counter++;
+        ++subproblem_counter;
         if (std::abs((i + x_off) - (j + y_off)) > k) {
           fd_.at(i, j) = std::numeric_limits<double>::infinity();
         } else {
@@ -365,10 +365,10 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
       }
       if (i + e + 1 <= y_size) { // Last j that is outside e-strip.
         fd_.at(i, i + e + 1) = std::numeric_limits<double>::infinity();
-        subproblem_counter++;
+        ++subproblem_counter;
       }
       // Set next i to iterate.
-      i++;
+      ++i;
       // NOTE: i <= x_size verifies depth and dil[max_depth] bounds.
       // NOTE: For i=x_size (subtree root) the depth is always smaller than
       //       max_depth.
@@ -378,14 +378,14 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
         // of i with depth equals max_depth, and max_depth_it points to it.
         // x_off has to be substructed to get correct i.
         i = t1_dil_.at(max_depth).at(max_depth_it) - x_off;
-        max_depth_it++;
+        ++max_depth_it;
       } else if (i <= x_size && t1_depth_.at(i + x_off) == max_depth) {
-        max_depth_it++;
+        ++max_depth_it;
       }
     }
   }
 
-  subproblem_counter++;
+  ++subproblem_counter;
   // QUESTION: Is it possible that for some e-value an infinity should be
   //           returned, because the last subproblem is too far away?
   candidate_result = std::min({
