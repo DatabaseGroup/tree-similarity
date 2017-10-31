@@ -25,22 +25,32 @@
 /// TED command-line interface.
 
 #include "command_line.h"
+#include <sys/time.h>
+#include <sys/resource.h>
 
 int main(int argc, char** argv) {
 
   using Label = label::StringLabel;
   using CostModel = cost_model::UnitCostModel<Label>;
 
+  // Runtime measurement variables (rusage).
+  rusage before_rusage;
+  rusage after_rusage;
+  timeval runtime_utime;
+  timeval runtime_stime;
+  unsigned int runtime;
+  int rusage_return_value = -1;
+
   // Verify parameters.
-  if (argc != 3 && argc != 4) {
+  if (argc != 3 && argc != 4 && argc != 5) {
     std::cerr << "Incorrect number of parameters." << std::endl;
     return -1;
   }
 
   // NOTE: Trees passed as command-line arguments must be sorrounded with ''.
 
-  std::cout << "Source tree: " << argv[1] << std::endl;
-  std::cout << "Destination tree: " << argv[2] << std::endl;
+  // std::cout << "Source tree: " << argv[1] << std::endl;
+  // std::cout << "Destination tree: " << argv[2] << std::endl;
 
   parser::BracketNotationParser bnp;
   // Verify the input format before parsing.
@@ -52,18 +62,45 @@ int main(int argc, char** argv) {
     std::cerr << "Incorrect format of destination tree. Is the number of opening and closing brackets equal?" << std::endl;
     return -1;
   }
+
+  rusage_return_value = getrusage(RUSAGE_SELF, &before_rusage);
   const node::Node<Label> source_tree = bnp.parse_string(argv[1]);
   const node::Node<Label> destination_tree = bnp.parse_string(argv[2]);
+  rusage_return_value = getrusage(RUSAGE_SELF, &after_rusage);
+  timersub(&after_rusage.ru_utime, &before_rusage.ru_utime, &runtime_utime);
+  timersub(&after_rusage.ru_stime, &before_rusage.ru_stime, &runtime_stime);
+  runtime = runtime_utime.tv_usec + runtime_utime.tv_sec * 1000000 +
+      runtime_stime.tv_usec + runtime_stime.tv_sec * 1000000;
+  std::cout << runtime << " ";
 
   if (argc == 3) {
     zhang_shasha::Algorithm<Label, CostModel> zs_ted;
-    std::cout << "TED = " << zs_ted.zhang_shasha_ted(source_tree, destination_tree) << std::endl;
+    rusage_return_value = getrusage(RUSAGE_SELF, &before_rusage);
+    std::cout << zs_ted.zhang_shasha_ted(source_tree, destination_tree);
+    rusage_return_value = getrusage(RUSAGE_SELF, &after_rusage);
+    std::cout << " " << zs_ted.get_subproblem_count();
+    timersub(&after_rusage.ru_utime, &before_rusage.ru_utime, &runtime_utime);
+    timersub(&after_rusage.ru_stime, &before_rusage.ru_stime, &runtime_stime);
+    runtime = runtime_utime.tv_usec + runtime_utime.tv_sec * 1000000 +
+        runtime_stime.tv_usec + runtime_stime.tv_sec * 1000000;
+    std::cout << " " << runtime << std::endl;
   }
-  if (argc == 4) {
+  if (argc > 3) {
     int k = std::stoi(argv[3]);
-    std::cout << "k: " << argv[3] << std::endl;
     touzet::Algorithm<Label, CostModel> touzet_ted;
-    std::cout << "TED = " << touzet_ted.touzet_ted(source_tree, destination_tree, k) << std::endl;
+    rusage_return_value = getrusage(RUSAGE_SELF, &before_rusage);
+    if (argc == 5) {
+      std::cout << touzet_ted.touzet_ted(source_tree, destination_tree, k, true);
+    } else {
+      std::cout << touzet_ted.touzet_ted(source_tree, destination_tree, k);
+    }
+    rusage_return_value = getrusage(RUSAGE_SELF, &after_rusage);
+    std::cout << " " << touzet_ted.get_subproblem_count();
+    timersub(&after_rusage.ru_utime, &before_rusage.ru_utime, &runtime_utime);
+    timersub(&after_rusage.ru_stime, &before_rusage.ru_stime, &runtime_stime);
+    runtime = runtime_utime.tv_usec + runtime_utime.tv_sec * 1000000 +
+        runtime_stime.tv_usec + runtime_stime.tv_sec * 1000000;
+    std::cout << " " << runtime << std::endl;
   }
   return 0;
 }
