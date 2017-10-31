@@ -144,6 +144,14 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
   const int kT1Size = t1.get_tree_size();
   const int kT2Size = t2.get_tree_size();
 
+  // Reset subproblem counter.
+  // NOTE: This must be reset before the next if. Otherwise subproblem_counter
+  //       is not initialised.
+  //       Could be done also in the constructor but only additionally for the
+  //       first execution. If the algorithm is executed more times, it has to
+  //       be reset also here.
+  subproblem_counter = 0;
+
   // If the pair of root nodes is not in k-strip (input tree size difference is
   // greater than k), return infinity.
   if (std::abs((kT1Size-1) - (kT2Size-1)) > k) {
@@ -182,9 +190,6 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
   //       the note at 'const int kT1Size'.
   index_nodes(t1, t1_size_, t1_depth_, t1_subtree_max_depth_, t1_dil_, t1_node_);
   index_nodes(t2, t2_size_, t2_depth_, t2_subtree_max_depth_, t2_dil_, t2_node_);
-
-  // Reset subproblem counter.
-  subproblem_counter = 0;
 
   // Nested loop over all node pairs in k-strip : |x-y|<=k.
   // NOTE: This loop iterates over all node pairs from k-strip, and verifies
