@@ -46,7 +46,7 @@ int main() {
 
       // Parse test tree.
       parser::BracketNotationParser bnp;
-      node::Node<Label> t1 = bnp.parse_string(input_tree);
+      node::Node<Label> t1 = bnp.parse_single(input_tree);
 
       // Execute the algorithm to perform node indexing.
       touzet_ted.touzet_ted(t1, t1, t1.get_tree_size());

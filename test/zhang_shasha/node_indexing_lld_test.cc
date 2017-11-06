@@ -52,7 +52,7 @@ int main() {
         return -1;
       }
       // Parse test tree.
-      node::Node<Label> t1 = bnp.parse_string(input_tree);
+      node::Node<Label> t1 = bnp.parse_single(input_tree);
 
       // Execute the algorithm to perform node indexing.
       zs_ted.zhang_shasha_ted(t1, t1);

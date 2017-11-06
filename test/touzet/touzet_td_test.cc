@@ -87,8 +87,8 @@ int main() {
         return -1;
       }
       // Parse test tree.
-      node::Node<Label> t1 = bnp.parse_string(source_tree);
-      node::Node<Label> t2 = bnp.parse_string(destination_tree);
+      node::Node<Label> t1 = bnp.parse_single(source_tree);
+      node::Node<Label> t2 = bnp.parse_single(destination_tree);
 
       // Execute the algorithm to perform node indexing.
       touzet_ted.touzet_ted(t1, t2, k_value);

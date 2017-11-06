@@ -48,8 +48,8 @@ int main() {
         return -1;
       }
       // Parse test tree.
-      node::Node<Label> t1 = bnp.parse_string(input_tree_1_string);
-      node::Node<Label> t2 = bnp.parse_string(input_tree_2_string);
+      node::Node<Label> t1 = bnp.parse_single(input_tree_1_string);
+      node::Node<Label> t2 = bnp.parse_single(input_tree_2_string);
 
       // Execute the algorithm WITHOUT depth-based pruning.
       double computed_results = touzet_ted.touzet_ted(t1, t2, k);

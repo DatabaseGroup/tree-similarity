@@ -64,8 +64,8 @@ int main(int argc, char** argv) {
   }
 
   rusage_return_value = getrusage(RUSAGE_SELF, &before_rusage);
-  const node::Node<Label> source_tree = bnp.parse_string(argv[1]);
-  const node::Node<Label> destination_tree = bnp.parse_string(argv[2]);
+  const node::Node<Label> source_tree = bnp.parse_single(argv[1]);
+  const node::Node<Label> destination_tree = bnp.parse_single(argv[2]);
   rusage_return_value = getrusage(RUSAGE_SELF, &after_rusage);
   timersub(&after_rusage.ru_utime, &before_rusage.ru_utime, &runtime_utime);
   timersub(&after_rusage.ru_stime, &before_rusage.ru_stime, &runtime_stime);
