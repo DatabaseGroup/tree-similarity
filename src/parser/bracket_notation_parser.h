@@ -50,6 +50,7 @@
 #include "string_label.h"
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <regex>
 
@@ -63,20 +64,29 @@ public:
 // Member functions
 public:
   /// Takes the string of a tree in bracket notation, parses it to the Node
-  /// structure with StringLabels, and returns reference to the root.
-  ///
-  /// TODO: Verify if the returned object is not copied.
+  /// structure with StringLabels, and returns the root.
   ///
   /// \param tree_string The string holding the tree in bracket notation.
   ///
-  /// \return Reference to the root node.
-  const node::Node<Label> parse_string(const std::string& tree_string);
+  /// \return Root of the parsed tree.
+  node::Node<Label> parse_single(const std::string& tree_string);
+
+  /// Takes a file with one tree (in bracket notation) per line and parses it
+  /// to a vector of Node objects with StringLabels.
+  ///
+  /// NOTE: It executes parse_single for every line in the data file.
+  /// NOTE: The notation of trees is assumed correct.
+  ///
+  /// \param trees_collection Container to store all trees.
+  /// \param file_path The path to the file with set of trees.
+  void parse_collection(std::vector<node::Node<Label>>& trees_collection,
+      const std::string& file_path);
 
   /// Generates the tokens for the input string.
   ///
   /// \param tree_string The string holding the tree in bracket notation.
   /// \return Vector with all tokens.
-  const std::vector<std::string> get_tokens(const std::string& tree_string);
+  std::vector<std::string> get_tokens(const std::string& tree_string);
 
   /// Validates the bracket notation input.
   ///

@@ -68,3 +68,26 @@ add_test(
   NAME parsing_bracket_notation_tokens_test           # TEST NAME
   COMMAND parsing_bracket_notation_tokens_test_driver # EXECUTABLE NAME
 )
+
+# Testing collection tree sizes after parsing (reading from file).
+
+# Copy test cases.
+file(
+  COPY collection_size_test_data.txt
+  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+add_executable(
+  parsing_bracket_notation_collection_size_test_driver # EXECUTABLE NAME
+  parsing_bracket_notation_collection_size_test.cc     # EXECUTABLE SOURCE
+)
+
+target_link_libraries(
+  parsing_bracket_notation_collection_size_test_driver # EXECUTABLE NAME
+  TreeSimilarity                                       # LIBRARY NAME
+)
+
+add_test(
+  NAME parsing_bracket_notation_collection_size_test           # TEST NAME
+  COMMAND parsing_bracket_notation_collection_size_test_driver # EXECUTABLE NAME
+)
