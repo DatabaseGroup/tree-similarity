@@ -32,6 +32,7 @@ target_include_directories(TreeSimilarity INTERFACE
   src/touzet
   src/data_structures
   src/parser
+  src/join
 )
 
 # For using add_test().
