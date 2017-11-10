@@ -23,45 +23,53 @@
 ///
 /// \details
 /// Implements a naive tree similarity join as a nested loop and executing
-/// tree edit distance for each pair of trees from a collection.
+/// tree edit distance (Zhang and Shasha) for each pair of trees from a
+/// collection.
 
 #ifndef TREE_SIMILARITY_JOIN_NAIVE_SELF_JOIN_H
 #define TREE_SIMILARITY_JOIN_NAIVE_SELF_JOIN_H
 
-#include <iostream>
 #include <vector>
-#include <cmath>
 #include "node.h"
 #include "zhang_shasha.h"
 
 namespace join {
 
-/// TODO: Document it.
-struct ResultElement {
+/// This is an element of the join's result set.
+struct JoinResultElement {
+  /// Tree id of the left-hand tree in the result element.
   int tree_id_1;
+  /// Tree id of the right-hand tree in the result element.
   int tree_id_2;
+  /// Tree edit distance between tree_id_1 and tree_id_2.
   double ted_value;
-  ResultElement(int tree_id_1, int tree_id_2, double ted_value);
+  /// Constructor.
+  JoinResultElement(int tree_id_1, int tree_id_2, double ted_value);
 };
 
-/// TODO: Document it.
+/// Represents a naive self tree similarity join.
 template <typename Label, typename CostModel>
 class NaiveSelfJoin {
 // Member functions.
 public:
   /// Constructor.
   NaiveSelfJoin();
-  /// TODO: Document it.
-  // QUESTION: Should return a set/bag of ResultElement?
-  std::vector<join::ResultElement> execute_join(
-    std::vector<node::Node<Label>>& trees_collection,
-    const double similarity_threshold) const;
+  /// Executes the join algorithm.
+  ///
+  /// \param trees_collection A vector holding all trees from the relation to
+  ///                         self-join.
+  /// \param similarity_threshold The maximum number of edit operations that
+  ///                             differs two trees in the join's result set.
+  /// \return A vector with the join result.
+  std::vector<join::JoinResultElement> execute_join(
+      std::vector<node::Node<Label>>& trees_collection,
+      const double similarity_threshold) const;
 // Member variables.
 private:
   /// Cost model.
+  ///
+  /// NOTE: This join supports only unit cost model.
   const CostModel c_;
-// Member functions.
-private:
 };
 
 // Implementation details.

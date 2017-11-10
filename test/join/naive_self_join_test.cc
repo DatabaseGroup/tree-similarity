@@ -11,15 +11,16 @@
 #include "unit_cost_model.h"
 
 /// Convert vector of ResultElement to is string representation.
+/// Sorts the vector in case the result elements don't come in the input order.
 ///
 /// TODO: Move this method to some util.
 ///
 /// \param v Vector of ResultElement.
 /// \return String representation of v.
-std::string vector_of_re_to_string(std::vector<join::ResultElement>& v) {
+std::string vector_of_re_to_string(std::vector<join::JoinResultElement>& v) {
   // Sort the vector using lambda function implemented here.
-  std::sort(v.begin(), v.end(), [](const join::ResultElement& a,
-                                   const join::ResultElement& b){
+  std::sort(v.begin(), v.end(), [](const join::JoinResultElement& a,
+                                   const join::JoinResultElement& b){
     if (a.tree_id_1 < b.tree_id_1) {
       return true;
     } else if (a.tree_id_1 == b.tree_id_1) {
@@ -39,7 +40,7 @@ std::string vector_of_re_to_string(std::vector<join::ResultElement>& v) {
     s += "{" + std::to_string(e.tree_id_1) + "," + std::to_string(e.tree_id_2)
         + "," + std::to_string(std::lround(e.ted_value)) + "},";
   }
-  s.pop_back(); // Delete the last coma.s
+  s.pop_back(); // Delete the last comma.
   return s;
 }
 
@@ -47,9 +48,8 @@ int main() {
   using Label = label::StringLabel;
   using CostModel = cost_model::UnitCostModel<Label>;
 
-  // Set similarity threshold.
-  // BUG: Something's incorrect with the denormalising to number of edits.
-  double similarity_threshold = 0.90; // => #edits=1
+  // Set similarity threshold - maximum number of allowed edit operations.
+  double similarity_threshold = 1.00;
 
   // Correct result - currently hard-coded here.
   std::string correct_result = "{1,2,1},{1,3,1},{2,3,1},{2,5,1}";
