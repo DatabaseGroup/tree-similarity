@@ -28,10 +28,10 @@
 #define TREE_SIMILARITY_TOUZET_TOUZET_IMPL_H
 
 template <typename Label, typename CostModel>
-Algorithm<Label, CostModel>::Algorithm() : c_() {}
+Touzet<Label, CostModel>::Touzet() : c_() {}
 
 template <typename Label, typename CostModel>
-int Algorithm<Label, CostModel>::index_nodes_recursion(
+int Touzet<Label, CostModel>::index_nodes_recursion(
     const node::Node<Label>& node,
     std::vector<int>& size,
     std::vector<int>& depth,
@@ -106,7 +106,7 @@ int Algorithm<Label, CostModel>::index_nodes_recursion(
 }
 
 template <typename Label, typename CostModel>
-void Algorithm<Label, CostModel>::index_nodes(
+void Touzet<Label, CostModel>::index_nodes(
     const node::Node<Label>& root,
     std::vector<int>& size,
     std::vector<int>& depth,
@@ -132,7 +132,7 @@ void Algorithm<Label, CostModel>::index_nodes(
 }
 
 template <typename Label, typename CostModel>
-double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
+double Touzet<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
                                                const node::Node<Label>& t2,
                                                const int k,
                                                const bool d_pruning) {
@@ -219,7 +219,7 @@ double Algorithm<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
 };
 
 template <typename Label, typename CostModel>
-double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
+double Touzet<Label, CostModel>::tree_dist(const int x, const int y,
                                               const int k, const int e,
                                               const bool d_pruning) {
   int x_size = t1_size_[x];
@@ -408,7 +408,7 @@ double Algorithm<Label, CostModel>::tree_dist(const int x, const int y,
 };
 
 template <typename Label, typename CostModel>
-int Algorithm<Label, CostModel>::e(const int x, const int y, const int k) const {
+int Touzet<Label, CostModel>::e(const int x, const int y, const int k) const {
   // e(x,y) = k - |(|T1|-(x+1))-(|T2|-(y+1))| - |((x+1)-|T1_x|)-((y+1)-|T2_y|)|
   int x_size = t1_size_[x];
   int y_size = t2_size_[y];
@@ -418,7 +418,7 @@ int Algorithm<Label, CostModel>::e(const int x, const int y, const int k) const 
 };
 
 template <typename Label, typename CostModel>
-bool Algorithm<Label, CostModel>::k_relevant(const int x, const int y, const int k) const {
+bool Touzet<Label, CostModel>::k_relevant(const int x, const int y, const int k) const {
   // The lower bound formula:
   // |(|T1|-(x+1))-(|T2|-(y+1))| + ||T1_x|-|T2_y|| + |((x+1)-|T1_x|)-((y+1)-|T2_y|)| < k
   int x_size = t1_size_[x];
@@ -437,7 +437,7 @@ bool Algorithm<Label, CostModel>::k_relevant(const int x, const int y, const int
 };
 
 template <typename Label, typename CostModel>
-const typename Algorithm<Label, CostModel>::TestItems Algorithm<Label, CostModel>::get_test_items() const {
+const typename Touzet<Label, CostModel>::TestItems Touzet<Label, CostModel>::get_test_items() const {
   TestItems test_items = {
     t1_size_,
     td_,
@@ -449,7 +449,7 @@ const typename Algorithm<Label, CostModel>::TestItems Algorithm<Label, CostModel
 }
 
 template <typename Label, typename CostModel>
-const unsigned long long int Algorithm<Label, CostModel>::get_subproblem_count() const {
+const unsigned long long int Touzet<Label, CostModel>::get_subproblem_count() const {
   return subproblem_counter;
 }
 

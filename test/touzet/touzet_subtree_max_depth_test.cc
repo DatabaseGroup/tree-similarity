@@ -35,7 +35,7 @@ int main() {
   }
 
   // Initialise Touzet's algorithm.
-  touzet::Algorithm<Label, CostModel> touzet_ted;
+  ted::Touzet<Label, CostModel> touzet_ted;
 
   for (std::string line; std::getline( test_cases_file, line);) {
     if (line[0] == '#') {

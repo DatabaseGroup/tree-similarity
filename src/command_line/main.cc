@@ -87,7 +87,7 @@ int main(int argc, char** argv) {
   }
   if (argc > 3) {
     int k = std::stoi(argv[3]);
-    touzet::Algorithm<Label, CostModel> touzet_ted;
+    ted::Touzet<Label, CostModel> touzet_ted;
     rusage_return_value = getrusage(RUSAGE_SELF, &before_rusage);
     if (argc == 5) {
       std::cout << touzet_ted.touzet_ted(source_tree, destination_tree, k, true);

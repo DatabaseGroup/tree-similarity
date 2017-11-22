@@ -41,7 +41,7 @@
 #include <limits>
 #include <cstdlib>
 
-namespace touzet {
+namespace ted {
 
 /// This class implements the tree edit distance algorithm by Helene Touzet.
 /// The method to execute the algorithm is touzet_ted. It takes as input two
@@ -61,7 +61,7 @@ namespace touzet {
 /// [1] H. Touzet. Comparing similar ordered trees in linear-time. Journal of
 ///     Discrete Algorithms. 2007.
 template <typename Label, typename CostModel>
-class Algorithm {
+class Touzet {
 // Member struct.
 public:
   /// Holds internal items of the algorithms that are tested for correctness.
@@ -75,7 +75,7 @@ public:
 // Member functions.
 public:
   /// Constructor. Creates the cost model based on the template.
-  Algorithm();
+  Touzet();
   /// Computes the tree edit distance between two trees assuming a maximum
   /// number of allowed structural modifications (deletions, insertions).
   ///

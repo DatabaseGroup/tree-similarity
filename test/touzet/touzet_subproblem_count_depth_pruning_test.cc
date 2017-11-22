@@ -21,7 +21,7 @@ int main() {
   }
 
   // Initialise Touzet algorithm.
-  touzet::Algorithm<Label, CostModel> touzet_ted;
+  ted::Touzet<Label, CostModel> touzet_ted;
 
   // Read test cases from a file line by line.
   for (std::string line; std::getline( test_cases_file, line);) {
