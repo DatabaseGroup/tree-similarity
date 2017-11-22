@@ -35,7 +35,7 @@ int main() {
   }
 
   // Initialise ZS algorithm.
-  zhang_shasha::Algorithm<Label, CostModel> zs_ted;
+  ted::ZhangShasha<Label, CostModel> zs_ted;
 
   for (std::string line; std::getline( test_cases_file, line);) {
     if (line[0] == '#') {

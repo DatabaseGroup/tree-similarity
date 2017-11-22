@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
   std::cout << runtime << " ";
 
   if (argc == 3) {
-    zhang_shasha::Algorithm<Label, CostModel> zs_ted;
+    ted::ZhangShasha<Label, CostModel> zs_ted;
     rusage_return_value = getrusage(RUSAGE_SELF, &before_rusage);
     std::cout << zs_ted.zhang_shasha_ted(source_tree, destination_tree);
     rusage_return_value = getrusage(RUSAGE_SELF, &after_rusage);

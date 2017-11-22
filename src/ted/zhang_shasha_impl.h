@@ -28,10 +28,10 @@
 #define TREE_SIMILARITY_ZHANG_SHASHA_ZHANG_SHASHA_IMPL_H
 
 template <typename Label, typename CostModel>
-Algorithm<Label, CostModel>::Algorithm() : c_() {}
+ZhangShasha<Label, CostModel>::ZhangShasha() : c_() {}
 
 template <typename Label, typename CostModel>
-void Algorithm<Label, CostModel>::index_nodes_recursion(
+void ZhangShasha<Label, CostModel>::index_nodes_recursion(
     const node::Node<Label>& node,
     std::vector<int>& lld,
     std::vector<int>& kr,
@@ -90,7 +90,7 @@ void Algorithm<Label, CostModel>::index_nodes_recursion(
 }
 
 template <typename Label, typename CostModel>
-void Algorithm<Label, CostModel>::index_nodes(
+void ZhangShasha<Label, CostModel>::index_nodes(
     const node::Node<Label>& root,
     std::vector<int>& lld,
     std::vector<int>& kr,
@@ -124,7 +124,7 @@ void Algorithm<Label, CostModel>::index_nodes(
 }
 
 template <typename Label, typename CostModel>
-double Algorithm<Label, CostModel>::zhang_shasha_ted(const node::Node<Label>& t1,
+double ZhangShasha<Label, CostModel>::zhang_shasha_ted(const node::Node<Label>& t1,
                                                      const node::Node<Label>& t2) {
   // std::cout << "=== zhang_shasha_ted ===" << std::endl;
 
@@ -167,7 +167,7 @@ double Algorithm<Label, CostModel>::zhang_shasha_ted(const node::Node<Label>& t1
 }
 
 template <typename Label, typename CostModel>
-void Algorithm<Label, CostModel>::forest_distance(
+void ZhangShasha<Label, CostModel>::forest_distance(
     int kr1,
     int kr2) {
   const int kKr1Lld = t1_lld_[kr1 - 1]; // See declaration of t1_lld_.
@@ -212,7 +212,7 @@ void Algorithm<Label, CostModel>::forest_distance(
 }
 
 template <typename Label, typename CostModel>
-const typename Algorithm<Label, CostModel>::TestItems Algorithm<Label, CostModel>::get_test_items() const {
+const typename ZhangShasha<Label, CostModel>::TestItems ZhangShasha<Label, CostModel>::get_test_items() const {
   TestItems test_items = {
     t1_kr_,
     t1_lld_,
@@ -221,7 +221,7 @@ const typename Algorithm<Label, CostModel>::TestItems Algorithm<Label, CostModel
 }
 
 template <typename Label, typename CostModel>
-const unsigned long long int Algorithm<Label, CostModel>::get_subproblem_count() const {
+const unsigned long long int ZhangShasha<Label, CostModel>::get_subproblem_count() const {
   return subproblem_counter;
 }
 

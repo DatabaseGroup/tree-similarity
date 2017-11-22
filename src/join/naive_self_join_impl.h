@@ -37,7 +37,7 @@ std::vector<join::JoinResultElement> NaiveSelfJoin<Label, CostModel>::execute_jo
 
   std::vector<join::JoinResultElement> result_set;
 
-  zhang_shasha::Algorithm<Label, CostModel> ted_algorithm;
+  ted::ZhangShasha<Label, CostModel> ted_algorithm;
 
   int i = 0;
   int j = 0;

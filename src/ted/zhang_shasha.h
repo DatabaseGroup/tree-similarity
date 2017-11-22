@@ -35,10 +35,10 @@
 #include "matrix.h"
 #include <iostream>
 
-namespace zhang_shasha {
+namespace ted {
 
 template <typename Label, typename CostModel>
-class Algorithm {
+class ZhangShasha {
 // Member struct.
 public:
   /// Holds internal items of the algorithms that are tested for correctness.
@@ -49,7 +49,7 @@ public:
 // Member functions.
 public:
   /// Constructor. Creates the cost model based on the template.
-  Algorithm();
+  ZhangShasha();
   /// Computes the tree edit distance between two trees.
   ///
   /// \param t1 Source tree.

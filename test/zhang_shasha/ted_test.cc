@@ -21,7 +21,7 @@ int main() {
   }
 
   // Initialise ZS algorithm.
-  zhang_shasha::Algorithm<Label, CostModel> zs_ted;
+  ted::ZhangShasha<Label, CostModel> zs_ted;
 
   // Read test cases from a file line by line.
   for (std::string line; std::getline( test_cases_file, line);) {
