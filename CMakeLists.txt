@@ -18,8 +18,7 @@ target_include_directories(TreeSimilarity INTERFACE
   src/node
   src/label
   src/cost_model
-  src/zhang_shasha
-  src/touzet
+  src/ted
   src/data_structures
   src/parser
   src/join
