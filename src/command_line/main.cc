@@ -24,7 +24,7 @@
 /// \details
 /// TED command-line interface.
 
-#include "command_line.h"
+#include "main.h"
 #include <sys/time.h>
 #include <sys/resource.h>
 

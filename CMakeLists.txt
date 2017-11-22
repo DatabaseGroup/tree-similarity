@@ -9,16 +9,6 @@ project(tree_similarity)
 # TODO: Explain the flags.
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
 
-# directories - for header files
-#include_directories(
-#  src/node
-#  src/label
-#  src/cost_model
-#  src/zhang_shasha
-#  src/data_structures
-#  src/parser
-#)
-
 # Create header-only library 'TreeSimilarity'.
 #
 # One can also use include_directories() to add all header files which would be
