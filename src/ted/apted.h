@@ -48,47 +48,50 @@
 namespace ted {
 
 template <typename Label>
-class NodeIndexer {
+class APTEDNodeIndexer {
 public:
   // Structure indices.
-  std::vector<std::reference_wrapper<const node::Node<Label>>> preL_to_node;
-  std::vector<int> preL_to_size;
-  std::vector<int> preL_to_parent;
-  std::vector<std::vector<int>> preL_to_children;
-  std::vector<int> postL_to_lld;
-  std::vector<int> postR_to_rld;
-  std::vector<int> preL_to_ln;
-  std::vector<int> preR_to_ln;
-  std::vector<bool> preL_to_node_type_L;
-  std::vector<bool> preL_to_node_type_R;
+  /// NOTE: We use reference_wrapper for const references to nodes. For now, we
+  /// decided not to use raw pointers. Smart pointers introduce ownership, but
+  /// this vector is only an observer from a logical point of view.
+  std::vector<std::reference_wrapper<const node::Node<Label>>> preL_to_node_;
+  std::vector<int> preL_to_size_;
+  std::vector<int> preL_to_parent_;
+  std::vector<std::vector<int>> preL_to_children_;
+  std::vector<int> postL_to_lld_;
+  std::vector<int> postR_to_rld_;
+  std::vector<int> preL_to_ln_;
+  std::vector<int> preR_to_ln_;
+  std::vector<bool> preL_to_node_type_L_;
+  std::vector<bool> preL_to_node_type_R_;
   // Traversal translation indices.
-  std::vector<int> preL_to_preR;
-  std::vector<int> preR_to_preL;
-  std::vector<int> preL_to_postL;
-  std::vector<int> postL_to_preL;
-  std::vector<int> preL_to_postR;
-  std::vector<int> postR_to_preL;
+  std::vector<int> preL_to_preR_;
+  std::vector<int> preR_to_preL_;
+  std::vector<int> preL_to_postL_;
+  std::vector<int> postL_to_preL_;
+  std::vector<int> preL_to_postR_;
+  std::vector<int> postR_to_preL_;
   // Cost indices.
-  std::vector<int> preL_to_kr_sum;
-  std::vector<int> preL_to_rev_kr_sum;
-  std::vector<int> preL_to_desc_sum;
-  std::vector<int> preL_to_sumDelCost;
-  std::vector<int> preL_to_sumInsCost;
+  std::vector<int> preL_to_kr_sum_;
+  std::vector<int> preL_to_rev_kr_sum_;
+  std::vector<int> preL_to_desc_sum_;
+  std::vector<int> preL_to_sumDelCost_;
+  std::vector<int> preL_to_sumInsCost_;
   // Structure single-value variables.
-  int tree_size;
-  int lshl;
-  int rchl;
+  int tree_size_;
+  int lshl_;
+  int rchl_;
 private:
   // Variables holding values modified at runtime while the algorithm executes.
-  int current_node;
+  int current_node_;
   // Variables used temporarily while indexing.
-  int size_tmp;
-  int desc_sizes_tmp;
-  int kr_sizes_sum_tmp;
-  int rev_kr_sizes_sum_tmp;
-  int preorder_tmp;
+  int size_tmp_;
+  int desc_sizes_tmp_;
+  int kr_sizes_sum_tmp_;
+  int rev_kr_sizes_sum_tmp_;
+  int preorder_tmp_;
 public:
-  NodeIndexer(const node::Node<Label>& t);
+  APTEDNodeIndexer(const node::Node<Label>& t);
 private:
   int index_nodes(const node::Node<Label>& node, int postorder);
   void post_traversal_indexing();
@@ -142,9 +145,7 @@ private:
   // /// Stores references to nodes of the source tree. Indexed in preorder ids
   // /// starting with 0.
   // ///
-  // /// NOTE: We use reference_wrapper for const references to nodes. For now, we
-  // /// decided not to use raw pointers. Smart pointers introduce ownership, but
-  // /// this vector is only an observer from a logical point of view.
+
   // std::vector<std::reference_wrapper<const node::Node<Label>>> t1_node_;
   // /// Stores references to nodes of the destination tree. Indexed in postorder-1.
   // std::vector<std::reference_wrapper<const node::Node<Label>>> t2_node_;
