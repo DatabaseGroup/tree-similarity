@@ -150,7 +150,17 @@ template <typename Label, typename CostModel>
 double APTED<Label, CostModel>::apted_ted(const node::Node<Label>& t1, const node::Node<Label>& t2) {
   APTEDNodeIndexer<Label> ni_1(t1);
   APTEDNodeIndexer<Label> ni_2(t2);
+  return apted_ted(ni_1, ni_2);
+}
+
+template <typename Label, typename CostModel>
+double APTED<Label, CostModel>::apted_ted(const APTEDNodeIndexer<Label>& ni_1, const APTEDNodeIndexer<Label>& ni_2) {
   return 111.111;
 }
+
+// template <typename Label, typename CostModel>
+// const TestItems& APTED<Label, CostModel>::get_test_items(const node::Node<Label>& t1) const {
+//
+// }
 
 #endif // TREE_SIMILARITY_TED_APTED_IMPL_H

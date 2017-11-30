@@ -125,6 +125,7 @@ public:
   /// \param t2 Destination tree.
   /// \return Tree edit distance between t1 and t2.
   double apted_ted(const node::Node<Label>& t1, const node::Node<Label>& t2);
+  double apted_ted(const APTEDNodeIndexer<Label>& ni_1, const APTEDNodeIndexer<Label>& ni_2);
   /// Creates a TestItems object and returns it (by value).
   ///
   /// \return A TestItem object.
@@ -163,7 +164,7 @@ private:
   /// last value computed in fd_.
   unsigned long long int subproblem_counter;
 // Member functions.
-private:
+public:
   // /// Indexes the nodes of an input tree. Wrapper for the recursive
   // /// index_nodes_recursion. This method fills in the passed vectors.
   // ///
