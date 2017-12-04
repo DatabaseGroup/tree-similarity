@@ -22,6 +22,10 @@ foreach(loop_var ${apted_test_list})
     ${loop_var}_driver # EXECUTABLE NAME
     TreeSimilarity     # LIBRARY NAME
   )
+  target_link_libraries(
+    ${loop_var}_driver # EXECUTABLE NAME
+    TestCommon         # LIBRARY NAME
+  )
   add_test(
     NAME    ${loop_var}        # TEST NAME
     COMMAND ${loop_var}_driver # EXECUTABLE NAME

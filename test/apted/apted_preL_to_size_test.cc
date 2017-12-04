@@ -6,20 +6,7 @@
 #include "node.h"
 #include "bracket_notation_parser.h"
 #include "apted.h"
-
-/// Convert vector of int values to its string representation.
-///
-/// \param v Vector of int values.
-/// \return String representation of v.
-const std::string vector_to_string(const std::vector<int>& v) {
-  std::string s("{");
-  for (auto e : v) {
-    s += std::to_string(e) + ",";
-  }
-  s.pop_back();
-  s += "}";
-  return s;
-}
+#include "to_string_converters.h"
 
 int main() {
 
@@ -32,6 +19,8 @@ int main() {
     return -1;
   }
 
+  parser::BracketNotationParser bnp;
+
   for (std::string line; std::getline( test_cases_file, line);) {
     if (line[0] == '#') {
       std::getline(test_cases_file, line);
@@ -39,13 +28,13 @@ int main() {
       std::getline(test_cases_file, line);
       std::string correct_result = line;
 
-      // Parse test tree.
-      parser::BracketNotationParser bnp;
       node::Node<Label> t1 = bnp.parse_single(input_tree);
 
       ted::APTEDNodeIndexer<Label> ni(t1);
 
-      std::string computed_results = vector_to_string(ni.preL_to_size_);
+      // TODO: Differs in test cases filename and the ni's member name.
+
+      std::string computed_results = common::vector_to_string(ni.preL_to_size_);
 
       if (correct_result != computed_results) {
         std::cerr << "Incorrect subtree sizes result: " << computed_results << " instead of " << correct_result << std::endl;
