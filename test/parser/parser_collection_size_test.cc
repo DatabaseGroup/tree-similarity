@@ -13,7 +13,7 @@ int main() {
   int correct_number_trees = 3;
   int correct_number_nodes = 1 + 13 + 20;
 
-  std::string file_path = "collection_size_test_data.txt";
+  std::string file_path = "parser_collection_size_test_data.txt";
 
   // Create the container to store all trees.
   std::vector<node::Node<Label>> trees_collection;

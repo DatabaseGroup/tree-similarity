@@ -24,7 +24,7 @@ int main() {
   std::cout << "Tokens test." << std::endl;
 
   // Parse test cases from file.
-  std::ifstream test_cases_file("tokens_test_data.txt");
+  std::ifstream test_cases_file("parser_tokens_test_data.txt");
 
   if (!test_cases_file) {
     std::cerr << "ERROR: Problem reading the test file." << std::endl;
