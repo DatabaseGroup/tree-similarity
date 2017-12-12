@@ -38,14 +38,14 @@ int main() {
       std::string correct_result = line;
 
       parser::BracketNotationParser bnp;
-      
+
       // Validate test tree.
       if (!bnp.validate_input(input_tree)) {
         std::cerr << "Incorrect format of input tree: '" << input_tree << "'. Is the number of opening and closing brackets equal?" << std::endl;
         return -1;
       }
       // Parse test tree.
-      std::string computed_results = vector_to_string(bnp.get_tokens(input_tree));
+      std::string computed_results = vector_to_string(bnp.get_tokens_efficient(input_tree));
 
       if (correct_result != computed_results) {
         std::cerr << "Incorrect tokens: " << computed_results << " instead of " << correct_result << std::endl;

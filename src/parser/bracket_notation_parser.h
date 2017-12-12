@@ -71,6 +71,8 @@ public:
   /// \return Root of the parsed tree.
   node::Node<Label> parse_single(const std::string& tree_string);
 
+  node::Node<Label> parse_single_efficient(const std::string& tree_string);
+
   /// Takes a file with one tree (in bracket notation) per line and parses it
   /// to a vector of Node objects with StringLabels.
   ///
@@ -87,6 +89,8 @@ public:
   /// \param tree_string The string holding the tree in bracket notation.
   /// \return Vector with all tokens.
   std::vector<std::string> get_tokens(const std::string& tree_string);
+
+  std::vector<std::string> get_tokens_efficient(const std::string& tree_string);
 
   /// Validates the bracket notation input.
   ///
