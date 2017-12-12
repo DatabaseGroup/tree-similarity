@@ -141,7 +141,7 @@ node::Node<BracketNotationParser::Label> BracketNotationParser::parse_single(
   return root;
 }
 
-void BracketNotationParser::parse_collection(
+void BracketNotationParser::parse_collection_efficient(
     std::vector<node::Node<BracketNotationParser::Label>>& trees_collection,
     const std::string& file_path) {
   // Open the file.
@@ -153,6 +153,21 @@ void BracketNotationParser::parse_collection(
   // Read the trees line by line, parse, and move into the container.
   for (std::string tree_string; std::getline(trees_file, tree_string);) {
     trees_collection.push_back(parse_single_efficient(tree_string)); // -> This invokes a move constructor (due to push_back(<rvalue>)).
+  }
+}
+
+void BracketNotationParser::parse_collection(
+    std::vector<node::Node<BracketNotationParser::Label>>& trees_collection,
+    const std::string& file_path) {
+  // Open the file.
+  std::ifstream trees_file(file_path);
+  if (!trees_file) {
+    // TODO: Error handling.
+    // std::cerr << "ERROR: Problem reading the file." << std::endl;
+  }
+  // Read the trees line by line, parse, and move into the container.
+  for (std::string tree_string; std::getline(trees_file, tree_string);) {
+    trees_collection.push_back(parse_single(tree_string)); // -> This invokes a move constructor (due to push_back(<rvalue>)).
   }
 }
 

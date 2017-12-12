@@ -84,6 +84,9 @@ public:
   void parse_collection(std::vector<node::Node<Label>>& trees_collection,
       const std::string& file_path);
 
+  void parse_collection_efficient(std::vector<node::Node<Label>>& trees_collection,
+      const std::string& file_path);
+
   /// Generates the tokens for the input string.
   ///
   /// \param tree_string The string holding the tree in bracket notation.

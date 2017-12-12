@@ -19,7 +19,7 @@ int main() {
   std::vector<node::Node<Label>> trees_collection;
 
   parser::BracketNotationParser bnp;
-  bnp.parse_collection(trees_collection, file_path);
+  bnp.parse_collection_efficient(trees_collection, file_path);
 
   int computed_number_trees = trees_collection.size();
   int computed_number_nodes = 0;
