@@ -144,15 +144,21 @@ node::Node<BracketNotationParser::Label> BracketNotationParser::parse_single(
 void BracketNotationParser::parse_collection_efficient(
     std::vector<node::Node<BracketNotationParser::Label>>& trees_collection,
     const std::string& file_path) {
-  // Open the file.
-  std::ifstream trees_file(file_path);
-  if (!trees_file) {
-    // TODO: Error handling.
-    // std::cerr << "ERROR: Problem reading the file." << std::endl;
-  }
-  // Read the trees line by line, parse, and move into the container.
-  for (std::string tree_string; std::getline(trees_file, tree_string);) {
-    trees_collection.push_back(parse_single_efficient(tree_string)); // -> This invokes a move constructor (due to push_back(<rvalue>)).
+  std::ifstream trees_file;
+  trees_file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+  try {
+    // Open the file.
+    trees_file.open(file_path);
+    // Read the trees line by line, parse, and move into the container.
+    for (std::string tree_string; std::getline(trees_file, tree_string);) {
+      trees_collection.push_back(parse_single_efficient(tree_string)); // -> This invokes a move constructor (due to push_back(<rvalue>)).
+    }
+    // Close the file.
+    trees_file.close();
+  } catch (std::ios_base::failure e) {
+    std::cerr << "Exception opening/reading/closing file '" << file_path << "' in BracketNotationParser::parse_collection_efficient" << std::endl;
+    std::cerr << "  +--> 'e.what()': " << e.what() << std::endl;
+    std::cerr << "  +--> 'strerror(errno)': " << strerror(errno) << std::endl;
   }
 }
 
