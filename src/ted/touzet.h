@@ -39,7 +39,9 @@
 #include "matrix.h"
 #include <iostream>
 #include <limits>
+#include <algorithm>
 #include <cstdlib>
+#include <string>
 
 namespace ted {
 
@@ -68,6 +70,7 @@ public:
   struct TestItems {
     const std::vector<int>& t1_size;
     const data_structures::Matrix<double>& td;
+    const data_structures::Matrix<double>& fd;
     const std::vector<int>& t1_depth;
     const std::vector<std::vector<int>>& t1_dil;
     const std::vector<int>& t1_max_subtree_depth;

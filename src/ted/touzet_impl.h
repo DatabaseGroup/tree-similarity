@@ -170,6 +170,7 @@ double Touzet<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
   //       messed up. We only have to ensure that we do not iterate over too
   //       many elements using k instead of e.
   fd_ = BandMatrix<double>(kT1Size + 1, k + 1);
+  fd_.Matrix::fill_with(std::numeric_limits<double>::infinity());
 
   // Cleanup node indices for consecutive use of the algorithm.
   t1_size_.clear();
@@ -205,12 +206,17 @@ double Touzet<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
       //       y-coordinate.
       td_.Matrix::at(x, y) = std::numeric_limits<double>::signaling_NaN();
     }
+    if (std::min(x + k, kT2Size-1) > td_.get_columns()) {
+      std::cout << "in touzet_ted -> col-value too large: " + std::to_string(std::min(x + k, kT2Size-1)) << std::endl;
+    }
     for (int y = std::max(0, x - k); y <= std::min(x + k, kT2Size-1); ++y) {
       if (!k_relevant(x, y, k)) {
         // Overwrite NaN to infinity.
         td_.at(x, y) = std::numeric_limits<double>::infinity();
       } else {
         // Compute td(x, y) with e errors - the value of e(x, y, k).
+        // fd_ = BandMatrix<double>(kT1Size + 1, k + 1);
+        // fd_.Matrix::fill_with(std::numeric_limits<double>::infinity());
         td_.at(x, y) = tree_dist(x, y, k, e(x, y, k), d_pruning);
       }
     }
@@ -223,7 +229,7 @@ double Touzet<Label, CostModel>::tree_dist(const int x, const int y,
                                               const int k, const int e,
                                               const bool d_pruning) {
   int x_size = t1_size_[x];
-  int y_size = t2_size_[y];
+  int y_size = t2_size_[y]; // BUG: Possible bug here. y_size < i + e but y_size > #columns in fd_
 
   // Calculates offsets that let us translate i and j to correct postorder ids.
   int x_off = x - x_size;
@@ -257,6 +263,9 @@ double Touzet<Label, CostModel>::tree_dist(const int x, const int y,
         fd_.at(i, i - e - 1) = std::numeric_limits<double>::infinity();
         ++subproblem_counter;
       }
+      if (std::min(i + e, y_size) > fd_.get_columns()) {
+        std::cout << "in tree_dist -> j-col-value too large: " + std::to_string(std::min(i + e, y_size)) << std::endl;
+      }
       for (int j = std::max(1, i - e); j <= std::min(i + e, y_size); ++j) { // only (i,j) that are in e-strip
         // The td(x_size-1, y_size-1) is computed differently.
         // TODO: This condition is evaluated too often but passes only on the
@@ -283,6 +292,12 @@ double Touzet<Label, CostModel>::tree_dist(const int x, const int y,
         if (std::abs((i + x_off) - (j + y_off)) > k) {
           fd_.at(i, j) = std::numeric_limits<double>::infinity();
         } else {
+          int row = i - t1_size_[i + x_off];
+          int col = j - t2_size_[j + y_off];
+          int band_width = fd_.get_band_width();
+          if (col + band_width - row > fd_.get_columns()) {
+            std::cout << "in tree_dist -> reading col-value too large: " + std::to_string(col + band_width - row) << std::endl;
+          }
           candidate_result = std::min({
             fd_.read_at(i - 1, j) + c_.del(t1_node_[i + x_off]),
             fd_.read_at(i, j - 1) + c_.ins(t2_node_[j + y_off]),
@@ -441,6 +456,7 @@ const typename Touzet<Label, CostModel>::TestItems Touzet<Label, CostModel>::get
   TestItems test_items = {
     t1_size_,
     td_,
+    fd_,
     t1_depth_,
     t1_dil_,
     t1_subtree_max_depth_,

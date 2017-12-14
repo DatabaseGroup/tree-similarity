@@ -37,6 +37,10 @@
 
 #include <memory>
 #include <vector>
+#include <iostream>
+#include <string>
+#include <algorithm>
+#include <stdexcept>
 
 namespace data_structures {
 
@@ -74,6 +78,7 @@ public:
   ///
   /// \return Reference to the specified element.
   const ElementType& read_at(size_t row, size_t col) const;
+  void fill_with(ElementType value);
 };
 
 /// A specialised matrix, where only the elements on the diagonal band matter.
@@ -95,6 +100,10 @@ private:
 public:
   /// Constructor(s).
   BandMatrix() = default;
+  // TODO: Take original rows and original columns and band_width.
+  // TODO: Not every original cell is in the BandMatrix but each of them should
+  //       be possible to call. Throw exception if the called cell is not
+  //       addressed in the BandMatrix.
   BandMatrix(size_t rows, size_t band_width);
   /// Returns the band width parameter.
   size_t get_band_width() const;
@@ -124,12 +133,25 @@ size_t Matrix<ElementType>::get_columns() const {
 template<typename ElementType>
 ElementType& Matrix<ElementType>::at(size_t row, size_t col) {
   // NOTE: Using at() for checking bounds.
+  // TODO: Only data_ bounds are checked, not rows and columns.
+  // TODO: There is a max original x-coordinate that can be addressed.
+  if (!(col < columns_)) {
+    throw std::out_of_range ("Matrix<ElementType>::at() : col is out of range.");
+  }
   return data_.at(row * columns_ + col);
 }
 
 template<typename ElementType>
 const ElementType& Matrix<ElementType>::read_at(size_t row, size_t col) const {
+  if (!(col < columns_)) {
+    throw std::out_of_range ("Matrix<ElementType>::read_at() : col is out of range.");
+  }
   return data_.at(row * columns_ + col);
+}
+
+template<typename ElementType>
+void Matrix<ElementType>::fill_with(ElementType value) {
+  std::fill(data_.begin(), data_.end(), value);
 }
 
 template<typename ElementType>
@@ -142,13 +164,36 @@ BandMatrix<ElementType>::BandMatrix(size_t rows, size_t band_width)
 //             class. Or read about inlining.
 
 template<typename ElementType>
+size_t BandMatrix<ElementType>::get_band_width() const {
+  return band_width_;
+}
+
+template<typename ElementType>
 ElementType& BandMatrix<ElementType>::at(size_t row, size_t col) {
-  return Matrix<ElementType>::at(row, col - row + band_width_);
+  // if (col + band_width_ - row != col - row + band_width_) {
+  //   std::cout << "at: col + band_width_ - row = " << std::to_string(col + band_width_ - row) << "; col - row + band_width_ = " << std::to_string(col - row + band_width_) << std::endl;
+  // }
+  // if (row < band_width_ && col + band_width_ - row < band_width_ - row) {
+  //   std::cout << "Incorrect row: " + std::to_string(row) + " or col: " + std::to_string(col + band_width_ - row) + " for min col: " + std::to_string(band_width_ - row) << std::endl;
+  // }
+  return Matrix<ElementType>::at(row, col + band_width_ - row);
 }
 
 template<typename ElementType>
 const ElementType& BandMatrix<ElementType>::read_at(size_t row, size_t col) const {
-  return Matrix<ElementType>::read_at(row, col - row + band_width_);
+  // if (col + band_width_ - row != col - row + band_width_) {
+  //   std::cout << "read_at: col + band_width_ - row = " << std::to_string(col + band_width_ - row) << "; col - row + band_width_ = " << std::to_string(col - row + band_width_) << std::endl;
+  // }
+  // if (row < band_width_ && col + band_width_ - row < band_width_ - row) {
+  //   std::cout << "Incorrect row: " + std::to_string(row) + " or col: " + std::to_string(col + band_width_ - row) + " for min col: " + std::to_string(band_width_ - row) << std::endl;
+  // }
+  // if (col + band_width_ - row > 2 * band_width_ + 1) {
+  //   std::cout << "col-value too large: " + std::to_string(col + band_width_ - row) << std::endl;
+  // }
+  // if (row > band_width_*2+1 && col + band_width_ - row < band_width_*2+1 - row) {
+  //   std::cout << "Incorrect row: " + std::to_string(row) + " or col: " + std::to_string(col + band_width_ - row) + " for min col: " + std::to_string(band_width_ - row) << std::endl;
+  // }
+  return Matrix<ElementType>::read_at(row, col + band_width_ - row);
 }
 
 } // namespace data_structures

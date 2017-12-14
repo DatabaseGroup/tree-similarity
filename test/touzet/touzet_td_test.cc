@@ -21,12 +21,20 @@ const std::string matrix_to_string(const data_structures::Matrix<double>& m) {
     for (int y = 0; y < m.get_columns(); ++y){
       double e = m.read_at(x, y);
       if (e == std::numeric_limits<double>::infinity()) {
-        s += "@";
+        s += "  @";
       } else if (std::isnan(e)) {
-        s += "-";
+        s += "  -";
       } else {
         std::string e_string = std::to_string(e);
-        s += e_string.substr(0, e_string.find("."));
+        std::string e_string_int = e_string.substr(0, e_string.find("."));
+        if (e_string_int.length() == 1) {
+          s += "  " + e_string_int;
+        }
+        else if (e_string_int.length() == 2) {
+          s += " " + e_string_int;
+        } else {
+          s += e_string_int;
+        }
       }
     }
     s += "\n";
@@ -95,7 +103,8 @@ int main() {
 
       auto touzet_test_items = touzet_ted.get_test_items();
 
-      std::string computed_results = matrix_to_string(touzet_test_items.td);
+      std::string computed_results = matrix_to_string(touzet_test_items.fd);
+      // std::string computed_results = matrix_to_string(touzet_test_items.fd);
 
       if (correct_result != computed_results) {
         std::cerr << "Incorrect values in the td matrix:\n" << computed_results << "\ninstead of\n" << correct_result << std::endl;
