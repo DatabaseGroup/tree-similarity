@@ -115,6 +115,9 @@ private:
   const std::string kLeftBracket = "{";
   const std::string kRightBracket = "}";
 
+  /// Structure elements of the bracket notation.
+  const std::string kStructureElements = "{}";
+
   /// Escape character.
   const char kEscapeChar = '\\';
 

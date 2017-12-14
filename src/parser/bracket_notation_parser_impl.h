@@ -176,35 +176,31 @@ std::vector<std::string> BracketNotationParser::get_tokens_efficient(
     const std::string& tree_string) {
   std::vector<std::string> tokens;
 
-  // Structure elements to search.
-  char const* s_elems = "{}";
-  // Escape character.
-  char const* escape_char = "\\";
+  // Get pointer to the structure elements.
+  const char* s_elems = kStructureElements.c_str();
 
   // Get pointer to the beginning of the input string.
-  char const* begin = tree_string.c_str();
+  const char* begin = tree_string.c_str();
   // Pointer to the beginning of consecutive searches.
-  char const* next_begin = begin;
-  // Start from the second character.
-  char const* iter = begin;
+  const char* next_begin = begin;
   // Remember iter from previous iteration in old_iter - for label begin.
-  char const* old_iter = begin;
+  const char* old_iter = begin;
   // iter is a pointer to consecutive occurences of either '{' or '}'.
-  for(iter = strpbrk(next_begin, s_elems); iter != NULL; iter = strpbrk(next_begin, s_elems)) {
+  for(const char* iter = strpbrk(next_begin, s_elems); iter != NULL; iter = strpbrk(next_begin, s_elems)) {
     // Next iteration will start from the position right of iter.
     next_begin = iter + 1;
     // Check if the character just before the found position is an escape_char.
     // Then, disregard the current position.
-    if (iter > begin && *(iter-1) == *escape_char) {
+    if (iter > begin && *(iter-1) == kEscapeChar) {
       continue;
     }
     // If there is something between two consecutive brackets, it's potentially
     // a label - record it.
     if (iter > old_iter + 1) {
-      tokens.push_back(typename std::vector<std::string>::value_type(old_iter+1, iter));
+      tokens.push_back(typename std::vector<std::string>::value_type(old_iter+1, iter)); // Calls the allocator of string.
     }
     // Record the found bracket.
-    tokens.push_back(typename std::vector<std::string>::value_type(iter, iter+1));
+    tokens.push_back(typename std::vector<std::string>::value_type(iter, iter+1)); // Calls the allocator of string.
     old_iter = iter;
   }
 
