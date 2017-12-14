@@ -45,7 +45,7 @@ int main() {
         return -1;
       }
       // Parse test tree.
-      std::string computed_results = vector_to_string(bnp.get_tokens_efficient(input_tree));
+      std::string computed_results = vector_to_string(bnp.get_tokens(input_tree));
 
       if (correct_result != computed_results) {
         std::cerr << "Incorrect tokens: " << computed_results << " instead of " << correct_result << std::endl;

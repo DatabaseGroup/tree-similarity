@@ -29,10 +29,10 @@
 
 /// This is currently a copy of the previous version but with the efficient
 /// tokanization.
-node::Node<BracketNotationParser::Label> BracketNotationParser::parse_single_efficient(
+node::Node<BracketNotationParser::Label> BracketNotationParser::parse_single(
     const std::string& tree_string) {
 
-  std::vector<std::string> tokens = get_tokens_efficient(tree_string);
+  std::vector<std::string> tokens = get_tokens(tree_string);
 
   // Tokenize the input string - get iterator over tokens.
   auto tokens_begin = tokens.begin();
@@ -84,64 +84,7 @@ node::Node<BracketNotationParser::Label> BracketNotationParser::parse_single_eff
   return root;
 }
 
-node::Node<BracketNotationParser::Label> BracketNotationParser::parse_single(
-    const std::string& tree_string) {
-
-  // Tokenize the input string - get iterator over tokens.
-  auto tokens_begin = std::sregex_iterator(tree_string.begin(),
-                                           tree_string.end(), kR);
-  auto tokens_end = std::sregex_iterator();
-
-  // Deal with the root node separately.
-  ++tokens_begin; // Advance tokens to label.
-  std::smatch match = *tokens_begin;
-  std::string match_str = match.str();
-  if (match_str == kLeftBracket || match_str == kRightBracket) { // Root has an empty label.
-    match_str = "";
-    // Do not advance tokens - we're already at kLeftBracket or kRightBracket.
-  } else { // Non-empty label.
-    ++tokens_begin; // Advance tokens.
-  }
-  Label root_label(match_str);
-  node::Node<Label> root(root_label);
-  node_stack.push_back(std::ref(root));
-
-  // Iterate all remaining tokens.
-  while (tokens_begin != tokens_end) {
-    match = *tokens_begin;
-    match_str = match.str();
-
-    if (match_str == kLeftBracket) { // Enter node.
-      ++tokens_begin; // Advance tokens to label.
-      match = *tokens_begin;
-      match_str = match.str();
-
-      if (match_str == kLeftBracket || match_str == kRightBracket) { // Node has an empty label.
-        match_str = "";
-        // Do not advance tokens - we're already at kLeftBracket or kRightBracket.
-      } else { // Non-empty label.
-        ++tokens_begin; // Advance tokens.
-      }
-
-      // Create new node.
-      Label node_label(match_str);
-      node::Node<Label> n(node_label);
-
-      // Move n to become a child.
-      // Return reference from add_child to the 'new-located' object.
-      // Put a reference to just-moved n (last child of its parent) on a stack.
-      node_stack.push_back(std::ref(node_stack.back().get().add_child(n)));
-    }
-
-    if (match_str == kRightBracket) { // Exit node.
-      node_stack.pop_back();
-      ++tokens_begin; // Advance tokens.
-    }
-  }
-  return root;
-}
-
-void BracketNotationParser::parse_collection_efficient(
+void BracketNotationParser::parse_collection(
     std::vector<node::Node<BracketNotationParser::Label>>& trees_collection,
     const std::string& file_path) {
   std::ifstream trees_file(file_path);
@@ -151,28 +94,13 @@ void BracketNotationParser::parse_collection_efficient(
   // Read the trees line by line, parse, and move into the container.
   std::string tree_string;
   while (std::getline(trees_file, tree_string)) {
-    trees_collection.push_back(parse_single_efficient(tree_string)); // -> This invokes a move constructor (due to push_back(<rvalue>)).
+    trees_collection.push_back(parse_single(tree_string)); // -> This invokes a move constructor (due to push_back(<rvalue>)).
   }
   trees_file.close();
 }
 
-void BracketNotationParser::parse_collection(
-    std::vector<node::Node<BracketNotationParser::Label>>& trees_collection,
-    const std::string& file_path) {
-  // Open the file.
-  std::ifstream trees_file(file_path);
-  if (!trees_file) {
-    // TODO: Error handling.
-    // std::cerr << "ERROR: Problem reading the file." << std::endl;
-  }
-  // Read the trees line by line, parse, and move into the container.
-  for (std::string tree_string; std::getline(trees_file, tree_string);) {
-    trees_collection.push_back(parse_single(tree_string)); // -> This invokes a move constructor (due to push_back(<rvalue>)).
-  }
-}
-
 /// This is only a tokanizer that returns a vector with correct tokens.
-std::vector<std::string> BracketNotationParser::get_tokens_efficient(
+std::vector<std::string> BracketNotationParser::get_tokens(
     const std::string& tree_string) {
   std::vector<std::string> tokens;
 
@@ -202,26 +130,6 @@ std::vector<std::string> BracketNotationParser::get_tokens_efficient(
     // Record the found bracket.
     tokens.push_back(typename std::vector<std::string>::value_type(iter, iter+1)); // Calls the allocator of string.
     old_iter = iter;
-  }
-
-  return tokens;
-}
-
-std::vector<std::string> BracketNotationParser::get_tokens(
-    const std::string& tree_string) {
-  std::vector<std::string> tokens;
-
-  // Tokenize the input string - get iterator over tokens.
-  auto tokens_begin = std::sregex_iterator(tree_string.begin(),
-                                           tree_string.end(), kR);
-  auto tokens_end = std::sregex_iterator();
-
-  // Iterate all tokens and collect.
-  for (std::sregex_iterator i = tokens_begin; i != tokens_end; ++i) {
-    std::smatch match = *i;
-    std::string match_str = match.str();
-    tokens.push_back(match_str);
-    std::cout << match_str << std::endl;
   }
 
   return tokens;

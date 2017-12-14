@@ -71,8 +71,6 @@ public:
   /// \return Root of the parsed tree.
   node::Node<Label> parse_single(const std::string& tree_string);
 
-  node::Node<Label> parse_single_efficient(const std::string& tree_string);
-
   /// Takes a file with one tree (in bracket notation) per line and parses it
   /// to a vector of Node objects with StringLabels.
   ///
@@ -84,16 +82,11 @@ public:
   void parse_collection(std::vector<node::Node<Label>>& trees_collection,
       const std::string& file_path);
 
-  void parse_collection_efficient(std::vector<node::Node<Label>>& trees_collection,
-      const std::string& file_path);
-
   /// Generates the tokens for the input string.
   ///
   /// \param tree_string The string holding the tree in bracket notation.
   /// \return Vector with all tokens.
   std::vector<std::string> get_tokens(const std::string& tree_string);
-
-  std::vector<std::string> get_tokens_efficient(const std::string& tree_string);
 
   /// Validates the bracket notation input.
   ///
@@ -124,18 +117,6 @@ private:
   /// A regex string to match left and right brackets.
   const std::string kMatchLeftBracket = "\\" + kLeftBracket;
   const std::string kMatchRightBracket = "\\" + kRightBracket;
-
-  /// A regex string to match labels:
-  /// - a backslash followed by any character,
-  /// OR
-  /// - any character that's not a structure bracket.
-  /// Empty labels are dealt with while parsing.
-  const std::string kMatchStringLabel = "(\\\\.|[^" + kLeftBracket
-      + kRightBracket + "])+";
-
-  /// A regex to match either left bracket or label or right bracket.
-  const std::regex kR = std::regex(kMatchLeftBracket + "|" + kMatchStringLabel
-                                   + "|" + kMatchRightBracket);
 };
 
 // Implementation details

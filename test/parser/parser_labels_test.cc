@@ -47,7 +47,7 @@ int main() {
         return -1;
       }
       // Parse test tree.
-      node::Node<Label> t = bnp.parse_single_efficient(input_tree);
+      node::Node<Label> t = bnp.parse_single(input_tree);
 
       std::string computed_results = vector_to_string(t.get_all_labels());
 

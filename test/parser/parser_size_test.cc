@@ -32,7 +32,7 @@ int main() {
         return -1;
       }
       // Parse test tree.
-      node::Node<Label> t = bnp.parse_single_efficient(input_tree);
+      node::Node<Label> t = bnp.parse_single(input_tree);
 
       int computed_results = t.get_tree_size();
 
