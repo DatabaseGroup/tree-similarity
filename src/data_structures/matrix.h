@@ -135,18 +135,24 @@ ElementType& Matrix<ElementType>::at(size_t row, size_t col) {
   // NOTE: Using at() for checking bounds.
   // TODO: Only data_ bounds are checked, not rows and columns.
   // TODO: There is a max original x-coordinate that can be addressed.
-  if (!(col < columns_)) {
+  if (col >= columns_) {
     throw std::out_of_range ("Matrix<ElementType>::at() : col is out of range.");
   }
-  return data_.at(row * columns_ + col);
+  if (row >= rows_) {
+    throw std::out_of_range ("Matrix<ElementType>::at() : row is out of range.");
+  }
+  return data_[row * columns_ + col];
 }
 
 template<typename ElementType>
 const ElementType& Matrix<ElementType>::read_at(size_t row, size_t col) const {
-  if (!(col < columns_)) {
+  if (col >= columns_) {
     throw std::out_of_range ("Matrix<ElementType>::read_at() : col is out of range.");
   }
-  return data_.at(row * columns_ + col);
+  if (row >= rows_) {
+    throw std::out_of_range ("Matrix<ElementType>::read_at() : row is out of range.");
+  }
+  return data_[row * columns_ + col];
 }
 
 template<typename ElementType>
