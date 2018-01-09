@@ -10,38 +10,34 @@
 #include "bracket_notation_parser.h"
 #include "touzet.h"
 
-/// Convert matrix of double values to its string representation.
-/// Due to unit-cost model we output int values.
-///
-/// \param m Matrix of int values.
-/// \return String representation of v.
-// const std::string matrix_to_string(const data_structures::Matrix<double>& m) {
-//   std::string s("");
-//   for (int x = 0; x < m.get_rows(); ++x){
-//     for (int y = 0; y < m.get_columns(); ++y){
-//       double e = m.read_at(x, y);
-//       if (e == std::numeric_limits<double>::infinity()) {
-//         s += "  @";
-//       } else if (std::isnan(e)) {
-//         s += "  -";
-//       } else {
-//         std::string e_string = std::to_string(e);
-//         std::string e_string_int = e_string.substr(0, e_string.find("."));
-//         if (e_string_int.length() == 1) {
-//           s += "  " + e_string_int;
-//         }
-//         else if (e_string_int.length() == 2) {
-//           s += " " + e_string_int;
-//         } else {
-//           s += e_string_int;
-//         }
-//       }
-//     }
-//     s += "\n";
-//   }
-//   s.pop_back();
-//   return s;
-// }
+
+const std::string format_matrix_to_string(const data_structures::Matrix<double>& m) {
+  std::string s("");
+  for (int x = 0; x < m.get_rows(); ++x){
+    for (int y = 0; y < m.get_columns(); ++y){
+      double e = m.read_at(x, y);
+      if (e == std::numeric_limits<double>::infinity()) {
+        s += "  @";
+      } else if (std::isnan(e)) {
+        s += "  -";
+      } else {
+        std::string e_string = std::to_string(e);
+        std::string e_string_int = e_string.substr(0, e_string.find("."));
+        if (e_string_int.length() == 1) {
+          s += "  " + e_string_int;
+        }
+        else if (e_string_int.length() == 2) {
+          s += " " + e_string_int;
+        } else {
+          s += e_string_int;
+        }
+      }
+    }
+    s += "\n";
+  }
+  s.pop_back();
+  return s;
+}
 
 const std::string matrix_to_string(const data_structures::Matrix<double>& m) {
   std::string s("");
@@ -88,6 +84,8 @@ int main() {
       std::getline(test_cases_file, line);
       int k_value = std::stoi(line);
 
+      std::cout << "--- TEST ---" << std::endl;
+
       // Read td matrix
       std::string correct_result = "";
       std::getline(test_cases_file, line);
@@ -131,6 +129,9 @@ int main() {
         std::cerr << "Incorrect values in the td matrix:\n" << computed_results << "\ninstead of\n" << correct_result << std::endl;
         std::cerr << "for input trees: " << source_tree << " | " << destination_tree << std::endl;
         std::cerr << "and k: " << k_value << std::endl;
+        std::cerr << format_matrix_to_string(touzet_test_items.td) << std::endl;
+        std::cerr << "*************************************************" << std::endl;
+        std::cerr << format_matrix_to_string(touzet_test_items.fd) << std::endl;
         return -1;
       }
     }

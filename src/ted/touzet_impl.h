@@ -206,17 +206,17 @@ double Touzet<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
       //       y-coordinate.
       td_.Matrix::at(x, y) = std::numeric_limits<double>::signaling_NaN();
     }
-    // if (std::min(x + k, kT2Size-1) > td_.get_columns()) {
-    //   std::cout << "in touzet_ted -> col-value too large: " + std::to_string(std::min(x + k, kT2Size-1)) << std::endl;
-    // }
+    int orig_y = std::min(x + k, kT2Size-1);
+    int comp_y = orig_y + k - x;
+    if (comp_y > (int)td_.get_columns()) {
+      std::cout << "in touzet_ted -> col-value too large: " + std::to_string(orig_y) << std::endl;
+    }
     for (int y = std::max(0, x - k); y <= std::min(x + k, kT2Size-1); ++y) {
       if (!k_relevant(x, y, k)) {
         // Overwrite NaN to infinity.
         td_.at(x, y) = std::numeric_limits<double>::infinity();
       } else {
         // Compute td(x, y) with e errors - the value of e(x, y, k).
-        // fd_ = BandMatrix<double>(kT1Size + 1, k + 1);
-        // fd_.Matrix::fill_with(std::numeric_limits<double>::infinity());
         td_.at(x, y) = tree_dist(x, y, k, e(x, y, k), d_pruning);
       }
     }
@@ -234,6 +234,8 @@ double Touzet<Label, CostModel>::tree_dist(const int x, const int y,
   // Calculates offsets that let us translate i and j to correct postorder ids.
   int x_off = x - x_size;
   int y_off = y - y_size;
+
+  // std::cout << "in tree_dist -> (x,y) = (" << x << "," << y << ")" << std::endl;
 
   // Initial cases.
   fd_.at(0, 0) = 0.0; // (0,0) is always within e-strip.
@@ -263,12 +265,6 @@ double Touzet<Label, CostModel>::tree_dist(const int x, const int y,
         fd_.at(i, i - e - 1) = std::numeric_limits<double>::infinity();
         ++subproblem_counter;
       }
-      // if (std::min(i + e, y_size) > fd_.get_columns()) {
-      //   std::cout << "in tree_dist -> j-col-value too large in fd_: " + std::to_string(std::min(i + e, y_size)) << std::endl;
-      // }
-      // if (std::min(i + e, y_size) > td_.get_columns()) {
-      //   std::cout << "in tree_dist -> j-col-value too large in td_: " + std::to_string(std::min(i + e, y_size)) << std::endl;
-      // }
       for (int j = std::max(1, i - e); j <= std::min(i + e, y_size); ++j) { // only (i,j) that are in e-strip
         // The td(x_size-1, y_size-1) is computed differently.
         // TODO: This condition is evaluated too often but passes only on the
@@ -295,32 +291,32 @@ double Touzet<Label, CostModel>::tree_dist(const int x, const int y,
         if (std::abs((i + x_off) - (j + y_off)) > k) {
           fd_.at(i, j) = std::numeric_limits<double>::infinity();
         } else {
-          // int row = i - t1_size_[i + x_off];
-          // int col = j - t2_size_[j + y_off];
-          // int band_width = fd_.get_band_width();
-          // if ((col + band_width - row) > fd_.get_columns()) {
-          //   std::cout << "in tree_dist -> reading col-value too large: " + std::to_string(col + band_width - row) << std::endl;
-          // }
-          // BUG TODO: Validate if the values can be read from fd_ and td_.
           candidate_result = std::numeric_limits<double>::infinity();
-          // (i - 1, j) and (i, j - 1) should not be a problem because we initialise the first j outside the strip.
-          // if (j >= std::max(1, i-1 - e)) {
-            candidate_result = std::min(candidate_result, fd_.read_at(i - 1, j) + c_.del(t1_node_[i + x_off]));
-          // }
-          // if (j-1 >= std::max(1, i - e)) {
-            candidate_result = std::min(candidate_result, fd_.read_at(i, j - 1) + c_.ins(t2_node_[j + y_off]));
-          // }
-          if (j - t2_size_[j + y_off] >= std::max(1, i - t1_size_[i + x_off] - e) && j - t2_size_[j + y_off] <= std::min(i - t1_size_[i + x_off] + e, y_size)) {
-            // Value from td_ we can simply read. In the worst case ....
-            // std::cout << "in tree_dist -> reading col-value too large: j = " + std::to_string(j - t2_size_[j + y_off]) << std::endl;
-            candidate_result = std::min(candidate_result, fd_.read_at(i - t1_size_[i + x_off], j - t2_size_[j + y_off]) + td_.read_at(i + x_off, j + y_off));
-            // std::cout << "in tree_dist -> reading col-value too large: j = " + std::to_string(j - t2_size_[j + y_off]) << std::endl;
+          candidate_result = std::min(candidate_result, fd_.read_at(i - 1, j) + c_.del(t1_node_[i + x_off]));
+          candidate_result = std::min(candidate_result, fd_.read_at(i, j - 1) + c_.ins(t2_node_[j + y_off]));
+          double td_read = td_.read_at(i + x_off, j + y_off);
+          double fd_read = 0.0;
+          // If one of the forests is a tree, look up the vlaues in fd_.
+          // Otherwise, both forests are trees and the fd-part is empty.
+          if (i - t1_size_[i + x_off] != 0 || j - t2_size_[j + y_off] != 0) {
+            // If the values to read are outside of the band, they exceed
+            // the threshold or are not ppresent in the band-matrix.
+            if (j - t2_size_[j + y_off] < std::max(0, i - t1_size_[i + x_off] - e - 1)) {
+              // std::cout << "in tree_dist -> reading LEFT of band: " +
+              //     std::to_string(j - t2_size_[j + y_off]) << "; (" << i << ","
+              //     << j << ")" << std::endl;
+              fd_read = std::numeric_limits<double>::infinity();
+            } else if (std::min(i - t1_size_[i + x_off] + e + 1, y_size) < j - t2_size_[j + y_off]) {
+              // std::cout << "in tree_dist -> reading RIGHT of band: "
+              //     + std::to_string(j - t2_size_[j + y_off]) << "; (" << i << ","
+              //     << j << ")" << std::endl;
+              fd_read = std::numeric_limits<double>::infinity();
+            } else {
+              fd_read = fd_.read_at(i - t1_size_[i + x_off], j - t2_size_[j + y_off]);
+            }
           }
-          // candidate_result = std::min({
-          //   fd_.read_at(i - 1, j) + c_.del(t1_node_[i + x_off]),
-          //   fd_.read_at(i, j - 1) + c_.ins(t2_node_[j + y_off]),
-          //   fd_.read_at(i - t1_size_[i + x_off], j - t2_size_[j + y_off]) + td_.read_at(i + x_off, j + y_off)
-          // });
+          candidate_result = std::min(candidate_result, fd_read + td_read);
+
           // None of the values in fd_ can be greater than e-value for this
           // subtree pair.
           std::cout << std::to_string(candidate_result) << std::endl;
@@ -338,6 +334,9 @@ double Touzet<Label, CostModel>::tree_dist(const int x, const int y,
     }
   } else {
     // General cases - loop WITH depth-based pruning.
+
+    // TODO: Fix index errors when accessing the matrix.
+    //       Matrix<ElementType>::read_at() : col is out of range, col accessed = 18446744073709551615
 
     // NOTE: max_depth has to be set to min(depth(x)+e+1, max depth of T1_x)
     //       because e+1 may exceed the maximum depth of T1_x.
