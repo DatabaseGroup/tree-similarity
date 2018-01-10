@@ -235,8 +235,6 @@ double Touzet<Label, CostModel>::tree_dist(const int x, const int y,
   int x_off = x - x_size;
   int y_off = y - y_size;
 
-  // std::cout << "in tree_dist -> (x,y) = (" << x << "," << y << ")" << std::endl;
-
   // Initial cases.
   fd_.at(0, 0) = 0.0; // (0,0) is always within e-strip.
   for (int j = 1; j <= std::min(y_size, e); ++j) { // i = 0; only j that are within e-strip.
@@ -300,16 +298,10 @@ double Touzet<Label, CostModel>::tree_dist(const int x, const int y,
           // Otherwise, both forests are trees and the fd-part is empty.
           if (i - t1_size_[i + x_off] != 0 || j - t2_size_[j + y_off] != 0) {
             // If the values to read are outside of the band, they exceed
-            // the threshold or are not ppresent in the band-matrix.
+            // the threshold or are not present in the band-matrix.
             if (j - t2_size_[j + y_off] < std::max(0, i - t1_size_[i + x_off] - e - 1)) {
-              // std::cout << "in tree_dist -> reading LEFT of band: " +
-              //     std::to_string(j - t2_size_[j + y_off]) << "; (" << i << ","
-              //     << j << ")" << std::endl;
               fd_read = std::numeric_limits<double>::infinity();
             } else if (std::min(i - t1_size_[i + x_off] + e + 1, y_size) < j - t2_size_[j + y_off]) {
-              // std::cout << "in tree_dist -> reading RIGHT of band: "
-              //     + std::to_string(j - t2_size_[j + y_off]) << "; (" << i << ","
-              //     << j << ")" << std::endl;
               fd_read = std::numeric_limits<double>::infinity();
             } else {
               fd_read = fd_.read_at(i - t1_size_[i + x_off], j - t2_size_[j + y_off]);
@@ -334,9 +326,6 @@ double Touzet<Label, CostModel>::tree_dist(const int x, const int y,
     }
   } else {
     // General cases - loop WITH depth-based pruning.
-
-    // TODO: Fix index errors when accessing the matrix.
-    //       Matrix<ElementType>::read_at() : col is out of range, col accessed = 18446744073709551615
 
     // NOTE: max_depth has to be set to min(depth(x)+e+1, max depth of T1_x)
     //       because e+1 may exceed the maximum depth of T1_x.
@@ -378,10 +367,25 @@ double Touzet<Label, CostModel>::tree_dist(const int x, const int y,
         if (std::abs((i + x_off) - (j + y_off)) > k) {
           fd_.at(i, j) = std::numeric_limits<double>::infinity();
         } else {
-          candidate_result = std::min(
-            fd_.read_at(i, j - 1) + c_.ins(t2_node_[j + y_off]),
-            fd_.read_at(i - t1_size_[i + x_off], j - t2_size_[j + y_off]) + td_.read_at(i + x_off, j + y_off)
-          );
+          candidate_result = std::numeric_limits<double>::infinity();
+          candidate_result = std::min(candidate_result, fd_.read_at(i, j - 1) + c_.ins(t2_node_[j + y_off]));
+          double td_read = td_.read_at(i + x_off, j + y_off);
+          double fd_read = 0.0;
+          // If one of the forests is a tree, look up the vlaues in fd_.
+          // Otherwise, both forests are trees and the fd-part is empty.
+          if (i - t1_size_[i + x_off] != 0 || j - t2_size_[j + y_off] != 0) {
+            // If the values to read are outside of the band, they exceed
+            // the threshold or are not present in the band-matrix.
+            if (j - t2_size_[j + y_off] < std::max(0, i - t1_size_[i + x_off] - e - 1)) {
+              fd_read = std::numeric_limits<double>::infinity();
+            } else if (std::min(i - t1_size_[i + x_off] + e + 1, y_size) < j - t2_size_[j + y_off]) {
+              fd_read = std::numeric_limits<double>::infinity();
+            } else {
+              fd_read = fd_.read_at(i - t1_size_[i + x_off], j - t2_size_[j + y_off]);
+            }
+          }
+          candidate_result = std::min(candidate_result, fd_read + td_read);
+
           // Value at (i-1,j) may not be calculated due to truncated tree,
           // thus it has to be verified separately.
           // NOTE: For i=1 there may be an out of bound exception for depth
@@ -392,6 +396,7 @@ double Touzet<Label, CostModel>::tree_dist(const int x, const int y,
               fd_.read_at(i - 1, j) + c_.del(t1_node_[i + x_off])
             );
           }
+
           // None of the values in fd_ can be greater than e-value for this
           // subtree pair.
           if (candidate_result > e) {
