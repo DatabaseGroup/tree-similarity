@@ -86,19 +86,20 @@ std::string SimpleTreeGenerator::modify_tree(std::string& tree_string, int tree_
 
   int num_renames = num_edits;
 
+  // Rename nodes.
   for (int r = 0; r < num_renames; ++r) {
     int random_node_id = nodes_dist(rd);
-    std::cout << "random node: " << random_node_id << std::endl;
+    std::cout << "random node to RENAME: " << random_node_id << std::endl;
     // Find {-token of random_node_id.
     int id = 0; // Equal to {-token of node with id=0.
     int cur_node_id = 0;
-    for (int i = 0; i < tokens.size(); ++i) {
+    for (int i = 1; i < tokens.size(); ++i) {
       if (cur_node_id == random_node_id) {
         break;
       }
-      id = i;
       if (tokens[i] == "{") {
         ++cur_node_id;
+        id = i;
       }
     }
     // Change the label - possibly the same.
@@ -106,6 +107,43 @@ std::string SimpleTreeGenerator::modify_tree(std::string& tree_string, int tree_
     tokens[id+1] = alphabet_[labels_dist(rd)];
   }
 
+  // Delete a random node.
+  int random_node_id = nodes_dist(rd);
+  if (random_node_id == 0) ++random_node_id; // Root can't be deleted.
+  std::cout << "random node to DELETE: " << random_node_id << std::endl;
+  // Find {-token of random_node_id.
+  int id_left = 0; // Equal to {-token of node with id=0.
+  int cur_node_id = 0;
+  for (int i = 1; i < tokens.size(); ++i) {
+    if (cur_node_id == random_node_id) {
+      break;
+    }
+    if (tokens[i] == "{") {
+      ++cur_node_id;
+      id_left = i;
+    }
+  }
+  int id_right = id_left;
+  for (int i = id_left+1; i < tokens.size(); ++i) {
+    int in_l = 1;
+    int in_r = 0;
+    if (tokens[i] == "{") {
+      ++in_l;
+    } else if (tokens[i] == "}") {
+      ++in_r;
+    }
+    if (in_l == in_r) {
+      id_right = i;
+      break;
+    }
+  }
+  // Erase tokens of node to delete. This is enough, becuase afterwards
+  // empty-string tokens are concatenated when the final string is composed.
+  tokens[id_left] = "";
+  tokens[id_left+1] = "";
+  tokens[id_right] = "";
+
+  // Compose the final tree by concatenating tokens.
   std::string tree = "";
   for (auto t : tokens) {
       tree += t;
