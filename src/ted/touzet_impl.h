@@ -311,7 +311,7 @@ double Touzet<Label, CostModel>::tree_dist(const int x, const int y,
 
           // None of the values in fd_ can be greater than e-value for this
           // subtree pair.
-          std::cout << std::to_string(candidate_result) << std::endl;
+          // std::cout << std::to_string(candidate_result) << std::endl;
           if (candidate_result > e) {
             fd_.at(i, j) = std::numeric_limits<double>::infinity();
           } else {

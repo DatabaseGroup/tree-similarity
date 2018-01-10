@@ -22,6 +22,7 @@ target_include_directories(TreeSimilarity INTERFACE
   src/data_structures
   src/parser
   src/join
+  src/tree_generator
 )
 
 # For using add_test().
