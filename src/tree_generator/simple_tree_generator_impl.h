@@ -68,10 +68,49 @@ std::string SimpleTreeGenerator::generate_tree(unsigned int tree_size) {
   return tree;
 }
 
-std::string SimpleTreeGenerator::modify_tree(std::string tree_string, int num_edits) {
+std::string SimpleTreeGenerator::modify_tree(std::string& tree_string, int tree_size, int num_edits) {
   // Start with renames.
   parser::BracketNotationParser bnp;
-  // TODO: Merge branches.
+  std::vector<std::string> tokens = bnp.get_tokens(tree_string);
+
+  // // Convert vector to string and print.
+  // std::string s;
+  // for (auto e : tokens) {
+  //   s += e + ",";
+  // }
+  // s.pop_back(); // Delete the last coma
+  // std::cout << s << std::endl;
+
+  std::random_device rd;
+  std::uniform_int_distribution<int> nodes_dist(0, tree_size-1);
+
+  int num_renames = num_edits;
+
+  for (int r = 0; r < num_renames; ++r) {
+    int random_node_id = nodes_dist(rd);
+    std::cout << "random node: " << random_node_id << std::endl;
+    // Find {-token of random_node_id.
+    int id = 0; // Equal to {-token of node with id=0.
+    int cur_node_id = 0;
+    for (int i = 0; i < tokens.size(); ++i) {
+      if (cur_node_id == random_node_id) {
+        break;
+      }
+      id = i;
+      if (tokens[i] == "{") {
+        ++cur_node_id;
+      }
+    }
+    // Change the label - possibly the same.
+    std::uniform_int_distribution<int> labels_dist(0, alphabet_.size()-1);
+    tokens[id+1] = alphabet_[labels_dist(rd)];
+  }
+
+  std::string tree = "";
+  for (auto t : tokens) {
+      tree += t;
+  }
+  return tree;
 }
 
 std::vector<std::string> SimpleTreeGenerator::generate_random_alphabet(

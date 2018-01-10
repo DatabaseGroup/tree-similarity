@@ -31,6 +31,7 @@
 #ifndef TREE_GENERATOR_SIMPLE_TREE_GENERATOR_H
 #define TREE_GENERATOR_SIMPLE_TREE_GENERATOR_H
 
+#include <iostream>
 #include <vector>
 #include <string>
 #include <random>
@@ -44,7 +45,7 @@ public:
   std::string generate_tree(unsigned int tree_size);
   std::vector<std::string> generate_random_alphabet(unsigned int tree_size,
       unsigned int label_length, double ratio);
-  std::string modify_tree(std::string tree_string, int num_edits);
+  std::string modify_tree(std::string& tree_string, int stree_size, int num_edits);
 private:
   const std::string kLeftBracket = "{";
   const std::string kRightBracket = "}";

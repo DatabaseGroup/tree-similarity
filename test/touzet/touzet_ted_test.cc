@@ -44,7 +44,7 @@ int main() {
   int k;
   for (int i = 0; i < 10; ++i) {
     t1_gen_string = stg.generate_tree(10);
-    t2_gen_string = stg.generate_tree(10);
+    t2_gen_string = stg.modify_tree(t1_gen_string, 10, 3);
     std::cout << t1_gen_string << std::endl;
     std::cout << t2_gen_string << std::endl;
     node::Node<Label> t1_gen = bnp.parse_single(t1_gen_string);
