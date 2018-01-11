@@ -150,6 +150,8 @@ std::string SimpleTreeGenerator::modify_tree(std::string& tree_string, int tree_
     tokens[id_left] = "";
     tokens[id_left+1] = "";
     tokens[id_right] = "";
+    // Update the distribution bounds.
+    nodes_dist = std::uniform_int_distribution<int>(0, tree_size-1-(d+1));
   }
 
   // Compose the final tree by concatenating tokens.
