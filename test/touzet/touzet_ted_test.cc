@@ -43,6 +43,7 @@ int main() {
   std::string t1_gen_string;
   std::string t2_gen_string;
   double touzet_result;
+  double touzet_result_d;
   double zs_result;
   int k;
   for (int i = 0; i < 200; ++i) {
@@ -56,15 +57,17 @@ int main() {
       zs_result = zs_ted.zhang_shasha_ted(t1_gen, t2_gen);
       k = int(std::ceil(zs_result));
       touzet_result = touzet_ted.touzet_ted(t1_gen, t2_gen, k);
-      std::cout << "            k = " << k << std::endl;
-      std::cout << "    zs_result = " << zs_result << std::endl;
-      std::cout << "touzet_result = " << touzet_result << std::endl;
+      touzet_result_d = touzet_ted.touzet_ted(t1_gen, t2_gen, k, true);
+      std::cout << "              k = " << k << std::endl;
+      std::cout << "      zs_result = " << zs_result << std::endl;
+      std::cout << "  touzet_result = " << touzet_result << std::endl;
+      std::cout << "touzet_result_d = " << touzet_result_d << std::endl;
     } catch (const std::exception& e) {
       std::cerr << e.what() << std::endl;
     }
 
-    if (zs_result != touzet_result) {
-      std::cerr << "Incorrect TED result (Touzet vs ZS): " << touzet_result << " instead of " << zs_result << std::endl;
+    if (zs_result != touzet_result || zs_result != touzet_result_d) {
+      std::cerr << "Incorrect TED result (Touzet | Touzet_D vs ZS): " << touzet_result << " | " << touzet_result_d << " instead of " << zs_result << std::endl;
       std::cerr << "T1: " << t1_gen_string << std::endl;
       std::cerr << "T2: " << t2_gen_string << std::endl;
       std::cerr << "k: " << k << std::endl;
