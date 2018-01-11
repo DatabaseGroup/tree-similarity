@@ -31,7 +31,7 @@ SimpleTreeGenerator::SimpleTreeGenerator() : alphabet_(generate_random_alphabet(
 
 std::string SimpleTreeGenerator::generate_tree(unsigned int tree_size) {
 
-  std::random_device rd;
+  std::mt19937 rd;
 
   std::uniform_int_distribution<int> labels_dist(0, alphabet_.size()-1);
 
@@ -87,7 +87,7 @@ std::string SimpleTreeGenerator::modify_tree(std::string& tree_string, int tree_
   // s.pop_back(); // Delete the last coma
   // std::cout << s << std::endl;
 
-  std::random_device rd;
+  std::mt19937 rd;
   std::uniform_int_distribution<int> nodes_dist(0, tree_size-1);
   std::uniform_int_distribution<int> labels_dist(0, alphabet_.size()-1);
   std::uniform_int_distribution<int> edits_dist(1, num_edits); // At least one edit.

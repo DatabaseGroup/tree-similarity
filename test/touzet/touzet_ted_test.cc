@@ -3,6 +3,7 @@
 #include <vector>
 #include <fstream>
 #include <cmath>
+#include <random>
 #include "unit_cost_model.h"
 #include "string_label.h"
 #include "node.h"
@@ -35,16 +36,18 @@ int main() {
 
   // Initialise SimpleTreeGenerator and generate a dummy tree.
   tree_generator::SimpleTreeGenerator stg;
-  // node::Node<Label> t1_gen;
-  // node::Node<Label> t2_gen;
+  int max_nodes = 50;
+  int max_edits = 15; // 25%
+  std::mt19937 rd;
+  std::uniform_int_distribution<int> edits_dist(0, max_edits);
   std::string t1_gen_string;
   std::string t2_gen_string;
   double touzet_result;
   double zs_result;
   int k;
-  for (int i = 0; i < 10; ++i) {
-    t1_gen_string = stg.generate_tree(10);
-    t2_gen_string = stg.modify_tree(t1_gen_string, 10, 3);
+  for (int i = 0; i < 200; ++i) {
+    t1_gen_string = stg.generate_tree(max_nodes);
+    t2_gen_string = stg.modify_tree(t1_gen_string, max_nodes, edits_dist(rd));
     std::cout << t1_gen_string << std::endl;
     std::cout << t2_gen_string << std::endl;
     node::Node<Label> t1_gen = bnp.parse_single(t1_gen_string);
