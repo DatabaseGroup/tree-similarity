@@ -114,15 +114,15 @@ int main() {
         std::cerr << "k: " << k << std::endl;
         return -1;
       }
-      // // Execute the algorithm WITH depth-based pruning.
-      // computed_results = touzet_ted.touzet_ted(t1, t2, k, true);
-      // if (correct_result != computed_results) {
-      //   std::cerr << "Incorrect TED result (WITH depth-based pruning): " << computed_results << " instead of " << correct_result << std::endl;
-      //   std::cerr << "T1: " << input_tree_1_string << std::endl;
-      //   std::cerr << "T2: " << input_tree_2_string << std::endl;
-      //   std::cerr << "k: " << k << std::endl;
-      //   return -1;
-      // }
+      // Execute the algorithm WITH depth-based pruning.
+      computed_results = touzet_ted.touzet_ted(t1, t2, k, true);
+      if (correct_result != computed_results) {
+        std::cerr << "Incorrect TED result (WITH depth-based pruning): " << computed_results << " instead of " << correct_result << std::endl;
+        std::cerr << "T1: " << input_tree_1_string << std::endl;
+        std::cerr << "T2: " << input_tree_2_string << std::endl;
+        std::cerr << "k: " << k << std::endl;
+        return -1;
+      }
     }
   }
 
