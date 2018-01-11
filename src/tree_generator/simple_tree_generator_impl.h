@@ -69,6 +69,12 @@ std::string SimpleTreeGenerator::generate_tree(unsigned int tree_size) {
 }
 
 std::string SimpleTreeGenerator::modify_tree(std::string& tree_string, int tree_size, int num_edits) {
+
+  if (num_edits == 0) {
+    std::string tree;
+    return tree.assign(tree_string);
+  }
+
   // Tokenize tree and work on tokens.
   parser::BracketNotationParser bnp;
   std::vector<std::string> tokens = bnp.get_tokens(tree_string);
