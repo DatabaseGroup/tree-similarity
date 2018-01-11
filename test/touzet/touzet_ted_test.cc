@@ -53,7 +53,9 @@ int main() {
       zs_result = zs_ted.zhang_shasha_ted(t1_gen, t2_gen);
       k = int(std::ceil(zs_result));
       touzet_result = touzet_ted.touzet_ted(t1_gen, t2_gen, k);
-      std::cout << k << std::endl;
+      std::cout << "            k = " << k << std::endl;
+      std::cout << "    zs_result = " << zs_result << std::endl;
+      std::cout << "touzet_result = " << touzet_result << std::endl;
     } catch (const std::exception& e) {
       std::cerr << e.what() << std::endl;
     }

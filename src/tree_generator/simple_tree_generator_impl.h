@@ -69,7 +69,7 @@ std::string SimpleTreeGenerator::generate_tree(unsigned int tree_size) {
 }
 
 std::string SimpleTreeGenerator::modify_tree(std::string& tree_string, int tree_size, int num_edits) {
-  // Start with renames.
+  // Tokenize tree and work on tokens.
   parser::BracketNotationParser bnp;
   std::vector<std::string> tokens = bnp.get_tokens(tree_string);
 
@@ -83,12 +83,17 @@ std::string SimpleTreeGenerator::modify_tree(std::string& tree_string, int tree_
 
   std::random_device rd;
   std::uniform_int_distribution<int> nodes_dist(0, tree_size-1);
+  std::uniform_int_distribution<int> labels_dist(0, alphabet_.size()-1);
+  std::uniform_int_distribution<int> edits_dist(1, num_edits); // At least one edit.
 
-  int num_renames = num_edits;
+  int num_renames = edits_dist(rd);
+  int num_deletions = num_edits - num_renames;
+
+  int random_node_id;
 
   // Rename nodes.
   for (int r = 0; r < num_renames; ++r) {
-    int random_node_id = nodes_dist(rd);
+    random_node_id = nodes_dist(rd);
     std::cout << "random node to RENAME: " << random_node_id << std::endl;
     // Find {-token of random_node_id.
     int id = 0; // Equal to {-token of node with id=0.
@@ -103,45 +108,49 @@ std::string SimpleTreeGenerator::modify_tree(std::string& tree_string, int tree_
       }
     }
     // Change the label - possibly the same.
-    std::uniform_int_distribution<int> labels_dist(0, alphabet_.size()-1);
     tokens[id+1] = alphabet_[labels_dist(rd)];
   }
 
-  // Delete a random node.
-  int random_node_id = nodes_dist(rd);
-  if (random_node_id == 0) ++random_node_id; // Root can't be deleted.
-  std::cout << "random node to DELETE: " << random_node_id << std::endl;
-  // Find {-token of random_node_id.
-  int id_left = 0; // Equal to {-token of node with id=0.
-  int cur_node_id = 0;
-  for (int i = 1; i < tokens.size(); ++i) {
-    if (cur_node_id == random_node_id) {
-      break;
+  // Delete nodes.
+  for (int d = 0; d < num_deletions; ++d) {
+    random_node_id = nodes_dist(rd);
+    if (random_node_id == 0) ++random_node_id; // Root can't be deleted.
+    std::cout << "random node to DELETE: " << random_node_id << std::endl;
+    // Find {-token of random_node_id.
+    int id_left = 0; // Equal to {-token of node with id=0.
+    int cur_node_id = 0;
+    for (int i = 1; i < tokens.size(); ++i) {
+      if (cur_node_id == random_node_id) {
+        break;
+      }
+      if (tokens[i] == "{") {
+        ++cur_node_id;
+        id_left = i;
+      }
     }
-    if (tokens[i] == "{") {
-      ++cur_node_id;
-      id_left = i;
-    }
-  }
-  int id_right = id_left;
-  for (int i = id_left+1; i < tokens.size(); ++i) {
+    // Find }-token of random_node_id.
+    // Do it by counting left and right brackets. When their numbers gets even,
+    // we have the right bracket.
+    int id_right = id_left; // id_right has to be right of id_left.
     int in_l = 1;
     int in_r = 0;
-    if (tokens[i] == "{") {
-      ++in_l;
-    } else if (tokens[i] == "}") {
-      ++in_r;
+    for (int i = id_left+1; i < tokens.size(); ++i) {
+      if (tokens[i] == "{") {
+        ++in_l;
+      } else if (tokens[i] == "}") {
+        ++in_r;
+      }
+      if (in_l == in_r) {
+        id_right = i;
+        break;
+      }
     }
-    if (in_l == in_r) {
-      id_right = i;
-      break;
-    }
+    // Erase tokens of node to delete. This is enough, becuase afterwards
+    // empty-string tokens are concatenated when the final string is composed.
+    tokens[id_left] = "";
+    tokens[id_left+1] = "";
+    tokens[id_right] = "";
   }
-  // Erase tokens of node to delete. This is enough, becuase afterwards
-  // empty-string tokens are concatenated when the final string is composed.
-  tokens[id_left] = "";
-  tokens[id_left+1] = "";
-  tokens[id_right] = "";
 
   // Compose the final tree by concatenating tokens.
   std::string tree = "";
