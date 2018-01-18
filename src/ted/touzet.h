@@ -72,6 +72,8 @@ public:
     const data_structures::Matrix<double>& td;
     const data_structures::Matrix<double>& fd;
     const std::vector<int>& t1_depth;
+    const std::vector<int>& t1_kr;
+    const std::vector<int>& t1_lch;
     const std::vector<std::vector<int>>& t1_dil;
     const std::vector<int>& t1_max_subtree_depth;
   };
@@ -122,6 +124,18 @@ private:
   /// Stores the depth for each node of the destination tree.
   /// Indexed in postorder ids starting with 0.
   std::vector<int> t2_depth_;
+  /// Key-root nodes of the source tree.
+  std::vector<int> t1_kr_;
+  /// Key-root nodes of the destination tree.
+  std::vector<int> t2_kr_;
+  /// Stores the postorder id of the left child for each node of the source
+  /// tree.
+  /// Indexed in postorder ids starting with 0.
+  std::vector<int> t1_lch_;
+  /// Stores the postorder id of the left child for each node of the destination
+  /// tree.
+  /// Indexed in postorder ids starting with 0.
+  std::vector<int> t2_lch_;
   /// An inverted list that for each depth value in source tree, stores node ids
   /// of nodes with that depth.
   /// Indexed in depth value.
@@ -197,6 +211,8 @@ private:
   /// \param nodes Vector with references to nodes.
   void index_nodes(const node::Node<Label>& root, std::vector<int>& size,
                    std::vector<int>& depth,
+                   std::vector<int>& kr,
+                   std::vector<int>& lch,
                    std::vector<int>& subtree_max_depth,
                    std::vector<std::vector<int>>& dil,
                    std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes);
@@ -218,6 +234,8 @@ private:
   /// \return Number of nodes in the subtree rooted at the caller node.
   int index_nodes_recursion(const node::Node<Label>& root,
                              std::vector<int>& size, std::vector<int>& depth,
+                             std::vector<int>& kr,
+                             std::vector<int>& lch,
                              std::vector<int>& subtree_max_depth,
                              std::vector<std::vector<int>>& dil,
                              std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,

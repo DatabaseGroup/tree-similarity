@@ -35,6 +35,8 @@ int Touzet<Label, CostModel>::index_nodes_recursion(
     const node::Node<Label>& node,
     std::vector<int>& size,
     std::vector<int>& depth,
+    std::vector<int>& kr,
+    std::vector<int>& lch,
     std::vector<int>& subtree_max_depth,
     std::vector<std::vector<int>>& dil,
     std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
@@ -63,18 +65,32 @@ int Touzet<Label, CostModel>::index_nodes_recursion(
   // This node subtree's max depth.
   int this_subtree_max_depth = 0;
 
+  // This node's left child.
+  int left_child = -1; // '-1' if there are no children.
+
   // Recursions to childen nodes.
   auto children_start_it = std::begin(node.get_children());
   auto children_end_it=std::end(node.get_children());
   while (children_start_it != children_end_it) {
-    desc_sum += index_nodes_recursion(*children_start_it, size, depth, subtree_max_depth, dil,
+    desc_sum += index_nodes_recursion(*children_start_it, size, depth, kr, lch,
+                                      subtree_max_depth, dil,
                                       nodes, start_postorder, start_preorder,
                                       start_depth + 1, this_subtree_max_depth);
+    if (children_start_it == node.get_children().begin()) {
+      left_child = start_postorder-1;
+    }
+    if (children_start_it != node.get_children().begin()) {
+      // Add current child to kr.
+      kr.push_back(start_postorder-1);
+    }
     // Continue to consecutive children.
     ++children_start_it;
   }
 
   // Here, start_postorder holds this node's postorder id.
+
+  // Left child.
+  lch.push_back(left_child);
 
   if (node.is_leaf()) {
     // Leaf has size 1.
@@ -110,6 +126,8 @@ void Touzet<Label, CostModel>::index_nodes(
     const node::Node<Label>& root,
     std::vector<int>& size,
     std::vector<int>& depth,
+    std::vector<int>& kr,
+    std::vector<int>& lch,
     std::vector<int>& subtree_max_depth,
     std::vector<std::vector<int>>& dil,
     std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes) {
@@ -125,10 +143,13 @@ void Touzet<Label, CostModel>::index_nodes(
   int start_preorder = 0;
   // Maximum input tree depth - the first reference passed to recursion.
   int input_max_depth = 0;
-  index_nodes_recursion(root, size, depth, subtree_max_depth, dil, nodes, start_postorder,
+  index_nodes_recursion(root, size, depth, kr, lch, subtree_max_depth, dil, nodes, start_postorder,
       start_preorder, 0, input_max_depth);
 
   // Here, start_postorder and start_preorder store the size of tree minus 1.
+
+  // Add root to kr - not added in the recursion.
+  kr.push_back(start_postorder-1);
 }
 
 template <typename Label, typename CostModel>

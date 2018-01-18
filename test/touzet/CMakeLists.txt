@@ -9,6 +9,8 @@ set(touzet_test_list
   touzet_td_test
   touzet_subproblem_count_depth_pruning_test
   touzet_ted_test
+  touzet_kr_test
+  touzet_left_child_test
 )
 
 # Add custom target for building all touzet's tests.
