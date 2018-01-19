@@ -153,17 +153,15 @@ void Touzet<Label, CostModel>::index_nodes(
 }
 
 template <typename Label, typename CostModel>
-double Touzet<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
-                                               const node::Node<Label>& t2,
-                                               const int k,
-                                               const bool d_pruning) {
+void Touzet<Label, CostModel>::init(const node::Node<Label>& t1,
+                                    const node::Node<Label>& t2, const int k) {
   using data_structures::BandMatrix;
 
   // NOTE: If the sizes of index vectors are not initialised, index_nodes
   //       should be used to get input tree sizes. This saves one tree
   //       traversal.
-  const int kT1Size = t1.get_tree_size();
-  const int kT2Size = t2.get_tree_size();
+  t1_input_size_ = t1.get_tree_size();
+  t2_input_size_ = t2.get_tree_size();
 
   // Reset subproblem counter.
   // NOTE: This must be reset before the next if. Otherwise subproblem_counter
@@ -173,24 +171,20 @@ double Touzet<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
   //       be reset also here.
   subproblem_counter = 0;
 
-  // If the pair of root nodes is not in k-strip (input tree size difference is
-  // greater than k), return infinity.
-  if (std::abs((kT1Size-1) - (kT2Size-1)) > k) {
-    return std::numeric_limits<double>::infinity();
-  } // QUESTION: Else, k should be reduced by the size difference.
-
   // NOTE: The default constructor of Matrix is called while constructing
   //       ZS-Algorithm.
-  // NOTE: Shouldn't we implement Matrix::resize() instead of constructing
-  //       matrix again?
+  // QUESTION: Shouldn't we implement Matrix::resize() instead of constructing
+  //           matrix again?
   // NOTE: The k may be larger than |T2|.
-  td_ = BandMatrix<double>(kT1Size, k);
+  td_ = BandMatrix<double>(t1_input_size_, k);
+  // Fill in for initially marking all subtree pairs as not eligable, and for debugging.
+  td_.fill_with(std::numeric_limits<double>::signaling_NaN());
   // NOTE: The band_width=e for Touzet's fd_ matrix varies. It is however
   //       smaller or equal to the initialised band_width=k+1. As long as we
   //       read and write using the original band_width, addresses are not
   //       messed up. We only have to ensure that we do not iterate over too
   //       many elements using k instead of e.
-  fd_ = BandMatrix<double>(kT1Size + 1, k + 1);
+  fd_ = BandMatrix<double>(t1_input_size_ + 1, k + 1);
   fd_.Matrix::fill_with(std::numeric_limits<double>::infinity());
 
   // Cleanup node indices for consecutive use of the algorithm.
@@ -216,15 +210,19 @@ double Touzet<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
   //       the note at 'const int kT1Size'.
   index_nodes(t1, t1_size_, t1_depth_, t1_kr_, t1_lch_, t1_subtree_max_depth_, t1_dil_, t1_node_);
   index_nodes(t2, t2_size_, t2_depth_, t2_kr_, t2_lch_, t2_subtree_max_depth_, t2_dil_, t2_node_);
+};
 
-  // Nested loop over all node pairs in k-strip : |x-y|<=k.
-  // NOTE: This loop iterates over all node pairs from k-strip, and verifies
-  //       their k-relevancy.
+template <typename Label, typename CostModel>
+double Touzet<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
+                                            const node::Node<Label>& t2,
+                                            const int k) {
+  init(t1, t2, k);
 
-  // TODO: Introduce keyroot nodes here.
-
-  // Fill in for initially marking all subtree pairs as not eligable, and for debugging.
-  td_.fill_with(std::numeric_limits<double>::signaling_NaN());
+  // If the pair of root nodes is not in k-strip (input tree size difference is
+  // greater than k), return infinity.
+  if (std::abs(t1_input_size_ - t2_input_size_) > k) {
+    return std::numeric_limits<double>::infinity();
+  }
 
   for (auto x : t1_kr_) {
     for (auto y : t2_kr_) {
@@ -235,7 +233,7 @@ double Touzet<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
         int y_i = y;
         while (y_i > top_y) {
           // Check band condition.
-          if (!(y_i < std::max(0, x_i - k) || y_i > std::min(x_i + k, kT2Size-1))) {
+          if (!(y_i < std::max(0, x_i - k) || y_i > std::min(x_i + k, t2_input_size_-1))) { // TODO: Iterate only over y_i in the band.
             // std::cout << "kr-ish pair: " + std::to_string(x_i) + "," + std::to_string(y_i) << std::endl;
             // Check relevancy.
             if (!k_relevant(x_i, y_i, k)) {
@@ -243,7 +241,9 @@ double Touzet<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
               // continue;
             } else {
               // if (std::isnan(td_.read_at(x_i, y_i))) {
-                td_.at(x_i, y_i) = tree_dist(x_i, y_i, k, e(x_i, y_i, k), d_pruning);
+              // std::cout << "kr-ish pair: " + std::to_string(x_i) + "," + std::to_string(y_i) << std::endl;
+                td_.at(x_i, y_i) = tree_dist(x_i, y_i, k, e(x_i, y_i, k));
+                // std::cout << "Writing OU to td_(" + std::to_string(x_i) + "," + std::to_string(y_i) + ") = " + std::to_string(td_.read_at(x_i, y_i)) << std::endl;
                 // std::cout << "for: " + std::to_string(x_i) + "," + std::to_string(y_i) + " dist = " + std::to_string(td_.at(x_i, y_i)) << std::endl;
               // }
               top_y = y_i;
@@ -263,43 +263,12 @@ double Touzet<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
     }
   }
 
-  // for (int x = 0; x < kT1Size; ++x) {
-  //   // Initialise the entire row to infinity.
-  //   // TODO: It seems not necessarily needed. Verify which td values are used
-  //   //       in forest distance. In manual execution, I've never used the
-  //   //       values from NaN cells.
-  //   // NOTE: NaN used in td tests for marking values that are not computed.
-  //   for (int y = 0; y < td_.get_columns(); ++y) {
-  //     // NOTE: The base class at has to be called here, not to translate the
-  //     //       y-coordinate.
-  //     td_.Matrix::at(x, y) = std::numeric_limits<double>::signaling_NaN();
-  //   }
-  //   int orig_y = std::min(x + k, kT2Size-1);
-  //   int comp_y = orig_y + k - x;
-  //   if (comp_y > (int)td_.get_columns()) {
-  //     std::cout << "in touzet_ted -> col-value too large: " + std::to_string(orig_y) << std::endl;
-  //   }
-  //   for (int y = std::max(0, x - k); y <= std::min(x + k, kT2Size-1); ++y) {
-  //     if (!k_relevant(x, y, k)) {
-  //       // Overwrite NaN to infinity.
-  //       td_.at(x, y) = std::numeric_limits<double>::infinity();
-  //     } else {
-  //       // Compute td(x, y) with e errors - the value of e(x, y, k).
-  //       // std::cout << "reading from td_(" + std::to_string(x) + "," + std::to_string(y) + ") = " + std::to_string(td_.read_at(x, y)) << std::endl;
-  //       if (std::isnan(td_.read_at(x, y))) {
-  //         // std::cout << "reading NaN from td_(" + std::to_string(x) + "," + std::to_string(y) + ")" << std::endl;
-  //         td_.at(x, y) = tree_dist(x, y, k, e(x, y, k), d_pruning);
-  //       }
-  //     }
-  //   }
-  // }
-  return td_.at(kT1Size-1, kT2Size-1);
+  return td_.at(t1_input_size_-1, t2_input_size_-1);
 };
 
 template <typename Label, typename CostModel>
 double Touzet<Label, CostModel>::tree_dist(const int x, const int y,
-                                              const int k, const int e,
-                                              const bool d_pruning) {
+                                              const int k, const int e) {
   int x_size = t1_size_[x];
   int y_size = t2_size_[y];
 
@@ -327,158 +296,60 @@ double Touzet<Label, CostModel>::tree_dist(const int x, const int y,
 
   double candidate_result = std::numeric_limits<double>::infinity();
 
-  // Choose the loop version based on the d_pruning flag.
-  if (!d_pruning) {
-    // General cases - loop WITHOUT depth-based pruning.
-    for (int i = 1; i <= x_size; ++i) {
-      if (i - e - 1 >= 1) { // First j that is outside e-strip.
-        fd_.at(i, i - e - 1) = std::numeric_limits<double>::infinity();
-        ++subproblem_counter;
-      }
-      for (int j = std::max(1, i - e); j <= std::min(i + e, y_size); ++j) { // only (i,j) that are in e-strip
-        // The td(x_size-1, y_size-1) is computed differently.
-        // TODO: This condition is evaluated too often but passes only on the
-        //       last i and j.
-        // TODO: With keyroots this condition doesn't have to be evaluated - mind depth-based pruning.
-        if (i == x_size && j == std::min(i + e, y_size)) {
-          break;
-        }
-        ++subproblem_counter;
-        // NOTE: It's about existence of a path from (i,j) to (x-x_size,y-y_size).
-        //       It exists only then, if it existed for the neighburing nodes
-        //       adding the costs for coming to (i,j).
-        //       We don't have to verify e-strip because that's ensured with the
-        //       for loop and the first j and the first i outside e-strip.
-        // QUESTION: What about k-strip?
-        //           (i,j), in the input trees scope including offsets, must be
-        //           in k-strip. Otherwise, there is certainly no edit path from
-        //           (i,j) to (0,0). In other words, thre is no edit path from
-        //           (i,j) to (0,0) with the given budget k.
-        // QUESTION: What about k-relevancy?
-        //           Adding this to the condition below makes ted tests fail.
-        //           (a,b) is k-relevant if (T1_a,T2_b) can be mapped based on
-        //           the size lower bound of the nodes around these subtrees.
-        //           Thus, it doesn't fit here.
-        if (std::abs((i + x_off) - (j + y_off)) > k) {
-          fd_.at(i, j) = std::numeric_limits<double>::infinity();
-          // QUESTION: Do we have to check if this can be a pair of subtrees?
-          //           Maybe not because eventhough we will read NaN and conver to inf.
-          // if (i - t1_size_[i + x_off] == 0 && j - t2_size_[j + y_off] == 0) { // Pair of two subtrees.
-          //   td_.at(i + x_off, j + y_off) = std::numeric_limits<double>::infinity();
-          // }
-        } else {
-          candidate_result = std::numeric_limits<double>::infinity();
-          candidate_result = std::min(candidate_result, fd_.read_at(i - 1, j) + c_.del(t1_node_[i + x_off]));
-          candidate_result = std::min(candidate_result, fd_.read_at(i, j - 1) + c_.ins(t2_node_[j + y_off]));
-
-          double fd_read = 0.0;
-          // If one of the forests is a tree, look up the vlaues in fd_.
-          // Otherwise, both forests are trees and the fd-part is empty.
-          if (i - t1_size_[i + x_off] != 0 || j - t2_size_[j + y_off] != 0) { // TODO: Swap if-else conditions.
-            // TODO: We're reading here NaN values because the pair of rightmost
-            //       subtrees may not be eligable.
-            // QUESTION: Is it possible that we read from outside the band? - No exception thrown.
-            double td_read = td_.read_at(i + x_off, j + y_off);
-            if (std::isnan(td_read)) { // TODO: We can't map rightmost subtrees, thus we can't map left forests? - Correct results.
-              td_read = std::numeric_limits<double>::infinity();
-              candidate_result = std::numeric_limits<double>::infinity();
-            } else {
-              // If the values to read are outside of the band, they exceed
-              // the threshold or are not present in the band-matrix.
-              if (j - t2_size_[j + y_off] < std::max(0, i - t1_size_[i + x_off] - e - 1)) {
-                fd_read = std::numeric_limits<double>::infinity();
-              } else if (std::min(i - t1_size_[i + x_off] + e + 1, y_size) < j - t2_size_[j + y_off]) {
-                fd_read = std::numeric_limits<double>::infinity();
-              } else {
-                fd_read = fd_.read_at(i - t1_size_[i + x_off], j - t2_size_[j + y_off]);
-              }
-              candidate_result = std::min(candidate_result, fd_read + td_read);
-            }
-            // if (td_read == std::numeric_limits<double>::infinity()) {
-              // std::cout << "read " + std::to_string(td_read) + " from: " + std::to_string(i + x_off) + "," + std::to_string(j + y_off) << std::endl;
-            // }
-
-
-          } else { // Pair of two subtrees.
-            fd_read = fd_.read_at(i - 1, j - 1) + c_.ren(t1_node_[i + x_off], t2_node_[j + y_off]);
-            candidate_result = std::min(candidate_result, fd_read);
-            // Write to td_ only if there is no value.
-            // if (std::isnan(td_.at(i + x_off, j + y_off))) {
-              if (candidate_result > e ) {
-                td_.at(i + x_off, j + y_off) = std::numeric_limits<double>::infinity();
-              } else {
-                td_.at(i + x_off, j + y_off) = candidate_result;
-              }
-              // std::cout << "for: " + std::to_string(i + x_off) + "," + std::to_string(j + y_off) + " dist = " + std::to_string(td_.at(i + x_off, j + y_off)) << std::endl;
-            // }
-          }
-          // candidate_result = std::min(candidate_result, fd_read + td_read);
-
-          // None of the values in fd_ can be greater than e-value for this
-          // subtree pair.
-          // std::cout << std::to_string(candidate_result) << std::endl;
-          if (candidate_result > e) {
-            fd_.at(i, j) = std::numeric_limits<double>::infinity();
-          } else {
-            fd_.at(i, j) = candidate_result;
-          }
-        }
-      }
-      if (i + e + 1 <= y_size) { // Last j that is outside e-strip.
-        fd_.at(i, i + e + 1) = std::numeric_limits<double>::infinity();
-        ++subproblem_counter;
-      }
+  // General cases - loop WITHOUT depth-based pruning.
+  for (int i = 1; i <= x_size; ++i) {
+    if (i - e - 1 >= 1) { // First j that is outside e-strip.
+      fd_.at(i, i - e - 1) = std::numeric_limits<double>::infinity();
+      ++subproblem_counter;
     }
-  } else {
-    // General cases - loop WITH depth-based pruning.
-
-    // NOTE: max_depth has to be set to min(depth(x)+e+1, max depth of T1_x)
-    //       because e+1 may exceed the maximum depth of T1_x.
-    // TODO: Figure out why e+1.
-    int max_depth = std::min(t1_depth_.at(x) + e + 1, t1_subtree_max_depth_.at(x));
-
-    int i = 1;
-    int max_depth_it = 0;
-    // Move max_depth_it to point to the first node within this subtree (T1_x).
-    // TODO: This requires a scan of one depth inversted list. Can we do better?
-    while (t1_dil_.at(max_depth).at(max_depth_it) < i + x_off) {
-      ++max_depth_it;
-    }
-    // Set the first i-value for the loop
-    // TODO: Make this if more elegant.
-    if (t1_depth_.at(i + x_off) > max_depth) {
-      // x_off has to be substructed to get correct i.
-      i = t1_dil_.at(max_depth).at(max_depth_it) - x_off;
-      ++max_depth_it;
-    } else if (t1_depth_.at(i + x_off) == max_depth) {
-      ++max_depth_it;
-    }
-    // Traversing truncated tree to filter out i-values based on depth.
-    while (i <= x_size) {
-      // Old if statement for filtering i-values based on depth.
-      // if (t1_depth_[i + x_off] - t1_depth_[x] > e + 1) { continue; }
-      if (i - e - 1 >= 1) { // First j that is outside e-strip.
-        fd_.at(i, i - e - 1) = std::numeric_limits<double>::infinity();
-        ++subproblem_counter;
+    for (int j = std::max(1, i - e); j <= std::min(i + e, y_size); ++j) { // only (i,j) that are in e-strip
+      // The td(x_size-1, y_size-1) is computed differently.
+      // TODO: This condition is evaluated too often but passes only on the
+      //       last i and j.
+      // TODO: With keyroots this condition doesn't have to be evaluated - mind depth-based pruning.
+      if (i == x_size && j == std::min(i + e, y_size)) {
+        break;
       }
-      for (int j = std::max(1, i - e); j <= std::min(i + e, y_size); ++j) { // only (i,j) that are in e-strip
-        // The td(x_size-1, y_size-1) is computed differently.
-        // TODO: This condition is evaluated too often but passes only on the
-        //       last i and j.
-        if (i == x_size && j == std::min(i + e, y_size)) {
-          break;
-        }
-        ++subproblem_counter;
-        if (std::abs((i + x_off) - (j + y_off)) > k) {
-          fd_.at(i, j) = std::numeric_limits<double>::infinity();
-        } else {
-          candidate_result = std::numeric_limits<double>::infinity();
-          candidate_result = std::min(candidate_result, fd_.read_at(i, j - 1) + c_.ins(t2_node_[j + y_off]));
+      ++subproblem_counter;
+      // NOTE: It's about existence of a path from (i,j) to (x-x_size,y-y_size).
+      //       It exists only then, if it existed for the neighburing nodes
+      //       adding the costs for coming to (i,j).
+      //       We don't have to verify e-strip because that's ensured with the
+      //       for loop and the first j and the first i outside e-strip.
+      // QUESTION: What about k-strip?
+      //           (i,j), in the input trees scope including offsets, must be
+      //           in k-strip. Otherwise, there is certainly no edit path from
+      //           (i,j) to (0,0). In other words, thre is no edit path from
+      //           (i,j) to (0,0) with the given budget k.
+      // QUESTION: What about k-relevancy?
+      //           Adding this to the condition below makes ted tests fail.
+      //           (a,b) is k-relevant if (T1_a,T2_b) can be mapped based on
+      //           the size lower bound of the nodes around these subtrees.
+      //           Thus, it doesn't fit here.
+      if (std::abs((i + x_off) - (j + y_off)) > k) {
+        fd_.at(i, j) = std::numeric_limits<double>::infinity();
+        // QUESTION: Do we have to check if this can be a pair of subtrees?
+        //           Maybe not because eventhough we will read NaN and conver to inf.
+        // if (i - t1_size_[i + x_off] == 0 && j - t2_size_[j + y_off] == 0) { // Pair of two subtrees.
+        //   td_.at(i + x_off, j + y_off) = std::numeric_limits<double>::infinity();
+        // }
+      } else {
+        candidate_result = std::numeric_limits<double>::infinity();
+        candidate_result = std::min(candidate_result, fd_.read_at(i - 1, j) + c_.del(t1_node_[i + x_off]));
+        candidate_result = std::min(candidate_result, fd_.read_at(i, j - 1) + c_.ins(t2_node_[j + y_off]));
+
+        double fd_read = 0.0;
+        // If one of the forests is a tree, look up the vlaues in fd_.
+        // Otherwise, both forests are trees and the fd-part is empty.
+        if (i - t1_size_[i + x_off] != 0 || j - t2_size_[j + y_off] != 0) { // TODO: Swap if-else conditions.
+          // TODO: We're reading here NaN values because the pair of rightmost
+          //       subtrees may not be eligable.
+          // QUESTION: Is it possible that we read from outside the band? - No exception thrown.
           double td_read = td_.read_at(i + x_off, j + y_off);
-          double fd_read = 0.0;
-          // If one of the forests is a tree, look up the vlaues in fd_.
-          // Otherwise, both forests are trees and the fd-part is empty.
-          if (i - t1_size_[i + x_off] != 0 || j - t2_size_[j + y_off] != 0) {
+          if (std::isnan(td_read)) { // TODO: We can't map rightmost subtrees, thus we can't map left forests? - Correct results.
+            td_read = std::numeric_limits<double>::infinity();
+            candidate_result = std::numeric_limits<double>::infinity();
+          } else {
             // If the values to read are outside of the band, they exceed
             // the threshold or are not present in the band-matrix.
             if (j - t2_size_[j + y_off] < std::max(0, i - t1_size_[i + x_off] - e - 1)) {
@@ -488,48 +359,235 @@ double Touzet<Label, CostModel>::tree_dist(const int x, const int y,
             } else {
               fd_read = fd_.read_at(i - t1_size_[i + x_off], j - t2_size_[j + y_off]);
             }
+            candidate_result = std::min(candidate_result, fd_read + td_read);
           }
-          candidate_result = std::min(candidate_result, fd_read + td_read);
+          // if (td_read == std::numeric_limits<double>::infinity()) {
+            // std::cout << "read " + std::to_string(td_read) + " from: " + std::to_string(i + x_off) + "," + std::to_string(j + y_off) << std::endl;
+          // }
 
-          // Value at (i-1,j) may not be calculated due to truncated tree,
-          // thus it has to be verified separately.
-          // NOTE: For i=1 there may be an out of bound exception for depth
-          //       lookup.
-          if (i == 1 || (i > 1 && t1_depth_.at(i - 1 + x_off) - t1_depth_[x] <= e + 1)) {
-            candidate_result = std::min(
-              candidate_result,
-              fd_.read_at(i - 1, j) + c_.del(t1_node_[i + x_off])
-            );
-          }
+        } else { // Pair of two subtrees.
+          fd_read = fd_.read_at(i - 1, j - 1) + c_.ren(t1_node_[i + x_off], t2_node_[j + y_off]);
+          candidate_result = std::min(candidate_result, fd_read);
+          // Write to td_ only if there is no value.
+          // if (std::isnan(td_.at(i + x_off, j + y_off))) {
+            if (candidate_result > e ) {
+              td_.at(i + x_off, j + y_off) = std::numeric_limits<double>::infinity();
+            } else {
+              td_.at(i + x_off, j + y_off) = candidate_result;
+            }
+            // std::cout << "Writing IN to td_(" + std::to_string(i + x_off) + "," + std::to_string(j + y_off) + ") = " + std::to_string(td_.read_at(i + x_off, j + y_off)) << std::endl;
+            // std::cout << "for: " + std::to_string(i + x_off) + "," + std::to_string(j + y_off) + " dist = " + std::to_string(td_.at(i + x_off, j + y_off)) << std::endl;
+          // }
+        }
+        // candidate_result = std::min(candidate_result, fd_read + td_read);
 
-          // None of the values in fd_ can be greater than e-value for this
-          // subtree pair.
-          if (candidate_result > e) {
-            fd_.at(i, j) = std::numeric_limits<double>::infinity();
-          } else {
-            fd_.at(i, j) = candidate_result;
-          }
+        // None of the values in fd_ can be greater than e-value for this
+        // subtree pair.
+        // std::cout << std::to_string(candidate_result) << std::endl;
+        if (candidate_result > e) {
+          fd_.at(i, j) = std::numeric_limits<double>::infinity();
+        } else {
+          fd_.at(i, j) = candidate_result;
         }
       }
-      if (i + e + 1 <= y_size) { // Last j that is outside e-strip.
-        fd_.at(i, i + e + 1) = std::numeric_limits<double>::infinity();
-        ++subproblem_counter;
+    }
+    if (i + e + 1 <= y_size) { // Last j that is outside e-strip.
+      fd_.at(i, i + e + 1) = std::numeric_limits<double>::infinity();
+      ++subproblem_counter;
+    }
+  }
+
+  ++subproblem_counter;
+  // QUESTION: Is it possible that for some e-value an infinity should be
+  //           returned, because the last subproblem is too far away?
+
+  // TODO: Do not repeat this. Should be computed in the loop.
+  candidate_result = std::min({
+    fd_.read_at(x_size - 1, y_size) + c_.del(t1_node_[x]),                 // Delete root in source subtree.
+    fd_.read_at(x_size, y_size - 1) + c_.ins(t2_node_[y]),                 // Insert root in destination subtree.
+    fd_.read_at(x_size - 1, y_size - 1) + c_.ren(t1_node_[x], t2_node_[y]) // Rename root nodes of the subtrees.
+  });
+  // The distance between two subtrees cannot be greater than e-value for these
+  // subtrees.
+  if (candidate_result > e) {
+    return std::numeric_limits<double>::infinity();
+  } else {
+    return candidate_result;
+  }
+};
+
+template <typename Label, typename CostModel>
+double Touzet<Label, CostModel>::touzet_ted_depth_pruning(const node::Node<Label>& t1,
+                                               const node::Node<Label>& t2,
+                                               const int k) {
+  init(t1, t2, k);
+
+  // If the pair of root nodes is not in k-strip (input tree size difference is
+  // greater than k), return infinity.
+  if (std::abs(t1_input_size_ - t2_input_size_) > k) {
+    return std::numeric_limits<double>::infinity();
+  }
+
+  // Nested loop over all node pairs in k-strip : |x-y|<=k.
+  // NOTE: This loop iterates over all node pairs from k-strip, and verifies
+  //       their k-relevancy.
+  for (int x = 0; x < t1_input_size_; ++x) {
+    // Initialise the entire row to infinity.
+    // TODO: It seems not necessarily needed. Verify which td values are used
+    //       in forest distance. In manual execution, I've never used the
+    //       values from NaN cells.
+    // NOTE: NaN used in td tests for marking values that are not computed.
+    for (int y = 0; y < td_.get_columns(); ++y) {
+      // NOTE: The base class at has to be called here, not to translate the
+      //       y-coordinate.
+      td_.Matrix::at(x, y) = std::numeric_limits<double>::signaling_NaN();
+    }
+    int orig_y = std::min(x + k, t2_input_size_-1);
+    int comp_y = orig_y + k - x;
+    if (comp_y > (int)td_.get_columns()) {
+    }
+    for (int y = std::max(0, x - k); y <= std::min(x + k, t2_input_size_-1); ++y) {
+      if (!k_relevant(x, y, k)) {
+        // Overwrite NaN to infinity.
+        td_.at(x, y) = std::numeric_limits<double>::infinity();
+      } else {
+        // Compute td(x, y) with e errors - the value of e(x, y, k).
+        td_.at(x, y) = tree_dist_depth_pruning(x, y, k, e(x, y, k));
       }
-      // Set next i to iterate.
-      ++i;
-      // NOTE: i <= x_size verifies depth and dil[max_depth] bounds.
-      // NOTE: For i=x_size (subtree root) the depth is always smaller than
-      //       max_depth.
-      // TODO: Make this if more elegant.
-      if (i <= x_size && t1_depth_.at(i + x_off) > max_depth) {
-        // If depth of i is greater than max_depth, there must be an ancestor
-        // of i with depth equals max_depth, and max_depth_it points to it.
-        // x_off has to be substructed to get correct i.
-        i = t1_dil_.at(max_depth).at(max_depth_it) - x_off;
-        ++max_depth_it;
-      } else if (i <= x_size && t1_depth_.at(i + x_off) == max_depth) {
-        ++max_depth_it;
+    }
+  }
+  return td_.at(t1_input_size_-1, t2_input_size_-1);
+};
+
+template <typename Label, typename CostModel>
+double Touzet<Label, CostModel>::tree_dist_depth_pruning(const int x, const int y,
+                                              const int k, const int e) {
+  int x_size = t1_size_[x];
+  int y_size = t2_size_[y];
+
+  // Calculates offsets that let us translate i and j to correct postorder ids.
+  int x_off = x - x_size;
+  int y_off = y - y_size;
+
+  // Initial cases.
+  fd_.at(0, 0) = 0.0; // (0,0) is always within e-strip.
+  for (int j = 1; j <= std::min(y_size, e); ++j) { // i = 0; only j that are within e-strip.
+    fd_.at(0, j) = fd_.read_at(0, j - 1) + c_.ins(t2_node_[j + y_off]);
+  }
+  if (e + 1 <= y_size) { // the first j that is outside e-strip
+    fd_.at(0, e + 1) = std::numeric_limits<double>::infinity();
+  }
+  // QUESTION: Is it necessary to verify depths here?
+  //           It is not, because these values will never be used. We write
+  //           them not to verify the condition.
+  for (int i = 1; i <= std::min(x_size, e); ++i) { // j = 0; only i that are within e-strip.
+    fd_.at(i, 0) = fd_.read_at(i - 1, 0) + c_.del(t1_node_[i + x_off]);
+  }
+  if (e + 1 <= x_size) { // the first i that is outside e-strip
+    fd_.at(e + 1, 0) = std::numeric_limits<double>::infinity();
+  }
+
+  double candidate_result = std::numeric_limits<double>::infinity();
+
+  // General cases - loop WITH depth-based pruning.
+
+  // NOTE: max_depth has to be set to min(depth(x)+e+1, max depth of T1_x)
+  //       because e+1 may exceed the maximum depth of T1_x.
+  // TODO: Figure out why e+1.
+  int max_depth = std::min(t1_depth_.at(x) + e + 1, t1_subtree_max_depth_.at(x));
+
+  int i = 1;
+  int max_depth_it = 0;
+  // Move max_depth_it to point to the first node within this subtree (T1_x).
+  // TODO: This requires a scan of one depth inversted list. Can we do better?
+  while (t1_dil_.at(max_depth).at(max_depth_it) < i + x_off) {
+    ++max_depth_it;
+  }
+  // Set the first i-value for the loop
+  // TODO: Make this if more elegant.
+  if (t1_depth_.at(i + x_off) > max_depth) {
+    // x_off has to be substructed to get correct i.
+    i = t1_dil_.at(max_depth).at(max_depth_it) - x_off;
+    ++max_depth_it;
+  } else if (t1_depth_.at(i + x_off) == max_depth) {
+    ++max_depth_it;
+  }
+  // Traversing truncated tree to filter out i-values based on depth.
+  while (i <= x_size) {
+    // Old if statement for filtering i-values based on depth.
+    // if (t1_depth_[i + x_off] - t1_depth_[x] > e + 1) { continue; }
+    if (i - e - 1 >= 1) { // First j that is outside e-strip.
+      fd_.at(i, i - e - 1) = std::numeric_limits<double>::infinity();
+      ++subproblem_counter;
+    }
+    for (int j = std::max(1, i - e); j <= std::min(i + e, y_size); ++j) { // only (i,j) that are in e-strip
+      // The td(x_size-1, y_size-1) is computed differently.
+      // TODO: This condition is evaluated too often but passes only on the
+      //       last i and j.
+      if (i == x_size && j == std::min(i + e, y_size)) {
+        break;
       }
+      ++subproblem_counter;
+      if (std::abs((i + x_off) - (j + y_off)) > k) {
+        fd_.at(i, j) = std::numeric_limits<double>::infinity();
+      } else {
+        candidate_result = std::numeric_limits<double>::infinity();
+        candidate_result = std::min(candidate_result, fd_.read_at(i, j - 1) + c_.ins(t2_node_[j + y_off]));
+        double td_read = td_.read_at(i + x_off, j + y_off);
+        double fd_read = 0.0;
+        // If one of the forests is a tree, look up the vlaues in fd_.
+        // Otherwise, both forests are trees and the fd-part is empty.
+        if (i - t1_size_[i + x_off] != 0 || j - t2_size_[j + y_off] != 0) {
+          // If the values to read are outside of the band, they exceed
+          // the threshold or are not present in the band-matrix.
+          if (j - t2_size_[j + y_off] < std::max(0, i - t1_size_[i + x_off] - e - 1)) {
+            fd_read = std::numeric_limits<double>::infinity();
+          } else if (std::min(i - t1_size_[i + x_off] + e + 1, y_size) < j - t2_size_[j + y_off]) {
+            fd_read = std::numeric_limits<double>::infinity();
+          } else {
+            fd_read = fd_.read_at(i - t1_size_[i + x_off], j - t2_size_[j + y_off]);
+          }
+        }
+        candidate_result = std::min(candidate_result, fd_read + td_read);
+
+        // Value at (i-1,j) may not be calculated due to truncated tree,
+        // thus it has to be verified separately.
+        // NOTE: For i=1 there may be an out of bound exception for depth
+        //       lookup.
+        if (i == 1 || (i > 1 && t1_depth_.at(i - 1 + x_off) - t1_depth_[x] <= e + 1)) {
+          candidate_result = std::min(
+            candidate_result,
+            fd_.read_at(i - 1, j) + c_.del(t1_node_[i + x_off])
+          );
+        }
+
+        // None of the values in fd_ can be greater than e-value for this
+        // subtree pair.
+        if (candidate_result > e) {
+          fd_.at(i, j) = std::numeric_limits<double>::infinity();
+        } else {
+          fd_.at(i, j) = candidate_result;
+        }
+      }
+    }
+    if (i + e + 1 <= y_size) { // Last j that is outside e-strip.
+      fd_.at(i, i + e + 1) = std::numeric_limits<double>::infinity();
+      ++subproblem_counter;
+    }
+    // Set next i to iterate.
+    ++i;
+    // NOTE: i <= x_size verifies depth and dil[max_depth] bounds.
+    // NOTE: For i=x_size (subtree root) the depth is always smaller than
+    //       max_depth.
+    // TODO: Make this if more elegant.
+    if (i <= x_size && t1_depth_.at(i + x_off) > max_depth) {
+      // If depth of i is greater than max_depth, there must be an ancestor
+      // of i with depth equals max_depth, and max_depth_it points to it.
+      // x_off has to be substructed to get correct i.
+      i = t1_dil_.at(max_depth).at(max_depth_it) - x_off;
+      ++max_depth_it;
+    } else if (i <= x_size && t1_depth_.at(i + x_off) == max_depth) {
+      ++max_depth_it;
     }
   }
 

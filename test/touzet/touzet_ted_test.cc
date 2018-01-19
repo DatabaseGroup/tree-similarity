@@ -130,14 +130,14 @@ int main() {
       touzet_result = touzet_ted.touzet_ted(t1_gen, t2_gen, k);
       std::cout << "  touzet_result = " << touzet_result << std::endl;
       std::cout << "   touzet subpr = " << touzet_ted.get_subproblem_count() << std::endl;
-      touzet_result_d = touzet_ted.touzet_ted(t1_gen, t2_gen, k, true);
+      touzet_result_d = touzet_ted.touzet_ted_depth_pruning(t1_gen, t2_gen, k);
       std::cout << "touzet_result_d = " << touzet_result_d << std::endl;
       std::cout << " touzet d subpr = " << touzet_ted.get_subproblem_count() << std::endl;
     } catch (const std::exception& e) {
       std::cerr << e.what() << std::endl;
     }
 
-    if (zs_result != touzet_result) { // || zs_result != touzet_result_d) {
+    if (zs_result != touzet_result || zs_result != touzet_result_d) {
       std::cerr << "Incorrect TED result (Touzet | Touzet_D vs ZS): " << touzet_result << " | " << touzet_result_d << " instead of " << zs_result << std::endl;
       std::cerr << "T1: " << t1_gen_string << std::endl;
       std::cerr << "T2: " << t2_gen_string << std::endl;

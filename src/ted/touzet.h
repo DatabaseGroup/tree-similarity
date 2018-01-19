@@ -84,14 +84,28 @@ public:
   /// Computes the tree edit distance between two trees assuming a maximum
   /// number of allowed structural modifications (deletions, insertions).
   ///
+  /// This is an optimized version compared to Touzet. It uses keyroot nodes
+  /// (as in Zhang and Shasha) not to recompute subtree-pair distances.
+  ///
   /// \param t1 Source tree.
   /// \param t2 Destination tree.
   /// \param k Maximum number of allowed structural modifications (deletions,
   ///          insertions).
-  /// \param d_pruning Enables depth-based pruning (default: false).
   /// \return Tree edit distance regarding k.
   double touzet_ted(const node::Node<Label>& t1, const node::Node<Label>& t2,
-      const int k, const bool d_pruning = false);
+      const int k);
+  /// Computes the tree edit distance between two trees assuming a maximum
+  /// number of allowed structural modifications (deletions, insertions).
+  ///
+  /// This is an implementation of the original Touzet's algorithm.
+  ///
+  /// \param t1 Source tree.
+  /// \param t2 Destination tree.
+  /// \param k Maximum number of allowed structural modifications (deletions,
+  ///          insertions).
+  /// \return Tree edit distance regarding k.
+  double touzet_ted_depth_pruning(const node::Node<Label>& t1,
+      const node::Node<Label>& t2, const int k);
   /// Creates a TestItems object and returns it (by value).
   ///
   /// \return A TestItem object.
@@ -103,6 +117,10 @@ public:
   const unsigned long long int get_subproblem_count() const;
 // Member variables.
 private:
+  /// The size of the source tree.
+  int t1_input_size_;
+  /// The size of the destination tree.
+  int t2_input_size_;
   /// Stores the subtree size for each node of the source tree.
   /// Indexed in postorder ids starting with 0.
   std::vector<int> t1_size_;
@@ -163,20 +181,38 @@ private:
   unsigned long long int subproblem_counter;
 // Member functions.
 private:
+  /// Resets and initialises algorithm's internal data structures and constants.
+  /// Has to be called before computing the distance.
+  ///
+  /// \param t1 Source tree.
+  /// \param t2 Destination tree.
+  /// \param k Maximum number of allowed structural modifications (deletions,
+  ///          insertions).
+  void init(const node::Node<Label>& t1, const node::Node<Label>& t2, const int k);
   /// Calculates the tree edit distance between two subtrees with the remaining
   /// budget of errors, e. Uses dynamic programming, with previously computed
   /// results stored in td_. Itself it fills in fd_ matrix.
   ///
-  /// NOTE: All parameters are passed by value.
+  /// It's a modified version compared to Touzet that works with keyroot nodes
+  /// by storing intermediate subtree-pair distances in td_.
   ///
   /// \param x Postorder ID of a subtree in the source tree.
   /// \param y Postorder ID of a subtree in the destination tree.
   /// \param k Original threshold for the number of structural modifications.
   /// \param e The remaining budget of structural modifications for (x,y).
-  /// \param d_pruning Enables depth-based pruning. Initialised in the call
-  ///                  of touzet_ted function.
-  double tree_dist(const int x, const int y, const int k, const int e,
-      const bool d_pruning);
+  double tree_dist(const int x, const int y, const int k, const int e);
+  /// Calculates the tree edit distance between two subtrees with the remaining
+  /// budget of errors, e. Uses dynamic programming, with previously computed
+  /// results stored in td_. Itself it fills in fd_ matrix.
+  ///
+  /// This is implementation of the original Touzet's algorithm, including
+  /// depth-based pruning.
+  ///
+  /// \param x Postorder ID of a subtree in the source tree.
+  /// \param y Postorder ID of a subtree in the destination tree.
+  /// \param k Original threshold for the number of structural modifications.
+  /// \param e The remaining budget of structural modifications for (x,y).
+  double tree_dist_depth_pruning(const int x, const int y, const int k, const int e);
   /// Calculates e(x,y) - a budget of the remaining number of errors
   /// (deletions and insertions) that are left for the pair of subtrees
   /// (T1_x,T2_y) after computing the lower bound for the nodes around them.
