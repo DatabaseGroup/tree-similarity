@@ -17,14 +17,14 @@
 {a{b}{c{d{e}{f}}}}
 {a{b}{d{c{e}}{f}}}
 2
-73
+69
 # Test case 6; TED=1; k=1=TED
 {a{b}{c{d{e}{f}}}}
 {a{b}{c{e}{f}}}
 1
-35
+33
 # Test case 4a - standard tree + one node in destination
 {a{b{c}{d{e}}}{f{g}{h{i{j}{k}}}}{l{m}}}
 {a{b{c}{d{x}{e}}}{f{g}{h{i{j}{k}}}}{l{m}}}
 1
-97
+95

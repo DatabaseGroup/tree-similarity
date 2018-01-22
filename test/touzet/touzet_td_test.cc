@@ -118,6 +118,7 @@ int main() {
       node::Node<Label> t2 = bnp.parse_single(destination_tree);
 
       // Execute the algorithm to perform node indexing.
+      // Tests td_ entries after touzet with depth-based pruning.
       touzet_ted.touzet_ted_depth_pruning(t1, t2, k_value);
 
       auto touzet_test_items = touzet_ted.get_test_items();
