@@ -566,23 +566,37 @@ double Touzet<Label, CostModel>::tree_dist_depth_pruning(const int x, const int 
 
 template <typename Label, typename CostModel>
 int Touzet<Label, CostModel>::e(const int x, const int y, const int k) const {
+  // Lower bound formula (k - RA - L):
   // e(x,y) = k - |(|T1|-(x+1))-(|T2|-(y+1))| - |((x+1)-|T1_x|)-((y+1)-|T2_y|)|
+  // New lower bound formula (k - R - A - L):
+  // e(x,y) = k - |(|T1|-(x+1)-depth(x))-(|T2|-(y+1)-depth(y))| - |depth(x)-depth(y)| - |((x+1)-|T1_x|)-((y+1)-|T2_y|)|
   int x_size = t1_size_[x];
   int y_size = t2_size_[y];
-  int lower_bound = std::abs((t1_size_.back() - (x+1)) - (t2_size_.back() - (y+1))) +
+  // int lower_bound = std::abs((t1_size_.back() - (x+1)) - (t2_size_.back() - (y+1))) +
+  //                   std::abs(((x+1) - x_size) - ((y+1) - y_size));
+  int lower_bound = std::abs((t1_size_.back() - (x+1) - t1_depth_[x]) - (t2_size_.back() - (y+1) - t2_depth_[y])) +
+                    std::abs(t1_depth_[x] - t2_depth_[y]) +
                     std::abs(((x+1) - x_size) - ((y+1) - y_size));
   return (k - lower_bound);
 };
 
 template <typename Label, typename CostModel>
 bool Touzet<Label, CostModel>::k_relevant(const int x, const int y, const int k) const {
-  // The lower bound formula:
+  // The lower bound formula (RA + D + L):
   // |(|T1|-(x+1))-(|T2|-(y+1))| + ||T1_x|-|T2_y|| + |((x+1)-|T1_x|)-((y+1)-|T2_y|)| < k
+  // New lower bound formula (R + A + D + L):
+  // |(|T1|-(x+1)-depth(x))-(|T2|-(y+1)-depth(y))| + |depth(x)-depth(y)| + ||T1_x|-|T2_y|| + |((x+1)-|T1_x|)-((y+1)-|T2_y|)| < k
   int x_size = t1_size_[x];
   int y_size = t2_size_[y];
-  int lower_bound = std::abs((t1_size_.back() - (x+1)) - (t2_size_.back() - (y+1))) +
+  // int lower_bound = std::abs((t1_size_.back() - (x+1)) - (t2_size_.back() - (y+1))) +
+  //                   std::abs(x_size - y_size) +
+  //                   std::abs(((x+1) - x_size) - ((y+1) - y_size));
+
+  int lower_bound = std::abs((t1_size_.back() - (x+1) - t1_depth_[x]) - (t2_size_.back() - (y+1) - t2_depth_[y])) +
+                    std::abs(t1_depth_[x] - t2_depth_[y]) +
                     std::abs(x_size - y_size) +
                     std::abs(((x+1) - x_size) - ((y+1) - y_size));
+
   // NOTE: The pair (x,y) is k-relevant if lower_bound <= k.
   //       lower_bound < k is not correct because then (x,y) would be
   //       k-irrelevant for lower_bound = k. That would further mean that the
