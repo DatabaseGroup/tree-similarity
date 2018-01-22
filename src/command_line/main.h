@@ -27,12 +27,14 @@
 #ifndef TREE_SIMILARITY_TED_H
 #define TREE_SIMILARITY_TED_H
 
+#include <iostream>
+#include <sys/time.h>
+#include <sys/resource.h>
 #include "node.h"
 #include "string_label.h"
 #include "unit_cost_model.h"
 #include "zhang_shasha.h"
 #include "touzet.h"
 #include "bracket_notation_parser.h"
-#include <iostream>
 
 #endif // TREE_SIMILARITY_TED_H

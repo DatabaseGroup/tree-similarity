@@ -52,7 +52,7 @@ int main() {
       node::Node<Label> t2 = bnp.parse_single(input_tree_2_string);
 
       // Execute the algorithm WITH depth-based pruning.
-      touzet_ted.touzet_ted(t1, t2, k, true);
+      touzet_ted.touzet_ted_depth_pruning(t1, t2, k);
       const unsigned long long computed_results = touzet_ted.get_subproblem_count();
       if (correct_result != computed_results) {
         std::cerr << "Incorrect subproblem count (WITH depth-based pruning): " << computed_results << " instead of " << correct_result << std::endl;

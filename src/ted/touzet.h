@@ -35,13 +35,14 @@
 
 #include <vector>
 #include <memory>
-#include "node.h"
-#include "matrix.h"
 #include <iostream>
 #include <limits>
 #include <algorithm>
 #include <cstdlib>
 #include <string>
+#include <cmath>
+#include "node.h"
+#include "matrix.h"
 
 namespace ted {
 

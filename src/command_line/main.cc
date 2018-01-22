@@ -25,8 +25,6 @@
 /// TED command-line interface.
 
 #include "main.h"
-#include <sys/time.h>
-#include <sys/resource.h>
 
 int main(int argc, char** argv) {
 
@@ -90,7 +88,7 @@ int main(int argc, char** argv) {
     ted::Touzet<Label, CostModel> touzet_ted;
     rusage_return_value = getrusage(RUSAGE_SELF, &before_rusage);
     if (argc == 5) {
-      std::cout << touzet_ted.touzet_ted(source_tree, destination_tree, k, true);
+      std::cout << touzet_ted.touzet_ted_depth_pruning(source_tree, destination_tree, k);
     } else {
       std::cout << touzet_ted.touzet_ted(source_tree, destination_tree, k);
     }

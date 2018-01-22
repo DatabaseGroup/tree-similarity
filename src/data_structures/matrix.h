@@ -152,10 +152,10 @@ const ElementType& Matrix<ElementType>::read_at(size_t row, size_t col) const {
   if (row >= rows_) {
     throw std::out_of_range ("Matrix<ElementType>::read_at() : row is out of range.");
   }
-  if (std::isnan(data_[row * columns_ + col])) {
-    std::cout << "Matrix<ElementType>::read_at() : reading NaN." << std::endl;
-    // throw std::invalid_argument ("Matrix<ElementType>::read_at() : reading NaN.");
-  }
+  // if (std::isnan(data_[row * columns_ + col])) {
+  //   std::cout << "Matrix<ElementType>::read_at() : reading NaN." << std::endl;
+  //   // throw std::invalid_argument ("Matrix<ElementType>::read_at() : reading NaN.");
+  // }
   return data_[row * columns_ + col];
 }
 
