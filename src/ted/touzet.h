@@ -108,6 +108,8 @@ public:
   /// \return Tree edit distance regarding k.
   double touzet_ted_depth_pruning(const node::Node<Label>& t1,
       const node::Node<Label>& t2, const int k);
+  double touzet_ted_orig_nored(const node::Node<Label>& t1,
+      const node::Node<Label>& t2, const int k);
   /// Creates a TestItems object and returns it (by value).
   ///
   /// \return A TestItem object.
@@ -223,6 +225,7 @@ private:
   /// \param k Original threshold for the number of structural modifications.
   /// \param e The remaining budget of structural modifications for (x,y).
   double tree_dist_depth_pruning(const int x, const int y, const int k, const int e);
+  double tree_dist_orig_nored(const int x, const int y, const int k, const int e, const int x_off, const int y_off);
   /// Calculates e(x,y) - a budget of the remaining number of errors
   /// (deletions and insertions) that are left for the pair of subtrees
   /// (T1_x,T2_y) after computing the lower bound for the nodes around them.

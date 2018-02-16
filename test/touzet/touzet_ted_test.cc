@@ -73,7 +73,7 @@ int main() {
       // Execute the algorithm WITHOUT depth-based pruning.
       double computed_results;
       try {
-        computed_results = touzet_ted.touzet_ted(t1, t2, k);
+        computed_results = touzet_ted.touzet_ted_orig_nored(t1, t2, k);
       } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
       }
@@ -97,6 +97,7 @@ int main() {
     }
   }
 
+  // return 0;
 
   // Randomised test cases.
 
@@ -127,7 +128,7 @@ int main() {
       std::cout << "              k = " << k << std::endl;
       std::cout << "      zs_result = " << zs_result << std::endl;
       std::cout << "       zs subpr = " << zs_ted.get_subproblem_count() << std::endl;
-      touzet_result = touzet_ted.touzet_ted(t1_gen, t2_gen, k);
+      touzet_result = touzet_ted.touzet_ted_orig_nored(t1_gen, t2_gen, k);
       std::cout << "  touzet_result = " << touzet_result << std::endl;
       std::cout << "   touzet subpr = " << touzet_ted.get_subproblem_count() << std::endl;
       touzet_result_d = touzet_ted.touzet_ted_depth_pruning(t1_gen, t2_gen, k);
