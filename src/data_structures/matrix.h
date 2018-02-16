@@ -139,7 +139,7 @@ ElementType& Matrix<ElementType>::at(size_t row, size_t col) {
     throw std::out_of_range ("Matrix<ElementType>::at() : col is out of range, col accessed = " + std::to_string(col));
   }
   if (row >= rows_) {
-    throw std::out_of_range ("Matrix<ElementType>::at() : row is out of range.");
+    throw std::out_of_range ("Matrix<ElementType>::at() : row is out of range, row accessed = " + std::to_string(row));
   }
   return data_[row * columns_ + col];
 }
@@ -150,7 +150,7 @@ const ElementType& Matrix<ElementType>::read_at(size_t row, size_t col) const {
     throw std::out_of_range ("Matrix<ElementType>::read_at() : col is out of range, col accessed = " + std::to_string(col));
   }
   if (row >= rows_) {
-    throw std::out_of_range ("Matrix<ElementType>::read_at() : row is out of range.");
+    throw std::out_of_range ("Matrix<ElementType>::read_at() : row is out of range, row accessed = " + std::to_string(row));
   }
   // if (std::isnan(data_[row * columns_ + col])) {
   //   std::cout << "Matrix<ElementType>::read_at() : reading NaN." << std::endl;
