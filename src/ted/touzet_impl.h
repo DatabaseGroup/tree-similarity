@@ -37,6 +37,7 @@ int Touzet<Label, CostModel>::index_nodes_recursion(
     std::vector<int>& depth,
     std::vector<int>& kr,
     std::vector<int>& lch,
+    std::vector<int>& parent,
     std::vector<int>& subtree_max_depth,
     std::vector<std::vector<int>>& dil,
     std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
@@ -67,13 +68,16 @@ int Touzet<Label, CostModel>::index_nodes_recursion(
 
   // This node's left child.
   int left_child = -1; // '-1' if there are no children.
+  
+  // To store postorder ids of this node's children.
+  std::vector<int> nodes_children;
 
   // Recursions to childen nodes.
   auto children_start_it = std::begin(node.get_children());
-  auto children_end_it=std::end(node.get_children());
+  auto children_end_it = std::end(node.get_children());
   while (children_start_it != children_end_it) {
     desc_sum += index_nodes_recursion(*children_start_it, size, depth, kr, lch,
-                                      subtree_max_depth, dil,
+                                      parent, subtree_max_depth, dil,
                                       nodes, start_postorder, start_preorder,
                                       start_depth + 1, this_subtree_max_depth);
     if (children_start_it == node.get_children().begin()) {
@@ -82,6 +86,8 @@ int Touzet<Label, CostModel>::index_nodes_recursion(
       // Add current child to kr.
       kr.push_back(start_postorder-1);
     }
+    // Collect children ids.
+    nodes_children.push_back(start_postorder-1);
     // Continue to consecutive children.
     ++children_start_it;
   }
@@ -90,6 +96,13 @@ int Touzet<Label, CostModel>::index_nodes_recursion(
 
   // Left child.
   lch.push_back(left_child);
+    
+  // Parent - dummy element to grow the vector by this node.
+  parent.push_back(-1);
+  // Set this node's postorder value as parent for all its children.
+  for (auto child_id : nodes_children) {
+    parent.at(child_id) = start_postorder;
+  }
 
   if (node.is_leaf()) {
     // Leaf has size 1.
@@ -127,6 +140,7 @@ void Touzet<Label, CostModel>::index_nodes(
     std::vector<int>& depth,
     std::vector<int>& kr,
     std::vector<int>& lch,
+    std::vector<int>& parent,
     std::vector<int>& subtree_max_depth,
     std::vector<std::vector<int>>& dil,
     std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes) {
@@ -142,7 +156,7 @@ void Touzet<Label, CostModel>::index_nodes(
   int start_preorder = 0;
   // Maximum input tree depth - the first reference passed to recursion.
   int input_max_depth = 0;
-  index_nodes_recursion(root, size, depth, kr, lch, subtree_max_depth, dil,
+  index_nodes_recursion(root, size, depth, kr, lch, parent, subtree_max_depth, dil,
       nodes, start_postorder, start_preorder, 0, input_max_depth);
 
   // Here, start_postorder and start_preorder store the size of tree minus 1.
@@ -167,6 +181,8 @@ void Touzet<Label, CostModel>::init(const node::Node<Label>& t1,
   t2_kr_.clear();
   t1_lch_.clear();
   t2_lch_.clear();
+  t1_parent_.clear();
+  t2_parent_.clear();
   t1_subtree_max_depth_.clear();
   t2_subtree_max_depth_.clear();
   t1_dil_.clear();
@@ -176,10 +192,10 @@ void Touzet<Label, CostModel>::init(const node::Node<Label>& t1,
   //       pushed-back. That results in linear-number of push_back invocations.
   //       The efficiency of that approach is not evaluated.
   //       However, to get the tree size, one tree traversal is required.
-  index_nodes(t1, t1_size_, t1_depth_, t1_kr_, t1_lch_, t1_subtree_max_depth_,
-      t1_dil_, t1_node_);
-  index_nodes(t2, t2_size_, t2_depth_, t2_kr_, t2_lch_, t2_subtree_max_depth_,
-      t2_dil_, t2_node_);
+  index_nodes(t1, t1_size_, t1_depth_, t1_kr_, t1_lch_, t1_parent_,
+      t1_subtree_max_depth_, t1_dil_, t1_node_);
+  index_nodes(t2, t2_size_, t2_depth_, t2_kr_, t2_lch_, t2_parent_,
+      t2_subtree_max_depth_, t2_dil_, t2_node_);
 
   // NOTE: Retrive the input tree sizes. Do not call get_tree_size() that causes
   //       an additional tree traversal.
@@ -616,6 +632,7 @@ const typename Touzet<Label, CostModel>::TestItems Touzet<Label, CostModel>::get
     t1_depth_,
     t1_kr_,
     t1_lch_,
+    t1_parent_,
     t1_dil_,
     t1_subtree_max_depth_,
   };

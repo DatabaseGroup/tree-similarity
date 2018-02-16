@@ -75,6 +75,7 @@ public:
     const std::vector<int>& t1_depth;
     const std::vector<int>& t1_kr;
     const std::vector<int>& t1_lch;
+    const std::vector<int>& t1_parent;
     const std::vector<std::vector<int>>& t1_dil;
     const std::vector<int>& t1_max_subtree_depth;
   };
@@ -148,13 +149,21 @@ private:
   /// Key-root nodes of the destination tree.
   std::vector<int> t2_kr_;
   /// Stores the postorder id of the left child for each node of the source
-  /// tree.
+  /// tree. '-1' represents no child.
   /// Indexed in postorder ids starting with 0.
   std::vector<int> t1_lch_;
   /// Stores the postorder id of the left child for each node of the destination
-  /// tree.
+  /// tree. '-1' represents no child.
   /// Indexed in postorder ids starting with 0.
   std::vector<int> t2_lch_;
+  /// Stores the postorder id of the parent for each node of the source
+  /// tree. '-1' represents no parent.
+  /// Indexed in postorder ids starting with 0.
+  std::vector<int> t1_parent_;
+  /// Stores the postorder id of the parent for each node of the destination
+  /// tree. '-1' represents no parent.
+  /// Indexed in postorder ids starting with 0.
+  std::vector<int> t2_parent_;
   /// An inverted list that for each depth value in source tree, stores node ids
   /// of nodes with that depth.
   /// Indexed in depth value.
@@ -250,6 +259,7 @@ private:
                    std::vector<int>& depth,
                    std::vector<int>& kr,
                    std::vector<int>& lch,
+                   std::vector<int>& parent,
                    std::vector<int>& subtree_max_depth,
                    std::vector<std::vector<int>>& dil,
                    std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes);
@@ -273,6 +283,7 @@ private:
                              std::vector<int>& size, std::vector<int>& depth,
                              std::vector<int>& kr,
                              std::vector<int>& lch,
+                             std::vector<int>& parent,
                              std::vector<int>& subtree_max_depth,
                              std::vector<std::vector<int>>& dil,
                              std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,

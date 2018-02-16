@@ -11,6 +11,7 @@ set(touzet_test_list
   touzet_ted_test
   touzet_kr_test
   touzet_left_child_test
+  touzet_parent_test
 )
 
 # Add custom target for building all touzet's tests.
