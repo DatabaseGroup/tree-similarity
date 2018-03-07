@@ -166,11 +166,24 @@ void Touzet<Label, CostModel>::index_nodes(
 }
 
 template <typename Label, typename CostModel>
+void Touzet<Label, CostModel>::fill_nodes_kr(std::vector<int>& nodes_kr,
+    std::vector<int>& lch, std::vector<int>& kr) {
+  for (auto i : kr) {
+    int l = i;
+    while (l >= 0) {
+      nodes_kr[l] = i;
+      l = lch[l];
+    }
+  }
+}
+
+template <typename Label, typename CostModel>
 void Touzet<Label, CostModel>::init(const node::Node<Label>& t1,
                                     const node::Node<Label>& t2, const int k) {
   using data_structures::BandMatrix;
 
   // Cleanup node indices for consecutive use of the algorithm.
+  // NOTE: clear() may have linear complexity.
   t1_size_.clear();
   t2_size_.clear();
   t1_node_.clear();
@@ -183,6 +196,8 @@ void Touzet<Label, CostModel>::init(const node::Node<Label>& t1,
   t2_lch_.clear();
   t1_parent_.clear();
   t2_parent_.clear();
+  t1_nodes_kr_.clear();
+  t2_nodes_kr_.clear();
   t1_subtree_max_depth_.clear();
   t2_subtree_max_depth_.clear();
   t1_dil_.clear();
@@ -196,11 +211,17 @@ void Touzet<Label, CostModel>::init(const node::Node<Label>& t1,
       t1_subtree_max_depth_, t1_dil_, t1_node_);
   index_nodes(t2, t2_size_, t2_depth_, t2_kr_, t2_lch_, t2_parent_,
       t2_subtree_max_depth_, t2_dil_, t2_node_);
-
+  
   // NOTE: Retrive the input tree sizes. Do not call get_tree_size() that causes
   //       an additional tree traversal.
   t1_input_size_ = t1_size_.back();
   t2_input_size_ = t2_size_.back();
+  
+  // NOTE: Allocate space for the vectors.
+  t1_nodes_kr_.resize(t1_input_size_);
+  t2_nodes_kr_.resize(t2_input_size_);
+  fill_nodes_kr(t1_nodes_kr_, t1_lch_, t1_kr_);
+  fill_nodes_kr(t2_nodes_kr_, t2_lch_, t2_kr_);
 
   // Reset subproblem counter.
   subproblem_counter = 0;
@@ -843,6 +864,7 @@ const typename Touzet<Label, CostModel>::TestItems Touzet<Label, CostModel>::get
     t1_kr_,
     t1_lch_,
     t1_parent_,
+    t1_nodes_kr_,
     t1_dil_,
     t1_subtree_max_depth_,
   };

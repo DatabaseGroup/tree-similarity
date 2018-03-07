@@ -76,6 +76,7 @@ public:
     const std::vector<int>& t1_kr;
     const std::vector<int>& t1_lch;
     const std::vector<int>& t1_parent;
+    const std::vector<int>& t1_nodes_kr;
     const std::vector<std::vector<int>>& t1_dil;
     const std::vector<int>& t1_max_subtree_depth;
   };
@@ -166,6 +167,14 @@ private:
   /// tree. '-1' represents no parent.
   /// Indexed in postorder ids starting with 0.
   std::vector<int> t2_parent_;
+  /// Stores the postorder id of the nearest keyroot-ancestor for each node of
+  /// the source tree.
+  /// Indexed in postorder ids starting with 0.
+  std::vector<int> t1_nodes_kr_;
+  /// Stores the postorder id of the nearest keyroot-ancestor for each node of
+  /// the destination tree.
+  /// Indexed in postorder ids starting with 0.
+  std::vector<int> t2_nodes_kr_;
   /// An inverted list that for each depth value in source tree, stores node ids
   /// of nodes with that depth.
   /// Indexed in depth value.
@@ -292,6 +301,17 @@ private:
                              std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
                              int& start_postorder, int& start_preorder,
                              int start_depth, int& parent_max_depth);
+  /// For each node, stores the postorder id of its nearest keyroot-ancestor.
+  ///
+  /// NOTE: Complexity is linear in the tree size.
+  ///
+  /// TODO: Try to do this while indexing the nodes.
+  ///
+  /// \param nodes_kr Vector with nodes keyroots.
+  /// \param lch Vector with leftmost children.
+  /// \param kr Vector with keyroot nodes.
+  void fill_nodes_kr(std::vector<int>& nodes_kr, std::vector<int>& lch,
+      std::vector<int>& kr);
 };
 
 // Implementation details.
