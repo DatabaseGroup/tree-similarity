@@ -1,4 +1,6 @@
 #include <iostream>
+#include <time.h>
+#include "timing.h"
 #include <string>
 #include <vector>
 #include <fstream>
@@ -70,49 +72,43 @@ int main() {
       node::Node<Label> t2 = bnp.parse_single(input_tree_2_string);
 
 
-      // Execute the algorithm WITHOUT depth-based pruning.
+      // Execute the algorithm WITHOUT redundancy.
       double computed_results;
       try {
-        computed_results = touzet_ted.touzet_ted_orig_nored(t1, t2, k);
+        computed_results = touzet_ted.touzet_ted_kr_set(t1, t2, k);
       } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
       }
 
       if (correct_result != computed_results) {
-        std::cerr << "Incorrect TED result (WITHOUT depth-based pruning): " << computed_results << " instead of " << correct_result << std::endl;
+        std::cerr << "Incorrect TED result (WITHOUT redundancy): " << computed_results << " instead of " << correct_result << std::endl;
         std::cerr << "T1: " << input_tree_1_string << std::endl;
         std::cerr << "T2: " << input_tree_2_string << std::endl;
         std::cerr << "k: " << k << std::endl;
         return -1;
       }
-      // // Execute the algorithm WITH depth-based pruning.
-      // computed_results = touzet_ted.touzet_ted(t1, t2, k, true);
-      // if (correct_result != computed_results) {
-      //   std::cerr << "Incorrect TED result (WITH depth-based pruning): " << computed_results << " instead of " << correct_result << std::endl;
-      //   std::cerr << "T1: " << input_tree_1_string << std::endl;
-      //   std::cerr << "T2: " << input_tree_2_string << std::endl;
-      //   std::cerr << "k: " << k << std::endl;
-      //   return -1;
-      // }
     }
   }
-
-  // return 0;
 
   // Randomised test cases.
 
   std::cout << "--- RANDOMIZED TEST ---" << std::endl;
-
+  
+  // Runtime measurement.
+  Timing timing;
+  
   // Initialise SimpleTreeGenerator and generate a dummy tree.
   tree_generator::SimpleTreeGenerator stg;
-  int max_nodes = 50;
-  int max_edits = 15; // 30%
+  int max_nodes = 100;
+  int max_edits = 30; // 30%
   std::mt19937 rd;
   std::uniform_int_distribution<int> edits_dist(0, max_edits);
   std::string t1_gen_string;
   std::string t2_gen_string;
   double touzet_result;
   double touzet_result_d;
+  double touzet_result_kr_loop;
+  double touzet_result_kr_set;
   double zs_result;
   int k;
   for (int i = 0; i < 200; ++i) {
@@ -123,23 +119,64 @@ int main() {
     node::Node<Label> t1_gen = bnp.parse_single(t1_gen_string);
     node::Node<Label> t2_gen = bnp.parse_single(t2_gen_string);
     try {
+      Timing::Interval * zs_time = timing.create_enroll("zs_time");
+      zs_time->start();
       zs_result = zs_ted.zhang_shasha_ted(t1_gen, t2_gen);
+      zs_time->stop();
       k = int(std::ceil(zs_result));
-      std::cout << "              k = " << k << std::endl;
-      std::cout << "      zs_result = " << zs_result << std::endl;
-      std::cout << "       zs subpr = " << zs_ted.get_subproblem_count() << std::endl;
-      touzet_result = touzet_ted.touzet_ted_orig_nored(t1_gen, t2_gen, k);
-      std::cout << "  touzet_result = " << touzet_result << std::endl;
-      std::cout << "   touzet subpr = " << touzet_ted.get_subproblem_count() << std::endl;
+      std::cout << "                      k = " << k << std::endl;
+      std::cout << "---------------------------------------------" << std::endl;
+      std::cout << "              zs_result = " << zs_result << std::endl;
+      std::cout << "               zs subpr = " << zs_ted.get_subproblem_count() << std::endl;
+      std::cout << "             zs runtime = " << zs_time->getfloat() << std::endl;
+      std::cout << "---------------------------------------------" << std::endl;
+      Timing::Interval * touzet_time = timing.create_enroll("touzet_time");
+      touzet_time->start();
+      touzet_result = touzet_ted.touzet_ted(t1_gen, t2_gen, k);
+      touzet_time->stop();
+      std::cout << "          touzet_result = " << touzet_result << std::endl;
+      std::cout << "           touzet subpr = " << touzet_ted.get_subproblem_count() << std::endl;
+      std::cout << "         touzet runtime = " << touzet_time->getfloat() << std::endl;
+      std::cout << "---------------------------------------------" << std::endl;
+      Timing::Interval * touzet_d_time = timing.create_enroll("touzet_d_time");
+      touzet_d_time->start();
       touzet_result_d = touzet_ted.touzet_ted_depth_pruning(t1_gen, t2_gen, k);
-      std::cout << "touzet_result_d = " << touzet_result_d << std::endl;
-      std::cout << " touzet d subpr = " << touzet_ted.get_subproblem_count() << std::endl;
+      touzet_d_time->stop();
+      std::cout << "        touzet_result_d = " << touzet_result_d << std::endl;
+      std::cout << "         touzet d subpr = " << touzet_ted.get_subproblem_count() << std::endl;
+      std::cout << "       touzet d runtime = " << touzet_d_time->getfloat() << std::endl;
+      std::cout << "---------------------------------------------" << std::endl;
+      Timing::Interval * touzet_kr_loop_time = timing.create_enroll("touzet_kr_loop_time");
+      touzet_kr_loop_time->start();
+      touzet_result_kr_loop = touzet_ted.touzet_ted_kr_loop(t1_gen, t2_gen, k);
+      touzet_kr_loop_time->stop();
+      std::cout << "  touzet_result_kr_loop = " << touzet_result_kr_loop << std::endl;
+      std::cout << "   touzet kr loop subpr = " << touzet_ted.get_subproblem_count() << std::endl;
+      std::cout << " touzet kr loop runtime = " << touzet_kr_loop_time->getfloat() << std::endl;
+      std::cout << "---------------------------------------------" << std::endl;
+      Timing::Interval * touzet_kr_set_time = timing.create_enroll("touzet_kr_set_time");
+      touzet_kr_set_time->start();
+      touzet_result_kr_set = touzet_ted.touzet_ted_kr_set(t1_gen, t2_gen, k);
+      touzet_kr_set_time->stop();
+      std::cout << "   touzet_result_kr_set = " << touzet_result_kr_set << std::endl;
+      std::cout << "    touzet kr set subpr = " << touzet_ted.get_subproblem_count() << std::endl;
+      std::cout << "  touzet kr set runtime = " << touzet_kr_set_time->getfloat() << std::endl;
+      std::cout << "---------------------------------------------" << std::endl;
     } catch (const std::exception& e) {
       std::cerr << e.what() << std::endl;
     }
 
-    if (zs_result != touzet_result || zs_result != touzet_result_d) {
-      std::cerr << "Incorrect TED result (Touzet | Touzet_D vs ZS): " << touzet_result << " | " << touzet_result_d << " instead of " << zs_result << std::endl;
+    if (zs_result != touzet_result ||
+        zs_result != touzet_result_d ||
+        zs_result != touzet_result_kr_loop ||
+        zs_result != touzet_result_kr_set
+      ) {
+      std::cerr << "Incorrect TED result (Touzet | Touzet_D | Touzet_KR_LOOP | Touzet_KR_SET vs ZS): " <<
+          touzet_result << " | " <<
+          touzet_result_d << " | " <<
+          touzet_result_kr_loop << " | " <<
+          touzet_result_kr_set <<
+          " instead of " << zs_result << std::endl;
       std::cerr << "T1: " << t1_gen_string << std::endl;
       std::cerr << "T2: " << t2_gen_string << std::endl;
       std::cerr << "k: " << k << std::endl;

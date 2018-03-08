@@ -9,6 +9,19 @@ project(tree_similarity)
 # TODO: Explain the flags.
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
 
+# Verify which timing implementation to use.
+# NOTE: Comes from common-code.
+include(CheckSymbolExists)
+CHECK_SYMBOL_EXISTS(clock_gettime "time.h" HAVE_CLOCK_GETTIME)
+if(NOT HAVE_CLOCK_GETTIME)
+  add_definitions(-DGETRUSAGE)
+endif()
+# Link the timing library and header file.
+add_library(
+  TimingLibrary                          # LIBRARY NAME
+  modules/common-code/timings/timing.cxx # LIBRARY SOURCE
+)
+
 # Create header-only library 'TreeSimilarity'.
 #
 # One can also use include_directories() to add all header files which would be
