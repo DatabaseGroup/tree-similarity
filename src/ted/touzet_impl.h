@@ -261,10 +261,7 @@ double Touzet<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
   // over all node pairs from k-strip, and verifies their k-relevancy.
   for (int x = 0; x < t1_input_size_; ++x) {
     for (int y = std::max(0, x - k); y <= std::min(x + k, t2_input_size_-1); ++y) {
-      if (!k_relevant(x, y, k)) {
-        // Overwrite NaN to infinity.
-        td_.at(x, y) = std::numeric_limits<double>::infinity();
-      } else {
+      if (k_relevant(x, y, k)) {
         // Compute td(x, y) with e errors - the value of e(x, y, k).
         td_.at(x, y) = tree_dist(x, y, k, e(x, y, k));
       }

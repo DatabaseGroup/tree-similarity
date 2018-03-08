@@ -272,7 +272,9 @@ private:
   /// budget of errors, e. Uses dynamic programming, with previously computed
   /// results stored in td_. Itself it fills in fd_ matrix.
   ///
-  /// This is implementation of the original Touzet's algorithm.
+  /// This is implementation of the original Touzet's algorithm with
+  /// a modification to store intermediate subtree pair distances. Used for
+  /// the algorithm versions that remove redundancy by useng keyroot nodes.
   ///
   /// \param x Postorder ID of a subtree in the source tree.
   /// \param y Postorder ID of a subtree in the destination tree.
