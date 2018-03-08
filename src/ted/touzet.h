@@ -356,7 +356,7 @@ private:
                              std::vector<std::vector<int>>& dil,
                              std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
                              int& start_postorder, int& start_preorder,
-                             int start_depth, int& parent_max_depth);
+                             unsigned int start_depth, int& parent_max_depth);
   /// For each node, stores the postorder id of its nearest keyroot-ancestor.
   ///
   /// NOTE: Complexity is linear in the tree size.

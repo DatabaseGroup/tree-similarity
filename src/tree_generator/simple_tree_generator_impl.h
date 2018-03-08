@@ -36,7 +36,7 @@ std::string SimpleTreeGenerator::generate_tree(unsigned int tree_size) {
   std::uniform_int_distribution<int> labels_dist(0, alphabet_.size()-1);
 
   std::vector<std::string> labels;
-  for (int i = 0; i < tree_size; ++i) {
+  for (unsigned int i = 0; i < tree_size; ++i) {
     labels.push_back(alphabet_[labels_dist(rd)]);
   }
 
@@ -47,7 +47,7 @@ std::string SimpleTreeGenerator::generate_tree(unsigned int tree_size) {
 
   std::uniform_int_distribution<int> right_dist;
   int right_id;
-  for (int i = 1; i < tree_size; ++i) {
+  for (unsigned int i = 1; i < tree_size; ++i) {
     right_dist = std::uniform_int_distribution<int>(i, max_right[i]);
     right_id = right_dist(rd);
     for (int desc = i+1; desc <= right_id; ++desc) {
@@ -58,7 +58,7 @@ std::string SimpleTreeGenerator::generate_tree(unsigned int tree_size) {
 
   // Make a tree.
   std::string tree = "";
-  for (int i = 0; i < tree_size; ++i) {
+  for (unsigned int i = 0; i < tree_size; ++i) {
       tree += kLeftBracket + labels[i];
       for (int r = 0; r < nodes[i]; ++r) {
         tree += kRightBracket;
@@ -104,7 +104,7 @@ std::string SimpleTreeGenerator::modify_tree(std::string& tree_string, int tree_
     // Find {-token of random_node_id.
     int id = 0; // Equal to {-token of node with id=0.
     int cur_node_id = 0;
-    for (int i = 1; i < tokens.size(); ++i) {
+    for (unsigned int i = 1; i < tokens.size(); ++i) {
       if (cur_node_id == random_node_id) {
         break;
       }
@@ -125,7 +125,7 @@ std::string SimpleTreeGenerator::modify_tree(std::string& tree_string, int tree_
     // Find {-token of random_node_id.
     int id_left = 0; // Equal to {-token of node with id=0.
     int cur_node_id = 0;
-    for (int i = 1; i < tokens.size(); ++i) {
+    for (unsigned int i = 1; i < tokens.size(); ++i) {
       if (cur_node_id == random_node_id) {
         break;
       }
@@ -140,7 +140,7 @@ std::string SimpleTreeGenerator::modify_tree(std::string& tree_string, int tree_
     int id_right = id_left; // id_right has to be right of id_left.
     int in_l = 1;
     int in_r = 0;
-    for (int i = id_left+1; i < tokens.size(); ++i) {
+    for (unsigned int i = id_left+1; i < tokens.size(); ++i) {
       if (tokens[i] == "{") {
         ++in_l;
       } else if (tokens[i] == "}") {

@@ -43,7 +43,7 @@ int Touzet<Label, CostModel>::index_nodes_recursion(
     std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
     int& start_postorder,
     int& start_preorder,
-    int start_depth,
+    unsigned int start_depth,
     int& parent_max_depth) {
 
   // Stores number of descendants of this node. Incrementally computed while
