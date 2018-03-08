@@ -34,6 +34,7 @@
 #define TREE_SIMILARITY_TOUZET_TOUZET_H
 
 #include <vector>
+#include <unordered_set>
 #include <memory>
 #include <iostream>
 #include <limits>
@@ -87,8 +88,8 @@ public:
   /// Computes the tree edit distance between two trees assuming a maximum
   /// number of allowed structural modifications (deletions, insertions).
   ///
-  /// This is an optimized version compared to Touzet. It uses keyroot nodes
-  /// (as in Zhang and Shasha) not to recompute subtree-pair distances.
+  /// This is an implementation of the original Touzet's algorithm WITHOUT
+  /// depth-based pruning.
   ///
   /// \param t1 Source tree.
   /// \param t2 Destination tree.
@@ -100,7 +101,12 @@ public:
   /// Computes the tree edit distance between two trees assuming a maximum
   /// number of allowed structural modifications (deletions, insertions).
   ///
-  /// This is an implementation of the original Touzet's algorithm.
+  /// This is an implementation of the original Touzet's algorithm WITH
+  /// depth-based pruning.
+  ///
+  /// NOTE: It involves a theoreticaly linear step to find the first node in
+  ///       the truncated tree (Def. 12 in [1]). See the comments in the code.
+  ///       We do it differently than in [1]. 
   ///
   /// \param t1 Source tree.
   /// \param t2 Destination tree.
@@ -109,7 +115,55 @@ public:
   /// \return Tree edit distance regarding k.
   double touzet_ted_depth_pruning(const node::Node<Label>& t1,
       const node::Node<Label>& t2, const int k);
-  double touzet_ted_orig_nored(const node::Node<Label>& t1,
+  /// Computes the tree edit distance between two trees assuming a maximum
+  /// number of allowed structural modifications (deletions, insertions).
+  ///
+  /// This is an optimized version compared to Touzet. It uses keyroot nodes
+  /// (as in Zhang and Shasha) not to recompute subtree-pair distances.
+  ///
+  /// The idea is to execute forest distance only once for all relevant
+  /// subtree pairs being on the left paths of the same root node pair.
+  /// It loops over all keyroot node pairs. For a specific pair it walks up
+  /// the left paths and finds the top node pair that is relevant, that is,
+  /// for keyroots (x,y) it finds the pair (x_l,y_l), x_l (y_l) is on the left
+  /// path rooted in x (y), x_l (y_l) is relevant with some node on the left
+  /// path rooted in x (y), and postorder ids of x_l (y_l) are maximal.
+  ///
+  /// \param t1 Source tree.
+  /// \param t2 Destination tree.
+  /// \param k Maximum number of allowed structural modifications (deletions,
+  ///          insertions).
+  /// \return Tree edit distance regarding k.
+  double touzet_ted_kr_loop(const node::Node<Label>& t1,
+      const node::Node<Label>& t2, const int k);
+  /// Computes the tree edit distance between two trees assuming a maximum
+  /// number of allowed structural modifications (deletions, insertions).
+  ///
+  /// This is an optimized version compared to Touzet. It uses keyroot nodes
+  /// (as in Zhang and Shasha) not to recompute subtree-pair distances.
+  ///
+  /// The idea is to execute forest distance only once for all relevant
+  /// subtree pairs being on the left paths of the same root node pair.
+  ///
+  /// This is an improved version of touzet_ted_kr_loop. It removes the
+  /// nested loop over keyroot nodes and traversals of the left paths.
+  /// It scans all subtree pairs in the band in decreasing postorder ids.
+  /// For each relevant pair (x_i,y_j), it verifies their keyroot nodes (x,y).
+  /// If (x,y) has not been seen before, forest distance will be computed for
+  /// (x_i,y_j). This ensures that (x_i,y_j) is a top pair on the left paths
+  /// rooted at x (y). Only after all (x_i,y_j) pairs are stored in a vector,
+  /// the forest distances are executed in the reverse order of the pairs. 
+  ///
+  /// NOTE: The check of seing (x,y) before is by storing (x,y) in
+  ///       std::unordered_set. To make hashing more efficient, we pack x and y
+  ///       in a single integer. See code for details.
+  ///
+  /// \param t1 Source tree.
+  /// \param t2 Destination tree.
+  /// \param k Maximum number of allowed structural modifications (deletions,
+  ///          insertions).
+  /// \return Tree edit distance regarding k.
+  double touzet_ted_kr_set(const node::Node<Label>& t1,
       const node::Node<Label>& t2, const int k);
   /// Creates a TestItems object and returns it (by value).
   ///
@@ -195,6 +249,10 @@ private:
   data_structures::BandMatrix<double> fd_;
   /// Cost model.
   const CostModel c_;
+  /// Constant used in touzet_ted_kr_set for shifting bits in packing two
+  /// values in a single long long (we need 32 bits for each value to pack in
+  /// order to accomodate input tree sizes beyond 60K nodes).
+  const short kBitsToShift = 32;
   /// Subproblem counter - for experiments only. Counts the number of
   /// non-trivial values filled in fd_ matrix: subproblems where both forests
   /// are not empty (including storing first infinities outside e-strip), and
@@ -214,8 +272,7 @@ private:
   /// budget of errors, e. Uses dynamic programming, with previously computed
   /// results stored in td_. Itself it fills in fd_ matrix.
   ///
-  /// It's a modified version compared to Touzet that works with keyroot nodes
-  /// by storing intermediate subtree-pair distances in td_.
+  /// This is implementation of the original Touzet's algorithm.
   ///
   /// \param x Postorder ID of a subtree in the source tree.
   /// \param y Postorder ID of a subtree in the destination tree.
@@ -234,7 +291,6 @@ private:
   /// \param k Original threshold for the number of structural modifications.
   /// \param e The remaining budget of structural modifications for (x,y).
   double tree_dist_depth_pruning(const int x, const int y, const int k, const int e);
-  double tree_dist_orig_nored(const int x, const int y, const int k, const int e, const int x_off, const int y_off);
   /// Calculates e(x,y) - a budget of the remaining number of errors
   /// (deletions and insertions) that are left for the pair of subtrees
   /// (T1_x,T2_y) after computing the lower bound for the nodes around them.
