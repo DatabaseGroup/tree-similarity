@@ -1,0 +1,3 @@
+[submodule "modules/common-code"]
+	path = modules/common-code
+	url = git@frosch.cosy.sbg.ac.at:wmann/common-code.git
