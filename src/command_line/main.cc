@@ -37,7 +37,6 @@ int main(int argc, char** argv) {
   timeval runtime_utime;
   timeval runtime_stime;
   unsigned int runtime;
-  int rusage_return_value = -1;
 
   // Verify parameters.
   if (argc != 3 && argc != 4 && argc != 5) {
@@ -61,10 +60,10 @@ int main(int argc, char** argv) {
     return -1;
   }
 
-  rusage_return_value = getrusage(RUSAGE_SELF, &before_rusage);
+  getrusage(RUSAGE_SELF, &before_rusage);
   const node::Node<Label> source_tree = bnp.parse_single(argv[1]);
   const node::Node<Label> destination_tree = bnp.parse_single(argv[2]);
-  rusage_return_value = getrusage(RUSAGE_SELF, &after_rusage);
+  getrusage(RUSAGE_SELF, &after_rusage);
   timersub(&after_rusage.ru_utime, &before_rusage.ru_utime, &runtime_utime);
   timersub(&after_rusage.ru_stime, &before_rusage.ru_stime, &runtime_stime);
   runtime = runtime_utime.tv_usec + runtime_utime.tv_sec * 1000000 +
@@ -73,9 +72,9 @@ int main(int argc, char** argv) {
 
   if (argc == 3) {
     ted::ZhangShasha<Label, CostModel> zs_ted;
-    rusage_return_value = getrusage(RUSAGE_SELF, &before_rusage);
+    getrusage(RUSAGE_SELF, &before_rusage);
     std::cout << zs_ted.zhang_shasha_ted(source_tree, destination_tree);
-    rusage_return_value = getrusage(RUSAGE_SELF, &after_rusage);
+    getrusage(RUSAGE_SELF, &after_rusage);
     std::cout << " " << zs_ted.get_subproblem_count();
     timersub(&after_rusage.ru_utime, &before_rusage.ru_utime, &runtime_utime);
     timersub(&after_rusage.ru_stime, &before_rusage.ru_stime, &runtime_stime);
@@ -86,13 +85,13 @@ int main(int argc, char** argv) {
   if (argc > 3) {
     int k = std::stoi(argv[3]);
     ted::Touzet<Label, CostModel> touzet_ted;
-    rusage_return_value = getrusage(RUSAGE_SELF, &before_rusage);
+    getrusage(RUSAGE_SELF, &before_rusage);
     if (argc == 5) {
       std::cout << touzet_ted.touzet_ted_depth_pruning(source_tree, destination_tree, k);
     } else {
       std::cout << touzet_ted.touzet_ted(source_tree, destination_tree, k);
     }
-    rusage_return_value = getrusage(RUSAGE_SELF, &after_rusage);
+    getrusage(RUSAGE_SELF, &after_rusage);
     std::cout << " " << touzet_ted.get_subproblem_count();
     timersub(&after_rusage.ru_utime, &before_rusage.ru_utime, &runtime_utime);
     timersub(&after_rusage.ru_stime, &before_rusage.ru_stime, &runtime_stime);

@@ -10,7 +10,7 @@
 #include "naive_self_join.h"
 #include "unit_cost_model.h"
 
-/// Convert vector of ResultElement to is string representation.
+/// Convert vector of ResultElement to its string representation.
 /// Sorts the vector in case the result elements don't come in the input order.
 ///
 /// TODO: Move this method to some util.
@@ -24,7 +24,7 @@ std::string vector_of_re_to_string(std::vector<join::JoinResultElement>& v) {
     if (a.tree_id_1 < b.tree_id_1) {
       return true;
     } else if (a.tree_id_1 == b.tree_id_1) {
-      if (a.tree_id_2 < a.tree_id_2) {
+      if (a.tree_id_2 < b.tree_id_2) {
         return true;
       } else if (a.tree_id_2 == b.tree_id_2) {
         if (a.ted_value < b.ted_value) {

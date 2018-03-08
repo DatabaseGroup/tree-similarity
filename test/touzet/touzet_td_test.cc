@@ -13,8 +13,8 @@
 
 const std::string format_matrix_to_string(const data_structures::Matrix<double>& m) {
   std::string s("");
-  for (int x = 0; x < m.get_rows(); ++x){
-    for (int y = 0; y < m.get_columns(); ++y){
+  for (unsigned int x = 0; x < m.get_rows(); ++x){
+    for (unsigned int y = 0; y < m.get_columns(); ++y){
       double e = m.read_at(x, y);
       if (e == std::numeric_limits<double>::infinity()) {
         s += "  @";
@@ -41,8 +41,8 @@ const std::string format_matrix_to_string(const data_structures::Matrix<double>&
 
 const std::string matrix_to_string(const data_structures::Matrix<double>& m) {
   std::string s("");
-  for (int x = 0; x < m.get_rows(); ++x){
-    for (int y = 0; y < m.get_columns(); ++y){
+  for (unsigned int x = 0; x < m.get_rows(); ++x){
+    for (unsigned int y = 0; y < m.get_columns(); ++y){
       double e = m.read_at(x, y);
       if (e == std::numeric_limits<double>::infinity()) {
         s += "@";
