@@ -123,8 +123,13 @@ int main() {
 
       auto touzet_test_items = touzet_ted.get_test_items();
 
+      // NOTE: Currently there are no NaN values in the matrices because it
+      //       makes the computatio easier. We initialise all the values to
+      //       infinity and then modify only those of the relevant subtree
+      //       pairs.
+      //       The expected results using NaN values are in:
+      //       'touzet_td_test_data_with_nan.txt'
       std::string computed_results = matrix_to_string(touzet_test_items.td);
-      // std::string computed_results = matrix_to_string(touzet_test_items.fd);
 
       if (correct_result != computed_results) {
         std::cerr << "Incorrect values in the td matrix:\n" << computed_results << "\ninstead of\n" << correct_result << std::endl;
