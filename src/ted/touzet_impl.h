@@ -303,7 +303,6 @@ double Touzet<Label, CostModel>::tree_dist(const int x, const int y,
   for (int i = 1; i <= x_size; ++i) {
     if (i - e - 1 >= 1) { // First j that is outside e-strip - can be read for the cell to the right.
       fd_.at(i, i - e - 1) = std::numeric_limits<double>::infinity();
-      ++subproblem_counter;
     }
     for (int j = std::max(1, i - e); j <= std::min(i + e, y_size); ++j) { // only (i,j) that are in e-strip
       ++subproblem_counter;
@@ -381,13 +380,8 @@ double Touzet<Label, CostModel>::tree_dist(const int x, const int y,
     }
     if (i + e + 1 <= y_size) { // Last j that is outside e-strip - can be read from the row below.
       fd_.at(i, i + e + 1) = std::numeric_limits<double>::infinity();
-      ++subproblem_counter;
     }
   }
-
-  ++subproblem_counter;
-  // QUESTION: Is it possible that for some e-value an infinity should be
-  //           returned, because the last subproblem is too far away?
 
   // The distance between two subtrees cannot be greater than e-value for these
   // subtrees.
@@ -574,7 +568,6 @@ double Touzet<Label, CostModel>::tree_dist_depth_pruning(const int x, const int 
     // if (t1_depth_[i + x_off] - t1_depth_[x] > e + 1) { continue; }
     if (i - e - 1 >= 1) { // First j that is outside e-strip.
       fd_.at(i, i - e - 1) = std::numeric_limits<double>::infinity();
-      ++subproblem_counter;
     }
     for (int j = std::max(1, i - e); j <= std::min(i + e, y_size); ++j) { // only (i,j) that are in e-strip
       // The td(x_size-1, y_size-1) is computed differently.
@@ -628,7 +621,6 @@ double Touzet<Label, CostModel>::tree_dist_depth_pruning(const int x, const int 
     }
     if (i + e + 1 <= y_size) { // Last j that is outside e-strip.
       fd_.at(i, i + e + 1) = std::numeric_limits<double>::infinity();
-      ++subproblem_counter;
     }
     // Set next i to iterate.
     ++i;
