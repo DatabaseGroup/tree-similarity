@@ -280,6 +280,8 @@ double Touzet<Label, CostModel>::tree_dist(const int x, const int y,
   // Calculates offsets that let us translate i and j to correct postorder ids.
   int x_off = x - x_size;
   int y_off = y - y_size;
+  
+  double inf = std::numeric_limits<double>::infinity();
 
   // Initial cases.
   fd_.at(0, 0) = 0.0; // (0,0) is always within e-strip.
@@ -287,109 +289,81 @@ double Touzet<Label, CostModel>::tree_dist(const int x, const int y,
     fd_.at(0, j) = fd_.read_at(0, j - 1) + c_.ins(t2_node_[j + y_off]);
   }
   if (e + 1 <= y_size) { // the first j that is outside e-strip
-    fd_.at(0, e + 1) = std::numeric_limits<double>::infinity();
+    fd_.at(0, e + 1) = inf;
   }
 
   for (int i = 1; i <= std::min(x_size, e); ++i) { // j = 0; only i that are within e-strip.
     fd_.at(i, 0) = fd_.read_at(i - 1, 0) + c_.del(t1_node_[i + x_off]);
   }
   if (e + 1 <= x_size) { // the first i that is outside e-strip
-    fd_.at(e + 1, 0) = std::numeric_limits<double>::infinity();
+    fd_.at(e + 1, 0) = inf;
   }
 
-  double candidate_result = std::numeric_limits<double>::infinity();
-
+  // Variables used in the nested loops.
+  double candidate_result;
+  int i_forest;
+  int j_forest;
+  double fd_read;
+  double td_read;
+  
   // General cases.
   for (int i = 1; i <= x_size; ++i) {
     if (i - e - 1 >= 1) { // First j that is outside e-strip - can be read for the cell to the right.
-      fd_.at(i, i - e - 1) = std::numeric_limits<double>::infinity();
+      fd_.at(i, i - e - 1) = inf;
     }
+    i_forest = i - t1_size_[i + x_off];
     for (int j = std::max(1, i - e); j <= std::min(i + e, y_size); ++j) { // only (i,j) that are in e-strip
       ++subproblem_counter;
-      // NOTE: It's about existence of a path from (i,j) to (x-x_size,y-y_size).
-      //       It exists only then, if it existed for the neighburing nodes
-      //       adding the costs for coming to (i,j).
-      //       We don't have to verify e-strip because that's ensured with the
-      //       for loop and the first j and the first i outside e-strip.
-      // QUESTION: What about k-strip?
-      //           (i,j), in the input trees scope including offsets, must be
-      //           in k-strip. Otherwise, there is certainly no edit path from
-      //           (i,j) to (0,0). In other words, thre is no edit path from
-      //           (i,j) to (0,0) with the given budget k.
-      // QUESTION: What about k-relevancy?
-      //           Adding this to the condition below makes ted tests fail.
-      //           (a,b) is k-relevant if (T1_a,T2_b) can be mapped based on
-      //           the size lower bound of the nodes around these subtrees.
-      //           Thus, it doesn't fit here.
-      if (std::abs((i + x_off) - (j + y_off)) > k) {
-        fd_.at(i, j) = std::numeric_limits<double>::infinity();
-        // QUESTION: Do we have to check if this can be a pair of subtrees?
-        //           Maybe not because eventhough we will read NaN and conver to inf.
-        // if (i - t1_size_[i + x_off] == 0 && j - t2_size_[j + y_off] == 0) { // Pair of two subtrees.
-        //   td_.at(i + x_off, j + y_off) = std::numeric_limits<double>::infinity();
-        // }
+      
+      j_forest = j - t2_size_[j + y_off];
+      
+      candidate_result = inf;
+      candidate_result = std::min(candidate_result, fd_.read_at(i - 1, j) + c_.del(t1_node_[i + x_off]));
+      candidate_result = std::min(candidate_result, fd_.read_at(i, j - 1) + c_.ins(t2_node_[j + y_off]));
+
+      fd_read = inf;
+      // If one of the forests is a tree, look up the vlaues in fd_.
+      // Otherwise, both forests are trees and the fd-part is empty.
+      if (i_forest != 0 || j_forest != 0) { // TODO: Swap if-else conditions or use '>0'.
+        // QUESTION: Is it possible that we read from outside the band? - No exception thrown.
+        td_read = td_.read_at(i + x_off, j + y_off);
+        // If the values to read are outside of the band, they exceed
+        // the threshold or are not present in the band-matrix.
+        // Read the value from fd_ only if they exist and are in the band.
+        if (std::max(0, i_forest - e - 1) <= j_forest &&
+            j_forest <= std::min(i_forest + e + 1, y_size)) {
+          fd_read = fd_.read_at(i_forest, j_forest);
+        }
+        candidate_result = std::min(candidate_result, fd_read + td_read);
+      } else { // Pair of two subtrees.
+        fd_read = fd_.read_at(i - 1, j - 1) + c_.ren(t1_node_[i + x_off], t2_node_[j + y_off]);
+        candidate_result = std::min(candidate_result, fd_read);
+        // Store the result only if it is within e budget.
+        // Otherwise the inifinity value is already there from init.
+        if (candidate_result <= e ) {
+          td_.at(i + x_off, j + y_off) = candidate_result;
+        }
+      }
+
+      // None of the values in fd_ can be greater than e-value for this
+      // subtree pair.
+      if (candidate_result > e) {
+        fd_.at(i, j) = inf;
       } else {
-        candidate_result = std::numeric_limits<double>::infinity();
-        candidate_result = std::min(candidate_result, fd_.read_at(i - 1, j) + c_.del(t1_node_[i + x_off]));
-        candidate_result = std::min(candidate_result, fd_.read_at(i, j - 1) + c_.ins(t2_node_[j + y_off]));
-
-        double fd_read = 0.0;
-        // If one of the forests is a tree, look up the vlaues in fd_.
-        // Otherwise, both forests are trees and the fd-part is empty.
-        if (i - t1_size_[i + x_off] != 0 || j - t2_size_[j + y_off] != 0) { // TODO: Swap if-else conditions or use '>0'.
-          // TODO: We're reading here NaN values because the pair of rightmost
-          //       subtrees may not be eligable.
-          // QUESTION: Is it possible that we read from outside the band? - No exception thrown.
-          double td_read = td_.read_at(i + x_off, j + y_off);
-          if (std::isnan(td_read)) { // TODO: We can't map rightmost subtrees, thus we can't map left forests? - Correct results.
-            td_read = std::numeric_limits<double>::infinity();
-            candidate_result = std::numeric_limits<double>::infinity();
-          } else {
-            // If the values to read are outside of the band, they exceed
-            // the threshold or are not present in the band-matrix.
-            if (j - t2_size_[j + y_off] < std::max(0, i - t1_size_[i + x_off] - e - 1)) {
-              fd_read = std::numeric_limits<double>::infinity();
-            } else if (std::min(i - t1_size_[i + x_off] + e + 1, y_size) < j - t2_size_[j + y_off]) {
-              fd_read = std::numeric_limits<double>::infinity();
-            } else {
-              fd_read = fd_.read_at(i - t1_size_[i + x_off], j - t2_size_[j + y_off]);
-            }
-            candidate_result = std::min(candidate_result, fd_read + td_read);
-          }
-        } else { // Pair of two subtrees.
-          fd_read = fd_.read_at(i - 1, j - 1) + c_.ren(t1_node_[i + x_off], t2_node_[j + y_off]);
-          candidate_result = std::min(candidate_result, fd_read);
-          // Write to td_ only if there is no value.
-          // if (std::isnan(td_.at(i + x_off, j + y_off))) {
-            if (candidate_result > e ) {
-              td_.at(i + x_off, j + y_off) = std::numeric_limits<double>::infinity();
-            } else {
-              td_.at(i + x_off, j + y_off) = candidate_result;
-            }
-          // }
-        }
-
-        // None of the values in fd_ can be greater than e-value for this
-        // subtree pair.
-        if (candidate_result > e) {
-          fd_.at(i, j) = std::numeric_limits<double>::infinity();
-        } else {
-          fd_.at(i, j) = candidate_result;
-        }
+        fd_.at(i, j) = candidate_result;
       }
     }
     if (i + e + 1 <= y_size) { // Last j that is outside e-strip - can be read from the row below.
-      fd_.at(i, i + e + 1) = std::numeric_limits<double>::infinity();
+      fd_.at(i, i + e + 1) = inf;
     }
   }
 
   // The distance between two subtrees cannot be greater than e-value for these
   // subtrees.
   if (candidate_result > e) {
-    return std::numeric_limits<double>::infinity();
-  } else {
-    return candidate_result;
+    return inf;
   }
+  return candidate_result;
 };
 
 template <typename Label, typename CostModel>
@@ -450,20 +424,20 @@ double Touzet<Label, CostModel>::touzet_ted_kr_set(const node::Node<Label>& t1,
   // Set to store and look up met pairs of keyroot nodes.
   std::unordered_set<unsigned long long int> kr_set;
   unsigned long long int key;
-  // Vector to collect pairs of nodes for executing foret distance.
+  // Vector to collect pairs of nodes for executing forest distance.
   std::vector<std::pair<int, int>> kr_vector;
-  
+    
   // Nested loop over all node pairs in k-strip : |x-y|<=k. This loop iterates
   // over all node pairs from k-strip, and verifies their k-relevancy.
   // The loop interates backwards in postorder ids. This ensures finding top
   // relevant pairs of nodes on the left paths of their root nodes. These pairs
   // are collected in a vector.
   for (int x = t1_input_size_ - 1; x >= 0; --x) {
+    int x_keyroot = t1_nodes_kr_[x];
     for (int y = std::min(x + k, t2_input_size_-1); y >= std::max(0, x - k); --y) {
       if (k_relevant(x, y, k)) {
         // The casting is needed for 32 bits shift.
-        key = ((unsigned long long int)t1_nodes_kr_[x] << kBitsToShift) |
-            (unsigned long long int)t2_nodes_kr_[y];
+        key = ((unsigned long long int)x_keyroot << kBitsToShift) | (unsigned long long int)t2_nodes_kr_[y];
         if (kr_set.insert(key).second) {
           kr_vector.push_back({x, y});
         }
