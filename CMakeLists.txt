@@ -36,6 +36,7 @@ target_include_directories(TreeSimilarity INTERFACE
   src/parser
   src/join
   src/tree_generator
+  src/ted_ub
 )
 
 # For using add_test().
