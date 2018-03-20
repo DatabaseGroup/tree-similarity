@@ -4,6 +4,7 @@
 set(greedy_ub_test_list
   greedy_ub_label_il_test
   greedy_ub_mapping_test
+  greedy_ub_post_to_pre_test
 )
 
 # Add custom target for building all touzet's tests.

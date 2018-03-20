@@ -44,6 +44,7 @@ public:
   /// Holds internal items of the algorithms that are tested for correctness.
   struct TestItems {
     const std::unordered_map<std::string, std::list<int>>& t1_label_il;
+    const std::vector<int>& t1_post_to_pre;
   };
 // Member functions.
 public:
@@ -73,6 +74,9 @@ private:
   /// Stores pointers to nodes of the destination tree. Indexed in postorder-1.
   std::vector<std::reference_wrapper<const node::Node<Label>>> t2_node_;
   
+  std::vector<int> t1_post_to_pre_;
+  std::vector<int> t2_post_to_pre_;
+  
   // TODO: Key should be of type Label - requires modifying implementation of
   //       Label. It has to be hashable.
   std::unordered_map<std::string, std::list<int>> t1_label_il_;
@@ -97,7 +101,8 @@ private:
   /// \param root The root node of the tree to index.
   void index_nodes(const node::Node<Label>& root,
                    std::unordered_map<std::string, std::list<int>>& label_il,
-                   std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes);
+                   std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
+                   std::vector<int>& post_to_pre);
   /// Traverses an input tree rooted at root recursively and collects
   /// information into index structures.
   ///
@@ -107,6 +112,7 @@ private:
   void index_nodes_recursion(const node::Node<Label>& root,
                              std::unordered_map<std::string, std::list<int>>& label_il,
                              std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
+                             std::vector<int>& post_to_pre,
                              int& start_postorder, int& start_preorder);
 };
 
