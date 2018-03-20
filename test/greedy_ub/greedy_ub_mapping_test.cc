@@ -86,13 +86,12 @@ int main() {
       std::string computed_results;
       try {
         computed_results = vector_to_string(greedy_ub.greedy_mapping(t1, t2));
-        std::cout << greedy_ub.greedy_mapping_cost(t1, t2) << std::endl;
       } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
       }
 
       if (correct_result != computed_results) {
-        std::cerr << "Incorrect TED result (WITHOUT redundancy): " << computed_results << " instead of " << correct_result << std::endl;
+        std::cerr << "Incorrect revised mapping: " << computed_results << " instead of " << correct_result << std::endl;
         std::cerr << "T1: " << input_tree_1_string << std::endl;
         std::cerr << "T2: " << input_tree_2_string << std::endl;
         // std::cerr << "k: " << k << std::endl;

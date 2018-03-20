@@ -43,9 +43,13 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::greedy_mapping(cons
   std::vector<std::pair<int, int>> mapping;
   std::list<int> candidate_ids;
   
-  for (int i = 0; i < t1_input_size_; ++i) {
+  for (int i = 0; i < t1_input_size_; ++i) { // Loop in postorder.
     candidate_ids = t2_label_il_[t1_node_[i].get().label().to_string()];
-    mapping.push_back({i, candidate_ids.front()});
+    // Map node i to the a node in T2 that is first in the inverted list. 
+    mapping.push_back({t1_post_to_pre_[i], t2_post_to_pre_[candidate_ids.front()]});
+    std::cout << "M " << t1_post_to_pre_[i] << "," << t2_post_to_pre_[candidate_ids.front()] << std::endl;
+    // TODO: Use the node that satisfied the threshold amd then delete it.
+    candidate_ids.pop_front();
   }
   
   mapping = revise_greedy_mapping(mapping);
@@ -57,12 +61,29 @@ template <typename Label, typename CostModel>
 std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::revise_greedy_mapping(std::vector<std::pair<int, int>>& mapping) {
   std::vector<std::pair<int, int>> revised_mapping;
   
-  int max_id = -1; // To make '0' pass the first if in the loop.
-  for (auto e : mapping) {
-    if (e.second > max_id) {
-      revised_mapping.push_back(e);
+  // TODO: Reorder the mappings such that as many as possible can be used.
+  //       Write rules for reordering. It seems that it will be mostly
+  //       dropping one pair in favour of more pairs.
+  
+  // TODO: Remember that the optimal mapping can rename nodes. If we have a gap
+  //       on both sides, maybe we can map some node pairs.
+  
+  std::vector<int> t2_mapped(t2_input_size_, -1);
+  for (unsigned int e = 0; e < mapping.size(); ++e) {
+    t2_mapped[mapping[e].second] = e;
+    std::cout << "MID " << mapping[e].second << ":" << e << std::endl;
+  }
+  
+  int mapping_index = -1;
+  int j_in_pre = 0;
+  for (int j = 0; j < t2_input_size_; ++j) { // Loop in postorder.
+    j_in_pre = t2_post_to_pre_[j];
+    auto j_mapped = t2_mapped[j_in_pre];
+    if(j_mapped > mapping_index) {
+      mapping_index = j_mapped;
+      revised_mapping.push_back(mapping[mapping_index]);
+      std::cout << "RM " << mapping[mapping_index].first << "," << mapping[mapping_index].second << std::endl;
     }
-    max_id = std::max(max_id, e.second);
   }
   
   return revised_mapping;
