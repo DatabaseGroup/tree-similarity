@@ -41,15 +41,18 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::greedy_mapping(cons
   init(t1, t2);
   
   std::vector<std::pair<int, int>> mapping;
-  std::list<int> candidate_ids;
+  // std::list<int> candidate_ids;
   
   for (int i = 0; i < t1_input_size_; ++i) { // Loop in postorder.
-    candidate_ids = t2_label_il_[t1_node_[i].get().label().to_string()];
-    // Map node i to the a node in T2 that is first in the inverted list. 
-    mapping.push_back({t1_post_to_pre_[i], t2_post_to_pre_[candidate_ids.front()]});
-    std::cout << "M " << t1_post_to_pre_[i] << "," << t2_post_to_pre_[candidate_ids.front()] << std::endl;
-    // TODO: Use the node that satisfied the threshold amd then delete it.
-    candidate_ids.pop_front();
+    std::list<int>& candidate_ids = t2_label_il_[t1_node_[i].get().label().to_string()];
+    // Map node i to the a node in T2 that is first in the inverted list.
+    // If there is anything to map.
+    if (candidate_ids.size() > 0) {
+      mapping.push_back({t1_post_to_pre_[i], t2_post_to_pre_[candidate_ids.front()]});
+      std::cout << "M " << t1_post_to_pre_[i] << "," << t2_post_to_pre_[candidate_ids.front()] << std::endl;
+      // TODO: Use the node that satisfied the threshold and then delete it.
+      candidate_ids.pop_front();
+    }
   }
   
   mapping = revise_greedy_mapping(mapping);
@@ -76,13 +79,36 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::revise_greedy_mappi
   
   int mapping_index = -1;
   int j_in_pre = 0;
+  std::pair<int, int> previous_pair = {-1,-1};
+  bool is_previous_pair = false;
   for (int j = 0; j < t2_input_size_; ++j) { // Loop in postorder.
     j_in_pre = t2_post_to_pre_[j];
     auto j_mapped = t2_mapped[j_in_pre];
-    if(j_mapped > mapping_index) {
+    if(j_mapped > mapping_index) { // NOTE: This order test is not enough.
+                                   // TODO: What does this order test ensure?
       mapping_index = j_mapped;
-      revised_mapping.push_back(mapping[mapping_index]);
-      std::cout << "RM " << mapping[mapping_index].first << "," << mapping[mapping_index].second << std::endl;
+      
+      std::cout << "Mindex:" << mapping_index << std::endl;
+      std::cout << "PP:" << previous_pair.first << "," << previous_pair.second << std::endl;
+      std::cout << "CP:" << mapping[mapping_index].first << "," << mapping[mapping_index].second << std::endl;
+      
+      // NOTE: Test for the current pair be up or right from previous pair.
+      bool are_both_up = false;
+      bool are_both_right = false;
+      if (is_previous_pair) {
+        if (mapping[mapping_index].first < previous_pair.first && mapping[mapping_index].second < previous_pair.second) {
+          are_both_up = true;
+        } else if (mapping[mapping_index].first > previous_pair.first && mapping[mapping_index].second > previous_pair.second) {
+          are_both_right = true;
+        }
+      }
+      
+      if (!is_previous_pair || are_both_up || are_both_right) {
+        revised_mapping.push_back(mapping[mapping_index]);
+        is_previous_pair = true;
+        previous_pair = mapping[mapping_index];
+        std::cout << "RM " << mapping[mapping_index].first << "," << mapping[mapping_index].second << std::endl;
+      }
     }
   }
   
