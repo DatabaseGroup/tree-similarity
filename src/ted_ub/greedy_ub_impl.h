@@ -55,6 +55,14 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::greedy_mapping(cons
     std::list<int>& candidate_ids = t2_label_il_[t1_node_[i].get().label().to_string()];
     // Map node i to the a node in T2 that is first in the inverted list.
     // If there is anything to map.
+    
+    // TODO: Ensure mapping conditions here and check the LB.
+    // for (auto c : candidate_ids) {
+    //   if (mapping to c makes entire mapping valid && LB <= k) {
+    //     map to c;
+    //     break;
+    //   }
+    
     if (candidate_ids.size() > 0) {
       mapping.push_back({t1_post_to_pre_[i], t2_post_to_pre_[candidate_ids.front()]});
       // std::cout << "M " << t1_post_to_pre_[i] << "," << t2_post_to_pre_[candidate_ids.front()] << std::endl;
