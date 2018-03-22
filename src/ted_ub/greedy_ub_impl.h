@@ -31,8 +31,16 @@ template <typename Label, typename CostModel>
 GreedyUB<Label, CostModel>::GreedyUB() : c_() {}
 
 template <typename Label, typename CostModel>
-double GreedyUB<Label, CostModel>::greedy_mapping_cost(const node::Node<Label>& t1, const node::Node<Label>& t2) {
-  std::vector<std::pair<int, int>> mapping = greedy_mapping(t1, t2);
+double GreedyUB<Label, CostModel>::verify(const node::Node<Label>& t1, const node::Node<Label>& t2, double similarity_threshold) {
+  double cost = mapping_cost(greedy_mapping(t1, t2));
+  if (cost <= static_cast <int> (std::ceil(similarity_threshold))) {
+    return cost;
+  }
+  return std::numeric_limits<double>::infinity();
+};
+
+template <typename Label, typename CostModel>
+double GreedyUB<Label, CostModel>::mapping_cost(const std::vector<std::pair<int, int>>& mapping) {
   return (t1_input_size_ + t2_input_size_ - 2 * mapping.size());
 };
 
@@ -49,7 +57,7 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::greedy_mapping(cons
     // If there is anything to map.
     if (candidate_ids.size() > 0) {
       mapping.push_back({t1_post_to_pre_[i], t2_post_to_pre_[candidate_ids.front()]});
-      std::cout << "M " << t1_post_to_pre_[i] << "," << t2_post_to_pre_[candidate_ids.front()] << std::endl;
+      // std::cout << "M " << t1_post_to_pre_[i] << "," << t2_post_to_pre_[candidate_ids.front()] << std::endl;
       // TODO: Use the node that satisfied the threshold and then delete it.
       candidate_ids.pop_front();
     }
@@ -64,17 +72,19 @@ template <typename Label, typename CostModel>
 std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::revise_greedy_mapping(std::vector<std::pair<int, int>>& mapping) {
   std::vector<std::pair<int, int>> revised_mapping;
   
-  // TODO: Reorder the mappings such that as many as possible can be used.
+  // IDEA: Reorder the mappings such that as many as possible can be used.
   //       Write rules for reordering. It seems that it will be mostly
   //       dropping one pair in favour of more pairs.
   
-  // TODO: Remember that the optimal mapping can rename nodes. If we have a gap
+  // IDEA: Remember that the optimal mapping can rename nodes. If we have a gap
   //       on both sides, maybe we can map some node pairs.
   
+  // Por each node in preorder of destination tree, store the position of its
+  // pair in the mapping sequence.
   std::vector<int> t2_mapped(t2_input_size_, -1);
   for (unsigned int e = 0; e < mapping.size(); ++e) {
     t2_mapped[mapping[e].second] = e;
-    std::cout << "MID " << mapping[e].second << ":" << e << std::endl;
+    // std::cout << "MID " << mapping[e].second << ":" << e << std::endl;
   }
   
   int mapping_index = -1;
@@ -84,15 +94,14 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::revise_greedy_mappi
   for (int j = 0; j < t2_input_size_; ++j) { // Loop in postorder.
     j_in_pre = t2_post_to_pre_[j];
     auto j_mapped = t2_mapped[j_in_pre];
-    if(j_mapped > mapping_index) { // NOTE: This order test is not enough.
-                                   // TODO: What does this order test ensure?
+    if(j_mapped > mapping_index) {
       mapping_index = j_mapped;
       
-      std::cout << "Mindex:" << mapping_index << std::endl;
-      std::cout << "PP:" << previous_pair.first << "," << previous_pair.second << std::endl;
-      std::cout << "CP:" << mapping[mapping_index].first << "," << mapping[mapping_index].second << std::endl;
+      // std::cout << "Mindex:" << mapping_index << std::endl;
+      // std::cout << "PP:" << previous_pair.first << "," << previous_pair.second << std::endl;
+      // std::cout << "CP:" << mapping[mapping_index].first << "," << mapping[mapping_index].second << std::endl;
       
-      // NOTE: Test for the current pair be up or right from previous pair.
+      // Test for the current pair be up or right from previous pair.
       bool are_both_up = false;
       bool are_both_right = false;
       if (is_previous_pair) {
@@ -103,11 +112,12 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::revise_greedy_mappi
         }
       }
       
+      // Keep the mapping only if eligable.
       if (!is_previous_pair || are_both_up || are_both_right) {
         revised_mapping.push_back(mapping[mapping_index]);
-        is_previous_pair = true;
-        previous_pair = mapping[mapping_index];
-        std::cout << "RM " << mapping[mapping_index].first << "," << mapping[mapping_index].second << std::endl;
+        is_previous_pair = true; // Set to mark that there is already a mapepd pair.
+        previous_pair = mapping[mapping_index]; // Record the previous pair.
+        // std::cout << "RM " << mapping[mapping_index].first << "," << mapping[mapping_index].second << std::endl;
       }
     }
   }
