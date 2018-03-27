@@ -383,7 +383,7 @@ double Touzet<Label, CostModel>::touzet_ted_kr_loop(const node::Node<Label>& t1,
   for (auto x : t1_kr_) {
     for (auto y : t2_kr_) {
       int top_x = -1;
-      int top_y = -1;      
+      int top_y = -1;
       // Search for top relevant pair.
       int x_l = x;
       while (x_l >= 0 && top_x == -1) { // While we haven't found any relevant
@@ -392,9 +392,10 @@ double Touzet<Label, CostModel>::touzet_ted_kr_loop(const node::Node<Label>& t1,
         while (y_l >= 0 && y_l > top_y) { // Verify only those nodes on the left
                                           // path from y that are above the
                                           // already found relevant node.
-          if (std::abs(x_l - y_l) <= k && k_relevant(x_l, y_l, k)) {
-            top_x = std::max(top_x, x_l);
-            top_y = std::max(top_y, y_l);
+          if (std::abs(x_l - y_l) <= k && k_relevant(x_l, y_l, k)) { // The pair has to be in the band
+                                                                     // and it has to be relevant.
+            top_x = x_l; // x_l always > top_x; std::max(top_x, x_l) not needed.
+            top_y = y_l; // y_l always > top_y; std::max(top_y, y_l) not needed.
             break; // Don't continue down the path.
           }            
           y_l = t2_lch_[y_l];
@@ -402,12 +403,21 @@ double Touzet<Label, CostModel>::touzet_ted_kr_loop(const node::Node<Label>& t1,
         x_l = t1_lch_[x_l];
       }
       if (top_x > -1 && top_y > -1) {
-        td_.at(top_x, top_y) = tree_dist(top_x, top_y, k, e_budget(top_x, top_y, k));
+        // Get max e over node pairs on left paths.
+        int e_max = 0;
+        int x_i = top_x;
+        while (x_i > -1) {
+          int y_i = top_y;
+          while (y_i > -1) {
+            e_max = std::max(e_max, e_budget(x_i, y_i, k));
+            y_i = t2_lch_[y_i];
+          }
+          x_i = t1_lch_[x_i];
+        }
+        td_.at(top_x, top_y) = tree_dist(top_x, top_y, k, e_max);
       }
     }
   }
-  
-  // std::cout << "touzet_ted_kr_loop Subproblems = " << get_subproblem_count() << std::endl;
   return td_.read_at(t1_input_size_-1, t2_input_size_-1);
 };
 
