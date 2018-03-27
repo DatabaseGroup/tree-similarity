@@ -301,7 +301,7 @@ private:
   /// \param y Postorder ID of a subtree in the destination tree.
   /// \param k Original threshold for the number of structural modifications.
   /// \return e(x,y) = k - |(|T1|-(x+1))-(|T2|-(y+1))| - |((x+1)-|T1_x|)-((y+1)-|T2_y|)|
-  int e(const int x, const int y, const int k) const;
+  int e_budget(const int x, const int y, const int k) const;
   /// Verifies if subtrees T1_x and T2_y are k-relevant.
   ///
   /// T1_x and T2_y are k-relevant if

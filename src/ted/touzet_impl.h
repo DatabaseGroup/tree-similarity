@@ -263,7 +263,7 @@ double Touzet<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
     for (int y = std::max(0, x - k); y <= std::min(x + k, t2_input_size_-1); ++y) {
       if (k_relevant(x, y, k)) {
         // Compute td(x, y) with e errors - the value of e(x, y, k).
-        td_.at(x, y) = tree_dist(x, y, k, e(x, y, k));
+        td_.at(x, y) = tree_dist(x, y, k, e_budget(x, y, k));
       }
     }
   }
@@ -305,7 +305,7 @@ double Touzet<Label, CostModel>::tree_dist(const int x, const int y,
   int j_forest;
   double fd_read;
   double td_read;
-  
+    
   // General cases.
   for (int i = 1; i <= x_size; ++i) {
     if (i - e - 1 >= 1) { // First j that is outside e-strip - can be read for the cell to the right.
@@ -330,6 +330,7 @@ double Touzet<Label, CostModel>::tree_dist(const int x, const int y,
         // If the values to read are outside of the band, they exceed
         // the threshold or are not present in the band-matrix.
         // Read the value from fd_ only if they exist and are in the band.
+        // TODO: And otherwise? -> It's initialized to inf.
         if (std::max(0, i_forest - e - 1) <= j_forest &&
             j_forest <= std::min(i_forest + e + 1, y_size)) {
           fd_read = fd_.read_at(i_forest, j_forest);
@@ -401,11 +402,12 @@ double Touzet<Label, CostModel>::touzet_ted_kr_loop(const node::Node<Label>& t1,
         x_l = t1_lch_[x_l];
       }
       if (top_x > -1 && top_y > -1) {
-        td_.at(top_x, top_y) = tree_dist(top_x, top_y, k, e(top_x, top_y, k));
+        td_.at(top_x, top_y) = tree_dist(top_x, top_y, k, e_budget(top_x, top_y, k));
       }
     }
   }
   
+  // std::cout << "touzet_ted_kr_loop Subproblems = " << get_subproblem_count() << std::endl;
   return td_.read_at(t1_input_size_-1, t2_input_size_-1);
 };
 
@@ -451,8 +453,19 @@ double Touzet<Label, CostModel>::touzet_ted_kr_set(const node::Node<Label>& t1,
   for (; rit != kr_vector.rend(); ++rit) {
     int x_l = rit->first;
     int y_l = rit->second;
+    // Get max e over node pairs on left paths.
+    int e_max = 0;
+    int top_x = x_l;
+    int top_y = y_l;
+    while (top_x > -1) {
+      while (top_y > -1) {
+        e_max = std::max(e_max, e_budget(top_x, top_y, k));
+        top_y = t2_lch_[top_y];
+      }
+      top_x = t1_lch_[top_x];
+    }
     // Compute td(x, y) with e errors - the value of e(x, y, k).
-    td_.at(x_l, y_l) = tree_dist(x_l, y_l, k, e(x_l, y_l, k));
+    td_.at(x_l, y_l) = tree_dist(x_l, y_l, k, e_max);    
   }
   
   return td_.read_at(t1_input_size_-1, t2_input_size_-1);
@@ -476,7 +489,7 @@ double Touzet<Label, CostModel>::touzet_ted_depth_pruning(const node::Node<Label
     for (int y = std::max(0, x - k); y <= std::min(x + k, t2_input_size_-1); ++y) {
       if (k_relevant(x, y, k)) {
         // Compute td(x, y) with e errors - the value of e(x, y, k).
-        td_.at(x, y) = tree_dist_depth_pruning(x, y, k, e(x, y, k));
+        td_.at(x, y) = tree_dist_depth_pruning(x, y, k, e_budget(x, y, k));
       }
     }
   }
@@ -631,7 +644,7 @@ double Touzet<Label, CostModel>::tree_dist_depth_pruning(const int x, const int 
 };
 
 template <typename Label, typename CostModel>
-int Touzet<Label, CostModel>::e(const int x, const int y, const int k) const {
+int Touzet<Label, CostModel>::e_budget(const int x, const int y, const int k) const {
   // Lower bound formula (k - RA - L):
   // e(x,y) = k - |(|T1|-(x+1))-(|T2|-(y+1))| - |((x+1)-|T1_x|)-((y+1)-|T2_y|)|
   // New lower bound formula (k - R - A - L):
