@@ -498,3 +498,13 @@ INF
 {c{a{f{f{a{f{b{d}}}{b}{a}{d{b}{b}}{d}}{f{f{f{f{f}}}}{a{c}{f}}}{f}{f{a}{c}}}{f{e{b}{a}}{a}}}{c}{a}}{e{d{f{d}{d}}}{e{f{c}}{d}}{b}{f{e}}{e{c{e{e{e{c}{c{c}}{d}}{b}}}{b}{a{e{a{b}}{b}{f}{a}}{a}{a}{f}}{e}{e}}{f{a{b}{e}}}}}{f{c{a}{e{c{a}}}{c{b{d{a}}{e}}{a{b}}}{c{c}{c}}{c{c}}}{c}{e{e}}{f{e}}{e{d}}{e{e{a}}}{d{e{a}}}}{d{a}{b{c{e}}{f{d}{c}}{f{d}}}{e{b}{a}}{e}{e{b{e}{d}}}}{f{e{e{f}}{c}{f}}{d{d}}{a{a{e{e{b{b{e}}}{f}{f}}{b}}}}}{e{f{b}}}{a}{e{b}{c{f{b{f{b}}}}{f{d{e}}{c{a}{a}}{e{e}{d}}{d}}{d{a}}{f}}{e}}{b{e{e}}{c{e}{f}}{c{b{d{d}}}}}{a{c{a{c{d}}}{d{e}}{c}}}{f{f{a{a}}}{d}{a}}{c{c{f}}}{e{f}{f}}}
 30
 30.0
+# Sentiment >	308 155; k=8 -> returns 7
+{0{0{2 Run}{2{2 for}{2{2 your}{2 lives}}}}{2 !}}
+{0{2{2 is}{0{2 a}{1 mess}}}{2 .}}
+8
+7.0
+# Sentiment >	308 155; k=7 -> return inf
+{0{0{2 Run}{2{2 for}{2{2 your}{2 lives}}}}{2 !}}
+{0{2{2 is}{0{2 a}{1 mess}}}{2 .}}
+7
+7.0
