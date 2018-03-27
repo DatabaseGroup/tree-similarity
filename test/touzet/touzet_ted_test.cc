@@ -216,7 +216,7 @@ int main(int argc, char** argv) {
   
   TestParams tp;
   
-  if (argc > 0) {
+  if (argc > 1) {
     std::vector<std::string> arguments(argv, argv + argc);
     for (auto a : arguments) {
       std::string string_a(a);
@@ -251,6 +251,10 @@ int main(int argc, char** argv) {
         tp.lower_than_threshold = true;
       }
     }
+    if (!tp.include_random && tp.input_file == "") {
+      std::cerr << "ERROR Nothing to do." << std::endl;
+      return -1;
+    }
   } else {
     tp.set_default();
   }
@@ -266,11 +270,14 @@ int main(int argc, char** argv) {
   std::cout << "alg_touzet_ted_kr_set = " << tp.alg_touzet_ted_kr_set << std::endl;
   std::cout << "alg_zs_ted = " << tp.alg_zs_ted << std::endl;
   
-  // Parse test cases from file.
-  std::ifstream test_cases_file(tp.input_file);
-  if (!test_cases_file.is_open()) {
-    std::cerr << "Error while opening file." << std::endl;
-    return -1;
+  std::ifstream test_cases_file;
+  if (tp.input_file != "") {
+    // Parse test cases from file.
+    test_cases_file = std::ifstream(tp.input_file);
+    if (!test_cases_file.is_open()) {
+      std::cerr << "ERROR Problem while opening file." << std::endl;
+      return -1;
+    }
   }
 
   // Fixed test cases.
