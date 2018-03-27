@@ -466,8 +466,8 @@ double Touzet<Label, CostModel>::touzet_ted_kr_set(const node::Node<Label>& t1,
     // Get max e over node pairs on left paths.
     int e_max = 0;
     int top_x = x_l;
-    int top_y = y_l;
     while (top_x > -1) {
+      int top_y = y_l;
       while (top_y > -1) {
         e_max = std::max(e_max, e_budget(top_x, top_y, k));
         top_y = t2_lch_[top_y];
