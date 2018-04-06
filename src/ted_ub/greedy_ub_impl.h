@@ -64,7 +64,8 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::greedy_mapping(cons
     //   }
     
     if (candidate_ids.size() > 0) {
-      mapping.push_back({t1_post_to_pre_[i], t2_post_to_pre_[candidate_ids.front()]});
+      // mapping.push_back({t1_post_to_pre_[i], t2_post_to_pre_[candidate_ids.front()]}); // preorder
+      mapping.push_back({i, candidate_ids.front()}); // postorder
       // std::cout << "M " << t1_post_to_pre_[i] << "," << t2_post_to_pre_[candidate_ids.front()] << std::endl;
       // TODO: Use the node that satisfied the threshold and then delete it.
       candidate_ids.pop_front();
@@ -76,7 +77,8 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::greedy_mapping(cons
   //   std::cout << m.first << "," << m.second << std::endl;
   // }
   
-  mapping = revise_greedy_mapping(mapping);
+  // mapping = revise_greedy_mapping(mapping);
+  mapping = to_ted_mapping(mapping);
   
   // std::cout << "---------------------Revised Mapping" << std::endl;
   // for (auto m : mapping) {
@@ -84,6 +86,152 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::greedy_mapping(cons
   // }
   
   return mapping;
+};
+
+template <typename Label, typename CostModel>
+std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::to_ted_mapping(std::vector<std::pair<int, int>>& mapping) {
+  std::vector<std::pair<int, int>> ted_mapping;
+  
+  std::vector<int> t1_count_mapped_desc(t1_input_size_);
+  std::vector<int> t2_count_mapped_desc(t2_input_size_);
+  std::vector<int> t1_count_mapped_left(t1_input_size_);
+  std::vector<int> t2_count_mapped_left(t2_input_size_);
+  
+  int t1_i = 0;
+  int t2_i = 0;
+  int cur_t1 = 0;
+  int cur_t2 = 0;
+  int prev_t1 = -1;
+  int prev_t2 = -1;
+  for (auto m : mapping) {
+    cur_t1 = m.first;
+    cur_t2 = m.second;
+    std::cout << "M(" << cur_t1 << "," << cur_t2 << ")" << std::endl;
+    
+    // Increasing postorder id test.
+    if (cur_t1 < prev_t1 || cur_t2 < prev_t2) {
+      std::cout << "M DEL post(" << cur_t1 << "," << cur_t2 << ")" << std::endl;
+      continue;
+    }
+    
+    // TODO: Review the following if statements.
+    
+    // T1
+    while (t1_i < cur_t1) { // nodes not in mapping
+      // descendants
+      t1_count_mapped_desc[t1_parent_[t1_i]] += t1_count_mapped_desc[t1_i];
+      // left
+      if (t1_rch_[t1_i] > -1) {
+        if (t1_node_[t1_i].get().is_leaf()) { // leaf node
+          t1_count_mapped_left[t1_rch_[t1_i]] = t1_count_mapped_left[t1_i];
+        } else { // inner node
+        }
+      }
+      if (t1_post_to_pre_[t1_parent_[t1_i]] + 1 == t1_post_to_pre_[t1_i]) { // leftmost child of its parent
+                                                                            // NOTE: Could be precomputed.
+        t1_count_mapped_left[t1_parent_[t1_i]] = t1_count_mapped_left[t1_i];
+      }
+      ++t1_i;
+    }
+    // mapped node
+    if (t1_parent_[t1_i] > -1) { // root has no parent
+      // descendants
+      t1_count_mapped_desc[t1_parent_[t1_i]] += t1_count_mapped_desc[t1_i] + 1;
+      // left
+      if (t1_rch_[t1_i] > -1) {
+        if (t1_node_[t1_i].get().is_leaf()) { // leaf node
+          t1_count_mapped_left[t1_rch_[t1_i]] = t1_count_mapped_left[t1_i] + 1;
+        } else { // inner node
+          t1_count_mapped_left[t1_rch_[t1_i]] += 1;
+        }
+      }
+      if (t1_post_to_pre_[t1_parent_[t1_i]] + 1 == t1_post_to_pre_[t1_i]) { // leftmost child of its parent
+                                                                            // NOTE: Could be precomputed.
+        t1_count_mapped_left[t1_parent_[t1_i]] = t1_count_mapped_left[t1_i];
+      }
+    }
+    ++t1_i;
+    
+    // NOTE: is_leaf : t1_node_[i].get().is_leaf() [with t1_size_[i] == 1 may be faster]
+    // NOTE: first_leaf_to_the_right : precompute
+    // NOTE: is_leftmost_child_of_its_parent : precompute OR post_to_pre[parent[i]] + 1 == post_to_pre[i]
+    
+    // T2
+    while (t2_i < cur_t2) { // nodes not in mapping
+      std::cout << "processing t2_i = " << t2_i << std::endl;
+      // descendants
+      t2_count_mapped_desc[t2_parent_[t2_i]] += t2_count_mapped_desc[t2_i];
+      // left
+      if (t2_rch_[t2_i] > -1) {
+        if (t2_node_[t2_i].get().is_leaf()) { // leaf node
+          t2_count_mapped_left[t2_rch_[t2_i]] = t2_count_mapped_left[t2_i];
+        } else { // inner node
+        }
+      }
+      if (t2_post_to_pre_[t2_parent_[t2_i]] + 1 == t2_post_to_pre_[t2_i]) { // leftmost child of its parent
+        t2_count_mapped_left[t2_parent_[t2_i]] = t2_count_mapped_left[t2_i];
+      }
+      ++t2_i;
+    }
+    // mapped node
+    std::cout << "processing t2_i = " << t2_i << std::endl;
+    if (t2_parent_[t2_i] > -1) { // root has no parent
+      // descendants
+      t2_count_mapped_desc[t2_parent_[t2_i]] += t2_count_mapped_desc[t2_i] + 1;
+      // left
+      if (t2_rch_[t2_i] > -1) {
+        if (t2_node_[t2_i].get().is_leaf()) { // leaf node
+          t2_count_mapped_left[t2_rch_[t2_i]] = t2_count_mapped_left[t2_i] + 1;
+        } else { // inner node
+          t2_count_mapped_left[t2_rch_[t2_i]] += 1;
+        }
+      }
+      if (t2_post_to_pre_[t2_parent_[t2_i]] + 1 == t2_post_to_pre_[t2_i]) { // leftmost child of its parent
+        t2_count_mapped_left[t2_parent_[t2_i]] = t2_count_mapped_left[t2_i];
+      }
+    }
+    ++t2_i;
+    
+    // Mapped descendants test.
+    if (t1_count_mapped_desc[cur_t1] != t2_count_mapped_desc[cur_t2]) {
+      std::cout << "M DEL desc(" << cur_t1 << "," << cur_t2 << ")" << std::endl;
+      continue;
+    }
+    
+    // Mapped nodes to the left test.
+    if (t1_count_mapped_left[cur_t1] != t2_count_mapped_left[cur_t2]) {
+      std::cout << "M DEL left(" << cur_t1 << "," << cur_t2 << ")" << std::endl;
+      continue;
+    }
+    
+    ted_mapping.push_back({cur_t1, cur_t2});
+    
+    prev_t1 = cur_t1;
+    prev_t2 = cur_t2;
+  }
+  // TODO: Gap after the last mapped node until the last node in the tree. 
+  
+  std::cout << "t1_count_mapped_desc : ";
+  for (auto e : t1_count_mapped_desc) {
+    std::cout << e << " ";
+  } std::cout << std::endl;
+  
+  std::cout << "t1_count_mapped_left : ";
+  for (auto e : t1_count_mapped_left) {
+    std::cout << e << " ";
+  } std::cout << std::endl;
+  
+  std::cout << "t2_count_mapped_desc : ";
+  for (auto e : t2_count_mapped_desc) {
+    std::cout << e << " ";
+  } std::cout << std::endl;
+  
+  std::cout << "t2_count_mapped_left : ";
+  for (auto e : t2_count_mapped_left) {
+    std::cout << e << " ";
+  } std::cout << std::endl;
+  
+  return ted_mapping;
 };
 
 template <typename Label, typename CostModel>

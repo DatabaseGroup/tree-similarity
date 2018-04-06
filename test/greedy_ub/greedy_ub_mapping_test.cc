@@ -1,6 +1,4 @@
 #include <iostream>
-// #include <time.h>
-// #include "timing.h"
 #include <string>
 #include <vector>
 #include <fstream>
@@ -65,8 +63,6 @@ int main() {
       std::string input_tree_1_string = line;
       std::getline(test_cases_file, line);
       std::string input_tree_2_string = line;
-      // std::getline(test_cases_file, line);
-      // int k = std::stoi(line);
       std::getline(test_cases_file, line);
       std::string correct_result = line;
 
@@ -94,7 +90,6 @@ int main() {
         std::cerr << "Incorrect revised mapping: " << computed_results << " instead of " << correct_result << std::endl;
         std::cerr << "T1: " << input_tree_1_string << std::endl;
         std::cerr << "T2: " << input_tree_2_string << std::endl;
-        // std::cerr << "k: " << k << std::endl;
         return -1;
       }
     }

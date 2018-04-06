@@ -131,9 +131,17 @@ private:
   /// Takes a greedy_mapping and revises it such that the output is a valid
   /// TED mapping.
   ///
+  /// TODO: Deprecated because incorrect.
+  ///
   /// \param mapping A one-to-one mapping.
   /// \return A revised mapping that is a valid TED mapping.
   std::vector<std::pair<int, int>> revise_greedy_mapping(std::vector<std::pair<int, int>>& mapping);
+  /// Takes a one-to-one mapping and revises it such that the output is a valid
+  /// TED mapping.
+  ///
+  /// \param mapping A one-to-one mapping.
+  /// \return A revised mapping that is a valid TED mapping.
+  std::vector<std::pair<int, int>> to_ted_mapping(std::vector<std::pair<int, int>>& mapping);
   /// Resets and initialises algorithm's internal data structures and constants.
   /// Has to be called before computing the distance.
   ///
