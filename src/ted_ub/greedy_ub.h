@@ -46,6 +46,8 @@ public:
   struct TestItems {
     const std::unordered_map<std::string, std::list<int>>& t1_label_il;
     const std::vector<int>& t1_post_to_pre;
+    const std::vector<int>& t1_parent;
+    const std::vector<int>& t1_rch;
   };
 // Member functions.
 public:
@@ -85,17 +87,33 @@ private:
   int t1_input_size_;
   /// The size of the destination tree.
   int t2_input_size_;
-  /// Stores pointers to nodes of the source tree. Indexed in postorder-1.
+  /// Stores pointers to nodes of the source tree. Indexed in postorder.
   // NOTE: We use reference_wrapper for const references to nodes. For now, we
   // decided not to use raw pointers. Smart pointers introduce ownership, but
   // this vector is only an observer from a logical point of view.
   std::vector<std::reference_wrapper<const node::Node<Label>>> t1_node_;
-  /// Stores pointers to nodes of the destination tree. Indexed in postorder-1.
+  /// Stores pointers to nodes of the destination tree. Indexed in postorder.
   std::vector<std::reference_wrapper<const node::Node<Label>>> t2_node_;
   /// Stores preorder id of each node in the source tree. Indexed in postorder.
   std::vector<int> t1_post_to_pre_;
   /// Stores preorder id of each node in the source tree. Indexed in postorder.
   std::vector<int> t2_post_to_pre_;
+  /// Stores the postorder id of the parent for each node of the source
+  /// tree. '-1' represents no parent.
+  /// Indexed in postorder ids starting with 0.
+  std::vector<int> t1_parent_;
+  /// Stores the postorder id of the parent for each node of the destination
+  /// tree. '-1' represents no parent.
+  /// Indexed in postorder ids starting with 0.
+  std::vector<int> t2_parent_;
+  /// Stores for each node x of the source tree the postorder id of the
+  /// first leaf node to the righ of x. '-1' represents no such node.
+  /// Indexed in postorder ids starting with 0.
+  std::vector<int> t1_rch_;
+  /// Stores for each node x of the destination tree the postorder id of the
+  /// first leaf node to the righ of x. '-1' represents no such node.
+  /// Indexed in postorder ids starting with 0.
+  std::vector<int> t2_rch_;
   /// For each laebl in the source tree, stores postorder ids of nodes that
   /// carry it (the list is sorted in postorder).
   /// NOTE: Key should be of type Label - requires modifying implementation of
@@ -128,18 +146,19 @@ private:
   ///
   /// \param root The root node of the tree to index.
   /// \param label_il Inverted list of labels to node postorder ids.
-  /// \param nodes Vector postorder ids to references to nodes.
+  /// \param nodes Vector of postorder ids to references to nodes.
   /// \param post_to_pre Translation vector from postorder to preorder id.
   void index_nodes(const node::Node<Label>& root,
                    std::unordered_map<std::string, std::list<int>>& label_il,
                    std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
-                   std::vector<int>& post_to_pre);
+                   std::vector<int>& post_to_pre,
+                   std::vector<int>& parent);
   /// Traverses an input tree rooted at root recursively and collects
   /// information into index structures.
   ///
   /// \param root The root node of the tree to index.
   /// \param label_il Inverted list of labels to node postorder ids.
-  /// \param nodes Vector postorder ids to references to nodes.
+  /// \param nodes Vector of postorder ids to references to nodes.
   /// \param post_to_pre Translation vector from postorder to preorder id.
   /// \param start_postorder Stores the postorder id of a node during traversal.
   /// \param start_preorder Stores the preorder id of a node during traversal.
@@ -147,7 +166,16 @@ private:
                              std::unordered_map<std::string, std::list<int>>& label_il,
                              std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
                              std::vector<int>& post_to_pre,
+                             std::vector<int>& parent,
                              int& start_postorder, int& start_preorder);
+  /// Collects the first leaf node to the right of every node of input tree.
+  ///
+  /// \param input_size Size of the input tree.
+  /// \param nodes Vector of postorder ids to references to nodes.
+  /// \param rch Vector with first leaf nodes to the right.
+  void post_traversal_indexing(const int input_size,
+                               const std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
+                               std::vector<int>& rch);
 };
 
 // Implementation details.

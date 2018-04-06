@@ -158,6 +158,7 @@ void GreedyUB<Label, CostModel>::index_nodes_recursion(
     std::unordered_map<std::string, std::list<int>>& label_il,
     std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
     std::vector<int>& post_to_pre,
+    std::vector<int>& parent,
     int& start_postorder,
     int& start_preorder) {
   // Here, start_preorder holds this node's preorder id.
@@ -167,17 +168,29 @@ void GreedyUB<Label, CostModel>::index_nodes_recursion(
   // in preorder.
   ++start_preorder;
   
+  // To store postorder ids of this node's children.
+  std::vector<int> nodes_children;
+  
   auto children_start_it = std::begin(node.get_children());
   auto children_end_it = std::end(node.get_children());
   while (children_start_it != children_end_it) {
     index_nodes_recursion(*children_start_it, label_il, nodes, post_to_pre,
-                          start_postorder, start_preorder);
+                          parent, start_postorder, start_preorder);
     // Here, start_postorder-1 is the postorder of the current child.
+    // Collect children ids.
+    nodes_children.push_back(start_postorder-1);
     // Continue to consecutive children.
     ++children_start_it;
   }
   
   // Here, start_postorder holds this node's postorder id here.
+
+  // Parent - dummy element to grow the vector by this node.
+  parent.push_back(-1);
+  // Set this node's postorder value as parent for all its children.
+  for (auto child_id : nodes_children) {
+    parent.at(child_id) = start_postorder;
+  }
 
   // Add current node to the nodes vector.
   nodes.push_back(std::ref(node));
@@ -191,23 +204,40 @@ void GreedyUB<Label, CostModel>::index_nodes_recursion(
   // Increment start_postorder for the consecutive node in postorder have the
   // correct id.
   ++start_postorder;
-}
+};
 
 template <typename Label, typename CostModel>
 void GreedyUB<Label, CostModel>::index_nodes(
     const node::Node<Label>& root,
     std::unordered_map<std::string, std::list<int>>& label_il,
     std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
-    std::vector<int>& post_to_pre) {
+    std::vector<int>& post_to_pre,
+    std::vector<int>& parent) {
   // Orders start with '0'.
   int start_postorder = 0;
   // NOTE: Preorder is not used. Remove start_preorder. Or
   //       move the template traversal with postorder and preorder to some notes
   //       of how to traverse trees.
   int start_preorder = 0;
-  index_nodes_recursion(root, label_il, nodes, post_to_pre, start_postorder, start_preorder);
+  index_nodes_recursion(root, label_il, nodes, post_to_pre, parent, start_postorder, start_preorder);
   // Here, start_postorder and start_preorder store the size of tree minus 1.
-}
+};
+
+template <typename Label, typename CostModel>
+void GreedyUB<Label, CostModel>::post_traversal_indexing(const int input_size,
+    const std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
+    std::vector<int>& rch) {
+  int current_leaf = -1;
+  int post_id = -1;
+  for(int i = 0; i < input_size; i++) { // loop in right-to-left preorder
+    post_id = input_size - i - 1; // Translation from right-to-left preorder
+                                  // to postorder.
+    rch[post_id] = current_leaf;
+    if(nodes[post_id].get().is_leaf()) { // NOTE: Could be precomputed.
+      current_leaf = post_id;
+    }
+  }
+};
 
 template <typename Label, typename CostModel>
 void GreedyUB<Label, CostModel>::init(const node::Node<Label>& t1,
@@ -218,23 +248,34 @@ void GreedyUB<Label, CostModel>::init(const node::Node<Label>& t1,
   t2_post_to_pre_.clear();
   t1_label_il_.clear();
   t2_label_il_.clear();
+  t1_parent_.clear();
+  t2_parent_.clear();
+  t1_rch_.clear();
+  t2_rch_.clear();
   
   // TODO: Do not call get_tree_size() that causes an additional tree traversal.
   //       Index subtree sizes instead - they'll be used anyways.
   t1_input_size_ = t1.get_tree_size();
   t2_input_size_ = t2.get_tree_size();
   
-  index_nodes(t1, t1_label_il_, t1_node_, t1_post_to_pre_);
-  index_nodes(t2, t2_label_il_, t2_node_, t2_post_to_pre_);
-}
+  index_nodes(t1, t1_label_il_, t1_node_, t1_post_to_pre_, t1_parent_);
+  index_nodes(t2, t2_label_il_, t2_node_, t2_post_to_pre_, t2_parent_);
+  
+  t1_rch_.resize(t1_input_size_);
+  t2_rch_.resize(t2_input_size_);
+  post_traversal_indexing(t1_input_size_, t1_node_, t1_rch_);
+  post_traversal_indexing(t2_input_size_, t2_node_, t2_rch_);
+};
 
 template <typename Label, typename CostModel>
 const typename GreedyUB<Label, CostModel>::TestItems GreedyUB<Label, CostModel>::get_test_items() const {
   TestItems test_items = {
     t1_label_il_,
     t1_post_to_pre_,
+    t1_parent_,
+    t1_rch_,
   };
   return test_items;
-}
+};
 
 #endif // TREE_SIMILARITY_TED_UB_GREEDY_UB_IMPL_H
