@@ -40,8 +40,7 @@ int main() {
 
   parser::BracketNotationParser bnp;
 
-  // Initialise GreedyUB algorithm.
-  ted_ub::GreedyUB<Label, CostModel> greedy_ub;
+  
 
   // Initialise Zhang and Shsha's algorithm.
   ted::ZhangShasha<Label, CostModel> zs_ted;
@@ -55,6 +54,9 @@ int main() {
   for (std::string line; std::getline( test_cases_file, line);) {
     if (line[0] == '#') {
 
+      // Initialise GreedyUB algorithm.
+      ted_ub::GreedyUB<Label, CostModel> greedy_ub;
+      
       std::cout << "--- TEST CASE ---" << std::endl;
       std::cout << line << std::endl;
 

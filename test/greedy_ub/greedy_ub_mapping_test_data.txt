@@ -30,3 +30,7 @@
 {d{a}{b}{c}}
 {f{e{a}{b}}{d{c}}}
 {(0,0),(1,1),(2,3)}
+# bozen pair (31, 16)
+{stradivaristrasse{2}{4{{1}{2}{4}}}{6}}
+{pascolistrasse{2{{2}{4}}}}
+{(0,0),(3,1)}
