@@ -48,6 +48,8 @@ public:
     const std::vector<int>& t1_post_to_pre;
     const std::vector<int>& t1_parent;
     const std::vector<int>& t1_rch;
+    const std::vector<int>& t1_depth;
+    const std::vector<int>& t1_size;
   };
 // Member functions.
 public:
@@ -114,6 +116,18 @@ private:
   /// first leaf node to the righ of x. '-1' represents no such node.
   /// Indexed in postorder ids starting with 0.
   std::vector<int> t2_rch_;
+  /// Stores the depth for each node of the source tree.
+  /// Indexed in postorder ids starting with 0.
+  std::vector<int> t1_depth_;
+  /// Stores the depth for each node of the destination tree.
+  /// Indexed in postorder ids starting with 0.
+  std::vector<int> t2_depth_;
+  /// Stores the subtree size for each node of the source tree.
+  /// Indexed in postorder ids starting with 0.
+  std::vector<int> t1_size_;
+  /// Stores the subtree size for each node of the destination tree.
+  /// Indexed in postorder ids starting with 0.
+  std::vector<int> t2_size_;
   /// For each laebl in the source tree, stores postorder ids of nodes that
   /// carry it (the list is sorted in postorder).
   /// NOTE: Key should be of type Label - requires modifying implementation of
@@ -160,7 +174,9 @@ private:
                    std::unordered_map<std::string, std::list<int>>& label_il,
                    std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
                    std::vector<int>& post_to_pre,
-                   std::vector<int>& parent);
+                   std::vector<int>& parent,
+                   std::vector<int>& depth,
+                   std::vector<int>& size);
   /// Traverses an input tree rooted at root recursively and collects
   /// information into index structures.
   ///
@@ -170,12 +186,15 @@ private:
   /// \param post_to_pre Translation vector from postorder to preorder id.
   /// \param start_postorder Stores the postorder id of a node during traversal.
   /// \param start_preorder Stores the preorder id of a node during traversal.
-  void index_nodes_recursion(const node::Node<Label>& root,
+  int index_nodes_recursion(const node::Node<Label>& root,
                              std::unordered_map<std::string, std::list<int>>& label_il,
                              std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
                              std::vector<int>& post_to_pre,
                              std::vector<int>& parent,
-                             int& start_postorder, int& start_preorder);
+                             std::vector<int>& depth,
+                             std::vector<int>& size,
+                             int& start_postorder, int& start_preorder,
+                             unsigned int start_depth);
   /// Collects the first leaf node to the right of every node of input tree.
   ///
   /// \param input_size Size of the input tree.
