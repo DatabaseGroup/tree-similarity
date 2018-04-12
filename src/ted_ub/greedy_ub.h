@@ -78,6 +78,9 @@ public:
   /// \param t1 Source tree.
   /// \param t2 Destination tree.
   std::vector<std::pair<int, int>> greedy_mapping(const node::Node<Label>& t1, const node::Node<Label>& t2);
+  
+  std::vector<std::pair<int, int>> lb_mapping(const node::Node<Label>& t1, const node::Node<Label>& t2, const int k);
+  
   /// Creates a TestItems object and returns it (by value).
   ///
   /// \return A TestItem object.
@@ -149,13 +152,13 @@ private:
   ///
   /// \param mapping A one-to-one mapping.
   /// \return A revised mapping that is a valid TED mapping.
-  std::vector<std::pair<int, int>> revise_greedy_mapping(std::vector<std::pair<int, int>>& mapping);
+  std::vector<std::pair<int, int>> revise_greedy_mapping(const std::vector<std::pair<int, int>>& mapping);
   /// Takes a one-to-one mapping and revises it such that the output is a valid
   /// TED mapping.
   ///
   /// \param mapping A one-to-one mapping.
   /// \return A revised mapping that is a valid TED mapping.
-  std::vector<std::pair<int, int>> to_ted_mapping(std::vector<std::pair<int, int>>& mapping);
+  std::vector<std::pair<int, int>> to_ted_mapping(const std::vector<std::pair<int, int>>& mapping);
   /// Resets and initialises algorithm's internal data structures and constants.
   /// Has to be called before computing the distance.
   ///
@@ -203,6 +206,18 @@ private:
   void post_traversal_indexing(const int input_size,
                                const std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
                                std::vector<int>& rch);
+  /// Verifies if subtrees T1_x and T2_y are k-relevant.
+  ///
+  /// T1_x and T2_y are k-relevant if
+  /// |(|T1|-(x+1))-(|T2|-(y+1))| + ||T1_x|-|T2_y|| + |((x+1)-|T1_x|)-((y+1)-|T2_y|)| < k.
+  ///
+  /// NOTE: x and y are increased by one due to node indexing starting with 0.
+  ///
+  /// \param x postorder id of a node in source tree T1.
+  /// \param y postorder id of a node in destination tree T2.
+  /// \param k maximum number of structural canges.
+  /// \return True if subtrees T1_x and T2_y are k-relevant, and false otherwise.
+  bool k_relevant(const int x, const int y, const int k) const;
 };
 
 // Implementation details.

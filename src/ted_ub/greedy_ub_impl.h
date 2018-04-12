@@ -49,47 +49,59 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::greedy_mapping(cons
   init(t1, t2);
   
   std::vector<std::pair<int, int>> mapping;
-  // std::list<int> candidate_ids;
   
   for (int i = 0; i < t1_input_size_; ++i) { // Loop in postorder.
-    std::list<int>& candidate_ids = t2_label_il_[t1_node_[i].get().label().to_string()];
-    // Map node i to the a node in T2 that is first in the inverted list.
-    // If there is anything to map.
-    
     // TODO: Ensure mapping conditions here and check the LB.
     // for (auto c : candidate_ids) {
     //   if (mapping to c makes entire mapping valid && LB <= k) {
     //     map to c;
     //     break;
     //   }
-    
+    std::list<int>& candidate_ids = t2_label_il_[t1_node_[i].get().label().to_string()];
+    // Map node i to the a node in T2 that is first in the inverted list.
+    // If there is anything to map.
     if (candidate_ids.size() > 0) {
-      // mapping.push_back({t1_post_to_pre_[i], t2_post_to_pre_[candidate_ids.front()]}); // preorder
       mapping.push_back({i, candidate_ids.front()}); // postorder
-      // std::cout << "M " << t1_post_to_pre_[i] << "," << t2_post_to_pre_[candidate_ids.front()] << std::endl;
       // TODO: Use the node that satisfied the threshold and then delete it.
       candidate_ids.pop_front();
     }
   }
-  
-  // std::cout << "---------------------1-1 Mapping" << std::endl;
-  // for (auto m : mapping) {
-  //   std::cout << m.first << "," << m.second << std::endl;
-  // }
-  
-  // mapping = revise_greedy_mapping(mapping);
   mapping = to_ted_mapping(mapping);
-  
-  // std::cout << "---------------------Revised Mapping" << std::endl;
-  // for (auto m : mapping) {
-  //   std::cout << m.first << "," << m.second << std::endl;
-  // }
-  
   return mapping;
 };
 
 template <typename Label, typename CostModel>
-std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::to_ted_mapping(std::vector<std::pair<int, int>>& mapping) {
+std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::lb_mapping(const node::Node<Label>& t1, const node::Node<Label>& t2, const int k) {
+  init(t1, t2);
+  std::vector<std::pair<int, int>> mapping;
+  for (int i = 0; i < t1_input_size_; ++i) { // Loop in postorder.
+    std::list<int>& candidate_ids = t2_label_il_[t1_node_[i].get().label().to_string()];
+    
+    // if (candidate_ids.size() > 0) {
+    //   mapping.push_back({i, candidate_ids.front()}); // postorder
+    //   // TODO: Use the node that satisfied the threshold and then delete it.
+    //   candidate_ids.pop_front();
+    // }
+    
+    std::list<int>::iterator cand_it = candidate_ids.begin();
+    int cand_id = 0;
+    for ( ; cand_it != candidate_ids.end(); ) {
+      cand_id = *cand_it;
+      if (k_relevant(i, cand_id, k)) {
+        mapping.push_back({i, cand_id}); // postorder
+        cand_it = candidate_ids.erase(cand_it); // Assignment not needed due to break.
+        break;
+      }
+      ++cand_it;
+    }
+    
+  }
+  mapping = to_ted_mapping(mapping);
+  return mapping;
+};
+
+template <typename Label, typename CostModel>
+std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::to_ted_mapping(const std::vector<std::pair<int, int>>& mapping) {
   std::vector<std::pair<int, int>> ted_mapping;
   
   std::vector<int> t1_count_mapped_desc(t1_input_size_);
@@ -289,7 +301,7 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::to_ted_mapping(std:
 };
 
 template <typename Label, typename CostModel>
-std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::revise_greedy_mapping(std::vector<std::pair<int, int>>& mapping) {
+std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::revise_greedy_mapping(const std::vector<std::pair<int, int>>& mapping) {
   std::vector<std::pair<int, int>> revised_mapping;
   
   // IDEA: Reorder the mappings such that as many as possible can be used.
@@ -495,6 +507,33 @@ void GreedyUB<Label, CostModel>::init(const node::Node<Label>& t1,
   t2_rch_.resize(t2_input_size_);
   post_traversal_indexing(t1_input_size_, t1_node_, t1_rch_);
   post_traversal_indexing(t2_input_size_, t2_node_, t2_rch_);
+};
+
+template <typename Label, typename CostModel>
+bool GreedyUB<Label, CostModel>::k_relevant(const int x, const int y, const int k) const {
+  // The lower bound formula (RA + D + L):
+  // |(|T1|-(x+1))-(|T2|-(y+1))| + ||T1_x|-|T2_y|| + |((x+1)-|T1_x|)-((y+1)-|T2_y|)| < k
+  // New lower bound formula (R + A + D + L):
+  // |(|T1|-(x+1)-depth(x))-(|T2|-(y+1)-depth(y))| + |depth(x)-depth(y)| + ||T1_x|-|T2_y|| + |((x+1)-|T1_x|)-((y+1)-|T2_y|)| < k
+  int x_size = t1_size_[x];
+  int y_size = t2_size_[y];
+  // int lower_bound = std::abs((t1_size_.back() - (x+1)) - (t2_size_.back() - (y+1))) +
+  //                   std::abs(x_size - y_size) +
+  //                   std::abs(((x+1) - x_size) - ((y+1) - y_size));
+
+  int lower_bound = std::abs((t1_size_.back() - (x+1) - t1_depth_[x]) - (t2_size_.back() - (y+1) - t2_depth_[y])) +
+                    std::abs(t1_depth_[x] - t2_depth_[y]) +
+                    std::abs(x_size - y_size) +
+                    std::abs(((x+1) - x_size) - ((y+1) - y_size));
+
+  // NOTE: The pair (x,y) is k-relevant if lower_bound <= k.
+  //       lower_bound < k is not correct because then (x,y) would be
+  //       k-irrelevant for lower_bound = k. That would further mean that the
+  //       subtrees T1_x and T2_y cannot be mapped with the given budget.
+  if (lower_bound <= k) {
+    return true;
+  }
+  return false;
 };
 
 template <typename Label, typename CostModel>
