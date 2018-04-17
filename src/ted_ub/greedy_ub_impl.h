@@ -166,9 +166,9 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::to_ted_mapping(cons
       // descendants
       t1_count_mapped_desc[t1_parent_[t1_i]] += t1_count_mapped_desc[t1_i];
       // left
-      if (t1_rch_[t1_i] > -1) {
-        if (t1_node_[t1_i].get().is_leaf()) { // leaf node
-          t1_count_mapped_left[t1_rch_[t1_i]] = t1_count_mapped_left[t1_i];
+      if (t1_rl_[t1_i] > -1) {
+        if (t1_size_[t1_i] == 1) { // leaf node
+          t1_count_mapped_left[t1_rl_[t1_i]] = t1_count_mapped_left[t1_i];
         } else { // inner node
         }
       }
@@ -184,9 +184,9 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::to_ted_mapping(cons
       // descendants
       t2_count_mapped_desc[t2_parent_[t2_i]] += t2_count_mapped_desc[t2_i];
       // left
-      if (t2_rch_[t2_i] > -1) {
-        if (t2_node_[t2_i].get().is_leaf()) { // leaf node
-          t2_count_mapped_left[t2_rch_[t2_i]] = t2_count_mapped_left[t2_i];
+      if (t2_rl_[t2_i] > -1) {
+        if (t2_size_[t2_i] == 1) { // leaf node
+          t2_count_mapped_left[t2_rl_[t2_i]] = t2_count_mapped_left[t2_i];
         } else { // inner node
         }
       }
@@ -217,11 +217,11 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::to_ted_mapping(cons
         // descendants
         t1_count_mapped_desc[t1_parent_[t1_i]] += t1_count_mapped_desc[t1_i] + 1;
         // left
-        if (t1_rch_[t1_i] > -1) {
-          if (t1_node_[t1_i].get().is_leaf()) { // leaf node
-            t1_count_mapped_left[t1_rch_[t1_i]] = t1_count_mapped_left[t1_i] + 1;
+        if (t1_rl_[t1_i] > -1) {
+          if (t1_size_[t1_i] == 1) { // leaf node
+            t1_count_mapped_left[t1_rl_[t1_i]] = t1_count_mapped_left[t1_i] + 1;
           } else { // inner node
-            t1_count_mapped_left[t1_rch_[t1_i]] += 1;
+            t1_count_mapped_left[t1_rl_[t1_i]] += 1;
           }
         }
         if (t1_post_to_pre_[t1_parent_[t1_i]] + 1 == t1_post_to_pre_[t1_i]) { // leftmost child of its parent
@@ -247,11 +247,11 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::to_ted_mapping(cons
         // descendants
         t2_count_mapped_desc[t2_parent_[t2_i]] += t2_count_mapped_desc[t2_i] + 1;
         // left
-        if (t2_rch_[t2_i] > -1) {
-          if (t2_node_[t2_i].get().is_leaf()) { // leaf node
-            t2_count_mapped_left[t2_rch_[t2_i]] = t2_count_mapped_left[t2_i] + 1;
+        if (t2_rl_[t2_i] > -1) {
+          if (t2_size_[t2_i] == 1) { // leaf node
+            t2_count_mapped_left[t2_rl_[t2_i]] = t2_count_mapped_left[t2_i] + 1;
           } else { // inner node
-            t2_count_mapped_left[t2_rch_[t2_i]] += 1;
+            t2_count_mapped_left[t2_rl_[t2_i]] += 1;
           }
         }
         if (t2_post_to_pre_[t2_parent_[t2_i]] + 1 == t2_post_to_pre_[t2_i]) { // leftmost child of its parent
@@ -464,13 +464,13 @@ void GreedyUB<Label, CostModel>::index_nodes(
 template <typename Label, typename CostModel>
 void GreedyUB<Label, CostModel>::post_traversal_indexing(const int input_size,
     const std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
-    std::vector<int>& rch) {
+    std::vector<int>& rl) {
   int current_leaf = -1;
   int post_id = -1;
   for(int i = 0; i < input_size; i++) { // loop in right-to-left preorder
     post_id = input_size - i - 1; // Translation from right-to-left preorder
                                   // to postorder.
-    rch[post_id] = current_leaf;
+    rl[post_id] = current_leaf;
     if(nodes[post_id].get().is_leaf()) { // NOTE: Could be precomputed.
       current_leaf = post_id;
     }
@@ -488,8 +488,8 @@ void GreedyUB<Label, CostModel>::init(const node::Node<Label>& t1,
   t2_label_il_.clear();
   t1_parent_.clear();
   t2_parent_.clear();
-  t1_rch_.clear();
-  t2_rch_.clear();
+  t1_rl_.clear();
+  t2_rl_.clear();
   t1_depth_.clear();
   t2_depth_.clear();
   t1_size_.clear();
@@ -503,10 +503,10 @@ void GreedyUB<Label, CostModel>::init(const node::Node<Label>& t1,
   index_nodes(t1, t1_label_il_, t1_node_, t1_post_to_pre_, t1_parent_, t1_depth_, t1_size_);
   index_nodes(t2, t2_label_il_, t2_node_, t2_post_to_pre_, t2_parent_, t2_depth_, t2_size_);
   
-  t1_rch_.resize(t1_input_size_);
-  t2_rch_.resize(t2_input_size_);
-  post_traversal_indexing(t1_input_size_, t1_node_, t1_rch_);
-  post_traversal_indexing(t2_input_size_, t2_node_, t2_rch_);
+  t1_rl_.resize(t1_input_size_);
+  t2_rl_.resize(t2_input_size_);
+  post_traversal_indexing(t1_input_size_, t1_node_, t1_rl_);
+  post_traversal_indexing(t2_input_size_, t2_node_, t2_rl_);
 };
 
 template <typename Label, typename CostModel>
@@ -542,7 +542,7 @@ const typename GreedyUB<Label, CostModel>::TestItems GreedyUB<Label, CostModel>:
     t1_label_il_,
     t1_post_to_pre_,
     t1_parent_,
-    t1_rch_,
+    t1_rl_,
     t1_depth_,
     t1_size_,
   };

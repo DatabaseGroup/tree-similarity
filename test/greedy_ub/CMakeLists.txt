@@ -7,7 +7,7 @@ set(greedy_ub_test_list
   greedy_ub_lb_mapping_test
   greedy_ub_post_to_pre_test
   greedy_ub_parent_test
-  greedy_ub_rch_test
+  greedy_ub_rl_test
   greedy_ub_depth_test
   greedy_ub_size_test
 )

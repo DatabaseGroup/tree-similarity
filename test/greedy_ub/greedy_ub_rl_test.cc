@@ -60,7 +60,7 @@ int main() {
 
       auto greedy_ub_test_items = greedy_ub.get_test_items();
 
-      std::string computed_results = vector_to_string(greedy_ub_test_items.t1_rch);
+      std::string computed_results = vector_to_string(greedy_ub_test_items.t1_rl);
 
       if (correct_result != computed_results) {
         std::cerr << "Incorrect key roots result: " << computed_results << " instead of " << correct_result << std::endl;

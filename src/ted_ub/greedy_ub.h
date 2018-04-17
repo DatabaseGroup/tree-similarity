@@ -47,7 +47,7 @@ public:
     const std::unordered_map<std::string, std::list<int>>& t1_label_il;
     const std::vector<int>& t1_post_to_pre;
     const std::vector<int>& t1_parent;
-    const std::vector<int>& t1_rch;
+    const std::vector<int>& t1_rl;
     const std::vector<int>& t1_depth;
     const std::vector<int>& t1_size;
   };
@@ -114,11 +114,11 @@ private:
   /// Stores for each node x of the source tree the postorder id of the
   /// first leaf node to the righ of x. '-1' represents no such node.
   /// Indexed in postorder ids starting with 0.
-  std::vector<int> t1_rch_;
+  std::vector<int> t1_rl_;
   /// Stores for each node x of the destination tree the postorder id of the
   /// first leaf node to the righ of x. '-1' represents no such node.
   /// Indexed in postorder ids starting with 0.
-  std::vector<int> t2_rch_;
+  std::vector<int> t2_rl_;
   /// Stores the depth for each node of the source tree.
   /// Indexed in postorder ids starting with 0.
   std::vector<int> t1_depth_;
@@ -202,10 +202,10 @@ private:
   ///
   /// \param input_size Size of the input tree.
   /// \param nodes Vector of postorder ids to references to nodes.
-  /// \param rch Vector with first leaf nodes to the right.
+  /// \param rl Vector with first leaf nodes to the right.
   void post_traversal_indexing(const int input_size,
                                const std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
-                               std::vector<int>& rch);
+                               std::vector<int>& rl);
   /// Verifies if subtrees T1_x and T2_y are k-relevant.
   ///
   /// T1_x and T2_y are k-relevant if
