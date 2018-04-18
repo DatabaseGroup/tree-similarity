@@ -159,6 +159,24 @@ private:
   /// \param mapping A one-to-one mapping.
   /// \return A revised mapping that is a valid TED mapping.
   std::vector<std::pair<int, int>> to_ted_mapping(const std::vector<std::pair<int, int>>& mapping);
+
+  void update_desc_when_not_mapped(const int node, std::vector<int>& count_mapped_desc, const std::vector<int>& parent,
+      const int input_size);
+  void update_desc_when_mapped(const int node, std::vector<int>& count_mapped_desc, const std::vector<int>& parent,
+      const int input_size);
+  
+  void update_left_when_not_mapped(const int node, std::vector<int>& count_mapped_left, const std::vector<int>& parent,
+      const std::vector<int>& rl, const std::vector<int>& size, const std::vector<int>& post_to_pre,
+      const int input_size);
+  void update_left_when_mapped(const int node, std::vector<int>& count_mapped_left, const std::vector<int>& parent,
+      const std::vector<int>& rl, const std::vector<int>& size, const std::vector<int>& post_to_pre,
+      const int input_size);
+  
+  bool if_in_corresponding_regions(int t1_begin_gap, int i, int t1_end_gap, int t2_begin_gap, int j, int t2_end_gap);
+  
+  std::vector<std::pair<int, int>> fill_gaps_in_mapping(std::vector<std::pair<int, int>>& mapping, const int k);
+
+
   /// Resets and initialises algorithm's internal data structures and constants.
   /// Has to be called before computing the distance.
   ///
