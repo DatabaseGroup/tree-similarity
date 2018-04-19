@@ -33,7 +33,7 @@ GreedyUB<Label, CostModel>::GreedyUB() : c_() {}
 template <typename Label, typename CostModel>
 double GreedyUB<Label, CostModel>::verify(const node::Node<Label>& t1,
     const node::Node<Label>& t2, double similarity_threshold) const {
-  double cost = mapping_cost(lb_mapping_fill_gaps(t1, t2));
+  double cost = mapping_cost(lb_mapping_fill_gaps(t1, t2, similarity_threshold));
   if (cost <= static_cast <int> (std::ceil(similarity_threshold))) {
     return cost;
   }
