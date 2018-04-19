@@ -3,8 +3,14 @@
 # Specify list of test strings.
 set(greedy_ub_test_list
   greedy_ub_label_il_test
-  greedy_ub_mapping_test
+  greedy_ub_lb_mapping_test
+  greedy_ub_lb_fill_gaps_test
   greedy_ub_post_to_pre_test
+  greedy_ub_parent_test
+  greedy_ub_rl_test
+  greedy_ub_depth_test
+  greedy_ub_size_test
+  greedy_ub_ted_test
 )
 
 # Add custom target for building all touzet's tests.
@@ -36,12 +42,12 @@ foreach(loop_var ${greedy_ub_test_list})
 endforeach(loop_var)
 
 # Link the timing library with greedy_ub_cost_test_driver.
-#target_link_libraries(
-#  greedy_ub_cost_test_driver # TARGET EXECUTABLE NAME
-#  TimingLibrary          # LIBRARY NAME
-#)
-#target_include_directories(
-#  greedy_ub_cost_test_driver                    # TARGET EXECUTABLE NAME
-#  PUBLIC ${PROJECT_SOURCE_DIR}/modules/common-code/timings # HEADER FILE
-#)
+target_link_libraries(
+  greedy_ub_ted_test_driver # TARGET EXECUTABLE NAME
+  TimingLibrary             # LIBRARY NAME
+)
+target_include_directories(
+  greedy_ub_ted_test_driver                    # TARGET EXECUTABLE NAME
+  PUBLIC ${PROJECT_SOURCE_DIR}/modules/common-code/timings # HEADER FILE
+)
 

@@ -1,6 +1,4 @@
 #include <iostream>
-// #include <time.h>
-// #include "timing.h"
 #include <string>
 #include <vector>
 #include <fstream>
@@ -23,7 +21,7 @@ const std::string vector_to_string(const std::vector<std::pair<int, int>>& v) {
   for (auto e : v) {
     s += "(" + std::to_string(e.first) + "," + std::to_string(e.second) + "),";
   }
-  s.pop_back();
+  if (s.size() > 1) s.pop_back();
   s += "}";
   return s;
 }
@@ -34,7 +32,7 @@ int main() {
   using CostModel = cost_model::UnitCostModel<Label>;
 
   // Parse test cases from file.
-  std::ifstream test_cases_file("greedy_ub_mapping_test_data.txt");
+  std::ifstream test_cases_file("greedy_ub_lb_mapping_test_data.txt");
   if (!test_cases_file.is_open()) {
     std::cerr << "Error while opening file." << std::endl;
     return -1;
@@ -42,21 +40,16 @@ int main() {
 
   parser::BracketNotationParser bnp;
 
-  // Initialise GreedyUB algorithm.
-  ted_ub::GreedyUB<Label, CostModel> greedy_ub;
-
-  // Initialise Zhang and Shsha's algorithm.
-  ted::ZhangShasha<Label, CostModel> zs_ted;
-
-
   // Fixed test cases.
-
   std::cout << "--- FIXED TEST ---" << std::endl;
 
   // Read test cases from a file line by line.
   for (std::string line; std::getline( test_cases_file, line);) {
     if (line[0] == '#') {
 
+      // Initialise GreedyUB algorithm.
+      ted_ub::GreedyUB<Label, CostModel> greedy_ub;
+      
       std::cout << "--- TEST CASE ---" << std::endl;
       std::cout << line << std::endl;
 
@@ -65,8 +58,8 @@ int main() {
       std::string input_tree_1_string = line;
       std::getline(test_cases_file, line);
       std::string input_tree_2_string = line;
-      // std::getline(test_cases_file, line);
-      // int k = std::stoi(line);
+      std::getline(test_cases_file, line);
+      int k = std::stoi(line);
       std::getline(test_cases_file, line);
       std::string correct_result = line;
 
@@ -85,7 +78,7 @@ int main() {
 
       std::string computed_results;
       try {
-        computed_results = vector_to_string(greedy_ub.greedy_mapping(t1, t2));
+        computed_results = vector_to_string(greedy_ub.lb_mapping(t1, t2, k));
       } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
       }
@@ -94,7 +87,7 @@ int main() {
         std::cerr << "Incorrect revised mapping: " << computed_results << " instead of " << correct_result << std::endl;
         std::cerr << "T1: " << input_tree_1_string << std::endl;
         std::cerr << "T2: " << input_tree_2_string << std::endl;
-        // std::cerr << "k: " << k << std::endl;
+        std::cerr << "k: " << k << std::endl;
         return -1;
       }
     }

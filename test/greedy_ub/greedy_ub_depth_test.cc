@@ -29,7 +29,7 @@ int main() {
   using CostModel = cost_model::UnitCostModel<Label>;
 
   // Parse test cases from file.
-  std::ifstream test_cases_file("greedy_ub_post_to_pre_test_data.txt");
+  std::ifstream test_cases_file("greedy_ub_depth_test_data.txt");
   if (!test_cases_file.is_open()) {
     std::cerr << "Error while opening file." << std::endl;
     return -1;
@@ -62,10 +62,10 @@ int main() {
 
       auto greedy_ub_test_items = greedy_ub.get_test_items();
 
-      std::string computed_results = vector_to_string(greedy_ub_test_items.t1_post_to_pre);
+      std::string computed_results = vector_to_string(greedy_ub_test_items.t1_depth);
 
       if (correct_result != computed_results) {
-        std::cerr << "Post to pre result: " << computed_results << " instead of " << correct_result << std::endl;
+        std::cerr << "Incorrect key roots result: " << computed_results << " instead of " << correct_result << std::endl;
         std::cerr << input_tree << std::endl;
         return -1;
       }
