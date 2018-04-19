@@ -25,6 +25,7 @@
 /// Implements greedy mapping of the matching labels with the assumption that
 /// similar trees should match many labels and should have similar structure.
 /// NOTE: Works with unit cost only.
+/// TODO: Expand.
 
 #ifndef TREE_SIMILARITY_TED_UB_GREEDY_UB_H
 #define TREE_SIMILARITY_TED_UB_GREEDY_UB_H
@@ -67,25 +68,55 @@ public:
   /// \return Greedy label upper bound value if it smaller or equal than the
   ///         similarity_threshold, and std::numeric_limits<double>::infinity()
   ///         otherwise.
-  double verify(const node::Node<Label>& t1, const node::Node<Label>& t2, double similarity_threshold);
+  double verify(const node::Node<Label>& t1, const node::Node<Label>& t2,
+      double similarity_threshold) const;
   /// Calculates the unit cost of passed mapping.
-  double mapping_cost(const std::vector<std::pair<int, int>>& mapping);
-  /// Produces a one-to-one mapping greedily matching labels.
   ///
-  /// NOTE: The result is not necessarily TED mapping. It is verified using
-  ///       revise_greedy_mapping.
+  /// NOTE: The greedy_ub algorithm assumes unit cost. However, this function
+  ///       could work with any cost model.
+  ///
+  /// \param mapping A mapping.
+  /// \result Cost of mapping using CostModel.
+  double mapping_cost(const std::vector<std::pair<int, int>>& mapping) const;
+  /// Produces a TED mapping greedily matching nodes with equal labels.
+  /// Each node x is matched to node y, such that y has the same label as
+  /// x, and the lower bound for (x,y) does not exceed the threshold k. 
+  ///
+  /// Moreover, each consecutive matched pair is ensured not to violate TED
+  /// mapping conditions.
+  ///
+  /// It is a two-step approach. First a one-to-one mapping is produced
+  /// greedily. Then, to_ted_mappingis used to revise the initial one-to-one
+  /// to a TED mapping.
+  ///
+  /// NOTE: In the worst case, it may have quadratic complexity due to
+  ///       evaluating lower bounds for many nodes. 
   ///
   /// \param t1 Source tree.
   /// \param t2 Destination tree.
-  std::vector<std::pair<int, int>> greedy_mapping(const node::Node<Label>& t1, const node::Node<Label>& t2);
-  
-  std::vector<std::pair<int, int>> lb_mapping(const node::Node<Label>& t1, const node::Node<Label>& t2, const int k);
-  
+  /// \param k Similarity threshold.
+  /// \result A TED mapping where only nodes with equal labels are matched.
+  std::vector<std::pair<int, int>> lb_mapping(const node::Node<Label>& t1,
+      const node::Node<Label>& t2, const int k);
+  /// Computes a TED mapping where:
+  /// - as many as possible nodes with equal labels are mapped,
+  /// - as many nodes as possible are renamed,
+  /// - the resulting mapping is ensured to be a TED mapping.
+  ///
+  /// NOTE: It has linear runtime complexity.
+  ///
+  /// NOTE: Internally, it executes lb_mapping and fill_gaps_in_mapping.
+  ///
+  /// \param t1 Source tree.
+  /// \param t2 Destination tree.
+  /// \param k Similarity threshold.
+  /// \result A TED mapping with possibly many node pairs mapped.
+  std::vector<std::pair<int, int>> lb_mapping_fill_gaps(
+      const node::Node<Label>& t1, const node::Node<Label>& t2, const int k);
   /// Creates a TestItems object and returns it (by value).
   ///
   /// \return A TestItem object.
   const TestItems get_test_items() const;
-// Member variables.
 // Member variables.
 private:
   /// The size of the source tree.
@@ -145,38 +176,49 @@ private:
   const CostModel c_;
 // Member functions.
 private:
-  /// Takes a greedy_mapping and revises it such that the output is a valid
-  /// TED mapping.
-  ///
-  /// TODO: Deprecated because incorrect.
-  ///
-  /// \param mapping A one-to-one mapping.
-  /// \return A revised mapping that is a valid TED mapping.
-  std::vector<std::pair<int, int>> revise_greedy_mapping(const std::vector<std::pair<int, int>>& mapping);
   /// Takes a one-to-one mapping and revises it such that the output is a valid
   /// TED mapping.
+  /// The solution is based on (a) increasing postorder ids of the nodes in
+  /// consecutive mapped pairs, and (b) counting the number of mapped
+  /// descendants and nodes to the left so far.
+  ///
+  /// NOTE: The complexity is supposed to be linear. Further analysis is
+  ///       necessary.
   ///
   /// \param mapping A one-to-one mapping.
   /// \return A revised mapping that is a valid TED mapping.
-  std::vector<std::pair<int, int>> to_ted_mapping(const std::vector<std::pair<int, int>>& mapping);
-
-  void update_desc_when_not_mapped(const int node, std::vector<int>& count_mapped_desc, const std::vector<int>& parent,
-      const int input_size);
-  void update_desc_when_mapped(const int node, std::vector<int>& count_mapped_desc, const std::vector<int>& parent,
-      const int input_size);
-  
-  void update_left_when_not_mapped(const int node, std::vector<int>& count_mapped_left, const std::vector<int>& parent,
-      const std::vector<int>& rl, const std::vector<int>& size, const std::vector<int>& post_to_pre,
-      const int input_size);
-  void update_left_when_mapped(const int node, std::vector<int>& count_mapped_left, const std::vector<int>& parent,
-      const std::vector<int>& rl, const std::vector<int>& size, const std::vector<int>& post_to_pre,
-      const int input_size);
-  
-  bool if_in_corresponding_regions(int t1_begin_gap, int i, int t1_end_gap, int t2_begin_gap, int j, int t2_end_gap);
-  
-  std::vector<std::pair<int, int>> fill_gaps_in_mapping(std::vector<std::pair<int, int>>& mapping, const int k);
-
-
+  std::vector<std::pair<int, int>> to_ted_mapping(
+      const std::vector<std::pair<int, int>>& mapping) const;
+  /// Updates mapped descendants and nodes to the left counters when node is
+  /// not mapped.
+  void update_desc_and_left_when_not_mapped(const int node,
+      std::vector<int>& count_mapped_desc, std::vector<int>& count_mapped_left,
+      const std::vector<int>& parent, const std::vector<int>& rl,
+      const std::vector<int>& size, const std::vector<int>& post_to_pre,
+      const int input_size) const;
+  /// Updates mapped descendants and nodes to the left counters when node is
+  /// mapped.
+  void update_desc_and_left_when_mapped(const int node,
+      std::vector<int>& count_mapped_desc, std::vector<int>& count_mapped_left,
+      const std::vector<int>& parent, const std::vector<int>& rl,
+      const std::vector<int>& size, const std::vector<int>& post_to_pre,
+      const int input_size) const;
+  /// Verifies if nodes i and j are in the corresponding regions with respect
+  /// to the beginnings and ends of the gaps.
+  /// Used in fill_gaps_in_mapping.
+  bool if_in_corresponding_regions(int t1_begin_gap, int i, int t1_end_gap,
+      int t2_begin_gap, int j, int t2_end_gap) const;
+  /// Given a TED mapping (in our scenario, nodes with equal labels are mapped),
+  /// fills in the gaps in mappings if possible.
+  /// Only nodes that satisfy the similarity threshold k are mapped.
+  /// The labels are disregarded here. The goal is to add possibly many pairs.
+  /// The resulting mapping is a TED mapping.
+  ///
+  /// \param mapping A TED mapping with possibly some gaps to fill in.
+  /// \param k Similarity threshold.
+  /// \result A TED mapping, with possibly more pairs than in mapping. 
+  std::vector<std::pair<int, int>> fill_gaps_in_mapping(
+      std::vector<std::pair<int, int>>& mapping, const int k) const;
   /// Resets and initialises algorithm's internal data structures and constants.
   /// Has to be called before computing the distance.
   ///

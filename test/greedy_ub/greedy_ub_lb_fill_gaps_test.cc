@@ -78,7 +78,7 @@ int main() {
 
       std::string computed_results;
       try {
-        computed_results = vector_to_string(greedy_ub.lb_mapping(t1, t2, k));
+        computed_results = vector_to_string(greedy_ub.lb_mapping_fill_gaps(t1, t2, k));
       } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
       }

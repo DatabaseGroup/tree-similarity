@@ -155,7 +155,7 @@ int single_test_case(TestParams& tp, TestInput& ti) {
       runtime.reset();
       runtime.start();
       // std::vector<std::pair<int, int>> m = greedy_ub.lb_mapping(t1, t2, 7);
-      std::vector<std::pair<int, int>> m = greedy_ub.lb_mapping(t1, t2, ti.k);
+      std::vector<std::pair<int, int>> m = greedy_ub.lb_mapping_fill_gaps(t1, t2, ti.k);
       computed_result = greedy_ub.mapping_cost(m);//touzet_ted.touzet_ted_kr_set(t1, t2, ti.k);
       runtime.stop();
       std::cout << "GREEDY_UB" << std::endl;
@@ -234,6 +234,7 @@ int main(int argc, char** argv) {
   std::cout << "lower_than_threshold = " << tp.lower_than_threshold << std::endl;
   std::cout << "alg_touzet_ted_kr_set = " << tp.alg_touzet_ted_kr_set << std::endl;
   std::cout << "alg_zs_ted = " << tp.alg_zs_ted << std::endl;
+  std::cout << "alg_greedy_ub = " << tp.alg_greedy_ub << std::endl;
   
   std::ifstream test_cases_file;
   if (tp.input_file != "") {

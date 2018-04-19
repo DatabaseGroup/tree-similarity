@@ -84,7 +84,9 @@ int main() {
       node::Node<Label> t1 = bnp.parse_single(input_tree_1_string);
 
       // Execute the algorithm to perform node indexing.
-      greedy_ub.greedy_mapping(t1, t1);
+      // The k-value does not matter for this test - this tests the correctness
+      // of an index only.
+      greedy_ub.lb_mapping(t1, t1, 1);
 
       auto greedy_ub_test_items = greedy_ub.get_test_items();
       auto label_il = greedy_ub_test_items.t1_label_il;
