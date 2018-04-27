@@ -58,3 +58,13 @@
 {p. mitterhofer str.{1}{2}}
 7
 {(2,1),(6,2)}
+# bozen pair (474404, 474405) [simplified, k must be large enough to allow all mappings]
+{art{key{1}}{aut{2}}{tit{3}{sub{4}}}{yea{5}}}
+{art{key{11}}{aut{22}}{aut{33}}{tit{44}{sub{55}}}{yea{66}}}
+6
+{(0,0),(1,1),(2,2),(3,3),(4,6),(5,7),(6,8),(7,9),(8,10),(9,11),(10,12)}
+# bozen pair (65, 66) - single label
+{o{o{o{o}{o}}}{o}{o{o}{o}}{o{o{o}{o}}}{o}{o}{o}{o{o}{o}}{o}}
+{o{o}{o{o{o}{o}{o}{o}{o}{o}{o}{o}{o}}}{o{o{o}{o}}}{o{o{o}}}}
+10
+{(0,0),(1,1),(4,4),(5,5),(6,6),(8,8),(9,9),(12,13),(14,16),(19,19)}

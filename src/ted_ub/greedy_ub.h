@@ -47,6 +47,7 @@ public:
   struct TestItems {
     const std::unordered_map<std::string, std::list<int>>& t1_label_il;
     const std::vector<int>& t1_post_to_pre;
+    const std::vector<int>& t1_pre_to_post;
     const std::vector<int>& t1_parent;
     const std::vector<int>& t1_rl;
     const std::vector<int>& t1_depth;
@@ -69,7 +70,7 @@ public:
   ///         similarity_threshold, and std::numeric_limits<double>::infinity()
   ///         otherwise.
   double verify(const node::Node<Label>& t1, const node::Node<Label>& t2,
-      double similarity_threshold) const;
+      double similarity_threshold);
   /// Calculates the unit cost of passed mapping.
   ///
   /// NOTE: The greedy_ub algorithm assumes unit cost. However, this function
@@ -134,6 +135,10 @@ private:
   std::vector<int> t1_post_to_pre_;
   /// Stores preorder id of each node in the source tree. Indexed in postorder.
   std::vector<int> t2_post_to_pre_;
+  /// Stores postorder id of each node in the source tree. Indexed in preorder.
+  std::vector<int> t1_pre_to_post_;
+  /// Stores postorder id of each node in the destination tree. Indexed in preorder.
+  std::vector<int> t2_pre_to_post_;
   /// Stores the postorder id of the parent for each node of the source
   /// tree. '-1' represents no parent.
   /// Indexed in postorder ids starting with 0.
@@ -203,6 +208,20 @@ private:
       const std::vector<int>& parent, const std::vector<int>& rl,
       const std::vector<int>& size, const std::vector<int>& post_to_pre,
       const int input_size) const;
+  /// Reads a TED mapping and counts for each node the number of its mapped
+  /// ancestors. Stores the values in the passed vectors.
+  ///
+  /// NOTE: Requires mapping to be TED mapping sorted on postorder ids.
+  /// NOTE: Requires linear time in both tree size.
+  ///
+  /// TODO: Maybe there is a better way of doing it.
+  ///
+  /// \param mapping
+  /// \param t1_count_mapped_anc
+  /// \param t2_count_mapped_anc
+  void get_mapped_ancestors_counts(std::vector<std::pair<int, int>>& mapping,
+      std::vector<int>& t1_count_mapped_anc,
+      std::vector<int>& t2_count_mapped_anc) const;
   /// Verifies if nodes i and j are in the corresponding regions with respect
   /// to the beginnings and ends of the gaps.
   /// Used in fill_gaps_in_mapping.
@@ -237,6 +256,7 @@ private:
                    std::unordered_map<std::string, std::list<int>>& label_il,
                    std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
                    std::vector<int>& post_to_pre,
+                   std::vector<int>& pre_to_post,
                    std::vector<int>& parent,
                    std::vector<int>& depth,
                    std::vector<int>& size);
@@ -253,6 +273,7 @@ private:
                              std::unordered_map<std::string, std::list<int>>& label_il,
                              std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
                              std::vector<int>& post_to_pre,
+                             std::vector<int>& pre_to_post,
                              std::vector<int>& parent,
                              std::vector<int>& depth,
                              std::vector<int>& size,
