@@ -6,6 +6,7 @@ set(greedy_ub_test_list
   greedy_ub_lb_mapping_test
   greedy_ub_lb_fill_gaps_test
   greedy_ub_post_to_pre_test
+  greedy_ub_pre_to_post_test
   greedy_ub_parent_test
   greedy_ub_rl_test
   greedy_ub_depth_test

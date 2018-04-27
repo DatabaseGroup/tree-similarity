@@ -32,7 +32,7 @@ GreedyUB<Label, CostModel>::GreedyUB() : c_() {}
 
 template <typename Label, typename CostModel>
 double GreedyUB<Label, CostModel>::verify(const node::Node<Label>& t1,
-    const node::Node<Label>& t2, double similarity_threshold) const {
+    const node::Node<Label>& t2, double similarity_threshold) {
   double cost = mapping_cost(lb_mapping_fill_gaps(t1, t2, similarity_threshold));
   if (cost <= static_cast <int> (std::ceil(similarity_threshold))) {
     return cost;
@@ -71,7 +71,16 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::lb_mapping(
       ++cand_it;
     }
   }
+  // // Print intermediate mappings.
+  // std::cout << "lb_mapping : ";
+  // for (auto m : mapping) {
+  //   std::cout << "(" << m.first << "," << m.second << ") ";
+  // } std::cout << std::endl;
   mapping = to_ted_mapping(mapping);
+  // std::cout << "to_ted_mapping : ";
+  // for (auto m : mapping) {
+  //   std::cout << "(" << m.first << "," << m.second << ") ";
+  // } std::cout << std::endl;
   return mapping;
 };
 
@@ -80,6 +89,13 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::lb_mapping_fill_gap
     const node::Node<Label>& t1, const node::Node<Label>& t2, const int k) {
   std::vector<std::pair<int, int>> mapping = lb_mapping(t1, t2, k);
   mapping = fill_gaps_in_mapping(mapping, k);
+  
+  // // Pring final mapping.
+  // std::cout << "lb_mapping_fill_gaps : ";
+  // for (auto m : mapping) {
+  //   std::cout << "(" << m.first << "," << m.second << ") ";
+  // } std::cout << std::endl;
+  
   return mapping;
 };
 
@@ -131,6 +147,40 @@ void GreedyUB<Label, CostModel>::update_desc_and_left_when_mapped(
       count_mapped_left[parent[node]] = count_mapped_left[node];
     }
   }
+};
+
+template <typename Label, typename CostModel>
+void GreedyUB<Label, CostModel>::get_mapped_ancestors_counts(
+    std::vector<std::pair<int, int>>& mapping,
+    std::vector<int>& t1_count_mapped_anc,
+    std::vector<int>& t2_count_mapped_anc) const {
+  std::vector<int> t1_mapped_nodes(t1_input_size_); // indexed in postorder
+  std::vector<int> t2_mapped_nodes(t2_input_size_); // indexed in postorder
+  for (auto m : mapping) {
+    t1_mapped_nodes[m.first] = 1;
+    t2_mapped_nodes[m.second] = 1;
+  }
+  int i_in_post = 0;
+  // T1
+  for (int i = 1; i < t1_input_size_; ++i) { // loop in preorder; root has no parent and 0 mapped ancestors
+    i_in_post = t1_pre_to_post_[i];
+    t1_count_mapped_anc[i_in_post] = t1_mapped_nodes[t1_parent_[i_in_post]];
+    t1_mapped_nodes[i_in_post] += t1_mapped_nodes[t1_parent_[i_in_post]];
+  }
+  // std::cout << "t1_count_mapped_anc : ";
+  // for (auto e : t1_count_mapped_anc) {
+  //   std::cout << e << " ";
+  // } std::cout << std::endl;
+  // T2
+  for (int i = 1; i < t2_input_size_; ++i) { // loop in preorder; root has no parent and 0 mapped ancestors
+    i_in_post = t2_pre_to_post_[i];
+    t2_count_mapped_anc[i_in_post] = t2_mapped_nodes[t2_parent_[i_in_post]];
+    t2_mapped_nodes[i_in_post] += t2_mapped_nodes[t2_parent_[i_in_post]];
+  }
+  // std::cout << "t2_count_mapped_anc : ";
+  // for (auto e : t2_count_mapped_anc) {
+  //   std::cout << e << " ";
+  // } std::cout << std::endl;
 };
 
 template <typename Label, typename CostModel>
@@ -205,6 +255,11 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::fill_gaps_in_mappin
   std::vector<int> t2_count_mapped_desc(t2_input_size_);
   std::vector<int> t1_count_mapped_left(t1_input_size_);
   std::vector<int> t2_count_mapped_left(t2_input_size_);
+    
+  // The counts for mapped ancestors.
+  std::vector<int> t1_count_mapped_anc(t1_input_size_);
+  std::vector<int> t2_count_mapped_anc(t2_input_size_);
+  get_mapped_ancestors_counts(mapping, t1_count_mapped_anc, t2_count_mapped_anc);
   
   std::pair<int, int> begin_gap = {-1, -1};
   
@@ -260,7 +315,8 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::fill_gaps_in_mappin
     while (i <= i_last && j <= j_last) {
       if (k_relevant(i, j, k) &&
           (t1_count_mapped_desc[i] == t2_count_mapped_desc[j] &&
-          t1_count_mapped_left[i] == t2_count_mapped_left[j]) &&
+          t1_count_mapped_left[i] == t2_count_mapped_left[j] &&
+          t1_count_mapped_anc[i] == t2_count_mapped_anc[j]) &&
           if_in_corresponding_regions(last_mapped.first, i, end_gap.first, last_mapped.second, j, end_gap.second)) {
         // Map (i,j) + push to result mapping + update counts for both nodes
         // incremented as mapped.
@@ -348,6 +404,11 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::to_ted_mapping(
     // The pairs in the input one-to-one mapping are sorted on the first
     // element. The second elements of two consecutive pairs must not have
     // decreasing postorder ids.
+    // NOTE: Non-decreasing ids of second elements could be ensured in lb_mapping.
+    //       But, this will reduce the number of initially mapped node which may not be
+    //       desired. For example, if given M=<(a,b),(a+1,b+2),(a+2,b+1)>, (a+1,b+2) is
+    //       removed due to violating TED conditions, (a+2,b+1) would may still be valid, and
+    //       have a lower cost than (a+1,b+1) possible from filling gaps.
     if (cur_t2 < prev_t2) {
       continue;
     }
@@ -446,6 +507,7 @@ int GreedyUB<Label, CostModel>::index_nodes_recursion(
     std::unordered_map<std::string, std::list<int>>& label_il,
     std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
     std::vector<int>& post_to_pre,
+    std::vector<int>& pre_to_post,
     std::vector<int>& parent,
     std::vector<int>& depth,
     std::vector<int>& size,
@@ -470,6 +532,7 @@ int GreedyUB<Label, CostModel>::index_nodes_recursion(
   auto children_end_it = std::end(node.get_children());
   while (children_start_it != children_end_it) {
     desc_sum += index_nodes_recursion(*children_start_it, label_il, nodes, post_to_pre,
+                          pre_to_post,
                           parent, depth, size, start_postorder, start_preorder,
                           start_depth + 1);
     // Here, start_postorder-1 is the postorder of the current child.
@@ -508,6 +571,9 @@ int GreedyUB<Label, CostModel>::index_nodes_recursion(
   // Store postorder to preorder translation.
   post_to_pre.push_back(current_preorder);
   
+  // Store preorder to postorder translation.
+  pre_to_post[current_preorder] = start_postorder;
+  
   // Increment start_postorder for the consecutive node in postorder have the
   // correct id.
   ++start_postorder;
@@ -522,6 +588,7 @@ void GreedyUB<Label, CostModel>::index_nodes(
     std::unordered_map<std::string, std::list<int>>& label_il,
     std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
     std::vector<int>& post_to_pre,
+    std::vector<int>& pre_to_post,
     std::vector<int>& parent,
     std::vector<int>& depth,
     std::vector<int>& size) {
@@ -531,7 +598,7 @@ void GreedyUB<Label, CostModel>::index_nodes(
   //       move the template traversal with postorder and preorder to some notes
   //       of how to traverse trees.
   int start_preorder = 0;
-  index_nodes_recursion(root, label_il, nodes, post_to_pre, parent, depth, size, start_postorder, start_preorder, 0);
+  index_nodes_recursion(root, label_il, nodes, post_to_pre, pre_to_post, parent, depth, size, start_postorder, start_preorder, 0);
   // Here, start_postorder and start_preorder store the size of tree minus 1.
 };
 
@@ -558,6 +625,8 @@ void GreedyUB<Label, CostModel>::init(const node::Node<Label>& t1,
   t2_node_.clear();
   t1_post_to_pre_.clear();
   t2_post_to_pre_.clear();
+  t1_pre_to_post_.clear();
+  t2_pre_to_post_.clear();
   t1_label_il_.clear();
   t2_label_il_.clear();
   t1_parent_.clear();
@@ -571,11 +640,16 @@ void GreedyUB<Label, CostModel>::init(const node::Node<Label>& t1,
   
   // TODO: Do not call get_tree_size() that causes an additional tree traversal.
   //       Index subtree sizes instead - they'll be used anyways.
+  // TODO: Getting tree size first makes things easier while indexing nodes.
+  //       If the size is known upfront it could be immediately assigned.
   t1_input_size_ = t1.get_tree_size();
   t2_input_size_ = t2.get_tree_size();
   
-  index_nodes(t1, t1_label_il_, t1_node_, t1_post_to_pre_, t1_parent_, t1_depth_, t1_size_);
-  index_nodes(t2, t2_label_il_, t2_node_, t2_post_to_pre_, t2_parent_, t2_depth_, t2_size_);
+  t1_pre_to_post_.resize(t1_input_size_);
+  t2_pre_to_post_.resize(t2_input_size_);
+  
+  index_nodes(t1, t1_label_il_, t1_node_, t1_post_to_pre_, t1_pre_to_post_, t1_parent_, t1_depth_, t1_size_);
+  index_nodes(t2, t2_label_il_, t2_node_, t2_post_to_pre_, t2_pre_to_post_, t2_parent_, t2_depth_, t2_size_);
   
   t1_rl_.resize(t1_input_size_);
   t2_rl_.resize(t2_input_size_);
@@ -615,6 +689,7 @@ const typename GreedyUB<Label, CostModel>::TestItems GreedyUB<Label, CostModel>:
   TestItems test_items = {
     t1_label_il_,
     t1_post_to_pre_,
+    t1_pre_to_post_,
     t1_parent_,
     t1_rl_,
     t1_depth_,
