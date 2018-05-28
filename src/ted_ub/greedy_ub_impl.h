@@ -88,7 +88,7 @@ template <typename Label, typename CostModel>
 std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::lb_mapping_fill_gaps(
     const node::Node<Label>& t1, const node::Node<Label>& t2, const int k) {
   std::vector<std::pair<int, int>> mapping = lb_mapping(t1, t2, k);
-  mapping = fill_gaps_in_mapping(mapping, k);
+  mapping = fill_gaps_in_mapping_no_left(mapping, k);
   
   // // Pring final mapping.
   // std::cout << "lb_mapping_fill_gaps : ";
@@ -97,6 +97,28 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::lb_mapping_fill_gap
   // } std::cout << std::endl;
   
   return mapping;
+};
+
+template <typename Label, typename CostModel>
+void GreedyUB<Label, CostModel>::update_desc_when_not_mapped(
+    const int node, std::vector<int>& count_mapped_desc,
+    const std::vector<int>& parent, const int input_size) const {
+  if (node < input_size - 1) { // Root has no parent nor the right leaf, and
+                               // the nodes of dummy mapping in fill_gaps_in_mapping
+                               // do not exist.
+    count_mapped_desc[parent[node]] += count_mapped_desc[node];
+  }
+};
+
+template <typename Label, typename CostModel>
+void GreedyUB<Label, CostModel>::update_desc_when_mapped(
+    const int node, std::vector<int>& count_mapped_desc,
+    const std::vector<int>& parent, const int input_size) const {
+  if (node < input_size - 1) { // Root has no parent nor the right leaf, and
+                               // the nodes of dummy mapping in fill_gaps_in_mapping
+                               // do not exist.
+    count_mapped_desc[parent[node]] += count_mapped_desc[node] + 1;
+  }
 };
 
 template <typename Label, typename CostModel>
@@ -243,6 +265,130 @@ bool GreedyUB<Label, CostModel>::if_in_corresponding_regions(int t1_begin_gap,
   }
   
   return false;
+};
+
+template <typename Label, typename CostModel>
+std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::fill_gaps_in_mapping_no_left(
+    std::vector<std::pair<int, int>>& mapping, const int k) const {
+  
+  // In result_mapping we store the output of this function.
+  std::vector<std::pair<int, int>> result_mapping;
+  
+  // The counts for mapped descendants and nodes to the left must be maintained.
+  std::vector<int> t1_count_mapped_desc(t1_input_size_);
+  std::vector<int> t2_count_mapped_desc(t2_input_size_);
+    
+  // The counts for mapped ancestors.
+  std::vector<int> t1_count_mapped_anc(t1_input_size_);
+  std::vector<int> t2_count_mapped_anc(t2_input_size_);
+  get_mapped_ancestors_counts(mapping, t1_count_mapped_anc, t2_count_mapped_anc);
+  
+  // Add a dummy mapping pair to cover the gap from the last mapping until the
+  // ends of the trees.
+  mapping.push_back({t1_input_size_, t2_input_size_});
+  
+  std::pair<int, int> begin_gap = {-1, -1};
+  std::pair<int, int> end_gap;
+  std::vector<std::pair<int, int>>::iterator end_gap_it = mapping.begin();
+  
+  while (end_gap_it != mapping.end()) {
+    end_gap = *end_gap_it;
+    
+    // If there is no gap, continue with the next mapped pair.
+    if (end_gap.first - begin_gap.first == 1 || end_gap.second - begin_gap.second == 1) {
+      // Update the counts for nodes between begin_gap and end_gap, if any,
+      // as not-mapped nodes.
+      if (end_gap.first - begin_gap.first > 1) { // There is a gap between first elements.
+        for (int not_mapped_first = begin_gap.first + 1; not_mapped_first < end_gap.first; ++not_mapped_first) {
+          update_desc_when_not_mapped(not_mapped_first, t1_count_mapped_desc, t1_parent_, t1_input_size_);
+        }
+      }
+      // Update the counts for nodes in end_gap as mapped nodes.
+      update_desc_when_mapped(end_gap.first, t1_count_mapped_desc, t1_parent_, t1_input_size_);
+      
+      // Update the counts for nodes between begin_gap and end_gap, if any,
+      // as not-mapped nodes.
+      if (end_gap.second - begin_gap.second > 1) { // There is a gap only between second elements.
+        for (int not_mapped_second = begin_gap.second + 1; not_mapped_second < end_gap.second; ++not_mapped_second) {
+          update_desc_when_not_mapped(not_mapped_second, t2_count_mapped_desc, t2_parent_, t2_input_size_);
+        }
+      }
+      // Update the counts for nodes in end_gap as mapped nodes.
+      update_desc_when_mapped(end_gap.second, t2_count_mapped_desc, t2_parent_, t2_input_size_);
+      
+      // Push the end of the current gap to the result.
+      result_mapping.push_back(end_gap);    
+      // Update the begin of the next gap.
+      begin_gap = end_gap;
+      ++end_gap_it;
+      continue;
+    }
+    
+    // There is a gap --> try to map nodes --> at the first node pair mapped,
+    // change the gap and continue the loop.
+
+    int i = begin_gap.first + 1;
+    int i_last = end_gap.first - 1;
+    int j = begin_gap.second + 1;
+    int j_last = end_gap.second - 1;
+    // std::pair<int, int> last_mapped = begin_gap;
+    bool mapped_in_gap = false;
+    while (i <= i_last && j <= j_last) {
+      if (k_relevant(i, j, k) &&
+          (t1_count_mapped_desc[i] == t2_count_mapped_desc[j] &&
+          t1_count_mapped_anc[i] == t2_count_mapped_anc[j]) &&
+          if_in_corresponding_regions(begin_gap.first, i, end_gap.first, begin_gap.second, j, end_gap.second)) {
+        // Map (i,j) + push to result mapping + update counts for both nodes
+        // incremented as mapped.
+        update_desc_when_mapped(i, t1_count_mapped_desc, t1_parent_, t1_input_size_);
+        update_desc_when_mapped(j, t2_count_mapped_desc, t2_parent_, t2_input_size_);
+        result_mapping.push_back({i, j});
+        // last_mapped = {i, j};
+        begin_gap = {i, j};
+        mapped_in_gap = true;
+        break;
+      } else {
+        // Update counts for the incremented node as non-mapped.
+        if (i_last - i > j_last - j) {
+          update_desc_when_not_mapped(i, t1_count_mapped_desc, t1_parent_, t1_input_size_);
+          ++i;
+        } else {
+          update_desc_when_not_mapped(j, t2_count_mapped_desc, t2_parent_, t2_input_size_);
+          ++j;
+        }
+      }
+    }
+    if (mapped_in_gap) {
+      continue;
+    } else {
+      // Check the case when only one of i or j incremented beyond the limit.
+      // The gap in one of the trees has been used up.
+      // Nothing mapped in gap.
+      if (i_last - i < 0 && j_last - j >= 0) {
+        for (int j_missing = j; j_missing <= j_last; ++j_missing) {
+          update_desc_when_not_mapped(j, t2_count_mapped_desc, t2_parent_, t2_input_size_);
+        }
+      }
+      if (j_last - j < 0 && i_last - i >= 0) {
+        for (int i_missing = i; i_missing <= i_last; ++i_missing) {
+          update_desc_when_not_mapped(i, t1_count_mapped_desc, t1_parent_, t1_input_size_);
+        }
+      }
+      // Update the counts for nodes in end_gap as mapped nodes.
+      update_desc_when_mapped(end_gap.first, t1_count_mapped_desc, t1_parent_, t1_input_size_);
+      update_desc_when_mapped(end_gap.second, t2_count_mapped_desc, t2_parent_, t2_input_size_);
+      // Push the end of the current gap to the result.
+      result_mapping.push_back(end_gap);
+      // Update the begin of the next gap.
+      begin_gap = end_gap;
+      ++end_gap_it;
+      continue;
+    }
+  }
+    
+  // Remove the last dummy mapping.
+  result_mapping.pop_back();
+  return result_mapping;
 };
 
 template <typename Label, typename CostModel>
@@ -455,10 +601,11 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::to_ted_mapping(
     if (t1_count_mapped_desc[cur_t1] != t2_count_mapped_desc[cur_t2]) {
       continue;
     }
-    // Mapped nodes to the left test.
-    if (t1_count_mapped_left[cur_t1] != t2_count_mapped_left[cur_t2]) {
-      continue;
-    }
+    // NOTE: COMMENTED OUT FOR TESTING.
+    // // Mapped nodes to the left test.
+    // if (t1_count_mapped_left[cur_t1] != t2_count_mapped_left[cur_t2]) {
+    //   continue;
+    // }
     
     // Mapped node in T1.
     if (!mapped_t1_node_processed) {

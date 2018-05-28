@@ -159,6 +159,11 @@ int single_test_case(TestParams& tp, TestInput& ti) {
       computed_result = greedy_ub.mapping_cost(m);//touzet_ted.touzet_ted_kr_set(t1, t2, ti.k);
       runtime.stop();
       std::cout << "GREEDY_UB" << std::endl;
+      std::cout << "   m : ";
+      for (auto e : m) {
+        std::cout << "(" << e.first << "," << e.second << ") ";
+      }
+      std::cout << std::endl;
       std::cout << " ted : " << computed_result << std::endl;
       std::cout << "time : " << runtime.getfloat() << std::endl;
       // if (compare_results(computed_result, expected_result, tp) < 0) {

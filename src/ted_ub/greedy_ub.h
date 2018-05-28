@@ -194,6 +194,14 @@ private:
   /// \return A revised mapping that is a valid TED mapping.
   std::vector<std::pair<int, int>> to_ted_mapping(
       const std::vector<std::pair<int, int>>& mapping) const;
+  /// Updates mapped descendants counters when node is not mapped.
+  void update_desc_when_not_mapped(const int node,
+      std::vector<int>& count_mapped_desc, const std::vector<int>& parent,
+      const int input_size) const;
+  /// Updates mapped descendants counters when node is mapped.
+  void update_desc_when_mapped(const int node,
+      std::vector<int>& count_mapped_desc, const std::vector<int>& parent,
+      const int input_size) const;
   /// Updates mapped descendants and nodes to the left counters when node is
   /// not mapped.
   void update_desc_and_left_when_not_mapped(const int node,
@@ -237,6 +245,8 @@ private:
   /// \param k Similarity threshold.
   /// \result A TED mapping, with possibly more pairs than in mapping. 
   std::vector<std::pair<int, int>> fill_gaps_in_mapping(
+      std::vector<std::pair<int, int>>& mapping, const int k) const;
+  std::vector<std::pair<int, int>> fill_gaps_in_mapping_no_left(
       std::vector<std::pair<int, int>>& mapping, const int k) const;
   /// Resets and initialises algorithm's internal data structures and constants.
   /// Has to be called before computing the distance.
