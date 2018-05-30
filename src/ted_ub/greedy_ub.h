@@ -35,6 +35,7 @@
 #include <unordered_map>
 #include <memory>
 #include "node.h"
+#include "label_dictionary.h"
 #include <iostream>
 
 namespace ted_ub {
@@ -45,13 +46,14 @@ class GreedyUB {
 public:
   /// Holds internal items of the algorithms that are tested for correctness.
   struct TestItems {
-    const std::unordered_map<std::string, std::list<int>>& t1_label_il;
+    const std::vector<std::vector<int>>& t1_label_il;
     const std::vector<int>& t1_post_to_pre;
     const std::vector<int>& t1_pre_to_post;
     const std::vector<int>& t1_parent;
     const std::vector<int>& t1_rl;
     const std::vector<int>& t1_depth;
     const std::vector<int>& t1_size;
+    const label::LabelDictionary<Label>& dict;
   };
 // Member functions.
 public:
@@ -167,16 +169,27 @@ private:
   /// Stores the subtree size for each node of the destination tree.
   /// Indexed in postorder ids starting with 0.
   std::vector<int> t2_size_;
-  /// For each laebl in the source tree, stores postorder ids of nodes that
+  /// For each label in the source tree, stores postorder ids of nodes that
   /// carry it (the list is sorted in postorder).
-  /// NOTE: Key should be of type Label - requires modifying implementation of
-  ///       Label. It has to be hashable.
-  std::unordered_map<std::string, std::list<int>> t1_label_il_;
-  /// For each laebl in the destination tree, stores postorder ids of nodes that
-  /// carry it (the list is sorted in postorder).
-  /// NOTE: Key should be of type Label - requires modifying implementation of
-  ///       Label. It has to be hashable.
-  std::unordered_map<std::string, std::list<int>> t2_label_il_;
+  ///
+  /// The inverted list is a vector because we use LabelDictionary to assign
+  /// labels ids. Then, we know how many different labels are there. The size
+  /// of this vector in the works case is the sum of input trees sizes.
+  ///
+  /// The postorder ids of nodes carrying a specific label are stored in a
+  /// vector. We can do this because instead of removing the mapped node from
+  /// a list, we mark it as mapped (using '-1').
+  std::vector<std::vector<int>> t1_label_il_;
+  /// See t1_label_il_.
+  std::vector<std::vector<int>> t2_label_il_;
+  /// Stores Label to int id translation of all labels in both input trees.
+  label::LabelDictionary<Label> dict_;
+  
+  std::vector<int> t1_label_;
+  std::vector<int> t2_label_;
+  
+  std::vector<int> t2_label_il_start_pos_;
+  
   /// Cost model.
   const CostModel c_;
 // Member functions.
@@ -263,13 +276,14 @@ private:
   /// \param nodes Vector of postorder ids to references to nodes.
   /// \param post_to_pre Translation vector from postorder to preorder id.
   void index_nodes(const node::Node<Label>& root,
-                   std::unordered_map<std::string, std::list<int>>& label_il,
+                   std::vector<std::vector<int>>& label_il,
                    std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
                    std::vector<int>& post_to_pre,
                    std::vector<int>& pre_to_post,
                    std::vector<int>& parent,
                    std::vector<int>& depth,
-                   std::vector<int>& size);
+                   std::vector<int>& size,
+                   std::vector<int>& label);
   /// Traverses an input tree rooted at root recursively and collects
   /// information into index structures.
   ///
@@ -280,13 +294,14 @@ private:
   /// \param start_postorder Stores the postorder id of a node during traversal.
   /// \param start_preorder Stores the preorder id of a node during traversal.
   int index_nodes_recursion(const node::Node<Label>& root,
-                             std::unordered_map<std::string, std::list<int>>& label_il,
+                             std::vector<std::vector<int>>& label_il,
                              std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
                              std::vector<int>& post_to_pre,
                              std::vector<int>& pre_to_post,
                              std::vector<int>& parent,
                              std::vector<int>& depth,
                              std::vector<int>& size,
+                             std::vector<int>& label,
                              int& start_postorder, int& start_preorder,
                              unsigned int start_depth);
   /// Collects the first leaf node to the right of every node of input tree.

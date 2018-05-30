@@ -57,18 +57,42 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::lb_mapping(
     const node::Node<Label>& t1, const node::Node<Label>& t2, const int k) {
   init(t1, t2);
   std::vector<std::pair<int, int>> mapping;
+  int cand_id = 0;
+  int start_pos = 0;
+  int end_pos = 0;
+  int pos = 0;
+  int t1_label_id = 0;
   for (int i = 0; i < t1_input_size_; ++i) { // Loop in postorder.
-    std::list<int>& candidate_ids = t2_label_il_[t1_node_[i].get().label().to_string()];
-    std::list<int>::iterator cand_it = candidate_ids.begin();
-    int cand_id = 0;
-    for ( ; cand_it != candidate_ids.end(); ) {
-      cand_id = *cand_it;
-      if (k_relevant(i, cand_id, k)) {
-        mapping.push_back({i, cand_id}); // postorder
-        cand_it = candidate_ids.erase(cand_it); // Assignment not needed due to break.
+    std::vector<int>& candidate_ids = t2_label_il_[t1_label_[i]];
+    // std::vector<int>::iterator cand_it = candidate_ids.begin();
+    // TODO: Use 2k+1 window.
+    t1_label_id = t1_label_[i];
+    start_pos = t2_label_il_start_pos_[t1_label_id];
+    end_pos = std::min(start_pos + 2 * k, (int)candidate_ids.size()-1);
+    pos = start_pos;
+    // for ( ; cand_it != candidate_ids.end(); ) {
+    while (pos <= end_pos) {
+      // cand_id = *cand_it;
+      cand_id = candidate_ids[pos];
+      if (cand_id - i > k) {
+        // We're certainly outside the window from the right side.
         break;
       }
-      ++cand_it;
+      if (cand_id == -1 || i - cand_id > k) {
+        // The label has been mapped or we're outside the window from the left side.
+        ++t2_label_il_start_pos_[t1_label_id];
+        ++pos;
+        continue;
+      }
+      if (k_relevant(i, cand_id, k)) {
+        // The pair can be mapped.
+        mapping.push_back({i, cand_id}); // postorder
+        // cand_it = candidate_ids.erase(cand_it); // Assignment not needed due to break.
+        candidate_ids[pos] = -1;
+        break;
+      }
+      // ++cand_it;
+      ++pos;
     }
   }
   // // Print intermediate mappings.
@@ -651,13 +675,14 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::to_ted_mapping(
 template <typename Label, typename CostModel>
 int GreedyUB<Label, CostModel>::index_nodes_recursion(
     const node::Node<Label>& node,
-    std::unordered_map<std::string, std::list<int>>& label_il,
+    std::vector<std::vector<int>>& label_il,
     std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
     std::vector<int>& post_to_pre,
     std::vector<int>& pre_to_post,
     std::vector<int>& parent,
     std::vector<int>& depth,
     std::vector<int>& size,
+    std::vector<int>& label,
     int& start_postorder,
     int& start_preorder,
     unsigned int start_depth) {
@@ -680,7 +705,7 @@ int GreedyUB<Label, CostModel>::index_nodes_recursion(
   while (children_start_it != children_end_it) {
     desc_sum += index_nodes_recursion(*children_start_it, label_il, nodes, post_to_pre,
                           pre_to_post,
-                          parent, depth, size, start_postorder, start_preorder,
+                          parent, depth, size, label, start_postorder, start_preorder,
                           start_depth + 1);
     // Here, start_postorder-1 is the postorder of the current child.
     // Collect children ids.
@@ -713,7 +738,10 @@ int GreedyUB<Label, CostModel>::index_nodes_recursion(
   nodes.push_back(std::ref(node));
   
   // Add current node postorder id to label inverted list.
-  label_il[node.label().to_string()].push_back(start_postorder);
+  // label_il[node.label().to_string()].push_back(start_postorder);
+  unsigned int label_id_in_dict = dict_.insert(node.label());
+  label_il[label_id_in_dict].push_back(start_postorder);
+  label.push_back(label_id_in_dict);
   
   // Store postorder to preorder translation.
   post_to_pre.push_back(current_preorder);
@@ -732,20 +760,21 @@ int GreedyUB<Label, CostModel>::index_nodes_recursion(
 template <typename Label, typename CostModel>
 void GreedyUB<Label, CostModel>::index_nodes(
     const node::Node<Label>& root,
-    std::unordered_map<std::string, std::list<int>>& label_il,
+    std::vector<std::vector<int>>& label_il,
     std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
     std::vector<int>& post_to_pre,
     std::vector<int>& pre_to_post,
     std::vector<int>& parent,
     std::vector<int>& depth,
-    std::vector<int>& size) {
+    std::vector<int>& size,
+    std::vector<int>& label) {
   // Orders start with '0'.
   int start_postorder = 0;
   // NOTE: Preorder is not used. Remove start_preorder. Or
   //       move the template traversal with postorder and preorder to some notes
   //       of how to traverse trees.
   int start_preorder = 0;
-  index_nodes_recursion(root, label_il, nodes, post_to_pre, pre_to_post, parent, depth, size, start_postorder, start_preorder, 0);
+  index_nodes_recursion(root, label_il, nodes, post_to_pre, pre_to_post, parent, depth, size, label, start_postorder, start_preorder, 0);
   // Here, start_postorder and start_preorder store the size of tree minus 1.
 };
 
@@ -784,6 +813,9 @@ void GreedyUB<Label, CostModel>::init(const node::Node<Label>& t1,
   t2_depth_.clear();
   t1_size_.clear();
   t2_size_.clear();
+  dict_.clear();
+  t1_label_.clear();
+  t2_label_.clear();
   
   // TODO: Do not call get_tree_size() that causes an additional tree traversal.
   //       Index subtree sizes instead - they'll be used anyways.
@@ -795,8 +827,14 @@ void GreedyUB<Label, CostModel>::init(const node::Node<Label>& t1,
   t1_pre_to_post_.resize(t1_input_size_);
   t2_pre_to_post_.resize(t2_input_size_);
   
-  index_nodes(t1, t1_label_il_, t1_node_, t1_post_to_pre_, t1_pre_to_post_, t1_parent_, t1_depth_, t1_size_);
-  index_nodes(t2, t2_label_il_, t2_node_, t2_post_to_pre_, t2_pre_to_post_, t2_parent_, t2_depth_, t2_size_);
+  // The size of the inverted list is at most sum of the input trees sizes.
+  t1_label_il_.resize(t1_input_size_ + t2_input_size_);
+  t2_label_il_.resize(t1_input_size_ + t2_input_size_);
+  
+  t2_label_il_start_pos_.resize(t1_input_size_ + t2_input_size_);
+  
+  index_nodes(t1, t1_label_il_, t1_node_, t1_post_to_pre_, t1_pre_to_post_, t1_parent_, t1_depth_, t1_size_, t1_label_);
+  index_nodes(t2, t2_label_il_, t2_node_, t2_post_to_pre_, t2_pre_to_post_, t2_parent_, t2_depth_, t2_size_, t2_label_);
   
   t1_rl_.resize(t1_input_size_);
   t2_rl_.resize(t2_input_size_);
@@ -841,6 +879,7 @@ const typename GreedyUB<Label, CostModel>::TestItems GreedyUB<Label, CostModel>:
     t1_rl_,
     t1_depth_,
     t1_size_,
+    dict_,
   };
   return test_items;
 };
