@@ -49,6 +49,11 @@ template<class Label>
 void LabelDictionary<Label>::clear() {
   dictionary_.clear();
   labels_count_ = 0;
-}
+};
+
+template<class Label>
+const unsigned int LabelDictionary<Label>::size() const {
+  return dictionary_.size();
+};
 
 #endif // TREE_SIMILARITY_LABEL_LABEL_DICTIONARY_IMPL_H

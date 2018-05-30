@@ -59,6 +59,8 @@ public:
   /// Removes all elements from the dictionary.
   /// Resets labels_count_ to 0;
   void clear();
+  
+  const unsigned int size() const;
 private:
   /// A hash map storing the labels.
   /// TODO: Write requirements for Label and update them in string_label.
