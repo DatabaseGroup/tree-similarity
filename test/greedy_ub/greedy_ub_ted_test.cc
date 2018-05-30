@@ -155,7 +155,29 @@ int single_test_case(TestParams& tp, TestInput& ti) {
       runtime.reset();
       runtime.start();
       // std::vector<std::pair<int, int>> m = greedy_ub.lb_mapping(t1, t2, 7);
-      std::vector<std::pair<int, int>> m = greedy_ub.lb_mapping_fill_gaps(t1, t2, ti.k);
+      std::vector<std::pair<int, int>> m = greedy_ub.lb_mapping_fill_gaps_deprecated(t1, t2, ti.k);
+      computed_result = greedy_ub.mapping_cost(m);//touzet_ted.touzet_ted_kr_set(t1, t2, ti.k);
+      runtime.stop();
+      std::cout << "GREEDY_UB_DEPRECATED" << std::endl;
+      std::cout << "   m : ";
+      for (auto e : m) {
+        std::cout << "(" << e.first << "," << e.second << ") ";
+      }
+      std::cout << std::endl;
+      std::cout << " ted : " << computed_result << std::endl;
+      std::cout << "time : " << runtime.getfloat() << std::endl;
+      if (computed_result < expected_result) {
+        communicate_result_error(computed_result, expected_result);
+        return -1;
+      }
+      // if (computed_result > expected_result) {
+      //   return 1;
+      // }
+      
+      runtime.reset();
+      runtime.start();
+      // std::vector<std::pair<int, int>> m = greedy_ub.lb_mapping(t1, t2, 7);
+      m = greedy_ub.lb_mapping_fill_gaps(t1, t2, ti.k);
       computed_result = greedy_ub.mapping_cost(m);//touzet_ted.touzet_ted_kr_set(t1, t2, ti.k);
       runtime.stop();
       std::cout << "GREEDY_UB" << std::endl;
@@ -166,16 +188,13 @@ int single_test_case(TestParams& tp, TestInput& ti) {
       std::cout << std::endl;
       std::cout << " ted : " << computed_result << std::endl;
       std::cout << "time : " << runtime.getfloat() << std::endl;
-      // if (compare_results(computed_result, expected_result, tp) < 0) {
-      //   return -1;
-      // }
       if (computed_result < expected_result) {
         communicate_result_error(computed_result, expected_result);
         return -1;
       }
       if (computed_result > expected_result) {
         return 1;
-      }      
+      }
     }
   } catch (const std::exception& e) {
     std::cerr << e.what() << std::endl;

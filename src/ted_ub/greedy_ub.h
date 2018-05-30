@@ -101,6 +101,10 @@ public:
   /// \result A TED mapping where only nodes with equal labels are matched.
   std::vector<std::pair<int, int>> lb_mapping(const node::Node<Label>& t1,
       const node::Node<Label>& t2, const int k);
+  /// Deprecated. Kept for experiments. Uses hashmap-based inverted list for
+  /// labels matching.
+  std::vector<std::pair<int, int>> lb_mapping_deprecated(const node::Node<Label>& t1,
+      const node::Node<Label>& t2, const int k);
   /// Computes a TED mapping where:
   /// - as many as possible nodes with equal labels are mapped,
   /// - as many nodes as possible are renamed,
@@ -108,13 +112,18 @@ public:
   ///
   /// NOTE: It has linear runtime complexity.
   ///
-  /// NOTE: Internally, it executes lb_mapping and fill_gaps_in_mapping.
+  /// NOTE: Internally, it executes lb_mapping_new and fill_gaps_in_mapping_no_left.
   ///
   /// \param t1 Source tree.
   /// \param t2 Destination tree.
   /// \param k Similarity threshold.
   /// \result A TED mapping with possibly many node pairs mapped.
   std::vector<std::pair<int, int>> lb_mapping_fill_gaps(
+      const node::Node<Label>& t1, const node::Node<Label>& t2, const int k);
+  /// Deprecated. Kept for experiments. Uses old filling gaps that have errors
+  /// and use number of mapped nodes to the left.
+  /// TODO: When deleted, delete also class fields and update node indexing.
+  std::vector<std::pair<int, int>> lb_mapping_fill_gaps_deprecated(
       const node::Node<Label>& t1, const node::Node<Label>& t2, const int k);
   /// Creates a TestItems object and returns it (by value).
   ///
@@ -182,14 +191,20 @@ private:
   std::vector<std::vector<int>> t1_label_il_;
   /// See t1_label_il_.
   std::vector<std::vector<int>> t2_label_il_;
+  /// For every label id, stores the starting position of traversing the
+  /// corresponding vector in t2_label_il_. Due to 2*k+1 window depending on
+  /// the postorder ids of two nodes that we try to match.
+  std::vector<int> t2_label_il_start_pos_;
   /// Stores Label to int id translation of all labels in both input trees.
   label::LabelDictionary<Label> dict_;
-  
+  /// Stores the label id from dict_ for each node of the source tree.
+  /// Indexed in postorder ids starting with 0.
   std::vector<int> t1_label_;
+  /// See t1_label_.
   std::vector<int> t2_label_;
-  
-  std::vector<int> t2_label_il_start_pos_;
-  
+  /// Deprecated. Kept for experiments. Old inverted list based on a hash map.
+  std::unordered_map<std::string, std::list<int>> t1_label_il_hash_;
+  std::unordered_map<std::string, std::list<int>> t2_label_il_hash_;
   /// Cost model.
   const CostModel c_;
 // Member functions.
@@ -259,7 +274,8 @@ private:
   /// \result A TED mapping, with possibly more pairs than in mapping. 
   std::vector<std::pair<int, int>> fill_gaps_in_mapping(
       std::vector<std::pair<int, int>>& mapping, const int k) const;
-  std::vector<std::pair<int, int>> fill_gaps_in_mapping_no_left(
+  /// Deprecated. Kept for experiments. 
+  std::vector<std::pair<int, int>> fill_gaps_in_mapping_deprecated(
       std::vector<std::pair<int, int>>& mapping, const int k) const;
   /// Resets and initialises algorithm's internal data structures and constants.
   /// Has to be called before computing the distance.
@@ -277,6 +293,7 @@ private:
   /// \param post_to_pre Translation vector from postorder to preorder id.
   void index_nodes(const node::Node<Label>& root,
                    std::vector<std::vector<int>>& label_il,
+                   std::unordered_map<std::string, std::list<int>>& label_il_hash,
                    std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
                    std::vector<int>& post_to_pre,
                    std::vector<int>& pre_to_post,
@@ -295,6 +312,7 @@ private:
   /// \param start_preorder Stores the preorder id of a node during traversal.
   int index_nodes_recursion(const node::Node<Label>& root,
                              std::vector<std::vector<int>>& label_il,
+                             std::unordered_map<std::string, std::list<int>>& label_il_hash,
                              std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
                              std::vector<int>& post_to_pre,
                              std::vector<int>& pre_to_post,
