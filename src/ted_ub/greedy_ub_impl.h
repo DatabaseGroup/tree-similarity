@@ -57,8 +57,50 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::lb_mapping(
     const node::Node<Label>& t1, const node::Node<Label>& t2, const int k) {
   init(t1, t2);
   std::vector<std::pair<int, int>> mapping;
+  int cand_id = 0;
+  int start_pos = 0;
+  int end_pos = 0;
+  int pos = 0;
+  int t1_label_id = 0;
   for (int i = 0; i < t1_input_size_; ++i) { // Loop in postorder.
-    std::list<int>& candidate_ids = t2_label_il_[t1_node_[i].get().label().to_string()];
+    std::vector<int>& candidate_ids = t2_label_il_[t1_label_[i]];
+    // Use 2k+1 window.
+    t1_label_id = t1_label_[i];
+    start_pos = t2_label_il_start_pos_[t1_label_id];
+    end_pos = std::min(start_pos + 2 * k, (int)candidate_ids.size()-1);
+    pos = start_pos;
+    while (pos <= end_pos) {
+      cand_id = candidate_ids[pos];
+      if (cand_id - i > k) {
+        // We're certainly outside the window from the right side.
+        break;
+      }
+      if (cand_id == -1 || i - cand_id > k) {
+        // The label has been mapped or we're outside the window from the left side.
+        ++t2_label_il_start_pos_[t1_label_id]; // For the consecutive i we don't need to start before.
+        ++pos;
+        continue;
+      }
+      if (k_relevant(i, cand_id, k)) {
+        // The pair can be mapped.
+        mapping.push_back({i, cand_id}); // postorder
+        candidate_ids[pos] = -1;
+        break;
+      }
+      ++pos;
+    }
+  }
+  mapping = to_ted_mapping(mapping);
+  return mapping;
+};
+
+template <typename Label, typename CostModel>
+std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::lb_mapping_deprecated(
+    const node::Node<Label>& t1, const node::Node<Label>& t2, const int k) {
+  init(t1, t2);
+  std::vector<std::pair<int, int>> mapping;
+  for (int i = 0; i < t1_input_size_; ++i) { // Loop in postorder.
+    std::list<int>& candidate_ids = t2_label_il_hash_[t1_node_[i].get().label().to_string()];
     std::list<int>::iterator cand_it = candidate_ids.begin();
     int cand_id = 0;
     for ( ; cand_it != candidate_ids.end(); ) {
@@ -71,16 +113,7 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::lb_mapping(
       ++cand_it;
     }
   }
-  // // Print intermediate mappings.
-  // std::cout << "lb_mapping : ";
-  // for (auto m : mapping) {
-  //   std::cout << "(" << m.first << "," << m.second << ") ";
-  // } std::cout << std::endl;
   mapping = to_ted_mapping(mapping);
-  // std::cout << "to_ted_mapping : ";
-  // for (auto m : mapping) {
-  //   std::cout << "(" << m.first << "," << m.second << ") ";
-  // } std::cout << std::endl;
   return mapping;
 };
 
@@ -89,14 +122,37 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::lb_mapping_fill_gap
     const node::Node<Label>& t1, const node::Node<Label>& t2, const int k) {
   std::vector<std::pair<int, int>> mapping = lb_mapping(t1, t2, k);
   mapping = fill_gaps_in_mapping(mapping, k);
-  
-  // // Pring final mapping.
-  // std::cout << "lb_mapping_fill_gaps : ";
-  // for (auto m : mapping) {
-  //   std::cout << "(" << m.first << "," << m.second << ") ";
-  // } std::cout << std::endl;
-  
   return mapping;
+};
+
+template <typename Label, typename CostModel>
+std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::lb_mapping_fill_gaps_deprecated(
+    const node::Node<Label>& t1, const node::Node<Label>& t2, const int k) {
+  std::vector<std::pair<int, int>> mapping = lb_mapping_deprecated(t1, t2, k);
+  mapping = fill_gaps_in_mapping_deprecated(mapping, k);
+  return mapping;
+};
+
+template <typename Label, typename CostModel>
+void GreedyUB<Label, CostModel>::update_desc_when_not_mapped(
+    const int node, std::vector<int>& count_mapped_desc,
+    const std::vector<int>& parent, const int input_size) const {
+  if (node < input_size - 1) { // Root has no parent nor the right leaf, and
+                               // the nodes of dummy mapping in fill_gaps_in_mapping
+                               // do not exist.
+    count_mapped_desc[parent[node]] += count_mapped_desc[node];
+  }
+};
+
+template <typename Label, typename CostModel>
+void GreedyUB<Label, CostModel>::update_desc_when_mapped(
+    const int node, std::vector<int>& count_mapped_desc,
+    const std::vector<int>& parent, const int input_size) const {
+  if (node < input_size - 1) { // Root has no parent nor the right leaf, and
+                               // the nodes of dummy mapping in fill_gaps_in_mapping
+                               // do not exist.
+    count_mapped_desc[parent[node]] += count_mapped_desc[node] + 1;
+  }
 };
 
 template <typename Label, typename CostModel>
@@ -246,7 +302,131 @@ bool GreedyUB<Label, CostModel>::if_in_corresponding_regions(int t1_begin_gap,
 };
 
 template <typename Label, typename CostModel>
-std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::fill_gaps_in_mapping(std::vector<std::pair<int, int>>& mapping,
+std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::fill_gaps_in_mapping(
+    std::vector<std::pair<int, int>>& mapping, const int k) const {
+  
+  // In result_mapping we store the output of this function.
+  std::vector<std::pair<int, int>> result_mapping;
+  
+  // The counts for mapped descendants and nodes to the left must be maintained.
+  std::vector<int> t1_count_mapped_desc(t1_input_size_);
+  std::vector<int> t2_count_mapped_desc(t2_input_size_);
+    
+  // The counts for mapped ancestors.
+  std::vector<int> t1_count_mapped_anc(t1_input_size_);
+  std::vector<int> t2_count_mapped_anc(t2_input_size_);
+  get_mapped_ancestors_counts(mapping, t1_count_mapped_anc, t2_count_mapped_anc);
+  
+  // Add a dummy mapping pair to cover the gap from the last mapping until the
+  // ends of the trees.
+  mapping.push_back({t1_input_size_, t2_input_size_});
+  
+  std::pair<int, int> begin_gap = {-1, -1};
+  std::pair<int, int> end_gap;
+  std::vector<std::pair<int, int>>::iterator end_gap_it = mapping.begin();
+  
+  while (end_gap_it != mapping.end()) {
+    end_gap = *end_gap_it;
+    
+    // If there is no gap, continue with the next mapped pair.
+    if (end_gap.first - begin_gap.first == 1 || end_gap.second - begin_gap.second == 1) {
+      // Update the counts for nodes between begin_gap and end_gap, if any,
+      // as not-mapped nodes.
+      if (end_gap.first - begin_gap.first > 1) { // There is a gap between first elements.
+        for (int not_mapped_first = begin_gap.first + 1; not_mapped_first < end_gap.first; ++not_mapped_first) {
+          update_desc_when_not_mapped(not_mapped_first, t1_count_mapped_desc, t1_parent_, t1_input_size_);
+        }
+      }
+      // Update the counts for nodes in end_gap as mapped nodes.
+      update_desc_when_mapped(end_gap.first, t1_count_mapped_desc, t1_parent_, t1_input_size_);
+      
+      // Update the counts for nodes between begin_gap and end_gap, if any,
+      // as not-mapped nodes.
+      if (end_gap.second - begin_gap.second > 1) { // There is a gap only between second elements.
+        for (int not_mapped_second = begin_gap.second + 1; not_mapped_second < end_gap.second; ++not_mapped_second) {
+          update_desc_when_not_mapped(not_mapped_second, t2_count_mapped_desc, t2_parent_, t2_input_size_);
+        }
+      }
+      // Update the counts for nodes in end_gap as mapped nodes.
+      update_desc_when_mapped(end_gap.second, t2_count_mapped_desc, t2_parent_, t2_input_size_);
+      
+      // Push the end of the current gap to the result.
+      result_mapping.push_back(end_gap);    
+      // Update the begin of the next gap.
+      begin_gap = end_gap;
+      ++end_gap_it;
+      continue;
+    }
+    
+    // There is a gap --> try to map nodes --> at the first node pair mapped,
+    // change the gap and continue the loop.
+
+    int i = begin_gap.first + 1;
+    int i_last = end_gap.first - 1;
+    int j = begin_gap.second + 1;
+    int j_last = end_gap.second - 1;
+    // std::pair<int, int> last_mapped = begin_gap;
+    bool mapped_in_gap = false;
+    while (i <= i_last && j <= j_last) {
+      if (k_relevant(i, j, k) &&
+          (t1_count_mapped_desc[i] == t2_count_mapped_desc[j] &&
+          t1_count_mapped_anc[i] == t2_count_mapped_anc[j]) &&
+          if_in_corresponding_regions(begin_gap.first, i, end_gap.first, begin_gap.second, j, end_gap.second)) {
+        // Map (i,j) + push to result mapping + update counts for both nodes
+        // incremented as mapped.
+        update_desc_when_mapped(i, t1_count_mapped_desc, t1_parent_, t1_input_size_);
+        update_desc_when_mapped(j, t2_count_mapped_desc, t2_parent_, t2_input_size_);
+        result_mapping.push_back({i, j});
+        // last_mapped = {i, j};
+        begin_gap = {i, j};
+        mapped_in_gap = true;
+        break;
+      } else {
+        // Update counts for the incremented node as non-mapped.
+        if (i_last - i > j_last - j) {
+          update_desc_when_not_mapped(i, t1_count_mapped_desc, t1_parent_, t1_input_size_);
+          ++i;
+        } else {
+          update_desc_when_not_mapped(j, t2_count_mapped_desc, t2_parent_, t2_input_size_);
+          ++j;
+        }
+      }
+    }
+    if (mapped_in_gap) {
+      continue;
+    } else {
+      // Check the case when only one of i or j incremented beyond the limit.
+      // The gap in one of the trees has been used up.
+      // Nothing mapped in gap.
+      if (i_last - i < 0 && j_last - j >= 0) {
+        for (int j_missing = j; j_missing <= j_last; ++j_missing) {
+          update_desc_when_not_mapped(j, t2_count_mapped_desc, t2_parent_, t2_input_size_);
+        }
+      }
+      if (j_last - j < 0 && i_last - i >= 0) {
+        for (int i_missing = i; i_missing <= i_last; ++i_missing) {
+          update_desc_when_not_mapped(i, t1_count_mapped_desc, t1_parent_, t1_input_size_);
+        }
+      }
+      // Update the counts for nodes in end_gap as mapped nodes.
+      update_desc_when_mapped(end_gap.first, t1_count_mapped_desc, t1_parent_, t1_input_size_);
+      update_desc_when_mapped(end_gap.second, t2_count_mapped_desc, t2_parent_, t2_input_size_);
+      // Push the end of the current gap to the result.
+      result_mapping.push_back(end_gap);
+      // Update the begin of the next gap.
+      begin_gap = end_gap;
+      ++end_gap_it;
+      continue;
+    }
+  }
+    
+  // Remove the last dummy mapping.
+  result_mapping.pop_back();
+  return result_mapping;
+};
+
+template <typename Label, typename CostModel>
+std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::fill_gaps_in_mapping_deprecated(std::vector<std::pair<int, int>>& mapping,
     const int k) const {
   std::vector<std::pair<int, int>> result_mapping;
   
@@ -455,10 +635,11 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::to_ted_mapping(
     if (t1_count_mapped_desc[cur_t1] != t2_count_mapped_desc[cur_t2]) {
       continue;
     }
-    // Mapped nodes to the left test.
-    if (t1_count_mapped_left[cur_t1] != t2_count_mapped_left[cur_t2]) {
-      continue;
-    }
+    // TODO: Remove everything related to mapped left.
+    // // Mapped nodes to the left test.
+    // if (t1_count_mapped_left[cur_t1] != t2_count_mapped_left[cur_t2]) {
+    //   continue;
+    // }
     
     // Mapped node in T1.
     if (!mapped_t1_node_processed) {
@@ -504,13 +685,15 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::to_ted_mapping(
 template <typename Label, typename CostModel>
 int GreedyUB<Label, CostModel>::index_nodes_recursion(
     const node::Node<Label>& node,
-    std::unordered_map<std::string, std::list<int>>& label_il,
+    std::vector<std::vector<int>>& label_il,
+    std::unordered_map<std::string, std::list<int>>& label_il_hash,
     std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
     std::vector<int>& post_to_pre,
     std::vector<int>& pre_to_post,
     std::vector<int>& parent,
     std::vector<int>& depth,
     std::vector<int>& size,
+    std::vector<int>& label,
     int& start_postorder,
     int& start_preorder,
     unsigned int start_depth) {
@@ -531,9 +714,9 @@ int GreedyUB<Label, CostModel>::index_nodes_recursion(
   auto children_start_it = std::begin(node.get_children());
   auto children_end_it = std::end(node.get_children());
   while (children_start_it != children_end_it) {
-    desc_sum += index_nodes_recursion(*children_start_it, label_il, nodes, post_to_pre,
+    desc_sum += index_nodes_recursion(*children_start_it, label_il, label_il_hash, nodes, post_to_pre,
                           pre_to_post,
-                          parent, depth, size, start_postorder, start_preorder,
+                          parent, depth, size, label, start_postorder, start_preorder,
                           start_depth + 1);
     // Here, start_postorder-1 is the postorder of the current child.
     // Collect children ids.
@@ -566,7 +749,11 @@ int GreedyUB<Label, CostModel>::index_nodes_recursion(
   nodes.push_back(std::ref(node));
   
   // Add current node postorder id to label inverted list.
-  label_il[node.label().to_string()].push_back(start_postorder);
+  label_il_hash[node.label().to_string()].push_back(start_postorder);
+  // New inverted list.
+  unsigned int label_id_in_dict = dict_.insert(node.label());
+  label_il[label_id_in_dict].push_back(start_postorder);
+  label.push_back(label_id_in_dict);
   
   // Store postorder to preorder translation.
   post_to_pre.push_back(current_preorder);
@@ -585,20 +772,22 @@ int GreedyUB<Label, CostModel>::index_nodes_recursion(
 template <typename Label, typename CostModel>
 void GreedyUB<Label, CostModel>::index_nodes(
     const node::Node<Label>& root,
-    std::unordered_map<std::string, std::list<int>>& label_il,
+    std::vector<std::vector<int>>& label_il,
+    std::unordered_map<std::string, std::list<int>>& label_il_hash,
     std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
     std::vector<int>& post_to_pre,
     std::vector<int>& pre_to_post,
     std::vector<int>& parent,
     std::vector<int>& depth,
-    std::vector<int>& size) {
+    std::vector<int>& size,
+    std::vector<int>& label) {
   // Orders start with '0'.
   int start_postorder = 0;
   // NOTE: Preorder is not used. Remove start_preorder. Or
   //       move the template traversal with postorder and preorder to some notes
   //       of how to traverse trees.
   int start_preorder = 0;
-  index_nodes_recursion(root, label_il, nodes, post_to_pre, pre_to_post, parent, depth, size, start_postorder, start_preorder, 0);
+  index_nodes_recursion(root, label_il, label_il_hash, nodes, post_to_pre, pre_to_post, parent, depth, size, label, start_postorder, start_preorder, 0);
   // Here, start_postorder and start_preorder store the size of tree minus 1.
 };
 
@@ -629,6 +818,8 @@ void GreedyUB<Label, CostModel>::init(const node::Node<Label>& t1,
   t2_pre_to_post_.clear();
   t1_label_il_.clear();
   t2_label_il_.clear();
+  t1_label_il_hash_.clear();
+  t2_label_il_hash_.clear();
   t1_parent_.clear();
   t2_parent_.clear();
   t1_rl_.clear();
@@ -637,6 +828,9 @@ void GreedyUB<Label, CostModel>::init(const node::Node<Label>& t1,
   t2_depth_.clear();
   t1_size_.clear();
   t2_size_.clear();
+  dict_.clear();
+  t1_label_.clear();
+  t2_label_.clear();
   
   // TODO: Do not call get_tree_size() that causes an additional tree traversal.
   //       Index subtree sizes instead - they'll be used anyways.
@@ -648,8 +842,14 @@ void GreedyUB<Label, CostModel>::init(const node::Node<Label>& t1,
   t1_pre_to_post_.resize(t1_input_size_);
   t2_pre_to_post_.resize(t2_input_size_);
   
-  index_nodes(t1, t1_label_il_, t1_node_, t1_post_to_pre_, t1_pre_to_post_, t1_parent_, t1_depth_, t1_size_);
-  index_nodes(t2, t2_label_il_, t2_node_, t2_post_to_pre_, t2_pre_to_post_, t2_parent_, t2_depth_, t2_size_);
+  // The size of the inverted list is at most sum of the input trees sizes.
+  t1_label_il_.resize(t1_input_size_ + t2_input_size_);
+  t2_label_il_.resize(t1_input_size_ + t2_input_size_);
+  
+  t2_label_il_start_pos_.resize(t1_input_size_ + t2_input_size_);
+  
+  index_nodes(t1, t1_label_il_, t1_label_il_hash_, t1_node_, t1_post_to_pre_, t1_pre_to_post_, t1_parent_, t1_depth_, t1_size_, t1_label_);
+  index_nodes(t2, t2_label_il_, t2_label_il_hash_, t2_node_, t2_post_to_pre_, t2_pre_to_post_, t2_parent_, t2_depth_, t2_size_, t2_label_);
   
   t1_rl_.resize(t1_input_size_);
   t2_rl_.resize(t2_input_size_);
@@ -694,6 +894,7 @@ const typename GreedyUB<Label, CostModel>::TestItems GreedyUB<Label, CostModel>:
     t1_rl_,
     t1_depth_,
     t1_size_,
+    dict_,
   };
   return test_items;
 };

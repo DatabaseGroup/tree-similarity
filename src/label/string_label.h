@@ -72,4 +72,18 @@ private:
 
 } // namespace label
 
+// Custom specialization of std::hash - injected in namespace std.
+// This is needed for LabelDictionary.
+namespace std
+{
+  template<> struct hash<label::StringLabel> {
+    typedef label::StringLabel argument_type;
+    typedef std::size_t result_type;
+    result_type operator()(argument_type const& s) const noexcept {
+        result_type const h ( std::hash<std::string>{}(s.to_string()) );
+        return h;
+    }
+  };
+}
+
 #endif // TREE_SIMILARITY_LABEL_STRING_LABEL_H

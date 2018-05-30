@@ -33,6 +33,28 @@ const std::string vector_to_string(const std::vector<std::pair<std::string, std:
   return s;
 };
 
+/// Convert vector of vector of int values to its string representation.
+///
+/// \param v Vector of vector of int values.
+/// \return String representation of v.
+const std::string vector_of_vectors_to_string(const std::vector<std::vector<int>>& v, const unsigned int limit) {
+  std::string s("{");
+  // for (auto ve : v) {
+  unsigned int elem_index = 0;
+  while (elem_index < limit) {
+    s += "{";
+    // TODO: Fix if no elements.
+    for (auto e : v[elem_index]) {
+      s += std::to_string(e) + ",";
+    }
+    s.pop_back();
+    s += "}";
+    ++elem_index;
+  }
+  s += "}";
+  return s;
+};
+
 bool compare_pair(std::pair<std::string, std::list<int>>& a, std::pair<std::string, std::list<int>>& b) {
   return a.first < b.first;
 };
@@ -90,11 +112,13 @@ int main() {
 
       auto greedy_ub_test_items = greedy_ub.get_test_items();
       auto label_il = greedy_ub_test_items.t1_label_il;
-      // Sort the map.
-      std::vector<std::pair<std::string, std::list<int>>> label_il_elems(label_il.begin(), label_il.end());
-      std::sort(label_il_elems.begin(), label_il_elems.end(), compare_pair);
+      auto dict_size = greedy_ub_test_items.dict.size();
       
-      std::string computed_results = vector_to_string(label_il_elems);
+      // Sort the map --> it's sorted due to label ids from LabelDictionary.
+      // std::vector<std::pair<std::string, std::list<int>>> label_il_elems(label_il.begin(), label_il.end());
+      // std::sort(label_il_elems.begin(), label_il_elems.end(), compare_pair);
+      
+      std::string computed_results = vector_of_vectors_to_string(label_il, dict_size);
 
       if (correct_result != computed_results) {
         std::cerr << "Incorrect label inverted list: " << computed_results << " instead of " << correct_result << std::endl;

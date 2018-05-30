@@ -35,6 +35,7 @@
 #include <unordered_map>
 #include <memory>
 #include "node.h"
+#include "label_dictionary.h"
 #include <iostream>
 
 namespace ted_ub {
@@ -45,13 +46,14 @@ class GreedyUB {
 public:
   /// Holds internal items of the algorithms that are tested for correctness.
   struct TestItems {
-    const std::unordered_map<std::string, std::list<int>>& t1_label_il;
+    const std::vector<std::vector<int>>& t1_label_il;
     const std::vector<int>& t1_post_to_pre;
     const std::vector<int>& t1_pre_to_post;
     const std::vector<int>& t1_parent;
     const std::vector<int>& t1_rl;
     const std::vector<int>& t1_depth;
     const std::vector<int>& t1_size;
+    const label::LabelDictionary<Label>& dict;
   };
 // Member functions.
 public:
@@ -99,6 +101,10 @@ public:
   /// \result A TED mapping where only nodes with equal labels are matched.
   std::vector<std::pair<int, int>> lb_mapping(const node::Node<Label>& t1,
       const node::Node<Label>& t2, const int k);
+  /// Deprecated. Kept for experiments. Uses hashmap-based inverted list for
+  /// labels matching.
+  std::vector<std::pair<int, int>> lb_mapping_deprecated(const node::Node<Label>& t1,
+      const node::Node<Label>& t2, const int k);
   /// Computes a TED mapping where:
   /// - as many as possible nodes with equal labels are mapped,
   /// - as many nodes as possible are renamed,
@@ -106,13 +112,18 @@ public:
   ///
   /// NOTE: It has linear runtime complexity.
   ///
-  /// NOTE: Internally, it executes lb_mapping and fill_gaps_in_mapping.
+  /// NOTE: Internally, it executes lb_mapping_new and fill_gaps_in_mapping_no_left.
   ///
   /// \param t1 Source tree.
   /// \param t2 Destination tree.
   /// \param k Similarity threshold.
   /// \result A TED mapping with possibly many node pairs mapped.
   std::vector<std::pair<int, int>> lb_mapping_fill_gaps(
+      const node::Node<Label>& t1, const node::Node<Label>& t2, const int k);
+  /// Deprecated. Kept for experiments. Uses old filling gaps that have errors
+  /// and use number of mapped nodes to the left.
+  /// TODO: When deleted, delete also class fields and update node indexing.
+  std::vector<std::pair<int, int>> lb_mapping_fill_gaps_deprecated(
       const node::Node<Label>& t1, const node::Node<Label>& t2, const int k);
   /// Creates a TestItems object and returns it (by value).
   ///
@@ -167,16 +178,33 @@ private:
   /// Stores the subtree size for each node of the destination tree.
   /// Indexed in postorder ids starting with 0.
   std::vector<int> t2_size_;
-  /// For each laebl in the source tree, stores postorder ids of nodes that
+  /// For each label in the source tree, stores postorder ids of nodes that
   /// carry it (the list is sorted in postorder).
-  /// NOTE: Key should be of type Label - requires modifying implementation of
-  ///       Label. It has to be hashable.
-  std::unordered_map<std::string, std::list<int>> t1_label_il_;
-  /// For each laebl in the destination tree, stores postorder ids of nodes that
-  /// carry it (the list is sorted in postorder).
-  /// NOTE: Key should be of type Label - requires modifying implementation of
-  ///       Label. It has to be hashable.
-  std::unordered_map<std::string, std::list<int>> t2_label_il_;
+  ///
+  /// The inverted list is a vector because we use LabelDictionary to assign
+  /// labels ids. Then, we know how many different labels are there. The size
+  /// of this vector in the works case is the sum of input trees sizes.
+  ///
+  /// The postorder ids of nodes carrying a specific label are stored in a
+  /// vector. We can do this because instead of removing the mapped node from
+  /// a list, we mark it as mapped (using '-1').
+  std::vector<std::vector<int>> t1_label_il_;
+  /// See t1_label_il_.
+  std::vector<std::vector<int>> t2_label_il_;
+  /// For every label id, stores the starting position of traversing the
+  /// corresponding vector in t2_label_il_. Due to 2*k+1 window depending on
+  /// the postorder ids of two nodes that we try to match.
+  std::vector<int> t2_label_il_start_pos_;
+  /// Stores Label to int id translation of all labels in both input trees.
+  label::LabelDictionary<Label> dict_;
+  /// Stores the label id from dict_ for each node of the source tree.
+  /// Indexed in postorder ids starting with 0.
+  std::vector<int> t1_label_;
+  /// See t1_label_.
+  std::vector<int> t2_label_;
+  /// Deprecated. Kept for experiments. Old inverted list based on a hash map.
+  std::unordered_map<std::string, std::list<int>> t1_label_il_hash_;
+  std::unordered_map<std::string, std::list<int>> t2_label_il_hash_;
   /// Cost model.
   const CostModel c_;
 // Member functions.
@@ -194,6 +222,14 @@ private:
   /// \return A revised mapping that is a valid TED mapping.
   std::vector<std::pair<int, int>> to_ted_mapping(
       const std::vector<std::pair<int, int>>& mapping) const;
+  /// Updates mapped descendants counters when node is not mapped.
+  void update_desc_when_not_mapped(const int node,
+      std::vector<int>& count_mapped_desc, const std::vector<int>& parent,
+      const int input_size) const;
+  /// Updates mapped descendants counters when node is mapped.
+  void update_desc_when_mapped(const int node,
+      std::vector<int>& count_mapped_desc, const std::vector<int>& parent,
+      const int input_size) const;
   /// Updates mapped descendants and nodes to the left counters when node is
   /// not mapped.
   void update_desc_and_left_when_not_mapped(const int node,
@@ -238,6 +274,9 @@ private:
   /// \result A TED mapping, with possibly more pairs than in mapping. 
   std::vector<std::pair<int, int>> fill_gaps_in_mapping(
       std::vector<std::pair<int, int>>& mapping, const int k) const;
+  /// Deprecated. Kept for experiments. 
+  std::vector<std::pair<int, int>> fill_gaps_in_mapping_deprecated(
+      std::vector<std::pair<int, int>>& mapping, const int k) const;
   /// Resets and initialises algorithm's internal data structures and constants.
   /// Has to be called before computing the distance.
   ///
@@ -253,13 +292,15 @@ private:
   /// \param nodes Vector of postorder ids to references to nodes.
   /// \param post_to_pre Translation vector from postorder to preorder id.
   void index_nodes(const node::Node<Label>& root,
-                   std::unordered_map<std::string, std::list<int>>& label_il,
+                   std::vector<std::vector<int>>& label_il,
+                   std::unordered_map<std::string, std::list<int>>& label_il_hash,
                    std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
                    std::vector<int>& post_to_pre,
                    std::vector<int>& pre_to_post,
                    std::vector<int>& parent,
                    std::vector<int>& depth,
-                   std::vector<int>& size);
+                   std::vector<int>& size,
+                   std::vector<int>& label);
   /// Traverses an input tree rooted at root recursively and collects
   /// information into index structures.
   ///
@@ -270,13 +311,15 @@ private:
   /// \param start_postorder Stores the postorder id of a node during traversal.
   /// \param start_preorder Stores the preorder id of a node during traversal.
   int index_nodes_recursion(const node::Node<Label>& root,
-                             std::unordered_map<std::string, std::list<int>>& label_il,
+                             std::vector<std::vector<int>>& label_il,
+                             std::unordered_map<std::string, std::list<int>>& label_il_hash,
                              std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
                              std::vector<int>& post_to_pre,
                              std::vector<int>& pre_to_post,
                              std::vector<int>& parent,
                              std::vector<int>& depth,
                              std::vector<int>& size,
+                             std::vector<int>& label,
                              int& start_postorder, int& start_preorder,
                              unsigned int start_depth);
   /// Collects the first leaf node to the right of every node of input tree.
