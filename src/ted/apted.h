@@ -38,6 +38,7 @@
 #define TREE_SIMILARITY_TED_APTED_H
 
 #include <vector>
+#include <stack>
 #include <memory>
 #include "node.h"
 #include "matrix.h"
@@ -47,7 +48,7 @@
 
 namespace ted {
 
-template <typename Label>
+template <typename Label, typename CostModel>
 class APTEDNodeIndexer {
 public:
   // Structure indices.
@@ -79,7 +80,7 @@ public:
   std::vector<int> preL_to_sumInsCost_;
   // Structure single-value variables.
   int tree_size_;
-  int lshl_;
+  int lchl_;
   int rchl_;
 private:
   // Variables holding values modified at runtime while the algorithm executes.
@@ -90,6 +91,8 @@ private:
   int kr_sizes_sum_tmp_;
   int rev_kr_sizes_sum_tmp_;
   int preorder_tmp_;
+  /// Cost model.
+  const CostModel c_;
 public:
   APTEDNodeIndexer(const node::Node<Label>& t);
 private:
@@ -100,7 +103,7 @@ public:
   int preL_to_rld(int preL);
   node::Node<Label>& postL_to_node(int postL);
   node::Node<Label>& postR_to_node(int postR);
-  int get_size();
+  // int get_size();
   bool is_leaf(int node);
   int get_current_node();
   void set_current_node(int preorder);
@@ -125,7 +128,7 @@ public:
   /// \param t2 Destination tree.
   /// \return Tree edit distance between t1 and t2.
   double apted_ted(const node::Node<Label>& t1, const node::Node<Label>& t2);
-  double apted_ted(const APTEDNodeIndexer<Label>& ni_1, const APTEDNodeIndexer<Label>& ni_2);
+  double apted_ted(APTEDNodeIndexer<Label, CostModel>& ni_1, APTEDNodeIndexer<Label, CostModel>& ni_2);
   /// Creates a TestItems object and returns it (by value).
   ///
   /// \return A TestItem object.
@@ -135,60 +138,41 @@ public:
   ///
   /// \return The number of subproblems acountered in the last TED computation.
   const unsigned long long int get_subproblem_count() const;
+private:
+  data_structures::Matrix<double> compute_opt_strategy_postL(APTEDNodeIndexer<Label, CostModel>& ni_1, APTEDNodeIndexer<Label, CostModel>& ni_2);
+  data_structures::Matrix<double> compute_opt_strategy_postR(APTEDNodeIndexer<Label, CostModel>& ni_1, APTEDNodeIndexer<Label, CostModel>& ni_2);
+  void ted_init(APTEDNodeIndexer<Label, CostModel>& ni_1, APTEDNodeIndexer<Label, CostModel>& ni_2);
+  double gted(APTEDNodeIndexer<Label, CostModel>& ni_1, APTEDNodeIndexer<Label, CostModel>& ni_2);
+  double spf1(APTEDNodeIndexer<Label, CostModel>& ni_1, int subtreeRootNode1, APTEDNodeIndexer<Label, CostModel>& ni_2, int subtreeRootNode2);
+  double spfA(APTEDNodeIndexer<Label, CostModel>& ni_1, APTEDNodeIndexer<Label, CostModel>& ni_2, int pathID, int pathType, bool treesSwapped);
+  double spfL(APTEDNodeIndexer<Label, CostModel>& ni_1, APTEDNodeIndexer<Label, CostModel>& ni_2, bool treesSwapped);
+  double spfR(APTEDNodeIndexer<Label, CostModel>& ni_1, APTEDNodeIndexer<Label, CostModel>& ni_2, bool treesSwapped);
+  int get_strategy_path_type(int pathIDWithPathIDOffset, int pathIDOffset, int currentRootNodePreL, int currentSubtreeSize);
+  void updateFnArray(int lnForNode, int node, int currentSubtreePreL);
+  void updateFtArray(int lnForNode, int node);
 // Member variables.
 private:
-  // /// Stores the subtree size for each node of the source tree.
-  // /// Indexed in preorder ids starting with 0.
-  // std::vector<int> t1_size_;
-  // /// Stores the subtree size for each node of the destination tree.
-  // /// Indexed in preorder ids starting with 0.
-  // std::vector<int> t2_size_;
-  // /// Stores references to nodes of the source tree. Indexed in preorder ids
-  // /// starting with 0.
-  // ///
-
-  // std::vector<std::reference_wrapper<const node::Node<Label>>> t1_node_;
-  // /// Stores references to nodes of the destination tree. Indexed in postorder-1.
-  // std::vector<std::reference_wrapper<const node::Node<Label>>> t2_node_;
   /// Matrix storing subtree distances.
   data_structures::Matrix<double> delta_;
-  /// Matrix storing subforest distances.
-  data_structures::Matrix<double> s_;
-  /// Matrix storing subforest distances.
-  data_structures::Matrix<double> t_;
+  // /// Matrix storing subforest distances.
+  // data_structures::Matrix<double> s_;
+  // /// Matrix storing subforest distances.
+  // data_structures::Matrix<double> t_;
   /// Cost model.
   const CostModel c_;
+  
+  std::vector<double> q_;
+  std::vector<int> fn_;
+  std::vector<int> ft_;
+  
+  int input_size_1_;
+  int input_size_2_;
+  
   /// Subproblem counter - for experiments only. Counts the number of
   /// non-trivial values filled in fd_ matrix: subproblems where both forests
   /// are not empty (including storing first infinities outside e-strip), and
   /// last value computed in fd_.
-  unsigned long long int subproblem_counter;
-// Member functions.
-public:
-  // /// Indexes the nodes of an input tree. Wrapper for the recursive
-  // /// index_nodes_recursion. This method fills in the passed vectors.
-  // ///
-  // /// Call this method to index nodes.
-  // ///
-  // /// \param root The root node of the tree to index.
-  // /// \param size Vector with subtree sizes.
-  // /// \param nodes Vector with references to nodes.
-  // void index_nodes(const node::Node<Label>& root, std::vector<int>& size,
-  //                  std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes);
-  // /// Traverses an input tree rooted at root recursively and collects
-  // /// information into index structures.
-  // ///
-  // /// \param root The root node of the tree to index.
-  // /// \param size Vector with subtree sizes.
-  // /// \param nodes Vector with references to nodes.
-  // /// \param start_postorder Stores the postorder id of a node during traversal.
-  // ///                        Modified by recursion.
-  // /// \param start_preorder Stores the preorder id of a node during traversal.
-  // ///                       Modified by recursion.
-  // /// \return Number of nodes in the subtree rooted at the caller node.
-  // int index_nodes_recursion(const node::Node<Label>& root,
-  //                            std::vector<std::reference_wrapper<const node::Node<Label>>>& nodes,
-  //                            int& start_postorder, int& start_preorder);
+  unsigned long long int subproblem_counter_;
 };
 
 // Implementation details.

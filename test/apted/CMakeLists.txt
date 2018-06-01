@@ -3,6 +3,7 @@
 # Specify list of test strings.
 set(apted_test_list
   apted_preL_to_size_test
+  apted_ted_test
 )
 
 # Add custom target for building all APTED's tests.

@@ -7,11 +7,13 @@
 #include "bracket_notation_parser.h"
 #include "apted.h"
 #include "to_string_converters.h"
+#include "unit_cost_model.h"
 
 int main() {
 
   using Label = label::StringLabel;
-
+  using CostModel = cost_model::UnitCostModel<Label>;
+  
   // Parse test cases from file.
   std::ifstream test_cases_file("apted_preL_to_size_test_data.txt");
   if (!test_cases_file.is_open()) {
@@ -30,7 +32,7 @@ int main() {
 
       node::Node<Label> t1 = bnp.parse_single(input_tree);
 
-      ted::APTEDNodeIndexer<Label> ni(t1);
+      ted::APTEDNodeIndexer<Label, CostModel> ni(t1);
 
       // TODO: Differs in test cases filename and the ni's member name.
 
