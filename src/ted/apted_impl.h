@@ -331,10 +331,12 @@ data_structures::Matrix<double> APTED<Label, CostModel>::compute_opt_strategy_po
   std::shared_ptr<std::vector<double>> cost_Rpointer_v;
   std::shared_ptr<std::vector<double>> cost_Ipointer_v;
   // std::vector<double>* strategypointer_v;
+  std::size_t strategypointer_v;
   std::shared_ptr<std::vector<double>> cost_Lpointer_parent_v;
   std::shared_ptr<std::vector<double>> cost_Rpointer_parent_v;
   std::shared_ptr<std::vector<double>> cost_Ipointer_parent_v;
   // std::vector<double>* strategypointer_parent_v;
+  std::size_t strategypointer_parent_v;
   int krSum_v;
   int revkrSum_v;
   int descSum_v;
@@ -358,6 +360,7 @@ data_structures::Matrix<double> APTED<Label, CostModel>::compute_opt_strategy_po
     }
 
     // strategypointer_v = strategy[v_in_preL];
+    strategypointer_v = v_in_preL;
 
     size_v = pre2size1[v_in_preL];
     leftPath_v = -(preR_to_preL_1[preL_to_preR_1[v_in_preL] + size_v - 1] + 1);// this is the left path's ID which is the leftmost leaf node: l-r_preorder(r-l_preorder(v) + |Fv| - 1)
@@ -372,7 +375,7 @@ data_structures::Matrix<double> APTED<Label, CostModel>::compute_opt_strategy_po
       cost1_I[v] = leafRow;
       for(int i = 0; i < size2; ++i) {
         // strategypointer_v[postL_to_preL_2[i]] = v_in_preL;
-        strategy.at(v_in_preL, postL_to_preL_2[i]) = v_in_preL;
+        strategy.at(strategypointer_v, postL_to_preL_2[i]) = v_in_preL;
       }
     }
 
@@ -400,6 +403,7 @@ data_structures::Matrix<double> APTED<Label, CostModel>::compute_opt_strategy_po
       cost_Rpointer_parent_v = cost1_R[parent_v_postL];
       cost_Ipointer_parent_v = cost1_I[parent_v_postL];
       // strategypointer_parent_v = strategy[parent_v_preL];
+      strategypointer_parent_v = parent_v_preL;
     }
 
     // Arrays.fill(cost2_L, 0L);
@@ -447,7 +451,7 @@ data_structures::Matrix<double> APTED<Label, CostModel>::compute_opt_strategy_po
         if (tmpCost < minCost) {
           minCost = tmpCost;
           // strategyPath = (int)strategypointer_v[w_in_preL] + 1;
-          strategyPath = (int)strategy.at(v_in_preL, w_in_preL) + 1;
+          strategyPath = (int)strategy.at(strategypointer_v, w_in_preL) + 1;
         }
         tmpCost = size_w * krSum_v + cost2_L[w];
         if (tmpCost < minCost) {
@@ -472,6 +476,7 @@ data_structures::Matrix<double> APTED<Label, CostModel>::compute_opt_strategy_po
         if (tmpCost < (*cost1_I[parent_v_postL])[w]) {
           (*cost_Ipointer_parent_v)[w] = tmpCost;
           // strategypointer_parent_v[w_in_preL] = strategypointer_v[w_in_preL];
+          strategy.at(strategypointer_parent_v, w_in_preL) = strategy.read_at(strategypointer_v, w_in_preL);
         }
         if (nodeType_R_1[v_in_preL]) {
           (*cost_Ipointer_parent_v)[w] += (*cost_Rpointer_parent_v)[w];
@@ -501,7 +506,7 @@ data_structures::Matrix<double> APTED<Label, CostModel>::compute_opt_strategy_po
         }
       }
       // strategypointer_v[w_in_preL] = strategyPath;
-      strategy.at(v_in_preL, w_in_preL) = strategyPath;
+      strategy.at(strategypointer_v, w_in_preL) = strategyPath;
     }
 
     if (!ni_1.is_leaf(v_in_preL)) {
@@ -578,9 +583,15 @@ double APTED<Label, CostModel>::gted(APTEDNodeIndexer<Label, CostModel>& ni_1, A
   int subtreeSize1 = ni_1.preL_to_size_[currentSubtree1];
   int subtreeSize2 = ni_2.preL_to_size_[currentSubtree2];
 
+  std::cout << "gted(" << currentSubtree1 << "," << currentSubtree2 << ")" << std::endl;
+
+  double result = 0;
+
   // Use spf1.
   if ((subtreeSize1 == 1 || subtreeSize2 == 1)) {
-    return spf1(ni_1, currentSubtree1, ni_2, currentSubtree2);
+    result = spf1(ni_1, currentSubtree1, ni_2, currentSubtree2);
+    std::cout << "spf1(" << currentSubtree1 << "," << currentSubtree2 << ") = " << result << std::endl;
+    return result;
   }
 
   int strategyPathID = (int)delta_.read_at(currentSubtree1, currentSubtree2);
@@ -612,12 +623,18 @@ double APTED<Label, CostModel>::gted(APTEDNodeIndexer<Label, CostModel>& ni_1, A
     // Used for accessing delta array and deciding on the edit operation
     // [1, Section 3.4].
     if (strategyPathType == 0) {
-      return spfL(ni_1, ni_2, false);
+      result = spfL(ni_1, ni_2, false);
+      std::cout << "spfL(" << ni_1.get_current_node() << "," << ni_2.get_current_node() << ") = " << result << std::endl;
+      return result;
     }
     if (strategyPathType == 1) {
-      return spfR(ni_1, ni_2, false);
+      result = spfR(ni_1, ni_2, false);
+      std::cout << "spfR(" << ni_1.get_current_node() << "," << ni_2.get_current_node() << ") = " << result << std::endl;
+      return result;
     }
-    return spfA(ni_1, ni_2, std::abs(strategyPathID) - 1, strategyPathType, false);
+    result = spfA(ni_1, ni_2, std::abs(strategyPathID) - 1, strategyPathType, false);
+    std::cout << "spfA(" << ni_1.get_current_node() << "," << ni_2.get_current_node() << ") = " << result << std::endl;
+    return result;
   }
 
   currentPathNode -= pathIDOffset;
@@ -642,12 +659,18 @@ double APTED<Label, CostModel>::gted(APTEDNodeIndexer<Label, CostModel>& ni_1, A
   // for accessing delta array and deciding on the edit operation
   // [1, Section 3.4].
   if (strategyPathType == 0) {
-    return spfL(ni_2, ni_1, true);
+    result = spfL(ni_2, ni_1, true);
+    std::cout << "spfL(" << ni_1.get_current_node() << "," << ni_2.get_current_node() << ") = " << result << std::endl;
+    return result;
   }
   if (strategyPathType == 1) {
-    return spfR(ni_2, ni_1, true);
+    result = spfR(ni_2, ni_1, true);
+    std::cout << "spfR(" << ni_1.get_current_node() << "," << ni_2.get_current_node() << ") = " << result << std::endl;
+    return result;
   }
-  return spfA(ni_2, ni_1, std::abs(strategyPathID) - pathIDOffset - 1, strategyPathType, true);
+  result = spfA(ni_2, ni_1, std::abs(strategyPathID) - pathIDOffset - 1, strategyPathType, true);
+  std::cout << "spfA(" << ni_1.get_current_node() << "," << ni_2.get_current_node() << ") = " << result << std::endl;
+  return result;
 }
 
 template <typename Label, typename CostModel>
