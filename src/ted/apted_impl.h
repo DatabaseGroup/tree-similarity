@@ -229,6 +229,26 @@ void APTEDNodeIndexer<Label, CostModel>::set_current_node(int preorder) {
 };
 
 template <typename Label, typename CostModel>
+int APTEDNodeIndexer<Label, CostModel>::preL_to_lld(int preL) {
+  return postL_to_preL_[postL_to_lld_[preL_to_postL_[preL]]];
+}
+
+template <typename Label, typename CostModel>
+int APTEDNodeIndexer<Label, CostModel>::preL_to_rld(int preL) {
+  return postR_to_preL_[postR_to_rld_[preL_to_postR_[preL]]];
+}
+
+template <typename Label, typename CostModel>
+const node::Node<Label>& APTEDNodeIndexer<Label, CostModel>::postL_to_node(int postL) {
+  return preL_to_node_[postL_to_preL_[postL]];
+}
+
+template <typename Label, typename CostModel>
+const node::Node<Label>& APTEDNodeIndexer<Label, CostModel>::postR_to_node(int postR) {
+  return preL_to_node_[postR_to_preL_[postR]];
+}
+
+template <typename Label, typename CostModel>
 APTED<Label, CostModel>::APTED() : c_() {}
 
 template <typename Label, typename CostModel>
@@ -1143,13 +1163,210 @@ double APTED<Label, CostModel>::spfA(APTEDNodeIndexer<Label, CostModel>& ni_1, A
 
 template <typename Label, typename CostModel>
 double APTED<Label, CostModel>::spfL(APTEDNodeIndexer<Label, CostModel>& ni_1, APTEDNodeIndexer<Label, CostModel>& ni_2, bool treesSwapped) {
-  return 222.222;
+  // Initialise the array to store the keyroot nodes in the right-hand input
+  // subtree.
+  std::vector<int> keyRoots(ni_2.preL_to_size_[ni_2.get_current_node()]);
+  // Arrays.fill(keyRoots, -1);
+  std::fill(keyRoots.begin(), keyRoots.end(), -1);
+  // Get the leftmost leaf node of the right-hand input subtree.
+  int pathID = ni_2.preL_to_lld(ni_2.get_current_node());
+  // Calculate the keyroot nodes in the right-hand input subtree.
+  // firstKeyRoot is the index in keyRoots of the first keyroot node that
+  // we have to process. We need this index because keyRoots array is larger
+  // than the number of keyroot nodes.
+  int firstKeyRoot = computeKeyRoots(ni_2, ni_2.get_current_node(), pathID, keyRoots, 0);
+  // Initialise an array to store intermediate distances for subforest pairs.
+  data_structures::Matrix<double> forestdist(ni_1.preL_to_size_[ni_1.get_current_node()]+1, ni_2.preL_to_size_[ni_2.get_current_node()]+1);
+  // Compute the distances between pairs of keyroot nodes. In the left-hand
+  // input subtree only the root is the keyroot. Thus, we compute the distance
+  // between the left-hand input subtree and all keyroot nodes in the
+  // right-hand input subtree.
+  for (int i = firstKeyRoot-1; i >= 0; --i) {
+    treeEditDist(ni_1, ni_2, ni_1.get_current_node(), keyRoots[i], forestdist, treesSwapped);
+  }
+  // Return the distance between the input subtrees.
+  return forestdist.read_at(ni_1.preL_to_size_[ni_1.get_current_node()], ni_2.preL_to_size_[ni_2.get_current_node()]);
+};
+
+template <typename Label, typename CostModel>
+int APTED<Label, CostModel>::computeKeyRoots(APTEDNodeIndexer<Label, CostModel>& ni_2, int subtreeRootNode, int pathID, std::vector<int>& keyRoots, int index) {
+  // The subtreeRootNode is a keyroot node. Add it to keyRoots.
+  keyRoots[index] = subtreeRootNode;
+  // Increment the index to know where to store the next keyroot node.
+  ++index;
+  // Walk up the left path starting with the leftmost leaf of subtreeRootNode,
+  // until the child of subtreeRootNode.
+  int pathNode = pathID;
+  while (pathNode > subtreeRootNode) {
+    int parent = ni_2.preL_to_parent_[pathNode];
+    // For each sibling to the right of pathNode, execute this method recursively.
+    // Each right sibling of pathNode is a keyroot node.
+    for (int child : ni_2.preL_to_children_[parent]) {
+      // Execute computeKeyRoots recursively for the new subtree rooted at child and child's leftmost leaf node.
+      if (child != pathNode) index = computeKeyRoots(ni_2, child, ni_2.preL_to_lld(child), keyRoots, index);
+    }
+    // Walk up.
+    pathNode = parent;
+  }
+  return index;
+};
+
+template <typename Label, typename CostModel>
+void APTED<Label, CostModel>::treeEditDist(APTEDNodeIndexer<Label, CostModel>& ni_1, APTEDNodeIndexer<Label, CostModel>& ni_2, int it1subtree, int it2subtree, data_structures::Matrix<double>& forestdist, bool treesSwapped) {
+  // Translate input subtree root nodes to left-to-right postorder.
+  int i = ni_1.preL_to_postL_[it1subtree];
+  int j = ni_2.preL_to_postL_[it2subtree];
+  // We need to offset the node ids for accessing forestdist array which has
+  // indices from 0 to subtree size. However, the subtree node indices do not
+  // necessarily start with 0.
+  // Whenever the original left-to-right postorder id has to be accessed, use
+  // i+ioff and j+joff.
+  int ioff = ni_1.postL_to_lld_[i] - 1;
+  int joff = ni_2.postL_to_lld_[j] - 1;
+  // Variables holding costs of each minimum element.
+  float da = 0;
+  float db = 0;
+  float dc = 0;
+  // Initialize forestdist array with deletion and insertion costs of each
+  // relevant subforest.
+  forestdist.at(0, 0) = 0;
+  for (int i1 = 1; i1 <= i - ioff; ++i1) {
+    forestdist.at(i1, 0) = forestdist.read_at(i1 - 1, 0) + (treesSwapped ? c_.ins(ni_1.postL_to_node(i1 + ioff)) : c_.del(ni_1.postL_to_node(i1 + ioff))); // USE COST MODEL - delete i1.
+  }
+  for (int j1 = 1; j1 <= j - joff; ++j1) {
+    forestdist.at(0, j1) = forestdist.read_at(0, j1 - 1) + (treesSwapped ? c_.del(ni_2.postL_to_node(j1 + joff)) : c_.ins(ni_2.postL_to_node(j1 + joff))); // USE COST MODEL - insert j1.
+  }
+  // Fill in the remaining costs.
+  for (int i1 = 1; i1 <= i - ioff; ++i1) {
+    for (int j1 = 1; j1 <= j - joff; ++j1) {
+      // Increment the number of subproblems.
+      ++subproblem_counter_;
+      // Calculate partial distance values for this subproblem.
+      double u = (treesSwapped ? c_.ren(ni_2.postL_to_node(j1 + joff), ni_1.postL_to_node(i1 + ioff)) : c_.ren(ni_1.postL_to_node(i1 + ioff), ni_2.postL_to_node(j1 + joff))); // USE COST MODEL - rename i1 to j1.
+      da = forestdist.read_at(i1 - 1, j1) + (treesSwapped ? c_.ins(ni_1.postL_to_node(i1 + ioff)) : c_.del(ni_1.postL_to_node(i1 + ioff))); // USE COST MODEL - delete i1.
+      db = forestdist.read_at(i1, j1 - 1) + (treesSwapped ? c_.del(ni_2.postL_to_node(j1 + joff)) : c_.ins(ni_2.postL_to_node(j1 + joff))); // USE COST MODEL - insert j1.
+      // If current subforests are subtrees.
+      if (ni_1.postL_to_lld_[i1 + ioff] == ni_1.postL_to_lld_[i] && ni_2.postL_to_lld_[j1 + joff] == ni_2.postL_to_lld_[j]) {
+        dc = forestdist.read_at(i1 - 1, j1 - 1) + u;
+        // Store the relevant distance value in delta array.
+        if (treesSwapped) {
+          delta_.at(ni_2.postL_to_preL_[j1 + joff], ni_1.postL_to_preL_[i1 + ioff]) = forestdist.read_at(i1 - 1, j1 - 1);
+        } else {
+          delta_.at(ni_1.postL_to_preL_[i1 + ioff], ni_2.postL_to_preL_[j1 + joff]) = forestdist.read_at(i1 - 1, j1 - 1);
+        }
+      } else {
+        dc = forestdist.read_at(ni_1.postL_to_lld_[i1 + ioff] - 1 - ioff, ni_2.postL_to_lld_[j1 + joff] - 1 - joff) +
+          (treesSwapped ? delta_.read_at(ni_2.postL_to_preL_[j1 + joff], ni_1.postL_to_preL_[i1 + ioff]) : delta_.read_at(ni_1.postL_to_preL_[i1 + ioff], ni_2.postL_to_preL_[j1 + joff])) + u;
+      }
+      // Calculate final minimum.
+      forestdist.at(i1, j1) = da >= db ? db >= dc ? dc : db : da >= dc ? dc : da;
+    }
+  }
 };
 
 template <typename Label, typename CostModel>
 double APTED<Label, CostModel>::spfR(APTEDNodeIndexer<Label, CostModel>& ni_1, APTEDNodeIndexer<Label, CostModel>& ni_2, bool treesSwapped) {
-  return 333.333;
+  // Initialise the array to store the keyroot nodes in the right-hand input
+  // subtree.
+  std::vector<int> revKeyRoots(ni_2.preL_to_size_[ni_2.get_current_node()]);
+  // Arrays.fill(revKeyRoots, -1);
+  std::fill(revKeyRoots.begin(), revKeyRoots.end(), -1);
+  // Get the rightmost leaf node of the right-hand input subtree.
+  int pathID = ni_2.preL_to_rld(ni_2.get_current_node());
+  // Calculate the keyroot nodes in the right-hand input subtree.
+  // firstKeyRoot is the index in keyRoots of the first keyroot node that
+  // we have to process. We need this index because keyRoots array is larger
+  // than the number of keyroot nodes.
+  int firstKeyRoot = computeRevKeyRoots(ni_2, ni_2.get_current_node(), pathID, revKeyRoots, 0);
+  // Initialise an array to store intermediate distances for subforest pairs.
+  data_structures::Matrix<double> forestdist(ni_1.preL_to_size_[ni_1.get_current_node()]+1, ni_2.preL_to_size_[ni_2.get_current_node()]+1);
+  // Compute the distances between pairs of keyroot nodes. In the left-hand
+  // input subtree only the root is the keyroot. Thus, we compute the distance
+  // between the left-hand input subtree and all keyroot nodes in the
+  // right-hand input subtree.
+  for (int i = firstKeyRoot-1; i >= 0; --i) {
+    revTreeEditDist(ni_1, ni_2, ni_1.get_current_node(), revKeyRoots[i], forestdist, treesSwapped);
+  }
+  // Return the distance between the input subtrees.
+  return forestdist.read_at(ni_1.preL_to_size_[ni_1.get_current_node()], ni_2.preL_to_size_[ni_2.get_current_node()]);
 };
+
+template <typename Label, typename CostModel>
+int APTED<Label, CostModel>::computeRevKeyRoots(APTEDNodeIndexer<Label, CostModel>& ni_2, int subtreeRootNode, int pathID, std::vector<int>& revKeyRoots, int index) {
+  // The subtreeRootNode is a keyroot node. Add it to keyRoots.
+  revKeyRoots[index] = subtreeRootNode;
+  // Increment the index to know where to store the next keyroot node.
+  ++index;
+  // Walk up the right path starting with the rightmost leaf of
+  // subtreeRootNode, until the child of subtreeRootNode.
+  int pathNode = pathID;
+  while (pathNode > subtreeRootNode) {
+    int parent = ni_2.preL_to_parent_[pathNode];
+    // For each sibling to the left of pathNode, execute this method recursively.
+    // Each left sibling of pathNode is a keyroot node.
+    for (int child : ni_2.preL_to_children_[parent]) {
+      // Execute computeRevKeyRoots recursively for the new subtree rooted at child and child's rightmost leaf node.
+      if (child != pathNode) index = computeRevKeyRoots(ni_2, child, ni_2.preL_to_rld(child), revKeyRoots, index);
+    }
+    // Walk up.
+    pathNode = parent;
+  }
+  return index;
+};
+
+template <typename Label, typename CostModel>
+void APTED<Label, CostModel>::revTreeEditDist(APTEDNodeIndexer<Label, CostModel>& ni_1, APTEDNodeIndexer<Label, CostModel>& ni_2, int it1subtree, int it2subtree, data_structures::Matrix<double>& forestdist, bool treesSwapped) {
+  // Translate input subtree root nodes to right-to-left postorder.
+  int i = ni_1.preL_to_postR_[it1subtree];
+  int j = ni_2.preL_to_postR_[it2subtree];
+  // We need to offset the node ids for accessing forestdist array which has
+  // indices from 0 to subtree size. However, the subtree node indices do not
+  // necessarily start with 0.
+  // Whenever the original right-to-left postorder id has to be accessed, use
+  // i+ioff and j+joff.
+  int ioff = ni_1.postR_to_rld_[i] - 1;
+  int joff = ni_2.postR_to_rld_[j] - 1;
+  // Variables holding costs of each minimum element.
+  float da = 0;
+  float db = 0;
+  float dc = 0;
+  // Initialize forestdist array with deletion and insertion costs of each
+  // relevant subforest.
+  forestdist.at(0,0) = 0;
+  for (int i1 = 1; i1 <= i - ioff; ++i1) {
+    forestdist.at(i1, 0) = forestdist.read_at(i1 - 1, 0) + (treesSwapped ? c_.ins(ni_1.postR_to_node(i1 + ioff)) : c_.del(ni_1.postR_to_node(i1 + ioff))); // USE COST MODEL - delete i1.
+  }
+  for (int j1 = 1; j1 <= j - joff; ++j1) {
+    forestdist.at(0, j1) = forestdist.read_at(0, j1 - 1) + (treesSwapped ? c_.del(ni_2.postR_to_node(j1 + joff)) : c_.ins(ni_2.postR_to_node(j1 + joff))); // USE COST MODEL - insert j1.
+  }
+  // Fill in the remaining costs.
+  for (int i1 = 1; i1 <= i - ioff; ++i1) {
+    for (int j1 = 1; j1 <= j - joff; ++j1) {
+      // Increment the number of subproblems.
+      ++subproblem_counter_;
+      // Calculate partial distance values for this subproblem.
+      float u = (treesSwapped ? c_.ren(ni_2.postR_to_node(j1 + joff), ni_1.postR_to_node(i1 + ioff)) : c_.ren(ni_1.postR_to_node(i1 + ioff), ni_2.postR_to_node(j1 + joff))); // USE COST MODEL - rename i1 to j1.
+      da = forestdist.read_at(i1 - 1, j1) + (treesSwapped ? c_.ins(ni_1.postR_to_node(i1 + ioff)) : c_.del(ni_1.postR_to_node(i1 + ioff))); // USE COST MODEL - delete i1.
+      db = forestdist.read_at(i1, j1 - 1) + (treesSwapped ? c_.del(ni_2.postR_to_node(j1 + joff)) : c_.ins(ni_2.postR_to_node(j1 + joff))); // USE COST MODEL - insert j1.
+      // If current subforests are subtrees.
+      if (ni_1.postR_to_rld_[i1 + ioff] == ni_1.postR_to_rld_[i] && ni_2.postR_to_rld_[j1 + joff] == ni_2.postR_to_rld_[j]) {
+        dc = forestdist.read_at(i1 - 1, j1 - 1) + u;
+        // Store the relevant distance value in delta array.
+        if (treesSwapped) {
+          delta_.at(ni_2.postR_to_preL_[j1+joff], ni_1.postR_to_preL_[i1+ioff]) = forestdist.read_at(i1 - 1, j1 - 1);
+        } else {
+          delta_.at(ni_1.postR_to_preL_[i1+ioff], ni_2.postR_to_preL_[j1+joff]) = forestdist.read_at(i1 - 1, j1 - 1);
+        }
+      } else {
+        dc = forestdist.read_at(ni_1.postR_to_rld_[i1 + ioff] - 1 - ioff, ni_2.postR_to_rld_[j1 + joff] - 1 - joff) +
+          (treesSwapped ? delta_.read_at(ni_2.postR_to_preL_[j1 + joff], ni_1.postR_to_preL_[i1 + ioff]) : delta_.read_at(ni_1.postR_to_preL_[i1 + ioff], ni_2.postR_to_preL_[j1 + joff])) + u;
+      }
+      // Calculate final minimum.
+      forestdist.at(i1, j1) = da >= db ? db >= dc ? dc : db : da >= dc ? dc : da;
+    }
+  }
+};
+
 
 template <typename Label, typename CostModel>
 int APTED<Label, CostModel>::get_strategy_path_type(int pathIDWithPathIDOffset, int pathIDOffset, int currentRootNodePreL, int currentSubtreeSize) {

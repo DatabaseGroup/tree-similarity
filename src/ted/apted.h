@@ -101,8 +101,8 @@ private:
 public:
   int preL_to_lld(int preL);
   int preL_to_rld(int preL);
-  node::Node<Label>& postL_to_node(int postL);
-  node::Node<Label>& postR_to_node(int postR);
+  const node::Node<Label>& postL_to_node(int postL);
+  const node::Node<Label>& postR_to_node(int postR);
   // int get_size();
   bool is_leaf(int node);
   int get_current_node();
@@ -144,9 +144,17 @@ private:
   void ted_init(APTEDNodeIndexer<Label, CostModel>& ni_1, APTEDNodeIndexer<Label, CostModel>& ni_2);
   double gted(APTEDNodeIndexer<Label, CostModel>& ni_1, APTEDNodeIndexer<Label, CostModel>& ni_2);
   double spf1(APTEDNodeIndexer<Label, CostModel>& ni_1, int subtreeRootNode1, APTEDNodeIndexer<Label, CostModel>& ni_2, int subtreeRootNode2);
+  
   double spfA(APTEDNodeIndexer<Label, CostModel>& ni_1, APTEDNodeIndexer<Label, CostModel>& ni_2, int pathID, int pathType, bool treesSwapped);
+  
   double spfL(APTEDNodeIndexer<Label, CostModel>& ni_1, APTEDNodeIndexer<Label, CostModel>& ni_2, bool treesSwapped);
+  int computeKeyRoots(APTEDNodeIndexer<Label, CostModel>& ni_2, int subtreeRootNode, int pathID, std::vector<int>& keyRoots, int index);
+  void treeEditDist(APTEDNodeIndexer<Label, CostModel>& ni_1, APTEDNodeIndexer<Label, CostModel>& ni_2, int it1subtree, int it2subtree, data_structures::Matrix<double>& forestdist, bool treesSwapped);
+  
   double spfR(APTEDNodeIndexer<Label, CostModel>& ni_1, APTEDNodeIndexer<Label, CostModel>& ni_2, bool treesSwapped);
+  int computeRevKeyRoots(APTEDNodeIndexer<Label, CostModel>& ni_2, int subtreeRootNode, int pathID, std::vector<int>& revKeyRoots, int index);
+  void revTreeEditDist(APTEDNodeIndexer<Label, CostModel>& ni_1, APTEDNodeIndexer<Label, CostModel>& ni_2, int it1subtree, int it2subtree, data_structures::Matrix<double>& forestdist, bool treesSwapped);
+  
   int get_strategy_path_type(int pathIDWithPathIDOffset, int pathIDOffset, int currentRootNodePreL, int currentSubtreeSize);
   void updateFnArray(int lnForNode, int node, int currentSubtreePreL);
   void updateFtArray(int lnForNode, int node);
