@@ -519,7 +519,7 @@ data_structures::Matrix<double> APTED<Label, CostModel>::compute_opt_strategy_po
 
   }
   
-  std::cout << "strategy[0][0] = " << strategy.read_at(0, 0) << std::endl;
+  // std::cout << "strategy[0][0] = " << strategy.read_at(0, 0) << std::endl;
   return strategy;
 };
 
@@ -659,6 +659,7 @@ double APTED<Label, CostModel>::spf1(APTEDNodeIndexer<Label, CostModel>& ni_1, i
     const node::Node<Label>& n2 = ni_2.preL_to_node_[subtreeRootNode2];
     double maxCost = c_.del(n1) + c_.ins(n2);
     double renCost = c_.ren(n1, n2);
+    std::cout << "spf1 = " << (renCost < maxCost ? renCost : maxCost) << std::endl;
     return renCost < maxCost ? renCost : maxCost;
   }
   if (subtreeSize1 == 1) {
@@ -675,6 +676,7 @@ double APTED<Label, CostModel>::spf1(APTEDNodeIndexer<Label, CostModel>& ni_1, i
       }
     }
     cost += minRenMinusIns;
+    std::cout << "spf1 = " << (cost < maxCost ? cost : maxCost) << std::endl;
     return cost < maxCost ? cost : maxCost;
   }
   if (subtreeSize2 == 1) {
@@ -691,8 +693,10 @@ double APTED<Label, CostModel>::spf1(APTEDNodeIndexer<Label, CostModel>& ni_1, i
       }
     }
     cost += minRenMinusDel;
+    std::cout << "spf1 = " << (cost < maxCost ? cost : maxCost) << std::endl;
     return cost < maxCost ? cost : maxCost;
   }
+  std::cout << "spf1 = -1" << std::endl;
   return -1;
 }
 
@@ -724,6 +728,9 @@ double APTED<Label, CostModel>::spfA(APTEDNodeIndexer<Label, CostModel>& ni_1, A
   int subtreeSize1 = ni_1.preL_to_size_[currentSubtreePreL1];
   data_structures::Matrix<double> t(subtreeSize2+1, subtreeSize2+1);
   data_structures::Matrix<double> s(subtreeSize1+1, subtreeSize2+1);
+  
+  // std::vector<double> q_(std::max(input_size_1_, input_size_2_) + 1);
+  
   double minCost = -1;
   // sp1, sp2 and sp3 correspond to three elements of the minimum in the
   // recursive formula [1, Figure 12].
@@ -1158,6 +1165,7 @@ double APTED<Label, CostModel>::spfA(APTEDNodeIndexer<Label, CostModel>& ni_1, A
     startPathNode = endPathNode;
     endPathNode = it1parents[endPathNode];
   }
+  std::cout << "spfA = " << minCost << std::endl;
   return minCost;
 };
 
@@ -1185,6 +1193,7 @@ double APTED<Label, CostModel>::spfL(APTEDNodeIndexer<Label, CostModel>& ni_1, A
     treeEditDist(ni_1, ni_2, ni_1.get_current_node(), keyRoots[i], forestdist, treesSwapped);
   }
   // Return the distance between the input subtrees.
+  std::cout << "spfL = " << forestdist.read_at(ni_1.preL_to_size_[ni_1.get_current_node()], ni_2.preL_to_size_[ni_2.get_current_node()]) << std::endl;
   return forestdist.read_at(ni_1.preL_to_size_[ni_1.get_current_node()], ni_2.preL_to_size_[ni_2.get_current_node()]);
 };
 
@@ -1288,6 +1297,7 @@ double APTED<Label, CostModel>::spfR(APTEDNodeIndexer<Label, CostModel>& ni_1, A
     revTreeEditDist(ni_1, ni_2, ni_1.get_current_node(), revKeyRoots[i], forestdist, treesSwapped);
   }
   // Return the distance between the input subtrees.
+  std::cout << "spfR = " << forestdist.read_at(ni_1.preL_to_size_[ni_1.get_current_node()], ni_2.preL_to_size_[ni_2.get_current_node()]) << std::endl;
   return forestdist.read_at(ni_1.preL_to_size_[ni_1.get_current_node()], ni_2.preL_to_size_[ni_2.get_current_node()]);
 };
 
@@ -1363,6 +1373,7 @@ void APTED<Label, CostModel>::revTreeEditDist(APTEDNodeIndexer<Label, CostModel>
       }
       // Calculate final minimum.
       forestdist.at(i1, j1) = da >= db ? db >= dc ? dc : db : da >= dc ? dc : da;
+      // std::cout << "forestdist.at(i1, j1) = " << forestdist.at(i1, j1) << std::endl;
     }
   }
 };
