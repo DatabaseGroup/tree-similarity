@@ -252,6 +252,15 @@ template <typename Label, typename CostModel>
 APTED<Label, CostModel>::APTED() : c_() {}
 
 template <typename Label, typename CostModel>
+double APTED<Label, CostModel>::verify(const node::Node<Label>& t1, const node::Node<Label>& t2, double similarity_threshold){
+  double ted_value = apted_ted(t1, t2);
+  if (ted_value <= similarity_threshold) {
+    return ted_value;
+  }
+  return std::numeric_limits<double>::infinity();
+};
+
+template <typename Label, typename CostModel>
 double APTED<Label, CostModel>::apted_ted(const node::Node<Label>& t1, const node::Node<Label>& t2) {
   APTEDNodeIndexer<Label, CostModel> ni_1(t1);
   APTEDNodeIndexer<Label, CostModel> ni_2(t2);
@@ -583,14 +592,14 @@ double APTED<Label, CostModel>::gted(APTEDNodeIndexer<Label, CostModel>& ni_1, A
   int subtreeSize1 = ni_1.preL_to_size_[currentSubtree1];
   int subtreeSize2 = ni_2.preL_to_size_[currentSubtree2];
 
-  std::cout << "gted(" << currentSubtree1 << "," << currentSubtree2 << ")" << std::endl;
+  // std::cout << "gted(" << currentSubtree1 << "," << currentSubtree2 << ")" << std::endl;
 
   double result = 0;
 
   // Use spf1.
   if ((subtreeSize1 == 1 || subtreeSize2 == 1)) {
     result = spf1(ni_1, currentSubtree1, ni_2, currentSubtree2);
-    std::cout << "spf1(" << currentSubtree1 << "," << currentSubtree2 << ") = " << result << std::endl;
+    // std::cout << "spf1(" << currentSubtree1 << "," << currentSubtree2 << ") = " << result << std::endl;
     return result;
   }
 
@@ -624,16 +633,16 @@ double APTED<Label, CostModel>::gted(APTEDNodeIndexer<Label, CostModel>& ni_1, A
     // [1, Section 3.4].
     if (strategyPathType == 0) {
       result = spfL(ni_1, ni_2, false);
-      std::cout << "spfL(" << ni_1.get_current_node() << "," << ni_2.get_current_node() << ") = " << result << std::endl;
+      // std::cout << "spfL(" << ni_1.get_current_node() << "," << ni_2.get_current_node() << ") = " << result << std::endl;
       return result;
     }
     if (strategyPathType == 1) {
       result = spfR(ni_1, ni_2, false);
-      std::cout << "spfR(" << ni_1.get_current_node() << "," << ni_2.get_current_node() << ") = " << result << std::endl;
+      // std::cout << "spfR(" << ni_1.get_current_node() << "," << ni_2.get_current_node() << ") = " << result << std::endl;
       return result;
     }
     result = spfA(ni_1, ni_2, std::abs(strategyPathID) - 1, strategyPathType, false);
-    std::cout << "spfA(" << ni_1.get_current_node() << "," << ni_2.get_current_node() << ") = " << result << std::endl;
+    // std::cout << "spfA(" << ni_1.get_current_node() << "," << ni_2.get_current_node() << ") = " << result << std::endl;
     return result;
   }
 
@@ -660,16 +669,16 @@ double APTED<Label, CostModel>::gted(APTEDNodeIndexer<Label, CostModel>& ni_1, A
   // [1, Section 3.4].
   if (strategyPathType == 0) {
     result = spfL(ni_2, ni_1, true);
-    std::cout << "spfL(" << ni_1.get_current_node() << "," << ni_2.get_current_node() << ") = " << result << std::endl;
+    // std::cout << "spfL(" << ni_1.get_current_node() << "," << ni_2.get_current_node() << ") = " << result << std::endl;
     return result;
   }
   if (strategyPathType == 1) {
     result = spfR(ni_2, ni_1, true);
-    std::cout << "spfR(" << ni_1.get_current_node() << "," << ni_2.get_current_node() << ") = " << result << std::endl;
+    // std::cout << "spfR(" << ni_1.get_current_node() << "," << ni_2.get_current_node() << ") = " << result << std::endl;
     return result;
   }
   result = spfA(ni_2, ni_1, std::abs(strategyPathID) - pathIDOffset - 1, strategyPathType, true);
-  std::cout << "spfA(" << ni_1.get_current_node() << "," << ni_2.get_current_node() << ") = " << result << std::endl;
+  // std::cout << "spfA(" << ni_1.get_current_node() << "," << ni_2.get_current_node() << ") = " << result << std::endl;
   return result;
 }
 
@@ -682,7 +691,7 @@ double APTED<Label, CostModel>::spf1(APTEDNodeIndexer<Label, CostModel>& ni_1, i
     const node::Node<Label>& n2 = ni_2.preL_to_node_[subtreeRootNode2];
     double maxCost = c_.del(n1) + c_.ins(n2);
     double renCost = c_.ren(n1, n2);
-    std::cout << "spf1 = " << (renCost < maxCost ? renCost : maxCost) << std::endl;
+    // std::cout << "spf1 = " << (renCost < maxCost ? renCost : maxCost) << std::endl;
     return renCost < maxCost ? renCost : maxCost;
   }
   if (subtreeSize1 == 1) {
@@ -699,7 +708,7 @@ double APTED<Label, CostModel>::spf1(APTEDNodeIndexer<Label, CostModel>& ni_1, i
       }
     }
     cost += minRenMinusIns;
-    std::cout << "spf1 = " << (cost < maxCost ? cost : maxCost) << std::endl;
+    // std::cout << "spf1 = " << (cost < maxCost ? cost : maxCost) << std::endl;
     return cost < maxCost ? cost : maxCost;
   }
   if (subtreeSize2 == 1) {
@@ -716,10 +725,10 @@ double APTED<Label, CostModel>::spf1(APTEDNodeIndexer<Label, CostModel>& ni_1, i
       }
     }
     cost += minRenMinusDel;
-    std::cout << "spf1 = " << (cost < maxCost ? cost : maxCost) << std::endl;
+    // std::cout << "spf1 = " << (cost < maxCost ? cost : maxCost) << std::endl;
     return cost < maxCost ? cost : maxCost;
   }
-  std::cout << "spf1 = -1" << std::endl;
+  // std::cout << "spf1 = -1" << std::endl;
   return -1;
 }
 
@@ -1188,7 +1197,7 @@ double APTED<Label, CostModel>::spfA(APTEDNodeIndexer<Label, CostModel>& ni_1, A
     startPathNode = endPathNode;
     endPathNode = it1parents[endPathNode];
   }
-  std::cout << "spfA = " << minCost << std::endl;
+  // std::cout << "spfA = " << minCost << std::endl;
   return minCost;
 };
 
@@ -1216,7 +1225,7 @@ double APTED<Label, CostModel>::spfL(APTEDNodeIndexer<Label, CostModel>& ni_1, A
     treeEditDist(ni_1, ni_2, ni_1.get_current_node(), keyRoots[i], forestdist, treesSwapped);
   }
   // Return the distance between the input subtrees.
-  std::cout << "spfL = " << forestdist.read_at(ni_1.preL_to_size_[ni_1.get_current_node()], ni_2.preL_to_size_[ni_2.get_current_node()]) << std::endl;
+  // std::cout << "spfL = " << forestdist.read_at(ni_1.preL_to_size_[ni_1.get_current_node()], ni_2.preL_to_size_[ni_2.get_current_node()]) << std::endl;
   return forestdist.read_at(ni_1.preL_to_size_[ni_1.get_current_node()], ni_2.preL_to_size_[ni_2.get_current_node()]);
 };
 
@@ -1320,7 +1329,7 @@ double APTED<Label, CostModel>::spfR(APTEDNodeIndexer<Label, CostModel>& ni_1, A
     revTreeEditDist(ni_1, ni_2, ni_1.get_current_node(), revKeyRoots[i], forestdist, treesSwapped);
   }
   // Return the distance between the input subtrees.
-  std::cout << "spfR = " << forestdist.read_at(ni_1.preL_to_size_[ni_1.get_current_node()], ni_2.preL_to_size_[ni_2.get_current_node()]) << std::endl;
+  // std::cout << "spfR = " << forestdist.read_at(ni_1.preL_to_size_[ni_1.get_current_node()], ni_2.preL_to_size_[ni_2.get_current_node()]) << std::endl;
   return forestdist.read_at(ni_1.preL_to_size_[ni_1.get_current_node()], ni_2.preL_to_size_[ni_2.get_current_node()]);
 };
 
@@ -1435,6 +1444,11 @@ void APTED<Label, CostModel>::updateFtArray(int lnForNode, int node) {
   if(fn_[node] > -1) {
     ft_[fn_[node]] = node;
   }
+};
+
+template <typename Label, typename CostModel>
+const unsigned long long int APTED<Label, CostModel>::get_subproblem_count() const {
+  return subproblem_counter_;
 };
 
 // template <typename Label, typename CostModel>

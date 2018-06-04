@@ -13,6 +13,7 @@
 #include "touzet.h"
 #include "simple_tree_generator.h"
 #include "zhang_shasha.h"
+#include "apted.h"
 #include "greedy_ub.h"
 
 struct TestParams {
@@ -27,6 +28,7 @@ struct TestParams {
   bool alg_zs_ted;
   bool alg_greedy_ub;
   bool alg_greedy_ub_deprecated;
+  bool alg_apted;
   
   TestParams() {
     input_file = "";
@@ -40,6 +42,7 @@ struct TestParams {
     alg_zs_ted = false;
     alg_greedy_ub = false;
     alg_greedy_ub_deprecated = false;
+    alg_apted = false;
   };
   
   void set_default() {
@@ -53,6 +56,7 @@ struct TestParams {
     alg_zs_ted = true;
     alg_greedy_ub = true;
     alg_greedy_ub_deprecated = true;
+    alg_apted = true;
   };
 };
 
@@ -115,6 +119,9 @@ int single_test_case(TestParams& tp, TestInput& ti) {
   
   // Initialise GreedyUB algorithm.
   ted_ub::GreedyUB<Label, CostModel> greedy_ub;
+  
+  // Initialise APTED algorithm.
+  ted::APTED<Label, CostModel> apted_ted;
   
   // Runtime measurement.
   Timing timing;
@@ -245,6 +252,16 @@ int single_test_case(TestParams& tp, TestInput& ti) {
         return -1;
       }
     }
+    if (tp.alg_apted) {
+      runtime.reset();
+      runtime.start();
+      computed_result = apted_ted.apted_ted(t1, t2);
+      runtime.stop();
+      std::cout << "APTED_TED" << std::endl;
+      std::cout << " ted : " << computed_result << std::endl;
+      std::cout << "  sp : " << apted_ted.get_subproblem_count() << std::endl;
+      std::cout << "time : " << runtime.getfloat() << std::endl;
+    }
   } catch (const std::exception& e) {
     std::cerr << e.what() << std::endl;
   }
@@ -302,6 +319,9 @@ int main(int argc, char** argv) {
       }
       if (string_a == "-zs") {
         tp.alg_zs_ted = true;
+      }
+      if (string_a == "-apted") {
+        tp.alg_apted = true;
       }
     }
     if (tp.input_file == "") {
