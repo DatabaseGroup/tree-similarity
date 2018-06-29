@@ -74,6 +74,7 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::lb_mapping(
     pos = t2_label_il_start_pos_[t1_label_id]; // Start position for reading postorder ids of nodes with specific label.
     end_pos = std::min(pos + 2 * k, (int)candidate_ids.size()-1);
     while (pos <= end_pos) {
+      ++subproblem_counter;
       cand_id = candidate_ids[pos];
       if (cand_id - i > k) {
         // We're certainly outside the window from the right side.
@@ -302,7 +303,7 @@ bool GreedyUB<Label, CostModel>::if_in_corresponding_regions(int t1_begin_gap,
 
 template <typename Label, typename CostModel>
 std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::fill_gaps_in_mapping(
-    std::vector<std::pair<int, int>>& mapping, const int k) const {
+    std::vector<std::pair<int, int>>& mapping, const int k) {
   
   // In result_mapping we store the output of this function.
   std::vector<std::pair<int, int>> result_mapping;
@@ -343,7 +344,7 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::fill_gaps_in_mappin
       // Update the counts for nodes in end_gap as mapped nodes.
       update_desc_when_mapped(end_gap.second, t2_count_mapped_desc, t2_parent_, t2_input_size_);
       // Push the end of the current gap to the result.
-      result_mapping.push_back(end_gap);    
+      result_mapping.push_back(end_gap);
       // Update the begin of the next gap.
       begin_gap = end_gap;
       ++end_gap_it;
@@ -357,6 +358,7 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::fill_gaps_in_mappin
     int j_last = end_gap.second - 1;
     bool mapped_in_gap = false;
     while (i <= i_last && j <= j_last) {
+      ++subproblem_counter;
       if (t1_count_mapped_desc[i] == t2_count_mapped_desc[j] &&
           t1_count_mapped_anc[i] == t2_count_mapped_anc[j] &&
           k_relevant(i, j, k) &&
@@ -783,6 +785,9 @@ void GreedyUB<Label, CostModel>::init(const node::Node<Label>& t1,
   t1_label_.clear();
   t2_label_.clear();
   t2_label_il_start_pos_.clear();
+  
+  // Reset subproblem counter.
+  subproblem_counter = 0;
   
   // TODO: Do not call get_tree_size() that causes an additional tree traversal.
   //       Index subtree sizes instead - they'll be used anyways.

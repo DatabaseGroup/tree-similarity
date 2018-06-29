@@ -140,6 +140,11 @@ public:
   ///
   /// \return A TestItem object.
   const TestItems get_test_items() const;
+  /// If the TED algorithm has been executed, returns the number of subproblems
+  /// encountered during that execution.
+  ///
+  /// \return The number of subproblems acountered in the last TED computation.
+  const unsigned long long int get_subproblem_count() const;
 // Member variables.
 private:
   /// The size of the source tree.
@@ -218,6 +223,10 @@ private:
   std::unordered_map<std::string, std::list<int>> t2_label_il_hash_;
   /// Cost model.
   const CostModel c_;
+  /// Subproblem counter - for experiments only. Counts the number of
+  /// non-trivial values filled in fd_ matrix: subproblems where both forests
+  /// are not empty.
+  unsigned long long int subproblem_counter;
 // Member functions.
 private:
   /// Takes a one-to-one mapping and revises it such that the output is a valid
@@ -284,7 +293,7 @@ private:
   /// \param k Similarity threshold.
   /// \result A TED mapping, with possibly more pairs than in mapping. 
   std::vector<std::pair<int, int>> fill_gaps_in_mapping(
-      std::vector<std::pair<int, int>>& mapping, const int k) const;
+      std::vector<std::pair<int, int>>& mapping, const int k);
   /// Deprecated. Kept for experiments. 
   std::vector<std::pair<int, int>> fill_gaps_in_mapping_deprecated(
       std::vector<std::pair<int, int>>& mapping, const int k) const;
