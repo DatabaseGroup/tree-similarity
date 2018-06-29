@@ -73,6 +73,17 @@ public:
   ///         otherwise.
   double verify(const node::Node<Label>& t1, const node::Node<Label>& t2,
       double similarity_threshold);
+  /// Computes the TED value of the greedy label upper bound between trees t1
+  /// and t1 given a similarity_threshold value.
+  ///
+  /// NOTE: Here, only unit cost model is allowed.
+  ///
+  /// \param t1 Source tree.
+  /// \param t2 Destination tree.
+  /// \param k Maximum value of the tree edit distance.
+  /// \return TED value of the greedy label upper bound.
+  double greedy_ub_ted(const node::Node<Label>& t1, const node::Node<Label>& t2,
+      const int k);
   /// Calculates the unit cost of passed mapping.
   ///
   /// NOTE: The greedy_ub algorithm assumes unit cost. However, this function

@@ -41,6 +41,12 @@ double GreedyUB<Label, CostModel>::verify(const node::Node<Label>& t1,
 };
 
 template <typename Label, typename CostModel>
+double GreedyUB<Label, CostModel>::greedy_ub_ted(const node::Node<Label>& t1,
+    const node::Node<Label>& t2, const int k) {
+  return mapping_cost(lb_mapping_fill_gaps(t1, t2, static_cast <int> (std::ceil(k))));
+};
+
+template <typename Label, typename CostModel>
 double GreedyUB<Label, CostModel>::mapping_cost(
     const std::vector<std::pair<int, int>>& mapping) const {
   double result = 0.0;
