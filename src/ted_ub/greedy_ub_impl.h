@@ -856,4 +856,9 @@ const typename GreedyUB<Label, CostModel>::TestItems GreedyUB<Label, CostModel>:
   return test_items;
 };
 
+template <typename Label, typename CostModel>
+const unsigned long long int GreedyUB<Label, CostModel>::get_subproblem_count() const {
+  return subproblem_counter;
+}
+
 #endif // TREE_SIMILARITY_TED_UB_GREEDY_UB_IMPL_H
