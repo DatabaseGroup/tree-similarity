@@ -145,6 +145,8 @@ public:
   ///
   /// \return The number of subproblems acountered in the last TED computation.
   const unsigned long long int get_subproblem_count() const;
+  /// For compatibility with Touzet only.
+  const unsigned long long int get_top_y_update_count() const;
 // Member variables.
 private:
   /// The size of the source tree.
@@ -227,6 +229,8 @@ private:
   /// non-trivial values filled in fd_ matrix: subproblems where both forests
   /// are not empty.
   unsigned long long int subproblem_counter;
+  /// For compatibility with Touzet only.
+  unsigned long long int top_y_update_counter = 0;
 // Member functions.
 private:
   /// Takes a one-to-one mapping and revises it such that the output is a valid

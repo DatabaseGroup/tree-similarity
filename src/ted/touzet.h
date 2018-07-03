@@ -124,11 +124,9 @@ public:
   ///
   /// The idea is to execute forest distance only once for all relevant
   /// subtree pairs being on the left paths of the same root node pair.
-  /// It loops over all keyroot node pairs. For a specific pair it walks up
-  /// the left paths and finds the top node pair that is relevant, that is,
-  /// for keyroots (x,y) it finds the pair (x_l,y_l), x_l (y_l) is on the left
-  /// path rooted in x (y), x_l (y_l) is relevant with some node on the left
-  /// path rooted in x (y), and postorder ids of x_l (y_l) are maximal.
+  ///
+  /// It loops over all keyroot node pairs and finds the top nodes on their
+  /// left paths. See source code for details.
   ///
   /// \param t1 Source tree.
   /// \param t2 Destination tree.
@@ -136,6 +134,14 @@ public:
   ///          insertions).
   /// \return Tree edit distance regarding k.
   double touzet_ted_kr_loop(const node::Node<Label>& t1,
+      const node::Node<Label>& t2, const int k);
+  /// Inteface function to execute touzet_ted_kr_loop with computing the
+  /// e_max value. Currently for experiments only.
+  double touzet_ted_kr_loop_e_max(const node::Node<Label>& t1,
+      const node::Node<Label>& t2, const int k);
+  /// Inteface function to execute touzet_ted_kr_loop without computing the
+  /// e_max value. Currently for experiments only.
+  double touzet_ted_kr_loop_no_e_max(const node::Node<Label>& t1,
       const node::Node<Label>& t2, const int k);
   /// Computes the tree edit distance between two trees assuming a maximum
   /// number of allowed structural modifications (deletions, insertions).
@@ -146,18 +152,8 @@ public:
   /// The idea is to execute forest distance only once for all relevant
   /// subtree pairs being on the left paths of the same root node pair.
   ///
-  /// This is an improved version of touzet_ted_kr_loop. It removes the
-  /// nested loop over keyroot nodes and traversals of the left paths.
-  /// It scans all subtree pairs in the band in decreasing postorder ids.
-  /// For each relevant pair (x_i,y_j), it verifies their keyroot nodes (x,y).
-  /// If (x,y) has not been seen before, forest distance will be computed for
-  /// (x_i,y_j). This ensures that (x_i,y_j) is a top pair on the left paths
-  /// rooted at x (y). Only after all (x_i,y_j) pairs are stored in a vector,
-  /// the forest distances are executed in the reverse order of the pairs. 
-  ///
-  /// NOTE: The check of seing (x,y) before is by storing (x,y) in
-  ///       std::unordered_set. To make hashing more efficient, we pack x and y
-  ///       in a single integer. See code for details.
+  /// It loops over all node pairs in the k-strip and identifies the top
+  /// nodes on the left paths. See source code for details.
   ///
   /// \param t1 Source tree.
   /// \param t2 Destination tree.
@@ -165,6 +161,14 @@ public:
   ///          insertions).
   /// \return Tree edit distance regarding k.
   double touzet_ted_kr_set(const node::Node<Label>& t1,
+      const node::Node<Label>& t2, const int k);
+  /// Inteface function to execute touzet_ted_kr_set with computing the
+  /// e_max value. Currently for experiments only.
+  double touzet_ted_kr_set_e_max(const node::Node<Label>& t1,
+      const node::Node<Label>& t2, const int k);
+  /// Inteface function to execute touzet_ted_kr_set without computing the
+  /// e_max value. Currently for experiments only.
+  double touzet_ted_kr_set_no_e_max(const node::Node<Label>& t1,
       const node::Node<Label>& t2, const int k);
   /// Creates a TestItems object and returns it (by value).
   ///
@@ -175,6 +179,8 @@ public:
   ///
   /// \return The number of subproblems acountered in the last TED computation.
   const unsigned long long int get_subproblem_count() const;
+  /// For experiments only.
+  const unsigned long long int get_top_y_update_count() const;
 // Member variables.
 private:
   /// The size of the source tree.
@@ -259,6 +265,12 @@ private:
   /// are not empty (including storing first infinities outside e-strip), and
   /// last value computed in fd_.
   unsigned long long int subproblem_counter;
+  /// Counts the number of times top_y value is updated in touzet_ted_kr_set
+  /// or touzet_ted_kr_loop functions.
+  unsigned long long int top_y_update_counter;
+  /// Specifies if e_max value should be computed in touzet_ted_kr_set or
+  /// touzet_ted_kr_loop functions (default: true).
+  bool compute_e_max;
 // Member functions.
 private:
   /// Resets and initialises algorithm's internal data structures and constants.

@@ -225,6 +225,12 @@ void Touzet<Label, CostModel>::init(const node::Node<Label>& t1,
 
   // Reset subproblem counter.
   subproblem_counter = 0;
+  
+  // Reset top_y update counter.
+  top_y_update_counter = 0;
+  
+  // Reset e_max to the default value.
+  compute_e_max = true;
 
   // NOTE: The default constructor of Matrix is called while constructing
   //       the algorithm object.
@@ -368,6 +374,20 @@ double Touzet<Label, CostModel>::tree_dist(const int x, const int y,
 };
 
 template <typename Label, typename CostModel>
+double Touzet<Label, CostModel>::touzet_ted_kr_loop_e_max(
+    const node::Node<Label>& t1, const node::Node<Label>& t2, const int k) {
+  compute_e_max = true;
+  return touzet_ted_kr_loop(t1, t2, k);
+};
+
+template <typename Label, typename CostModel>
+double Touzet<Label, CostModel>::touzet_ted_kr_loop_no_e_max(
+    const node::Node<Label>& t1, const node::Node<Label>& t2, const int k) {
+  compute_e_max = false;
+  return touzet_ted_kr_loop(t1, t2, k);
+};
+
+template <typename Label, typename CostModel>
 double Touzet<Label, CostModel>::touzet_ted_kr_loop(const node::Node<Label>& t1,
                                                     const node::Node<Label>& t2,
                                                     const int k) {
@@ -405,6 +425,7 @@ double Touzet<Label, CostModel>::touzet_ted_kr_loop(const node::Node<Label>& t1,
                                          // by the stronger k-relevancy)
                                          // and it has to be relevant.
             if (top_x == -1) top_x = x_l; // The first top_x found is maximal.
+            ++top_y_update_counter;
             top_y = y_l; // y_l always > top_y; std::max(top_y, y_l) not needed.
             break; // Don't continue down the path in the right-hand tree.
           }
@@ -414,21 +435,38 @@ double Touzet<Label, CostModel>::touzet_ted_kr_loop(const node::Node<Label>& t1,
       }
       if (top_x > -1 && top_y > -1) {
         // Get max e over node pairs on left paths.
-        int e_max = 0;
-        int x_i = top_x;
-        while (x_i > -1) {
-          int y_i = top_y;
-          while (y_i > -1) {
-            e_max = std::max(e_max, e_budget(x_i, y_i, k));
-            y_i = t2_lch_[y_i];
+        int e_max = k;
+        if (compute_e_max) {
+          e_max = 0;
+          int x_i = top_x;
+          while (x_i > -1) {
+            int y_i = top_y;
+            while (y_i > -1) {
+              e_max = std::max(e_max, e_budget(x_i, y_i, k));
+              y_i = t2_lch_[y_i];
+            }
+            x_i = t1_lch_[x_i];
           }
-          x_i = t1_lch_[x_i];
         }
         td_.at(top_x, top_y) = tree_dist(top_x, top_y, k, e_max);
       }
     }
   }
   return td_.read_at(t1_input_size_-1, t2_input_size_-1);
+};
+
+template <typename Label, typename CostModel>
+double Touzet<Label, CostModel>::touzet_ted_kr_set_e_max(
+    const node::Node<Label>& t1, const node::Node<Label>& t2, const int k) {
+  compute_e_max = true;
+  return touzet_ted_kr_set(t1, t2, k);
+};
+
+template <typename Label, typename CostModel>
+double Touzet<Label, CostModel>::touzet_ted_kr_set_no_e_max(
+    const node::Node<Label>& t1, const node::Node<Label>& t2, const int k) {
+  compute_e_max = false;
+  return touzet_ted_kr_set(t1, t2, k);
 };
 
 template <typename Label, typename CostModel>
@@ -446,6 +484,8 @@ double Touzet<Label, CostModel>::touzet_ted_kr_set(const node::Node<Label>& t1,
   // A map to store pairs of met keyroot nodes and an index to kr_vector where
   // the corresponding pair of nodes is stored.
   std::unordered_map<unsigned long long int, unsigned int> kr_pair_to_index;
+  // NOTE: To make hashing more efficient, we pack a node pair into a single
+  //       integer value.
   unsigned long long int key;
   
   // Vector to collect pairs of nodes for executing forest distance.
@@ -487,7 +527,10 @@ double Touzet<Label, CostModel>::touzet_ted_kr_set(const node::Node<Label>& t1,
           // Look up the (top_x,top_y) pair for the kr_pair.
           auto& kr_pair = kr_vector[kr_pair_search.first->second];
           // Update top_y.
-          kr_pair.second = std::max(kr_pair.second, y);
+          if (y > kr_pair.second) {
+            ++top_y_update_counter;
+            kr_pair.second = y;
+          }
         }
       }
     }
@@ -500,15 +543,18 @@ double Touzet<Label, CostModel>::touzet_ted_kr_set(const node::Node<Label>& t1,
     int x_l = rit->first;
     int y_l = rit->second;
     // Get max e over node pairs on left paths.
-    int e_max = 0;
-    int top_x = x_l;
-    while (top_x > -1) {
-      int top_y = y_l;
-      while (top_y > -1) {
-        e_max = std::max(e_max, e_budget(top_x, top_y, k));
-        top_y = t2_lch_[top_y];
+    int e_max = k;
+    if (compute_e_max) {
+      e_max = 0;
+      int top_x = x_l;
+      while (top_x > -1) {
+        int top_y = y_l;
+        while (top_y > -1) {
+          e_max = std::max(e_max, e_budget(top_x, top_y, k));
+          top_y = t2_lch_[top_y];
+        }
+        top_x = t1_lch_[top_x];
       }
-      top_x = t1_lch_[top_x];
     }
     // Compute td(x, y) with e errors - the value of e(x, y, k).
     td_.at(x_l, y_l) = tree_dist(x_l, y_l, k, e_max);    
@@ -752,6 +798,11 @@ const typename Touzet<Label, CostModel>::TestItems Touzet<Label, CostModel>::get
 template <typename Label, typename CostModel>
 const unsigned long long int Touzet<Label, CostModel>::get_subproblem_count() const {
   return subproblem_counter;
+}
+
+template <typename Label, typename CostModel>
+const unsigned long long int Touzet<Label, CostModel>::get_top_y_update_count() const {
+  return top_y_update_counter;
 }
 
 #endif // TREE_SIMILARITY_TOUZET_TOUZET_IMPL_H
