@@ -379,6 +379,13 @@ double Touzet<Label, CostModel>::touzet_ted_kr_loop(const node::Node<Label>& t1,
     return std::numeric_limits<double>::infinity();
   }
   
+  // NOTE: There is an alternative approach to the kr-loop solution.
+  //       Given kr pair, find top_x as in the current loop. Find top_y by
+  //       swapping x and y parameters.
+  //       The two solutions differ in the number of steps for the worst and
+  //       best case.
+  //       TODO: Verify empirically.
+  
   // Iterate over all keyroot node pairs.
   for (auto x : t1_kr_) {
     for (auto y : t2_kr_) {
