@@ -386,20 +386,23 @@ double Touzet<Label, CostModel>::touzet_ted_kr_loop(const node::Node<Label>& t1,
       int top_y = -1;
       // Search for top relevant pair.
       int x_l = x;
-      while (x_l >= 0 && top_x == -1) { // While we haven't found any relevant
-                                        // node on the left path from x.
+      while (x_l >= 0) { // We have to go through all x. Once we find a top_y,
+                         // the consecutive x have to be checked against only
+                         // y_l > top_y.
         int y_l = y;
         while (y_l >= 0 && y_l > top_y) { // Verify only those nodes on the left
                                           // path from y that are above the
                                           // already found relevant node.
-          if (std::abs(x_l - y_l) <= k && k_relevant(x_l, y_l, k)) { // The pair has to be in the band
-                                                                     // and it has to be relevant.
-            top_x = x_l; // x_l always > top_x; std::max(top_x, x_l) not needed.
+          if (k_relevant(x_l, y_l, k)) { // The pair has to be in the band
+                                         // (std::abs(x_l - y_l) <= k satisfied
+                                         // by the stronger k-relevancy)
+                                         // and it has to be relevant.
+            if (top_x == -1) top_x = x_l; // The first top_x found is maximal.
             top_y = y_l; // y_l always > top_y; std::max(top_y, y_l) not needed.
-            break; // Don't continue down the path.
-          }            
+            break; // Don't continue down the path in the right-hand tree.
+          }
           y_l = t2_lch_[y_l];
-        }      
+        }
         x_l = t1_lch_[x_l];
       }
       if (top_x > -1 && top_y > -1) {
@@ -433,25 +436,51 @@ double Touzet<Label, CostModel>::touzet_ted_kr_set(const node::Node<Label>& t1,
     return std::numeric_limits<double>::infinity();
   }
   
-  // Set to store and look up met pairs of keyroot nodes.
-  std::unordered_set<unsigned long long int> kr_set;
+  // A map to store pairs of met keyroot nodes and an index to kr_vector where
+  // the corresponding pair of nodes is stored.
+  std::unordered_map<unsigned long long int, unsigned int> kr_pair_to_index;
   unsigned long long int key;
+  
   // Vector to collect pairs of nodes for executing forest distance.
   std::vector<std::pair<int, int>> kr_vector;
     
   // Nested loop over all node pairs in k-strip : |x-y|<=k. This loop iterates
   // over all node pairs from k-strip, and verifies their k-relevancy.
-  // The loop interates backwards in postorder ids. This ensures finding top
-  // relevant pairs of nodes on the left paths of their root nodes. These pairs
-  // are collected in a vector.
+  // The loop iterates in decreasing postorder ids.
+  //
+  // NOTE: Finding the first k-relevant node pair in this loop desn't ensure
+  //       finding top relevant nodes on the left paths of their root nodes.
+  //       y-nodes above the top_y last found have to be verified.
+  //
+  // For each k-relevant node pair in the k-strip, look up the corresponding
+  // keyroot pair.
+  // If we haven't seen the keroot pair before:
+  //   store the (x,y) pair at the end of the kr_vector;
+  //   insert the keyroot pair to the map with the kr_vector index as a value
+  //     (to remember where is the current (top_x,top_y) pair of this keroot
+  //     pair).
+  // If we've seen the keroot pair before:
+  //   look up their (top_x,top_y) pair in kr_vector;
+  //   update the top_y to the max of the current y and the top_y stored in
+  //     kr_vector.
+  unsigned int kr_pair_index = 0;
   for (int x = t1_input_size_ - 1; x >= 0; --x) {
     int x_keyroot = t1_nodes_kr_[x];
     for (int y = std::min(x + k, t2_input_size_-1); y >= std::max(0, x - k); --y) {
       if (k_relevant(x, y, k)) {
         // The casting is needed for 32 bits shift.
         key = ((unsigned long long int)x_keyroot << kBitsToShift) | (unsigned long long int)t2_nodes_kr_[y];
-        if (kr_set.insert(key).second) {
-          kr_vector.push_back({x, y});
+        // Try to insert {key, kr_pair_index} pair into kr_pair_to_index.
+        auto kr_pair_search = kr_pair_to_index.insert({key, kr_pair_index});
+        if (kr_pair_search.second) { // We meet this kr pair for the first time.
+        // kr_pair_index already inserted to kr_pair_to_index.
+        kr_vector.push_back({x, y});
+        ++kr_pair_index; // Increment the index for the consecutive kr pairs.
+        } else { // We've met this kr pair before.
+          // Look up the (top_x,top_y) pair for the kr_pair.
+          auto& kr_pair = kr_vector[kr_pair_search.first->second];
+          // Update top_y.
+          kr_pair.second = std::max(kr_pair.second, y);
         }
       }
     }
