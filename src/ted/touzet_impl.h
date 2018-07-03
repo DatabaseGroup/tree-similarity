@@ -251,6 +251,11 @@ void Touzet<Label, CostModel>::init(const node::Node<Label>& t1,
 };
 
 template <typename Label, typename CostModel>
+double Touzet<Label, CostModel>::verify(const node::Node<Label>& t1, const node::Node<Label>& t2, double similarity_threshold) {
+  return touzet_ted_kr_set(t1, t2, static_cast <int> (std::ceil(similarity_threshold)));
+};
+
+template <typename Label, typename CostModel>
 double Touzet<Label, CostModel>::touzet_ted(const node::Node<Label>& t1,
                                             const node::Node<Label>& t2,
                                             const int k) {
