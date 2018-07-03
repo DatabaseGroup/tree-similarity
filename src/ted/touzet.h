@@ -86,19 +86,6 @@ public:
 public:
   /// Constructor. Creates the cost model based on the template.
   Touzet();
-  /// Verifies if the tree edit distance between trees t1 and t1 is smaller or
-  /// equal than the similarity_threshold value.
-  ///
-  /// NOTE: Here, only unit cost model is allowed. similarity_threshold is
-  ///       converted to integer value using std::ceil and static cast.
-  ///
-  /// \param t1 Source tree.
-  /// \param t2 Destination tree.
-  /// \param similarity_threshold Maximum value of the tree edit distance.
-  /// \return Tree edit distance value if it smaller or equal than the
-  ///         similarity_threshold, and std::numeric_limits<double>::infinity()
-  ///         otherwise.
-  double verify(const node::Node<Label>& t1, const node::Node<Label>& t2, double similarity_threshold);
   /// Computes the tree edit distance between two trees assuming a maximum
   /// number of allowed structural modifications (deletions, insertions).
   ///
@@ -183,6 +170,19 @@ public:
   /// e_max value. Currently for experiments only.
   double touzet_ted_kr_set_no_e_max(const node::Node<Label>& t1,
       const node::Node<Label>& t2, const int k);
+  /// Verifies if the tree edit distance between trees t1 and t1 is smaller or
+  /// equal than the similarity_threshold value.
+  ///
+  /// NOTE: Here, only unit cost model is allowed. similarity_threshold is
+  ///       converted to integer value using std::ceil and static cast.
+  ///
+  /// \param t1 Source tree.
+  /// \param t2 Destination tree.
+  /// \param similarity_threshold Maximum value of the tree edit distance.
+  /// \return Tree edit distance value if it smaller or equal than the
+  ///         similarity_threshold, and std::numeric_limits<double>::infinity()
+  ///         otherwise.
+  double verify(const node::Node<Label>& t1, const node::Node<Label>& t2, double similarity_threshold);
   /// Creates a TestItems object and returns it (by value).
   ///
   /// \return A TestItem object.
