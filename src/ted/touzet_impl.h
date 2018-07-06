@@ -417,9 +417,9 @@ double Touzet<Label, CostModel>::touzet_ted_kr_loop(const node::Node<Label>& t1,
                          // the consecutive x have to be checked against only
                          // y_l > top_y.
         int y_l = y;
-        while (y_l >= 0 && y_l > top_y) { // Verify only those nodes on the left
-                                          // path from y that are above the
-                                          // already found relevant node.
+        while (y_l > top_y) { // Verify only those nodes on the left
+                              // path from y that are above the
+                              // already found relevant node.
           if (k_relevant(x_l, y_l, k)) { // The pair has to be in the band
                                          // (std::abs(x_l - y_l) <= k satisfied
                                          // by the stronger k-relevancy)
