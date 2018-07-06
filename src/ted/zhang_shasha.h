@@ -56,6 +56,8 @@ public:
   /// \param t2 Destination tree.
   /// \return Tree edit distance value.
   double zhang_shasha_ted(const node::Node<Label>& t1, const node::Node<Label>& t2);
+  /// For common signature in experiments only. Calls zhang_shasha_ted.
+  double zhang_shasha_ted_k(const node::Node<Label>& t1, const node::Node<Label>& t2, const int k = 0);
   /// Creates a TestItems object and returns it.
   ///
   /// \return A TestItem object.

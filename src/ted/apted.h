@@ -129,6 +129,8 @@ public:
   /// \return Tree edit distance between t1 and t2.
   double apted_ted(const node::Node<Label>& t1, const node::Node<Label>& t2);
   double apted_ted(APTEDNodeIndexer<Label, CostModel>& ni_1, APTEDNodeIndexer<Label, CostModel>& ni_2);
+  /// For common signature in experiments only. Calls apted_ted.
+  double apted_ted_k(const node::Node<Label>& t1, const node::Node<Label>& t2, const int k = 0);
   /// Verifies if the tree edit distance between trees t1 and t1 is smaller or
   /// equal than the similarity_threshold value.
   ///

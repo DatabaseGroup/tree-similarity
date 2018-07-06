@@ -124,6 +124,12 @@ void ZhangShasha<Label, CostModel>::index_nodes(
 }
 
 template <typename Label, typename CostModel>
+double ZhangShasha<Label, CostModel>::zhang_shasha_ted_k(const node::Node<Label>& t1,
+    const node::Node<Label>& t2, const int k) {
+  return zhang_shasha_ted(t1, t2);
+};
+
+template <typename Label, typename CostModel>
 double ZhangShasha<Label, CostModel>::zhang_shasha_ted(const node::Node<Label>& t1,
                                                      const node::Node<Label>& t2) {
   // std::cout << "=== zhang_shasha_ted ===" << std::endl;

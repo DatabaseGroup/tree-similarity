@@ -261,6 +261,11 @@ double APTED<Label, CostModel>::verify(const node::Node<Label>& t1, const node::
 };
 
 template <typename Label, typename CostModel>
+double APTED<Label, CostModel>::apted_ted_k(const node::Node<Label>& t1, const node::Node<Label>& t2, const int k) {
+  return apted_ted(t1, t2);
+};
+
+template <typename Label, typename CostModel>
 double APTED<Label, CostModel>::apted_ted(const node::Node<Label>& t1, const node::Node<Label>& t2) {
   APTEDNodeIndexer<Label, CostModel> ni_1(t1);
   APTEDNodeIndexer<Label, CostModel> ni_2(t2);
