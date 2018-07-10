@@ -50,7 +50,7 @@ template <typename Label, typename CostModel>
 double GreedyUB<Label, CostModel>::mapping_cost(
     const std::vector<std::pair<int, int>>& mapping) const {
   double result = 0.0;
-  for (auto m : mapping) {
+  for (const auto& m : mapping) {
     result += c_.ren(t1_node_[m.first], t2_node_[m.second]); // renames
   }
   result += t1_input_size_ - mapping.size(); // deletions
@@ -214,7 +214,7 @@ void GreedyUB<Label, CostModel>::get_mapped_ancestors_counts(
     std::vector<int>& t2_count_mapped_anc) const {
   std::vector<int> t1_mapped_nodes(t1_input_size_); // indexed in postorder
   std::vector<int> t2_mapped_nodes(t2_input_size_); // indexed in postorder
-  for (auto m : mapping) {
+  for (const auto& m : mapping) {
     t1_mapped_nodes[m.first] = 1;
     t2_mapped_nodes[m.second] = 1;
   }
@@ -432,7 +432,7 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::fill_gaps_in_mappin
   // ends of the trees.
   mapping.push_back({t1_input_size_, t2_input_size_});
   
-  for (auto end_gap : mapping) {
+  for (const auto& end_gap : mapping) {
     // If there is no gap, continue with the next mapped pair.
     if (end_gap.first - begin_gap.first == 1 || end_gap.second - begin_gap.second == 1) {
       // Update the counts for nodes between begin_gap and end_gap, if any,
@@ -562,7 +562,7 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::to_ted_mapping(
                     // postorder test.
   
   // Loop over all pairs in a one-to-one mapping.
-  for (auto m : mapping) {
+  for (const auto& m : mapping) {
     cur_t1 = m.first;
     cur_t2 = m.second;
     // Increasing postorder id test.
@@ -683,7 +683,7 @@ int GreedyUB<Label, CostModel>::index_nodes_recursion(
   // Parent - dummy element to grow the vector by this node.
   parent.push_back(-1);
   // Set this node's postorder value as parent for all its children.
-  for (auto child_id : nodes_children) {
+  for (const auto& child_id : nodes_children) {
     parent.at(child_id) = start_postorder;
   }
   

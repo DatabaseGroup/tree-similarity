@@ -100,7 +100,7 @@ int Touzet<Label, CostModel>::index_nodes_recursion(
   // Parent - dummy element to grow the vector by this node.
   parent.push_back(-1);
   // Set this node's postorder value as parent for all its children.
-  for (auto child_id : nodes_children) {
+  for (const auto& child_id : nodes_children) {
     parent.at(child_id) = start_postorder;
   }
 
@@ -520,9 +520,9 @@ double Touzet<Label, CostModel>::touzet_ted_kr_set(const node::Node<Label>& t1,
         // Try to insert {key, kr_pair_index} pair into kr_pair_to_index.
         auto kr_pair_search = kr_pair_to_index.insert({key, kr_pair_index});
         if (kr_pair_search.second) { // We meet this kr pair for the first time.
-        // kr_pair_index already inserted to kr_pair_to_index.
-        kr_vector.push_back({x, y});
-        ++kr_pair_index; // Increment the index for the consecutive kr pairs.
+          // kr_pair_index already inserted to kr_pair_to_index.
+          kr_vector.push_back({x, y});
+          ++kr_pair_index; // Increment the index for the consecutive kr pairs.
         } else { // We've met this kr pair before.
           // Look up the (top_x,top_y) pair for the kr_pair.
           auto& kr_pair = kr_vector[kr_pair_search.first->second];

@@ -54,7 +54,7 @@ const std::vector<Node<Label>>& Node<Label>::get_children() const {
 template<class Label>
 int Node<Label>::get_tree_size() const {
   int size = 1;
-  for (auto child : children_) {
+  for (const auto& child : children_) {
     size += child.get_tree_size();
   }
   return size;
@@ -69,7 +69,7 @@ const std::vector<std::string> Node<Label>::get_all_labels() const {
 template<class Label>
 void Node<Label>::get_all_labels_recursion(std::vector<std::string>& labels) const {
   labels.push_back(label_.to_string());
-  for (auto child : children_) {
+  for (const auto& child : children_) {
     child.get_all_labels_recursion(labels);
   }
 }
