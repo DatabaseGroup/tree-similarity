@@ -116,6 +116,11 @@ public:
   /// \return Tree edit distance regarding k.
   double touzet_ted_depth_pruning(const node::Node<Label>& t1,
       const node::Node<Label>& t2, const int k);
+  /// Fixes the problem from NOTE in touzet_ted_depth_pruning. Nodes in
+  /// truncated subtree are traversed twice: once to collect them, second time
+  /// to compute the ted values.
+  double touzet_ted_depth_pruning_truncated_tree_fix(const node::Node<Label>& t1,
+      const node::Node<Label>& t2, const int k);
   /// Computes the tree edit distance between two trees assuming a maximum
   /// number of allowed structural modifications (deletions, insertions).
   ///
@@ -319,6 +324,10 @@ private:
   /// \param k Original threshold for the number of structural modifications.
   /// \param e The remaining budget of structural modifications for (x,y).
   double tree_dist_depth_pruning(const int x, const int y, const int k, const int e);
+  /// This version of touzet_ted_depth_pruning ensures that only the nodes
+  /// in trucated tree are traversed. We ttraverse them once to find them, and
+  /// then second time to actually compute the distances.
+  double tree_dist_depth_pruning_truncated_tree_fix(const int x, const int y, const int k, const int e);
   /// Calculates e(x,y) - a budget of the remaining number of errors
   /// (deletions and insertions) that are left for the pair of subtrees
   /// (T1_x,T2_y) after computing the lower bound for the nodes around them.

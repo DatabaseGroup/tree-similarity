@@ -20,6 +20,7 @@ struct TestParams {
   bool set_zs_k;
   bool alg_touzet_ted;
   bool alg_touzet_ted_depth_pruning;
+  bool alg_touzet_ted_depth_pruning_truncated_tree_fix;
   bool alg_touzet_ted_kr_loop;
   bool alg_touzet_ted_kr_set;
   bool alg_zs_ted;
@@ -32,6 +33,7 @@ struct TestParams {
     set_zs_k = false;
     alg_touzet_ted = false;
     alg_touzet_ted_depth_pruning = false;
+    alg_touzet_ted_depth_pruning_truncated_tree_fix = false;
     alg_touzet_ted_kr_loop = false;
     alg_touzet_ted_kr_set = false;
     alg_zs_ted = false;
@@ -45,8 +47,9 @@ struct TestParams {
     set_zs_k = false;
     alg_touzet_ted = false;
     alg_touzet_ted_depth_pruning = false;
+    alg_touzet_ted_depth_pruning_truncated_tree_fix = true;
     alg_touzet_ted_kr_loop = false;
-    alg_touzet_ted_kr_set = true;
+    alg_touzet_ted_kr_set = false;
     alg_zs_ted = false;
     include_random = false;
     lower_than_threshold = false;
@@ -169,6 +172,19 @@ int single_test_case(TestParams& tp, TestInput& ti) {
         return -1;
       }
     }
+    if (tp.alg_touzet_ted_depth_pruning_truncated_tree_fix) {
+      runtime.reset();
+      runtime.start();
+      computed_result = touzet_ted.touzet_ted_depth_pruning_truncated_tree_fix(t1, t2, ti.k);
+      runtime.stop();
+      std::cout << "TOUZET_TED_DEPTH_PRUNING_TRUNCATED_TREE_FIX" << std::endl;
+      std::cout << " ted : " << computed_result << std::endl;
+      std::cout << "  sp : " << touzet_ted.get_subproblem_count() << std::endl;
+      std::cout << "time : " << runtime.getfloat() << std::endl;
+      if (compare_results(computed_result, expected_result, tp) < 0) {
+        return -1;
+      }
+    }
     if (tp.alg_touzet_ted_kr_loop) {
       runtime.reset();
       runtime.start();
@@ -197,6 +213,7 @@ int single_test_case(TestParams& tp, TestInput& ti) {
     }
   } catch (const std::exception& e) {
     std::cerr << e.what() << std::endl;
+    return -1;
   }
   
   return 0;
@@ -235,6 +252,9 @@ int main(int argc, char** argv) {
       if (string_a == "-td") {
         tp.alg_touzet_ted_depth_pruning = true;
       }
+      if (string_a == "-tdf") {
+        tp.alg_touzet_ted_depth_pruning_truncated_tree_fix = true;
+      }
       if (string_a == "-tl") {
         tp.alg_touzet_ted_kr_loop = true;
       }
@@ -266,6 +286,7 @@ int main(int argc, char** argv) {
   std::cout << "lower_than_threshold = " << tp.lower_than_threshold << std::endl;
   std::cout << "alg_touzet_ted = " << tp.alg_touzet_ted << std::endl;
   std::cout << "alg_touzet_ted_depth_pruning = " << tp.alg_touzet_ted_depth_pruning << std::endl;
+  std::cout << "alg_touzet_ted_depth_pruning_truncated_tree_fix = " << tp.alg_touzet_ted_depth_pruning_truncated_tree_fix << std::endl;
   std::cout << "alg_touzet_ted_kr_loop = " << tp.alg_touzet_ted_kr_loop << std::endl;
   std::cout << "alg_touzet_ted_kr_set = " << tp.alg_touzet_ted_kr_set << std::endl;
   std::cout << "alg_zs_ted = " << tp.alg_zs_ted << std::endl;
@@ -315,8 +336,8 @@ int main(int argc, char** argv) {
     tp.verify_expected = false;
     // Initialise SimpleTreeGenerator and generate a dummy tree.
     tree_generator::SimpleTreeGenerator stg;
-    int max_nodes = 100;
-    int max_edits = 30;
+    int max_nodes = 500;
+    int max_edits = 25;
     std::mt19937 rd;
     std::uniform_int_distribution<int> edits_dist(0, max_edits);
     // Do 200 test cases.
