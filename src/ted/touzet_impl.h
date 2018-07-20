@@ -794,25 +794,34 @@ double Touzet<Label, CostModel>::tree_dist_depth_pruning_truncated_tree_fix(
   // NOTE: max_depth has to be set to min(depth(x)+e+1, max depth of T1_x)
   //       because e+1 may exceed the maximum depth of T1_x.
   // TODO: Figure out why e+1.
-  int max_depth = std::min(t1_depth_.at(x) + e + 1, t1_subtree_max_depth_.at(x));
+  int max_depth = 0;
 
   // Collect all nodes in truncated tree to traverse.
-  // TODO: If we can't truncate anything, this step should be omitted.
   std::vector<int> nodes_to_traverse; // Normalized to current subtree: 1..|x|.
-  int n = 1;
-  int post_n = 0;
-  int depth_n = 0;
-  while (n <= x_size) { // Loop in right-to-left-preorder
-    post_n = x_size - n + 1 + x_off;
-    depth_n = t1_depth_.at(post_n);
-    // if (depth_n <= max_depth) { // NOTE: depth_n < max_depth is always satisfied.
-      nodes_to_traverse.push_back(x_size - n + 1);
-      if (depth_n == max_depth) {
-        n += t1_size_.at(post_n);
-      } else {
-        ++n;
-      }
-    // }
+  // NOTE: If we can't truncate anything, all the nodes from the subtree have
+  //       to be traversed.
+  if (t1_subtree_max_depth_.at(x) <= t1_depth_.at(x) + e + 1) {
+    max_depth = t1_subtree_max_depth_.at(x);
+    for (int n = x_size; n >= 1; --n) {
+      nodes_to_traverse.push_back(n);
+    }
+  } else {
+    max_depth = t1_depth_.at(x) + e + 1;
+    int n = 1;
+    int post_n = 0;
+    int depth_n = 0;
+    while (n <= x_size) { // Loop in right-to-left-preorder
+      post_n = x_size - n + 1 + x_off;
+      depth_n = t1_depth_.at(post_n);
+      // if (depth_n <= max_depth) { // NOTE: depth_n < max_depth is always satisfied.
+        nodes_to_traverse.push_back(x_size - n + 1);
+        if (depth_n == max_depth) {// Jump to the next node to the left with the max_depth.
+          n += t1_size_.at(post_n);
+        } else {
+          ++n;
+        }
+      // }
+    }
   }
 
   // Traversing truncated tree to filter out i-values based on depth.
