@@ -63,3 +63,8 @@
 {pascolistrasse{2{{2}{4}}}}
 3
 {(2,0),(3,1),(4,2)}
+# Descendants update problem
+{a{a}{b}{c{d{d}}}}
+{a{b{a}{c{d}}}{d}}
+4
+{(0,0),(2,1),(4,2),(5,5)}

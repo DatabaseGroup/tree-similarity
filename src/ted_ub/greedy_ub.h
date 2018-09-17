@@ -84,6 +84,9 @@ public:
   /// \return TED value of the greedy label upper bound.
   double greedy_ub_ted(const node::Node<Label>& t1, const node::Node<Label>& t2,
       const int k);
+  /// NOTE: Left to test against previous versions of the functions.
+  double greedy_ub_ted_deprecated(const node::Node<Label>& t1, const node::Node<Label>& t2,
+      const int k);
   /// Calculates the unit cost of passed mapping.
   ///
   /// NOTE: The greedy_ub algorithm assumes unit cost. However, this function
@@ -246,13 +249,36 @@ private:
   /// \return A revised mapping that is a valid TED mapping.
   std::vector<std::pair<int, int>> to_ted_mapping(
       const std::vector<std::pair<int, int>>& mapping) const;
+  /// Deprecated. Kept for experiments. Incorrectly updates the number of
+  /// mapped descendants.
+  /// TODO: When deleted, delete also class fields and update node indexing.
+  std::vector<std::pair<int, int>> to_ted_mapping_deprecated(
+      const std::vector<std::pair<int, int>>& mapping) const;
   /// Updates mapped descendants counters when node is not mapped.
+  /// NOTE: Use only when node ids are ordered.
   void update_desc_when_not_mapped(const int node,
       std::vector<int>& count_mapped_desc, const std::vector<int>& parent,
       const int input_size) const;
   /// Updates mapped descendants counters when node is mapped.
+  /// NOTE: Use only when node ids are ordered.
   void update_desc_when_mapped(const int node,
       std::vector<int>& count_mapped_desc, const std::vector<int>& parent,
+      const int input_size) const;
+  /// Updates mapped descendants counters when node is not mapped.
+  /// NOTE: Can be uses when node ids are not ordered.
+  ///       Fixes an update bug.
+  void update_prop_desc_when_not_mapped(const int node,
+      std::vector<int>& count_mapped_desc,
+      std::vector<int>& propagate_mapped_desc_count,
+      const std::vector<int>& parent,
+      const int input_size) const;
+  /// Updates mapped descendants counters when node is mapped.
+  /// NOTE: Can be uses when node ids are not ordered.
+  ///       Fixes an update bug.
+  void update_prop_desc_when_mapped(const int node,
+      std::vector<int>& count_mapped_desc,
+      std::vector<int>& propagate_mapped_desc_count,
+      const std::vector<int>& parent,
       const int input_size) const;
   /// Updates mapped descendants and nodes to the left counters when node is
   /// not mapped.

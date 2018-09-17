@@ -47,6 +47,12 @@ double GreedyUB<Label, CostModel>::greedy_ub_ted(const node::Node<Label>& t1,
 };
 
 template <typename Label, typename CostModel>
+double GreedyUB<Label, CostModel>::greedy_ub_ted_deprecated(const node::Node<Label>& t1,
+    const node::Node<Label>& t2, const int k) {
+  return mapping_cost(lb_mapping_fill_gaps_deprecated(t1, t2, static_cast <int> (std::ceil(k))));
+};
+
+template <typename Label, typename CostModel>
 double GreedyUB<Label, CostModel>::mapping_cost(
     const std::vector<std::pair<int, int>>& mapping) const {
   double result = 0.0;
@@ -101,23 +107,61 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::lb_mapping_deprecat
     const node::Node<Label>& t1, const node::Node<Label>& t2, const int k) {
   init(t1, t2);
   std::vector<std::pair<int, int>> mapping;
+  int cand_id = 0; // Postorder id of a candidate node in T2 carrying a matching label.
+  int end_pos = 0; // Maximum end position for reading postorder ids of nodes with specific label.
+  int pos = 0; // Position iterator.
+  int t1_label_id = 0;
   for (int i = 0; i < t1_input_size_; ++i) { // Loop in postorder.
-    std::list<int>& candidate_ids = t2_label_il_hash_[t1_node_[i].get().label().to_string()];
-    std::list<int>::iterator cand_it = candidate_ids.begin();
-    int cand_id = 0;
-    for ( ; cand_it != candidate_ids.end(); ) {
-      cand_id = *cand_it;
-      if (k_relevant(i, cand_id, k)) {
-        mapping.push_back({i, cand_id}); // postorder
-        cand_it = candidate_ids.erase(cand_it); // Assignment not needed due to break.
+    t1_label_id = t1_label_[i];
+    std::vector<int>& candidate_ids = t2_label_il_[t1_label_id]; // Postorder ids of nodes in T2 carrying label t1_label_id.
+    // Use 2k+1 window.
+    pos = t2_label_il_start_pos_[t1_label_id]; // Start position for reading postorder ids of nodes with specific label.
+    end_pos = std::min(pos + 2 * k, (int)candidate_ids.size()-1);
+    while (pos <= end_pos) {
+      ++subproblem_counter;
+      cand_id = candidate_ids[pos];
+      if (cand_id - i > k) {
+        // We're certainly outside the window from the right side.
         break;
       }
-      ++cand_it;
+      if (cand_id == -1 || i - cand_id > k) {
+        // The label has been mapped or we're outside the window from the left side.
+        ++t2_label_il_start_pos_[t1_label_id]; // For the consecutive values of i we don't need to start before.
+      } else if (k_relevant(i, cand_id, k)) {
+        // The pair can be mapped.
+        mapping.push_back({i, cand_id});
+        candidate_ids[pos] = -1; // Mark label as mapped - to not use it again.
+        break;
+      }
+      ++pos;
     }
   }
-  mapping = to_ted_mapping(mapping);
+  mapping = to_ted_mapping_deprecated(mapping);
   return mapping;
 };
+
+// template <typename Label, typename CostModel>
+// std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::lb_mapping_deprecated(
+//     const node::Node<Label>& t1, const node::Node<Label>& t2, const int k) {
+//   init(t1, t2);
+//   std::vector<std::pair<int, int>> mapping;
+//   for (int i = 0; i < t1_input_size_; ++i) { // Loop in postorder.
+//     std::list<int>& candidate_ids = t2_label_il_hash_[t1_node_[i].get().label().to_string()];
+//     std::list<int>::iterator cand_it = candidate_ids.begin();
+//     int cand_id = 0;
+//     for ( ; cand_it != candidate_ids.end(); ) {
+//       cand_id = *cand_it;
+//       if (k_relevant(i, cand_id, k)) {
+//         mapping.push_back({i, cand_id}); // postorder
+//         cand_it = candidate_ids.erase(cand_it); // Assignment not needed due to break.
+//         break;
+//       }
+//       ++cand_it;
+//     }
+//   }
+//   mapping = to_ted_mapping(mapping);
+//   return mapping;
+// };
 
 template <typename Label, typename CostModel>
 std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::lb_mapping_fill_gaps(
@@ -131,7 +175,8 @@ template <typename Label, typename CostModel>
 std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::lb_mapping_fill_gaps_deprecated(
     const node::Node<Label>& t1, const node::Node<Label>& t2, const int k) {
   std::vector<std::pair<int, int>> mapping = lb_mapping_deprecated(t1, t2, k);
-  mapping = fill_gaps_in_mapping_deprecated(mapping, k);
+  // mapping = fill_gaps_in_mapping_deprecated(mapping, k);
+  mapping = fill_gaps_in_mapping(mapping, k);
   return mapping;
 };
 
@@ -155,6 +200,38 @@ void GreedyUB<Label, CostModel>::update_desc_when_mapped(
                                // do not exist.
     count_mapped_desc[parent[node]] += count_mapped_desc[node] + 1;
   }
+};
+
+template <typename Label, typename CostModel>
+void GreedyUB<Label, CostModel>::update_prop_desc_when_not_mapped(
+    const int node, std::vector<int>& count_mapped_desc,
+    std::vector<int>& propagate_mapped_desc_count,
+    const std::vector<int>& parent, const int input_size) const {
+  int prop = propagate_mapped_desc_count[node];
+  if (prop > 0) {
+    if (node < input_size - 1) { // Root has no parent nor the right leaf, and
+                                 // the nodes of dummy mapping in fill_gaps_in_mapping
+                                 // do not exist.
+      count_mapped_desc[parent[node]] += prop;
+      propagate_mapped_desc_count[parent[node]] += prop;
+    }
+    propagate_mapped_desc_count[node] = 0; // This is actually not needed for
+                                           // t1 because the node ids are ordered.
+  }
+};
+
+template <typename Label, typename CostModel>
+void GreedyUB<Label, CostModel>::update_prop_desc_when_mapped(
+    const int node, std::vector<int>& count_mapped_desc,
+    std::vector<int>& propagate_mapped_desc_count,
+    const std::vector<int>& parent, const int input_size) const {
+  if (node < input_size - 1) { // Root has no parent nor the right leaf, and
+                               // the nodes of dummy mapping in fill_gaps_in_mapping
+                               // do not exist.
+    count_mapped_desc[parent[node]] += 1;
+    propagate_mapped_desc_count[parent[node]] += 1;
+  }
+  update_prop_desc_when_not_mapped(node, count_mapped_desc, propagate_mapped_desc_count, parent, input_size);
 };
 
 template <typename Label, typename CostModel>
@@ -550,7 +627,83 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::to_ted_mapping(
     const std::vector<std::pair<int, int>>& mapping) const {
   std::vector<std::pair<int, int>> ted_mapping;
   
-  // Vectors storing th enumber of descendants mapped for every node.
+  // Vectors storing the number of descendants mapped for every node.
+  std::vector<int> t1_count_mapped_desc(t1_input_size_);
+  std::vector<int> t2_count_mapped_desc(t2_input_size_);
+  // Vector to store the probagation values of the mapped descendants.
+  // This is a fix compared to the previous version.
+  std::vector<int> t1_propagate_mapped_desc_count(t1_input_size_);
+  std::vector<int> t2_propagate_mapped_desc_count(t2_input_size_);
+  
+  int t1_i = 0; // Iterator over nodes in T1 used to update descendants.
+  int t2_i = 0; // Iterator over nodes in T2 used to update descendants.
+  int cur_t1 = 0; // Node of T1 in the current mapped pair considered.
+  int cur_t2 = 0; // Node of T2 in the current mapped pair considered.
+  int prev_t2 = -1; // Previously mapped node in T2 used for increasing
+                    // postorder test.
+  
+  // Loop over all pairs in a one-to-one mapping.
+  for (const auto& m : mapping) {
+    cur_t1 = m.first;
+    cur_t2 = m.second;
+    // Increasing postorder id test.
+    // The pairs in the input one-to-one mapping are sorted on the first
+    // element. The second elements of two consecutive pairs must not have
+    // decreasing postorder ids.
+    // NOTE: Non-decreasing ids of second elements could be ensured in lb_mapping.
+    //       But, this will reduce the number of initially mapped node which may not be
+    //       desired. For example, if given M=<(a,b),(a+1,b+2),(a+2,b+1)>, (a+1,b+2) is
+    //       removed due to violating TED conditions, (a+2,b+1) would may still be valid, and
+    //       have a lower cost than (a+1,b+1) possible from filling gaps.
+    if (cur_t2 < prev_t2) {
+      continue;
+    }
+    
+    // NOTE: Go back with t2_i if the current node ids are smaller.
+    //       If cur_t2 < t2_i => cur_t2 has been processed as a non-mapped node and
+    //       it has to be processed as a mapped node, rolling back the changes made
+    //       to it.
+    //       If cur_t2 == t2_i => cur_t2 has to be processed as a mapped node,
+    //       it has not been processed before.
+    
+    // NOTE: We need the descendants up to date for a node v, although we may drop the pair with that
+    //       node. Then, the next node we process, v', may have the postorder smaller than v. This
+    //       causes a reupdate of the descendants for nodes v' until v.
+    
+    // Nodes not in mapping in T1 from last mapped to one before cur_t1.
+    while (t1_i < cur_t1) {
+      update_prop_desc_when_not_mapped(t1_i, t1_count_mapped_desc, t1_propagate_mapped_desc_count, t1_parent_, t1_input_size_);
+      ++t1_i;
+    }
+    // Nodes not in mapping in T2 from last mapped to one before cur_t2.
+    while (t2_i < cur_t2) {
+      update_prop_desc_when_not_mapped(t2_i, t2_count_mapped_desc, t2_propagate_mapped_desc_count, t2_parent_, t2_input_size_);
+      ++t2_i;
+    }
+    // Mapped descendants test.
+    if (t1_count_mapped_desc[cur_t1] == t2_count_mapped_desc[cur_t2]) {
+      ted_mapping.push_back({cur_t1, cur_t2});
+      prev_t2 = cur_t2;
+      update_prop_desc_when_mapped(t1_i, t1_count_mapped_desc, t1_propagate_mapped_desc_count, t1_parent_, t1_input_size_);
+      t1_i = cur_t1 + 1;
+      update_prop_desc_when_mapped(t2_i, t2_count_mapped_desc, t2_propagate_mapped_desc_count, t2_parent_, t2_input_size_);
+      t2_i = cur_t2 + 1;
+    }// else {cur_t1, cur_t2} cannot be mapped.
+  }
+  
+  // NOTE: The gap after the last mapped node until the last node in the tree
+  //       does not matter. Here, we only revise the given mapping. If there
+  //       are no pairs to revise left, we can stop. 
+    
+  return ted_mapping;
+};
+
+template <typename Label, typename CostModel>
+std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::to_ted_mapping_deprecated(
+    const std::vector<std::pair<int, int>>& mapping) const {
+  std::vector<std::pair<int, int>> ted_mapping;
+  
+  // Vectors storing the number of descendants mapped for every node.
   std::vector<int> t1_count_mapped_desc(t1_input_size_);
   std::vector<int> t2_count_mapped_desc(t2_input_size_);
   
@@ -599,7 +752,6 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::to_ted_mapping(
       update_desc_when_not_mapped(t2_i, t2_count_mapped_desc, t2_parent_, t2_input_size_);
       ++t2_i;
     }
-    
     // Mapped descendants test.
     if (t1_count_mapped_desc[cur_t1] == t2_count_mapped_desc[cur_t2]) {
       ted_mapping.push_back({cur_t1, cur_t2});
