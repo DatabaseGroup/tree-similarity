@@ -58,7 +58,7 @@ int main() {
       // Execute the algorithm to perform node indexing.
       // The k-value does not matter for this test - this tests the correctness
       // of an index only.
-      greedy_ub.lb_mapping(t1, t1, 1);
+      greedy_ub.greedy_ub_ted(t1, t1, 1);
 
       auto greedy_ub_test_items = greedy_ub.get_test_items();
 
