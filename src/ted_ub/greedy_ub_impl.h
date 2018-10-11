@@ -907,8 +907,10 @@ int GreedyUB<Label, CostModel>::index_nodes_recursion(
   // Add current node to the nodes vector.
   nodes.push_back(std::ref(node));
   
-  // Add current node postorder id to label inverted list.
-  label_il_hash[node.label().to_string()].push_back(start_postorder);
+  // Deprecated.
+  // // Add current node postorder id to label inverted list.
+  // label_il_hash[node.label().to_string()].push_back(start_postorder);
+  
   // New inverted list.
   unsigned int label_id_in_dict = dict_.insert(node.label());
   label_il[label_id_in_dict].push_back(start_postorder);
@@ -977,12 +979,12 @@ void GreedyUB<Label, CostModel>::init(const node::Node<Label>& t1,
   t2_pre_to_post_.clear();
   t1_label_il_.clear();
   t2_label_il_.clear();
-  t1_label_il_hash_.clear();
-  t2_label_il_hash_.clear();
+  // t1_label_il_hash_.clear();
+  // t2_label_il_hash_.clear();
   t1_parent_.clear();
   t2_parent_.clear();
-  t1_rl_.clear();
-  t2_rl_.clear();
+  // t1_rl_.clear();
+  // t2_rl_.clear();
   t1_depth_.clear();
   t2_depth_.clear();
   t1_size_.clear();
@@ -1014,10 +1016,11 @@ void GreedyUB<Label, CostModel>::init(const node::Node<Label>& t1,
   index_nodes(t1, t1_label_il_, t1_label_il_hash_, t1_node_, t1_post_to_pre_, t1_pre_to_post_, t1_parent_, t1_depth_, t1_size_, t1_label_);
   index_nodes(t2, t2_label_il_, t2_label_il_hash_, t2_node_, t2_post_to_pre_, t2_pre_to_post_, t2_parent_, t2_depth_, t2_size_, t2_label_);
   
-  t1_rl_.resize(t1_input_size_);
-  t2_rl_.resize(t2_input_size_);
-  post_traversal_indexing(t1_input_size_, t1_node_, t1_rl_);
-  post_traversal_indexing(t2_input_size_, t2_node_, t2_rl_);
+  // Deprecated.
+  // t1_rl_.resize(t1_input_size_);
+  // t2_rl_.resize(t2_input_size_);
+  // post_traversal_indexing(t1_input_size_, t1_node_, t1_rl_);
+  // post_traversal_indexing(t2_input_size_, t2_node_, t2_rl_);
 };
 
 template <typename Label, typename CostModel>
