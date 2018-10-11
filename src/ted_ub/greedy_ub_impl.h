@@ -379,29 +379,55 @@ bool GreedyUB<Label, CostModel>::if_in_corresponding_regions(int t1_begin_gap,
   
   // Four different cases.
   
-  // t1_begin_gap is desc of i is desc of t1_end_gap
-  if (t1_end_gap_pre < i_pre && i_pre < t1_begin_gap_pre &&
-      t2_end_gap_pre < j_pre && j_pre < t2_begin_gap_pre) {
-    return true;
+  if (t1_end_gap_pre < i_pre && t2_end_gap_pre < j_pre) {
+    // t1_begin_gap is desc of i is desc of t1_end_gap
+    if (i_pre < t1_begin_gap_pre && j_pre < t2_begin_gap_pre) {
+      return true;
+    }
+    // t1_begin_gap is desc of t1_end_gap, i is to the right of t1_begin_gap
+    // or
+    // t1_begin_gap is to the left of t1_end_gap, i is desc of t1_end_gap
+    if (t1_begin_gap_pre < i_pre && t2_begin_gap_pre < j_pre) {
+      return true;
+    }
   }
-  // t1_begin_gap is desc of t1_end_gap, i is to the right of t1_begin_gap
-  // or
-  // t1_begin_gap is to the left of t1_end_gap, i is desc of t1_end_gap
-  if (t1_end_gap_pre < i_pre && t1_begin_gap_pre < i_pre &&
-      t2_end_gap_pre < j_pre && t2_begin_gap_pre < j_pre) {
-    return true;
+  
+  // // t1_begin_gap is desc of i is desc of t1_end_gap
+  // if (t1_end_gap_pre < i_pre && i_pre < t1_begin_gap_pre &&
+  //     t2_end_gap_pre < j_pre && j_pre < t2_begin_gap_pre) {
+  //   return true;
+  // }
+  // // t1_begin_gap is desc of t1_end_gap, i is to the right of t1_begin_gap
+  // // or
+  // // t1_begin_gap is to the left of t1_end_gap, i is desc of t1_end_gap
+  // if (t1_end_gap_pre < i_pre && t1_begin_gap_pre < i_pre &&
+  //     t2_end_gap_pre < j_pre && t2_begin_gap_pre < j_pre) {
+  //   return true;
+  // }
+  
+  if (i_pre < t1_end_gap_pre && j_pre < t2_end_gap_pre) {
+    // t1_end_gap is to the right of t1_begin_gap, i is to the right of
+    // t1_begin_gap and to the left of t1_end_gap
+    if (t1_begin_gap_pre < i_pre && t2_begin_gap_pre < j_pre) {
+      return true;
+    }
+    // i is anc of t1_begin_gap, t1_end_gap is to the right of t1_begin_gap
+    if (i_pre < t1_begin_gap_pre && j_pre < t2_begin_gap_pre) {
+      return true;
+    }
   }
-  // t1_end_gap is to the right of t1_begin_gap, i is to the right of
-  // t1_begin_gap and to the left of t1_end_gap
-  if (t1_begin_gap_pre < i_pre && i_pre < t1_end_gap_pre &&
-      t2_begin_gap_pre < j_pre && j_pre < t2_end_gap_pre) {
-    return true;
-  }
-  // i is anc of t1_begin_gap, t1_end_gap is to the right of t1_begin_gap
-  if (i_pre < t1_begin_gap_pre && i_pre < t1_end_gap_pre &&
-      j_pre < t2_begin_gap_pre && j_pre < t2_end_gap_pre) {
-    return true;
-  }
+  
+  // // t1_end_gap is to the right of t1_begin_gap, i is to the right of
+  // // t1_begin_gap and to the left of t1_end_gap
+  // if (t1_begin_gap_pre < i_pre && i_pre < t1_end_gap_pre &&
+  //     t2_begin_gap_pre < j_pre && j_pre < t2_end_gap_pre) {
+  //   return true;
+  // }
+  // // i is anc of t1_begin_gap, t1_end_gap is to the right of t1_begin_gap
+  // if (i_pre < t1_begin_gap_pre && i_pre < t1_end_gap_pre &&
+  //     j_pre < t2_begin_gap_pre && j_pre < t2_end_gap_pre) {
+  //   return true;
+  // }
   
   return false;
 };
