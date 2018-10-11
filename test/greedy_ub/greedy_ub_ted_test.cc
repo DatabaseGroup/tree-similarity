@@ -217,14 +217,14 @@ int single_test_case(TestParams& tp, TestInput& ti) {
     if (tp.alg_greedy_ub) {
       runtime.reset();
       runtime.start();
-      computed_result = greedy_ub.greedy_ub_ted(t1, t2, ti.k);
+      computed_result = greedy_ub.verify_bool(t1, t2, ti.k);
       runtime.stop();
       std::cout << "GREEDY_UB" << std::endl;
       std::cout << " ted : " << computed_result << std::endl;
       std::cout << "time : " << runtime.getfloat() << std::endl;
-      if (compare_results(computed_result, expected_result, tp) < 0) {
-        return -1;
-      }
+      // if (compare_results(computed_result, expected_result, tp) < 0) {
+      //   return -1;
+      // }
     }
     if (tp.alg_greedy_ub_deprecated) {
       runtime.reset();
