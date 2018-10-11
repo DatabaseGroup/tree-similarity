@@ -43,26 +43,25 @@ double GreedyUB<Label, CostModel>::verify(const node::Node<Label>& t1,
 
 template <typename Label, typename CostModel>
 double GreedyUB<Label, CostModel>::verify_bool(const node::Node<Label>& t1,
-    const node::Node<Label>& t2, double similarity_threshold) {
+    const node::Node<Label>& t2, const int k) {
   init(t1, t2);
-  int t = static_cast <int> (std::ceil(similarity_threshold));
   
   // Check trivial upper and lower bounds.
-  if (t1_input_size_ + t2_input_size_ <= t) {
+  if (t1_input_size_ + t2_input_size_ <= k) {
     return 0;
   }
-  if (std::abs(t1_input_size_ - t2_input_size_) > t) {
+  if (std::abs(t1_input_size_ - t2_input_size_) > k) {
     return std::numeric_limits<double>::infinity();
   }
   
-  std::vector<std::pair<int, int>> mapping = lb_mapping(t1, t2, t);
+  std::vector<std::pair<int, int>> mapping = lb_mapping(t1, t2, k);
   double cost = mapping_cost(mapping);
-  if (cost <= t) {
+  if (cost <= k) {
     return 0;
   }
-  mapping = fill_gaps_in_mapping(mapping, t);
+  mapping = fill_gaps_in_mapping(mapping, k);
   cost = mapping_cost(mapping);
-  if (cost <= t) {
+  if (cost <= k) {
     return 0;
   }
   return std::numeric_limits<double>::infinity();
