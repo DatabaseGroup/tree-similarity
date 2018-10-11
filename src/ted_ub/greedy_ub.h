@@ -88,7 +88,7 @@ public:
   ///         std::numeric_limits<double>::infinity() if TED is certainly
   ///         above the threshold.
   double verify_bool(const node::Node<Label>& t1, const node::Node<Label>& t2,
-      double similarity_threshold);
+      const int k);
   /// Computes the TED value of the greedy label upper bound between trees t1
   /// and t1 given a similarity_threshold value.
   ///
