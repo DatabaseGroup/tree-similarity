@@ -73,6 +73,22 @@ public:
   ///         otherwise.
   double verify(const node::Node<Label>& t1, const node::Node<Label>& t2,
       double similarity_threshold);
+  /// Verifies if the greedy label upper bound between trees t1 and t1 is
+  /// smaller or equal than the similarity_threshold value.
+  ///
+  /// This version implements early-stopping techniques.
+  ///
+  /// NOTE: Here, only unit cost model is allowed. similarity_threshold is
+  ///       converted to integer value using std::ceil and static cast.
+  ///
+  /// \param t1 Source tree.
+  /// \param t2 Destination tree.
+  /// \param similarity_threshold Maximum value of the tree edit distance.
+  /// \return 0 if TED is certainly below the similarity_threshold, and
+  ///         std::numeric_limits<double>::infinity() if TED is certainly
+  ///         above the threshold.
+  double verify_bool(const node::Node<Label>& t1, const node::Node<Label>& t2,
+      const int k);
   /// Computes the TED value of the greedy label upper bound between trees t1
   /// and t1 given a similarity_threshold value.
   ///
@@ -139,6 +155,12 @@ public:
   /// TODO: When deleted, delete also class fields and update node indexing.
   std::vector<std::pair<int, int>> lb_mapping_fill_gaps_deprecated(
       const node::Node<Label>& t1, const node::Node<Label>& t2, const int k);
+  /// Resets and initialises algorithm's internal data structures and constants.
+  /// Has to be called before computing the distance.
+  ///
+  /// \param t1 Source tree.
+  /// \param t2 Destination tree.
+  void init(const node::Node<Label>& t1, const node::Node<Label>& t2);
   /// Creates a TestItems object and returns it (by value).
   ///
   /// \return A TestItem object.
@@ -327,12 +349,6 @@ private:
   /// Deprecated. Kept for experiments. 
   std::vector<std::pair<int, int>> fill_gaps_in_mapping_deprecated(
       std::vector<std::pair<int, int>>& mapping, const int k) const;
-  /// Resets and initialises algorithm's internal data structures and constants.
-  /// Has to be called before computing the distance.
-  ///
-  /// \param t1 Source tree.
-  /// \param t2 Destination tree.
-  void init(const node::Node<Label>& t1, const node::Node<Label>& t2);
   /// Indexes the nodes of an input tree. Wrapper for the recursive
   /// index_nodes_recursion.
   /// Call this method to index nodes.

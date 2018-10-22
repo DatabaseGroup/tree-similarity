@@ -217,35 +217,21 @@ int single_test_case(TestParams& tp, TestInput& ti) {
     if (tp.alg_greedy_ub) {
       runtime.reset();
       runtime.start();
-      // std::vector<std::pair<int, int>> m = greedy_ub.lb_mapping(t1, t2, 7);
-      std::vector<std::pair<int, int>> m = greedy_ub.lb_mapping_fill_gaps(t1, t2, ti.k);
-      computed_result = greedy_ub.mapping_cost(m);//touzet_ted.touzet_ted_kr_set(t1, t2, ti.k);
+      computed_result = greedy_ub.verify_bool(t1, t2, ti.k);
       runtime.stop();
       std::cout << "GREEDY_UB" << std::endl;
-      // std::cout << "   m : ";
-      // for (auto e : m) {
-      //   std::cout << "(" << e.first << "," << e.second << ") ";
-      // }
-      // std::cout << std::endl;
       std::cout << " ted : " << computed_result << std::endl;
       std::cout << "time : " << runtime.getfloat() << std::endl;
-      if (compare_results(computed_result, expected_result, tp) < 0) {
-        return -1;
-      }
+      // if (compare_results(computed_result, expected_result, tp) < 0) {
+      //   return -1;
+      // }
     }
     if (tp.alg_greedy_ub_deprecated) {
       runtime.reset();
       runtime.start();
-      // std::vector<std::pair<int, int>> m = greedy_ub.lb_mapping(t1, t2, 7);
-      std::vector<std::pair<int, int>> m = greedy_ub.lb_mapping_fill_gaps_deprecated(t1, t2, ti.k);
-      computed_result = greedy_ub.mapping_cost(m);//touzet_ted.touzet_ted_kr_set(t1, t2, ti.k);
+      computed_result = greedy_ub.greedy_ub_ted_deprecated(t1, t2, ti.k);
       runtime.stop();
       std::cout << "GREEDY_UB_DEPRECATED" << std::endl;
-      // std::cout << "   m : ";
-      // for (auto e : m) {
-      //   std::cout << "(" << e.first << "," << e.second << ") ";
-      // }
-      // std::cout << std::endl;
       std::cout << " ted : " << computed_result << std::endl;
       std::cout << "time : " << runtime.getfloat() << std::endl;
       if (compare_results(computed_result, expected_result, tp) < 0) {

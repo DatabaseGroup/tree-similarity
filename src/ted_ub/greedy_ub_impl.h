@@ -33,6 +33,7 @@ GreedyUB<Label, CostModel>::GreedyUB() : c_() {}
 template <typename Label, typename CostModel>
 double GreedyUB<Label, CostModel>::verify(const node::Node<Label>& t1,
     const node::Node<Label>& t2, double similarity_threshold) {
+  init(t1, t2);
   double cost = mapping_cost(lb_mapping_fill_gaps(t1, t2, similarity_threshold));
   if (cost <= static_cast <int> (std::ceil(similarity_threshold))) {
     return cost;
@@ -41,8 +42,35 @@ double GreedyUB<Label, CostModel>::verify(const node::Node<Label>& t1,
 };
 
 template <typename Label, typename CostModel>
+double GreedyUB<Label, CostModel>::verify_bool(const node::Node<Label>& t1,
+    const node::Node<Label>& t2, const int k) {
+  init(t1, t2);
+  
+  // Check trivial upper and lower bounds.
+  if (t1_input_size_ + t2_input_size_ <= k) {
+    return 0;
+  }
+  if (std::abs(t1_input_size_ - t2_input_size_) > k) {
+    return std::numeric_limits<double>::infinity();
+  }
+  
+  std::vector<std::pair<int, int>> mapping = lb_mapping(t1, t2, k);
+  double cost = mapping_cost(mapping);
+  if (cost <= k) {
+    return 0;
+  }
+  mapping = fill_gaps_in_mapping(mapping, k);
+  cost = mapping_cost(mapping);
+  if (cost <= k) {
+    return 0;
+  }
+  return std::numeric_limits<double>::infinity();
+};
+
+template <typename Label, typename CostModel>
 double GreedyUB<Label, CostModel>::greedy_ub_ted(const node::Node<Label>& t1,
     const node::Node<Label>& t2, const int k) {
+  init(t1, t2);
   return mapping_cost(lb_mapping_fill_gaps(t1, t2, static_cast <int> (std::ceil(k))));
 };
 
@@ -67,7 +95,6 @@ double GreedyUB<Label, CostModel>::mapping_cost(
 template <typename Label, typename CostModel>
 std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::lb_mapping(
     const node::Node<Label>& t1, const node::Node<Label>& t2, const int k) {
-  init(t1, t2);
   std::vector<std::pair<int, int>> mapping;
   int cand_id = 0; // Postorder id of a candidate node in T2 carrying a matching label.
   int end_pos = 0; // Maximum end position for reading postorder ids of nodes with specific label.
@@ -351,29 +378,55 @@ bool GreedyUB<Label, CostModel>::if_in_corresponding_regions(int t1_begin_gap,
   
   // Four different cases.
   
-  // t1_begin_gap is desc of i is desc of t1_end_gap
-  if (t1_end_gap_pre < i_pre && i_pre < t1_begin_gap_pre &&
-      t2_end_gap_pre < j_pre && j_pre < t2_begin_gap_pre) {
-    return true;
+  if (t1_end_gap_pre < i_pre && t2_end_gap_pre < j_pre) {
+    // t1_begin_gap is desc of i is desc of t1_end_gap
+    if (i_pre < t1_begin_gap_pre && j_pre < t2_begin_gap_pre) {
+      return true;
+    }
+    // t1_begin_gap is desc of t1_end_gap, i is to the right of t1_begin_gap
+    // or
+    // t1_begin_gap is to the left of t1_end_gap, i is desc of t1_end_gap
+    if (t1_begin_gap_pre < i_pre && t2_begin_gap_pre < j_pre) {
+      return true;
+    }
   }
-  // t1_begin_gap is desc of t1_end_gap, i is to the right of t1_begin_gap
-  // or
-  // t1_begin_gap is to the left of t1_end_gap, i is desc of t1_end_gap
-  if (t1_end_gap_pre < i_pre && t1_begin_gap_pre < i_pre &&
-      t2_end_gap_pre < j_pre && t2_begin_gap_pre < j_pre) {
-    return true;
+  
+  // // t1_begin_gap is desc of i is desc of t1_end_gap
+  // if (t1_end_gap_pre < i_pre && i_pre < t1_begin_gap_pre &&
+  //     t2_end_gap_pre < j_pre && j_pre < t2_begin_gap_pre) {
+  //   return true;
+  // }
+  // // t1_begin_gap is desc of t1_end_gap, i is to the right of t1_begin_gap
+  // // or
+  // // t1_begin_gap is to the left of t1_end_gap, i is desc of t1_end_gap
+  // if (t1_end_gap_pre < i_pre && t1_begin_gap_pre < i_pre &&
+  //     t2_end_gap_pre < j_pre && t2_begin_gap_pre < j_pre) {
+  //   return true;
+  // }
+  
+  if (i_pre < t1_end_gap_pre && j_pre < t2_end_gap_pre) {
+    // t1_end_gap is to the right of t1_begin_gap, i is to the right of
+    // t1_begin_gap and to the left of t1_end_gap
+    if (t1_begin_gap_pre < i_pre && t2_begin_gap_pre < j_pre) {
+      return true;
+    }
+    // i is anc of t1_begin_gap, t1_end_gap is to the right of t1_begin_gap
+    if (i_pre < t1_begin_gap_pre && j_pre < t2_begin_gap_pre) {
+      return true;
+    }
   }
-  // t1_end_gap is to the right of t1_begin_gap, i is to the right of
-  // t1_begin_gap and to the left of t1_end_gap
-  if (t1_begin_gap_pre < i_pre && i_pre < t1_end_gap_pre &&
-      t2_begin_gap_pre < j_pre && j_pre < t2_end_gap_pre) {
-    return true;
-  }
-  // i is anc of t1_begin_gap, t1_end_gap is to the right of t1_begin_gap
-  if (i_pre < t1_begin_gap_pre && i_pre < t1_end_gap_pre &&
-      j_pre < t2_begin_gap_pre && j_pre < t2_end_gap_pre) {
-    return true;
-  }
+  
+  // // t1_end_gap is to the right of t1_begin_gap, i is to the right of
+  // // t1_begin_gap and to the left of t1_end_gap
+  // if (t1_begin_gap_pre < i_pre && i_pre < t1_end_gap_pre &&
+  //     t2_begin_gap_pre < j_pre && j_pre < t2_end_gap_pre) {
+  //   return true;
+  // }
+  // // i is anc of t1_begin_gap, t1_end_gap is to the right of t1_begin_gap
+  // if (i_pre < t1_begin_gap_pre && i_pre < t1_end_gap_pre &&
+  //     j_pre < t2_begin_gap_pre && j_pre < t2_end_gap_pre) {
+  //   return true;
+  // }
   
   return false;
 };
@@ -853,8 +906,10 @@ int GreedyUB<Label, CostModel>::index_nodes_recursion(
   // Add current node to the nodes vector.
   nodes.push_back(std::ref(node));
   
-  // Add current node postorder id to label inverted list.
-  label_il_hash[node.label().to_string()].push_back(start_postorder);
+  // Deprecated.
+  // // Add current node postorder id to label inverted list.
+  // label_il_hash[node.label().to_string()].push_back(start_postorder);
+  
   // New inverted list.
   unsigned int label_id_in_dict = dict_.insert(node.label());
   label_il[label_id_in_dict].push_back(start_postorder);
@@ -923,12 +978,12 @@ void GreedyUB<Label, CostModel>::init(const node::Node<Label>& t1,
   t2_pre_to_post_.clear();
   t1_label_il_.clear();
   t2_label_il_.clear();
-  t1_label_il_hash_.clear();
-  t2_label_il_hash_.clear();
+  // t1_label_il_hash_.clear();
+  // t2_label_il_hash_.clear();
   t1_parent_.clear();
   t2_parent_.clear();
-  t1_rl_.clear();
-  t2_rl_.clear();
+  // t1_rl_.clear();
+  // t2_rl_.clear();
   t1_depth_.clear();
   t2_depth_.clear();
   t1_size_.clear();
@@ -960,10 +1015,11 @@ void GreedyUB<Label, CostModel>::init(const node::Node<Label>& t1,
   index_nodes(t1, t1_label_il_, t1_label_il_hash_, t1_node_, t1_post_to_pre_, t1_pre_to_post_, t1_parent_, t1_depth_, t1_size_, t1_label_);
   index_nodes(t2, t2_label_il_, t2_label_il_hash_, t2_node_, t2_post_to_pre_, t2_pre_to_post_, t2_parent_, t2_depth_, t2_size_, t2_label_);
   
-  t1_rl_.resize(t1_input_size_);
-  t2_rl_.resize(t2_input_size_);
-  post_traversal_indexing(t1_input_size_, t1_node_, t1_rl_);
-  post_traversal_indexing(t2_input_size_, t2_node_, t2_rl_);
+  // Deprecated.
+  // t1_rl_.resize(t1_input_size_);
+  // t2_rl_.resize(t2_input_size_);
+  // post_traversal_indexing(t1_input_size_, t1_node_, t1_rl_);
+  // post_traversal_indexing(t2_input_size_, t2_node_, t2_rl_);
 };
 
 template <typename Label, typename CostModel>
