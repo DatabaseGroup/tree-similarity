@@ -1,14 +1,18 @@
+#include <algorithm>
+#include <cmath>
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
-#include <fstream>
-#include <algorithm>
-#include <cmath>
-#include "string_label.h"
-#include "node.h"
+#include "t_join.h"
 #include "bracket_notation_parser.h"
-#include "naive_self_join.h"
+#include "inverted_list_element.h"
+#include "join_result_element.h"
+#include "node.h"
+#include "string_label.h"
+#include "touzet.h"
 #include "unit_cost_model.h"
+#include "zhang_shasha.h"
 
 /// Convert vector of ResultElement to its string representation.
 /// Sorts the vector in case the result elements don't come in the input order.
@@ -47,14 +51,19 @@ std::string vector_of_re_to_string(std::vector<join::JoinResultElement>& v) {
 int main() {
   using Label = label::StringLabel;
   using CostModel = cost_model::UnitCostModel<Label>;
-
-  // Set similarity threshold - maximum number of allowed edit operations.
-  double similarity_threshold = 1.00;
+  using VerificationTouzet = ted::Touzet<Label, CostModel>;
 
   // Correct result - currently hard-coded here.
-  std::string correct_result = "{1,2,1},{1,3,1},{2,3,1},{2,5,1}";
+  std::string correct_result = "{1,0,1},{2,0,1},{2,1,1},{4,2,1}";
 
-  std::string file_path = "naive_self_join_test_data.txt";
+  // File path to input tree collection.
+  std::string file_path = "t_join_test_data.txt";
+
+  // Set distance threshold - maximum number of allowed edit operations.
+  double distance_threshold = 1.00;
+  std::vector<std::pair<unsigned int, std::vector<label_set_converter::LabelSetElement>>> sets_collection;
+  std::vector<std::pair<unsigned int, unsigned int>> candidates;
+  std::vector<join::JoinResultElement> join_result;
 
   // Create the container to store all trees.
   std::vector<node::Node<Label>> trees_collection;
@@ -63,9 +72,11 @@ int main() {
   parser::BracketNotationParser bnp;
   bnp.parse_collection(trees_collection, file_path);
 
-  join::NaiveSelfJoin<Label, CostModel> nsj;
-  auto result_set = nsj.execute_join(trees_collection, similarity_threshold);
-  std::string computed_result = vector_of_re_to_string(result_set);
+  // TJoin with Touzet verification
+  join::TJoin<Label, CostModel, VerificationTouzet> tjoin;
+  tjoin.execute_join(trees_collection, sets_collection, candidates, join_result, distance_threshold);
+
+  std::string computed_result = vector_of_re_to_string(join_result);
   if (correct_result != computed_result) {
     std::cerr << "Incorrect result set: " << computed_result << " instead of "
         << correct_result << std::endl;
