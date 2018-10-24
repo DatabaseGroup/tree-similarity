@@ -38,10 +38,33 @@ add_executable(
 
 target_link_libraries(
   t_join_test_driver # EXECUTABLE NAME
-  TreeSimilarity              # LIBRARY NAME
+  TreeSimilarity     # LIBRARY NAME
 )
 
 add_test(
   NAME t_join_test           # TEST NAME
   COMMAND t_join_test_driver # EXECUTABLE NAME
+)
+
+# Testing tangjoin results.
+
+# Copy test cases.
+file(
+  COPY tang_join_test_data.txt
+  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+add_executable(
+  tang_join_test_driver # EXECUTABLE NAME
+  tang_join_test.cc     # EXECUTABLE SOURCE
+)
+
+target_link_libraries(
+  tang_join_test_driver # EXECUTABLE NAME
+  TreeSimilarity        # LIBRARY NAME
+)
+
+add_test(
+  NAME tang_join_test           # TEST NAME
+  COMMAND tang_join_test_driver # EXECUTABLE NAME
 )

@@ -55,6 +55,7 @@ public:
   /// remaining candidates are evaluated by Touzets algorithm.
   ///
   /// \param trees_collection A vector holding an input collection of trees.
+  /// \param sets_collection A vector holding the label sets of trees_collection.
   /// \param candidates A vector of candidate tree pairs.
   /// \param join_result A vector of result tree pairs and their TED value.
   /// \param distance_threshold The maximum number of edit operations that
