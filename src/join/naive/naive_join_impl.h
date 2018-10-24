@@ -19,21 +19,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/// \file join/naive_self_join_impl.h
+/// \file join/naive_join_impl.h
 ///
 /// \details
-/// Contains the implementation of a naive tree similarity self join.
+/// Contains the implementation of a naive tree similarity join.
 
-#ifndef TREE_SIMILARITY_JOIN_NAIVE_SELF_JOIN_IMPL_H
-#define TREE_SIMILARITY_JOIN_NAIVE_SELF_JOIN_IMPL_H
-
-template <typename Label, typename CostModel>
-NaiveSelfJoin<Label, CostModel>::NaiveSelfJoin() : c_() {}
+#ifndef TREE_SIMILARITY_JOIN_NAIVE_JOIN_IMPL_H
+#define TREE_SIMILARITY_JOIN_NAIVE_JOIN_IMPL_H
 
 template <typename Label, typename CostModel>
-std::vector<join::JoinResultElement> NaiveSelfJoin<Label, CostModel>::execute_join(
+NaiveJoin<Label, CostModel>::NaiveJoin() : c_() {}
+
+template <typename Label, typename CostModel>
+std::vector<join::JoinResultElement> NaiveJoin<Label, CostModel>::execute_join(
     std::vector<node::Node<Label>>& trees_collection,
-    const double similarity_threshold) const {
+    const double distance_threshold) const {
 
   std::vector<join::JoinResultElement> result_set;
 
@@ -48,7 +48,7 @@ std::vector<join::JoinResultElement> NaiveSelfJoin<Label, CostModel>::execute_jo
     for (auto it_j = it_i+1; it_j != trees_collection.end(); ++it_j) {
       ++j;
       double ted_value = ted_algorithm.zhang_shasha_ted(*it_i, *it_j);
-      if (ted_value <= similarity_threshold) {
+      if (ted_value <= distance_threshold) {
         result_set.emplace_back(i, j, ted_value);
       }
     }
@@ -57,7 +57,4 @@ std::vector<join::JoinResultElement> NaiveSelfJoin<Label, CostModel>::execute_jo
   return result_set;
 }
 
-join::JoinResultElement::JoinResultElement(int tree_id_1, int tree_id_2, double ted_value)
-    : tree_id_1(tree_id_1), tree_id_2(tree_id_2), ted_value(ted_value) {};
-
-#endif // TREE_SIMILARITY_JOIN_NAIVE_SELF_JOIN_IMPL_H
+#endif // TREE_SIMILARITY_JOIN_NAIVE_JOIN_IMPL_H

@@ -19,51 +19,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/// \file join/naive_self_join.h
+/// \file join/naive_join.h
 ///
 /// \details
 /// Implements a naive tree similarity join as a nested loop and executing
 /// tree edit distance (Zhang and Shasha) for each pair of trees from a
 /// collection.
 
-#ifndef TREE_SIMILARITY_JOIN_NAIVE_SELF_JOIN_H
-#define TREE_SIMILARITY_JOIN_NAIVE_SELF_JOIN_H
+#ifndef TREE_SIMILARITY_JOIN_NAIVE_JOIN_H
+#define TREE_SIMILARITY_JOIN_NAIVE_JOIN_H
 
 #include <vector>
 #include "node.h"
 #include "zhang_shasha.h"
+#include "join_result_element.h"
 
 namespace join {
 
-/// This is an element of the join's result set.
-struct JoinResultElement {
-  /// Tree id of the left-hand tree in the result element.
-  int tree_id_1;
-  /// Tree id of the right-hand tree in the result element.
-  int tree_id_2;
-  /// Tree edit distance between tree_id_1 and tree_id_2.
-  double ted_value;
-  /// Constructor.
-  JoinResultElement(int tree_id_1, int tree_id_2, double ted_value);
-};
-
-/// Represents a naive self tree similarity join.
+/// Represents a naive tree similarity join.
 template <typename Label, typename CostModel>
-class NaiveSelfJoin {
+class NaiveJoin {
 // Member functions.
 public:
   /// Constructor.
-  NaiveSelfJoin();
+  NaiveJoin();
   /// Executes the join algorithm.
   ///
-  /// \param trees_collection A vector holding all trees from the relation to
-  ///                         self-join.
-  /// \param similarity_threshold The maximum number of edit operations that
-  ///                             differs two trees in the join's result set.
+  /// \param trees_collection A vector holding an input collection of trees.
+  /// \param distance_threshold The maximum number of edit operations that
+  ///                           differs two trees in the join's result set.
   /// \return A vector with the join result.
   std::vector<join::JoinResultElement> execute_join(
       std::vector<node::Node<Label>>& trees_collection,
-      const double similarity_threshold) const;
+      const double distance_threshold) const;
 // Member variables.
 private:
   /// Cost model.
@@ -73,8 +61,8 @@ private:
 };
 
 // Implementation details.
-#include "naive_self_join_impl.h"
+#include "naive_join_impl.h"
 
 }
 
-#endif // TREE_SIMILARITY_JOIN_NAIVE_SELF_JOIN_H
+#endif // TREE_SIMILARITY_JOIN_NAIVE_JOIN_H
