@@ -54,9 +54,12 @@ public:
   /// Constructor.
   TangJoin();
   /// Given a collection of trees, the join candidates are computed.
-  /// First, the candidates are pruned by using the allpairs algorithm.
-  /// Second the allpairs candidate pairs are verified via Zhang and Sasha.
-  /// The join pairs are stored in result_collection_.
+  /// First, trees are transformed into binary trees. Then, the binary trees
+  /// are splitted into subgraphs. Next, candidates are retrieved from a 
+  /// two-layer index based on the top twig labels of the subgraphs the 
+  /// postorder IDs of the nodes in a tree. Second the candidate pairs are 
+  /// verified using a verification algorithm. The join result are stored 
+  /// in result_collection_.
   ///
   /// \param trees_collection A vector holding an input collection of trees.
   /// \param binary_trees_collection A vector holding the binary trees of 
@@ -81,8 +84,8 @@ public:
   void convert_trees_to_binary_trees(
       std::vector<node::Node<Label>>& trees_collection,
       std::vector<node::BinaryNode<Label>>& binary_trees_collection);
-  /// A given collection of sets the join candidates are computed with the
-  /// allpairs algorithm.
+  /// A given collection of binary trees candidates are retrieved from the two 
+  /// layer index introduced by Tang et al.
   ///
   /// \param binary_trees_collection A vector holding the binary trees of 
   ///                                trees_collection.
