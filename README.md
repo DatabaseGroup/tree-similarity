@@ -1,8 +1,10 @@
 # Tree Similarity Library
 
+**We actively develop this library and things change continuously.**
+
 The goal of this repository is to be the home of all code corresponding to tree similarity. This code base is a starting point for new research ideas and students project. Implementation of new features should be consistent with this code base.
 
-** Currently this README serves everyone, users and contributors. ** It is disorganised with an idea that having disorganised and correct content is better than no content. It should be expanded on a regular basis and possibly split into ``README.md`` and ``README_CONTRIBUTOR.md``.
+**Currently this README serves everyone, users and contributors.** It is disorganised with an idea that having disorganised and correct content is better than no content. It should be expanded on a regular basis and possibly split into ``README.md`` and ``README_CONTRIBUTOR.md``.
 
 ## Licence
 
