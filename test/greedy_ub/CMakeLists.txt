@@ -1,4 +1,4 @@
-# Touzet's algorithm tests.
+# Greedy Upper Bound algorithm tests.
 
 # Specify list of test strings.
 set(greedy_ub_test_list
@@ -10,7 +10,6 @@ set(greedy_ub_test_list
   greedy_ub_parent_test
   greedy_ub_depth_test
   greedy_ub_size_test
-  greedy_ub_ted_test
 )
 
 # Add custom target for building all touzet's tests.
