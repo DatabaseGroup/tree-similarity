@@ -8,6 +8,7 @@
 #include "node.h"
 #include "bracket_notation_parser.h"
 #include "naive_join.h"
+#include "touzet.h"
 #include "unit_cost_model.h"
 
 /// Convert vector of ResultElement to its string representation.
@@ -47,6 +48,7 @@ std::string vector_of_re_to_string(std::vector<join::JoinResultElement>& v) {
 int main() {
   using Label = label::StringLabel;
   using CostModel = cost_model::UnitCostModel<Label>;
+  using VerificationTouzet = ted::Touzet<Label, CostModel>;
 
   // Set similarity threshold - maximum number of allowed edit operations.
   double distance_threshold = 1.00;
@@ -63,7 +65,7 @@ int main() {
   parser::BracketNotationParser bnp;
   bnp.parse_collection(trees_collection, file_path);
 
-  join::NaiveJoin<Label, CostModel> nsj;
+  join::NaiveJoin<Label, CostModel, VerificationTouzet> nsj;
   auto result_set = nsj.execute_join(trees_collection, distance_threshold);
   std::string computed_result = vector_of_re_to_string(result_set);
   if (correct_result != computed_result) {

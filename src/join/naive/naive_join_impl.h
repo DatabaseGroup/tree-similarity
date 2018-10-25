@@ -27,18 +27,19 @@
 #ifndef TREE_SIMILARITY_JOIN_NAIVE_JOIN_IMPL_H
 #define TREE_SIMILARITY_JOIN_NAIVE_JOIN_IMPL_H
 
-template <typename Label, typename CostModel>
-NaiveJoin<Label, CostModel>::NaiveJoin() : c_() {}
+template <typename Label, typename CostModel, typename VerificationAlgorithm>
+NaiveJoin<Label, CostModel, VerificationAlgorithm>::NaiveJoin() {}
 
-template <typename Label, typename CostModel>
-std::vector<join::JoinResultElement> NaiveJoin<Label, CostModel>::execute_join(
-    std::vector<node::Node<Label>>& trees_collection,
-    const double distance_threshold) const {
+template <typename Label, typename CostModel, typename VerificationAlgorithm>
+std::vector<join::JoinResultElement> NaiveJoin<Label, CostModel, VerificationAlgorithm>::execute_join(
+    std::vector<node::Node<Label>>& trees_collection, 
+    const double distance_threshold) {
 
   std::vector<join::JoinResultElement> result_set;
 
-  ted::ZhangShasha<Label, CostModel> ted_algorithm;
+  VerificationAlgorithm ted_algorithm;
 
+  double ted_value = std::numeric_limits<double>::infinity();
   int i = 0;
   int j = 0;
   for (auto it_i = trees_collection.begin(); it_i != trees_collection.end(); ++it_i) {
@@ -47,14 +48,23 @@ std::vector<join::JoinResultElement> NaiveJoin<Label, CostModel>::execute_join(
     // Start the inner loop with the tree just iafter it_i.
     for (auto it_j = it_i+1; it_j != trees_collection.end(); ++it_j) {
       ++j;
-      double ted_value = ted_algorithm.zhang_shasha_ted(*it_i, *it_j);
-      if (ted_value <= distance_threshold) {
+      ted_value = ted_algorithm.verify(*it_i, *it_j, distance_threshold);
+      if (ted_value != std::numeric_limits<double>::infinity()) {
         result_set.emplace_back(i, j, ted_value);
       }
+
+      // Sum up all number of subproblems
+      sum_subproblem_counter_ += ted_algorithm.get_subproblem_count();
     }
   }
 
   return result_set;
 }
+
+template <typename Label, typename CostModel, typename VerificationAlgorithm>
+const unsigned long long int NaiveJoin<Label, CostModel, VerificationAlgorithm>::get_subproblem_count() const {
+  return sum_subproblem_counter_;
+}
+
 
 #endif // TREE_SIMILARITY_JOIN_NAIVE_JOIN_IMPL_H

@@ -37,7 +37,7 @@
 namespace join {
 
 /// Represents a naive tree similarity join.
-template <typename Label, typename CostModel>
+template <typename Label, typename CostModel, typename VerificationAlgorithm>
 class NaiveJoin {
 // Member functions.
 public:
@@ -51,13 +51,16 @@ public:
   /// \return A vector with the join result.
   std::vector<join::JoinResultElement> execute_join(
       std::vector<node::Node<Label>>& trees_collection,
-      const double distance_threshold) const;
+      const double distance_threshold);
+  /// If the TED algorithm has been executed, returns the number of subproblems
+  /// encountered during that execution.
+  ///
+  /// \return The number of subproblems acountered in the last TED computation.
+  const unsigned long long int get_subproblem_count() const;
 // Member variables.
 private:
-  /// Cost model.
-  ///
-  /// NOTE: This join supports only unit cost model.
-  const CostModel c_;
+  /// Number of subproblrems encoutered in the verification step.
+  unsigned long long int sum_subproblem_counter_;
 };
 
 // Implementation details.
