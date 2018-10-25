@@ -1,6 +1,4 @@
 #include <iostream>
-#include <time.h>
-#include "timing.h"
 #include <string>
 #include <vector>
 #include <fstream>
@@ -112,19 +110,13 @@ int single_test_case(TestParams& tp, TestInput& ti) {
   // Initialise Zhang and Shsha's algorithm.
   ted::ZhangShasha<Label, CostModel> zs_ted;
   
-  // Runtime measurement.
-  Timing timing;
-  Timing::Interval runtime("runtime");
     
   double computed_result = -1;
   double expected_result = -1;
   double result_zs = -1;
   
   if (tp.set_zs_k || tp.alg_zs_ted) {
-    runtime.reset();
-    runtime.start();
     result_zs = zs_ted.zhang_shasha_ted(t1, t2);
-    runtime.stop();
   }
   
   if (tp.verify_expected) {
@@ -142,71 +134,50 @@ int single_test_case(TestParams& tp, TestInput& ti) {
     std::cout << "ZS_TED" << std::endl;
     std::cout << " ted : " << result_zs << std::endl;
     std::cout << "  sp : " << zs_ted.get_subproblem_count() << std::endl;
-    std::cout << "time : " << runtime.getfloat() << std::endl;
   }
   
   try {
     if (tp.alg_touzet_ted) {
-      runtime.reset();
-      runtime.start();
       computed_result = touzet_ted.touzet_ted(t1, t2, ti.k);
-      runtime.stop();
       std::cout << "TOUZET_TED" << std::endl;
       std::cout << " ted : " << computed_result << std::endl;
       std::cout << "  sp : " << touzet_ted.get_subproblem_count() << std::endl;
-      std::cout << "time : " << runtime.getfloat() << std::endl;
       if (compare_results(computed_result, expected_result, tp) < 0) {
         return -1;
       }
     }
     if (tp.alg_touzet_ted_depth_pruning) {
-      runtime.reset();
-      runtime.start();
       computed_result = touzet_ted.touzet_ted_depth_pruning(t1, t2, ti.k);
-      runtime.stop();
       std::cout << "TOUZET_TED_DEPTH_PRUNING" << std::endl;
       std::cout << " ted : " << computed_result << std::endl;
       std::cout << "  sp : " << touzet_ted.get_subproblem_count() << std::endl;
-      std::cout << "time : " << runtime.getfloat() << std::endl;
       if (compare_results(computed_result, expected_result, tp) < 0) {
         return -1;
       }
     }
     if (tp.alg_touzet_ted_depth_pruning_truncated_tree_fix) {
-      runtime.reset();
-      runtime.start();
       computed_result = touzet_ted.touzet_ted_depth_pruning_truncated_tree_fix(t1, t2, ti.k);
-      runtime.stop();
       std::cout << "TOUZET_TED_DEPTH_PRUNING_TRUNCATED_TREE_FIX" << std::endl;
       std::cout << " ted : " << computed_result << std::endl;
       std::cout << "  sp : " << touzet_ted.get_subproblem_count() << std::endl;
-      std::cout << "time : " << runtime.getfloat() << std::endl;
       if (compare_results(computed_result, expected_result, tp) < 0) {
         return -1;
       }
     }
     if (tp.alg_touzet_ted_kr_loop) {
-      runtime.reset();
-      runtime.start();
       computed_result = touzet_ted.touzet_ted_kr_loop(t1, t2, ti.k);
-      runtime.stop();
       std::cout << "TOUZET_TED_KR_LOOP" << std::endl;
       std::cout << " ted : " << computed_result << std::endl;
       std::cout << "  sp : " << touzet_ted.get_subproblem_count() << std::endl;
-      std::cout << "time : " << runtime.getfloat() << std::endl;
       if (compare_results(computed_result, expected_result, tp) < 0) {
         return -1;
       }
     }
     if (tp.alg_touzet_ted_kr_set) {
-      runtime.reset();
-      runtime.start();
       computed_result = touzet_ted.touzet_ted_kr_set(t1, t2, ti.k);
-      runtime.stop();
       std::cout << "TOUZET_TED_KR_SET" << std::endl;
       std::cout << " ted : " << computed_result << std::endl;
       std::cout << "  sp : " << touzet_ted.get_subproblem_count() << std::endl;
-      std::cout << "time : " << runtime.getfloat() << std::endl;
       if (compare_results(computed_result, expected_result, tp) < 0) {
         return -1;
       }

@@ -43,13 +43,3 @@ foreach(loop_var ${touzet_test_list})
   )
 endforeach(loop_var)
 
-# Link the timing library with touzet_ted_test_driver.
-target_link_libraries(
-  touzet_ted_test_driver # TARGET EXECUTABLE NAME
-  TimingLibrary          # LIBRARY NAME
-)
-target_include_directories(
-  touzet_ted_test_driver                    # TARGET EXECUTABLE NAME
-  PUBLIC ${PROJECT_SOURCE_DIR}/modules/common-code/timings # HEADER FILE
-)
-

@@ -41,13 +41,3 @@ foreach(loop_var ${greedy_ub_test_list})
   )
 endforeach(loop_var)
 
-# Link the timing library with greedy_ub_cost_test_driver.
-target_link_libraries(
-  greedy_ub_ted_test_driver # TARGET EXECUTABLE NAME
-  TimingLibrary             # LIBRARY NAME
-)
-target_include_directories(
-  greedy_ub_ted_test_driver                    # TARGET EXECUTABLE NAME
-  PUBLIC ${PROJECT_SOURCE_DIR}/modules/common-code/timings # HEADER FILE
-)
-
