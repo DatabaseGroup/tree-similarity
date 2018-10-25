@@ -218,6 +218,15 @@ void ZhangShasha<Label, CostModel>::forest_distance(
 }
 
 template <typename Label, typename CostModel>
+double ZhangShasha<Label, CostModel>::verify(const node::Node<Label>& t1, const node::Node<Label>& t2, double similarity_threshold){
+  double ted_value = zhang_shasha_ted(t1, t2);
+  if (ted_value <= similarity_threshold) {
+    return ted_value;
+  }
+  return std::numeric_limits<double>::infinity();
+}
+
+template <typename Label, typename CostModel>
 const typename ZhangShasha<Label, CostModel>::TestItems ZhangShasha<Label, CostModel>::get_test_items() const {
   TestItems test_items = {
     t1_kr_,
