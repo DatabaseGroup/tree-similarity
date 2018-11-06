@@ -508,3 +508,8 @@ INF
 {0{2{2 is}{0{2 a}{1 mess}}}{2 .}}
 7
 7.0
+# Sentiment (1545,924); TED=16
+{3{3{2 Hugely}{3 accomplished}}{3{2{2 slice}{2{2 of}{3{3 Hitchcockian}{2 suspense}}}}{2 .}}}
+{4{4{3{2 The}{4{2 most}{3{3 compelling}{4{2 Wiseman}{3 epic}}}}}{2{2 of}{2{2 recent}{2 years}}}}{2 .}}
+15
+INF

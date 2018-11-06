@@ -737,9 +737,9 @@ std::vector<std::pair<int, int>> GreedyUB<Label, CostModel>::to_ted_mapping(
     if (t1_count_mapped_desc[cur_t1] == t2_count_mapped_desc[cur_t2]) {
       ted_mapping.push_back({cur_t1, cur_t2});
       prev_t2 = cur_t2;
-      update_prop_desc_when_mapped(t1_i, t1_count_mapped_desc, t1_propagate_mapped_desc_count, t1_parent_, t1_input_size_);
+      update_prop_desc_when_mapped(cur_t1, t1_count_mapped_desc, t1_propagate_mapped_desc_count, t1_parent_, t1_input_size_);
       t1_i = cur_t1 + 1;
-      update_prop_desc_when_mapped(t2_i, t2_count_mapped_desc, t2_propagate_mapped_desc_count, t2_parent_, t2_input_size_);
+      update_prop_desc_when_mapped(cur_t2, t2_count_mapped_desc, t2_propagate_mapped_desc_count, t2_parent_, t2_input_size_);
       t2_i = cur_t2 + 1;
     }// else {cur_t1, cur_t2} cannot be mapped.
   }
