@@ -83,3 +83,13 @@
 {1{1{2 A}{1{2 rather}{1 tired}}}{2{2{2 exercise}{2{2 in}{2 nostalgia}}}{2 .}}}
 15
 {(3,8),(4,9),(11,10),(12,12)}
+# Sentiment (1545,924)
+{3{3{2 Hugely}{3 accomplished}}{3{2{2 slice}{2{2 of}{3{3 Hitchcockian}{2 suspense}}}}{2 .}}}
+{4{4{3{2 The}{4{2 most}{3{3 compelling}{4{2 Wiseman}{3 epic}}}}}{2{2 of}{2{2 recent}{2 years}}}}{2 .}}
+15
+{(2,6),(4,9),(9,13),(10,15)}
+# Sentiment (924,1545)
+{4{4{3{2 The}{4{2 most}{3{3 compelling}{4{2 Wiseman}{3 epic}}}}}{2{2 of}{2{2 recent}{2 years}}}}{2 .}}
+{3{3{2 Hugely}{3 accomplished}}{3{2{2 slice}{2{2 of}{3{3 Hitchcockian}{2 suspense}}}}{2 .}}}
+15
+{(6,2),(9,4),(13,9),(15,10)}
