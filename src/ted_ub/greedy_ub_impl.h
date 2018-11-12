@@ -34,13 +34,14 @@ template <typename Label, typename CostModel>
 double GreedyUB<Label, CostModel>::verify(const node::Node<Label>& t1,
     const node::Node<Label>& t2, double similarity_threshold) {
   init(t1, t2);
+  int int_threshold = static_cast <int> (std::ceil(similarity_threshold));
   // We don't compute the upper bound for node pairs with size lower bound
   // greater than threshold.
-  if (std::abs(t1_input_size_ - t2_input_size_) > k) {
+  if (std::abs(t1_input_size_ - t2_input_size_) > int_threshold) {
     return std::numeric_limits<double>::infinity();
   }
-  double cost = mapping_cost(lb_mapping_fill_gaps(t1, t2, similarity_threshold));
-  if (cost <= static_cast <int> (std::ceil(similarity_threshold))) {
+  double cost = mapping_cost(lb_mapping_fill_gaps(t1, t2, int_threshold));
+  if (cost <= int_threshold) {
     return cost;
   }
   return std::numeric_limits<double>::infinity();
@@ -55,13 +56,13 @@ double GreedyUB<Label, CostModel>::greedy_ub_ted(const node::Node<Label>& t1,
   if (std::abs(t1_input_size_ - t2_input_size_) > k) {
     return std::numeric_limits<double>::infinity();
   }
-  return mapping_cost(lb_mapping_fill_gaps(t1, t2, static_cast <int> (std::ceil(k))));
+  return mapping_cost(lb_mapping_fill_gaps(t1, t2, k));
 };
 
 template <typename Label, typename CostModel>
 double GreedyUB<Label, CostModel>::greedy_ub_ted_deprecated(const node::Node<Label>& t1,
     const node::Node<Label>& t2, const int k) {
-  return mapping_cost(lb_mapping_fill_gaps_deprecated(t1, t2, static_cast <int> (std::ceil(k))));
+  return mapping_cost(lb_mapping_fill_gaps_deprecated(t1, t2, k));
 };
 
 template <typename Label, typename CostModel>
