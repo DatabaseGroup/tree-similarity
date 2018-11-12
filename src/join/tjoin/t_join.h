@@ -37,6 +37,7 @@
 #include <functional>
 #include "join_result_element.h"
 #include "node.h"
+#include "greedy_ub.h"
 #include "candidate_index.h"
 #include "label_set_converter.h"
 #include "label_set_element.h"
@@ -88,8 +89,22 @@ public:
       std::vector<std::pair<unsigned int, std::vector<label_set_converter::LabelSetElement>>>& sets_collection,
       std::vector<std::pair<unsigned int, unsigned int>>& candidates,
       const double distance_threshold);
+  /// Uses the label guided mapping upper bound (lgm) to send candidates to 
+  /// the result set without verification.
+  ///
+  /// \param trees_collection A vector holding an input collection of trees.
+  /// \param candidates A vector of candidate tree pairs.
+  /// \param join_result A vector of result tree pairs and their TED value.
+  /// \param distance_threshold The maximum number of edit operations that
+  ///                           differs two trees in the join's result set.
+  void upperbound(
+    std::vector<node::Node<Label>>& trees_collection,
+    std::vector<std::pair<unsigned int, unsigned int>>& candidates,
+    std::vector<join::JoinResultElement>& join_result, 
+    const double distance_threshold);
   /// Verify for each candidate pair in candidates if the tree edit
-  /// distance is below a certain distance_threshold.
+  /// distance is below a certain distance_threshold using the verification 
+  /// with bounded structural modifcations (bsm).
   ///
   /// \param trees_collection A vector holding an input collection of trees.
   /// \param candidates A vector of candidate tree pairs.

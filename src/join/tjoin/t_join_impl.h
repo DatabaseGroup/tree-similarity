@@ -49,6 +49,9 @@ void TJoin<Label, CostModel, VerificationAlgorithm>::execute_join(
   // Retrieves candidates from the candidate index.
   retrieve_candidates(sets_collection, candidates, distance_threshold);
 
+  // Use the label guided mapping upper bound to send candidates immediately .
+  upperbound(trees_collection, candidates, join_result, distance_threshold);
+
   // Verify all computed join candidates and return the join result.
   verify_candidates(trees_collection, candidates, join_result, distance_threshold);
 }
@@ -81,8 +84,30 @@ void TJoin<Label, CostModel, VerificationAlgorithm>::retrieve_candidates(
   pre_candidates_ = c_index.get_number_of_pre_candidates();
   // Copy the number of inverted list lookups.
   il_lookups_ = c_index.get_number_of_il_lookups();
-  // std::cout << "pre_candidates_: " << pre_candidates_ << std::endl;
-  // std::cout << "il_lookups_: " << il_lookups_ << std::endl;
+}
+
+template <typename Label, typename CostModel, typename VerificationAlgorithm>
+void TJoin<Label, CostModel, VerificationAlgorithm>::upperbound(
+    std::vector<node::Node<Label>>& trees_collection,
+    std::vector<std::pair<unsigned int, unsigned int>>& candidates,
+    std::vector<join::JoinResultElement>& join_result,
+    const double distance_threshold) {
+  ted_ub::GreedyUB<Label, CostModel> gub;
+
+  std::vector<std::pair<unsigned int, unsigned int>>::iterator it = candidates.begin();
+  while(it != candidates.end()) {
+    double ub_value = gub.verify(trees_collection[it->first],
+                                  trees_collection[it->second],
+                                  distance_threshold);
+    if(ub_value <= distance_threshold) {
+      join_result.emplace_back(it->first, it->second, ub_value);
+      *it = candidates.back();
+      candidates.pop_back();
+    }
+    else {
+      ++it;
+    }
+  }
 }
 
 template <typename Label, typename CostModel, typename VerificationAlgorithm>

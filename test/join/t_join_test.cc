@@ -57,10 +57,11 @@ int main() {
   std::string correct_result = "{1,0,1},{2,0,1},{2,1,1},{4,2,1}";
 
   // File path to input tree collection.
-  std::string file_path = "t_join_test_data.txt";
+  // std::string file_path = "t_join_test_data.txt";
+  std::string file_path = "/Users/huetterth/Documents/studies/phd/ted/ted-datasets/sentiment/sentiment_sorted.bracket";
 
   // Set distance threshold - maximum number of allowed edit operations.
-  double distance_threshold = 1.00;
+  double distance_threshold = 7.00;
   std::vector<std::pair<unsigned int, std::vector<label_set_converter::LabelSetElement>>> sets_collection;
   std::vector<std::pair<unsigned int, unsigned int>> candidates;
   std::vector<join::JoinResultElement> join_result;
@@ -75,13 +76,15 @@ int main() {
   // TJoin with Touzet verification
   join::TJoin<Label, CostModel, VerificationTouzet> tjoin;
   tjoin.execute_join(trees_collection, sets_collection, candidates, join_result, distance_threshold);
-
-  std::string computed_result = vector_of_re_to_string(join_result);
-  if (correct_result != computed_result) {
-    std::cerr << "Incorrect result set: " << computed_result << " instead of "
-        << correct_result << std::endl;
-    return -1;
-  }
+  // for(auto& res: join_result)
+  //   std::cout << res.tree_id_1 << " " << res.tree_id_2 << std::endl;
+  std::cout << " --- result size=" << join_result.size() << std::endl;
+  // std::string computed_result = vector_of_re_to_string(join_result);
+  // if (correct_result != computed_result) {
+    // std::cerr << "Incorrect result set: " << computed_result << " instead of "
+        // << correct_result << std::endl;
+    // return -1;
+  // }
 
   return 0;
 }
