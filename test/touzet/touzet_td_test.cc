@@ -3,7 +3,6 @@
 #include <vector>
 #include <fstream>
 #include <limits>
-#include <cmath>
 #include "unit_cost_model.h"
 #include "string_label.h"
 #include "node.h"
