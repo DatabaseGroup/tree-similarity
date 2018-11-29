@@ -33,10 +33,9 @@
 #include <vector>
 #include <list>
 #include <unordered_map>
-#include <memory>
+#include <cmath>
 #include "node.h"
 #include "label_dictionary.h"
-#include <iostream>
 
 namespace ted_ub {
 

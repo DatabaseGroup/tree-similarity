@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 #include <fstream>
-#include <cmath>
 #include <random>
 #include "unit_cost_model.h"
 #include "string_label.h"

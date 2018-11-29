@@ -2,7 +2,6 @@
 #include <string>
 #include <vector>
 #include <fstream>
-#include <cmath>
 #include "unit_cost_model.h"
 #include "string_label.h"
 #include "node.h"
