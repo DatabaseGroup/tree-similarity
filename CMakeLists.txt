@@ -25,6 +25,7 @@ target_include_directories(TreeSimilarity INTERFACE
   src/join/naive
   src/join/tjoin
   src/join/tang
+  src/join/degree_histogram
   src/tree_generator
   src/ted_ub
 )
