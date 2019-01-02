@@ -84,10 +84,33 @@ add_executable(
 
 target_link_libraries(
   dh_join_test_driver # EXECUTABLE NAME
-  TreeSimilarity        # LIBRARY NAME
+  TreeSimilarity      # LIBRARY NAME
 )
 
 add_test(
   NAME dh_join_test           # TEST NAME
   COMMAND dh_join_test_driver # EXECUTABLE NAME
+)
+
+# Testing leaf distance histogram results.
+
+# Copy test cases.
+file(
+  COPY ldh_join_test_data.txt
+  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+add_executable(
+  ldh_join_test_driver # EXECUTABLE NAME
+  ldh_join_test.cc     # EXECUTABLE SOURCE
+)
+
+target_link_libraries(
+  ldh_join_test_driver # EXECUTABLE NAME
+  TreeSimilarity       # LIBRARY NAME
+)
+
+add_test(
+  NAME ldh_join_test           # TEST NAME
+  COMMAND ldh_join_test_driver # EXECUTABLE NAME
 )

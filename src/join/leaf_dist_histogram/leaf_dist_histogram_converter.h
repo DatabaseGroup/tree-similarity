@@ -19,11 +19,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/// \file join/degree_histogram/degree_histogram_converter.h
+/// \file join/leaf_dist_histogram/leaf_dist_histogram_converter.h
 ///
 /// \details
-/// Takes a collection of trees and and converts them into a histogram of degree 
-/// values. The histogram stores the number of nodes with a certain degree value. 
+/// Takes a collection of trees and and converts them into a histogram of leaf 
+/// distance values. The histogram stores the number of nodes with a certain 
+/// leaf distance value. 
 
 
 #ifndef TREE_SIMILARITY_JOIN_DEGREE_HISTOGRAM_DEGREE_HISTOGRAM_CONVERTER_H
@@ -33,7 +34,7 @@
 #include "node.h"
 #include "string_label.h"
 
-namespace degree_histogram_converter {
+namespace leaf_dist_histogram_converter {
 
 template <typename Label>
 class Converter {
@@ -49,29 +50,29 @@ public:
   void create_histogram(
     const std::vector<node::Node<Label>>& trees_collection,
     std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& histogram_collection);
-  /// Returns the maximum degree of a node in a tree collection.
+  /// Returns the maximum leaf distance of a node in a tree collection.
   ///
-  /// \return The the maximum degree of a node in a tree collection.
-  const unsigned int get_maximum_degree() const;
+  /// \return The the maximum leaf distance of a node in a tree collection.
+  const unsigned int get_maximum_leaf_dist() const;
 // Member variables.
 private:
   /// Counter to give unique IDs to the tokens.
-  unsigned int max_degree_ = 0;
+  unsigned int max_leaf_distance_ = 0;
 // Member functions.
 private:
   /// Recursively transforms a tree into a histogram. Each element holds a value 
   /// of the histogram.
   ///
   /// \param tree_node Current node of a tree.
-  /// \param degree_histogram Vector of histogram values.
-  void create_degree_histrogram(
+  /// \param leaf_dist_histogram Vector of histogram values.
+  int create_leaf_dist_histrogram(
     const node::Node<Label>& tree_node, 
-    std::unordered_map<unsigned int, unsigned int>& degree_histogram, 
+    std::unordered_map<unsigned int, unsigned int>& leaf_dist_histogram, 
     unsigned int& tree_size);
 };
 
 // Implementation details.
-#include "degree_histogram_converter_impl.h"
+#include "leaf_dist_histogram_converter_impl.h"
 }
 
 #endif // TREE_SIMILARITY_JOIN_DEGREE_HISTOGRAM_DEGREE_HISTOGRAM_CONVERTER_H

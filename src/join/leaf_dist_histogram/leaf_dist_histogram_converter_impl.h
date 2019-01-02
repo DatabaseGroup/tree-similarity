@@ -19,7 +19,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/// \file join/degree_histogram/degree_histogram_converter_impl.h
+/// \file join/leaf_dist_histogram/leaf_dist_histogram_converter_impl.h
 ///
 /// \details
 /// Implements an algorithm that converts a collection of trees into a collection 
@@ -38,42 +38,47 @@ void Converter<Label>::create_histogram(
 
   // for each tree in the tree collection
   for (const auto& tree: trees_collection) {
-    // stores the number of nodes per degree
-    std::unordered_map<unsigned int, unsigned int> degree_histogram;
-    // stores the number of nodes per degree
+    // stores the number of nodes per leaf distance
+    std::unordered_map<unsigned int, unsigned int> leaf_dist_histogram;
+    // stores the number of nodes per leaf distance
     unsigned int tree_size = 0;
-    // traverse tree and store number of nodes per degree
-    create_degree_histrogram(tree, degree_histogram, tree_size);
-    // add degree histogram to collection
-    histogram_collection.emplace_back(tree_size, degree_histogram);
+    // traverse tree and store number of nodes per leaf distance
+    create_leaf_dist_histrogram(tree, leaf_dist_histogram, tree_size);
+    // add leaf distance histogram to collection
+    histogram_collection.emplace_back(tree_size, leaf_dist_histogram);
   }
 }
 
 template<typename Label>
-void Converter<Label>::create_degree_histrogram(
+int Converter<Label>::create_leaf_dist_histrogram(
     const node::Node<Label>& tree_node, 
-    std::unordered_map<unsigned int, unsigned int>& degree_histogram, 
+    std::unordered_map<unsigned int, unsigned int>& leaf_dist_histogram, 
     unsigned int& tree_size) {
 
-  // count number of children
-  unsigned int number_of_children = 0;
+  // the leaf distance is the minimum leaf distance of a nodes children + 1
+  unsigned int min_child_leaf_dist = -1;
   // do recursively for all children
   for (const auto& child: tree_node.get_children()) {
-    create_degree_histrogram(child, degree_histogram, tree_size);
-    ++number_of_children;
+    int child_dist = create_leaf_dist_histrogram(child, leaf_dist_histogram, tree_size);
+    if(min_child_leaf_dist > child_dist || min_child_leaf_dist == -1)
+      min_child_leaf_dist = child_dist;
   }
-  // increase degree count for current node
-  ++degree_histogram[number_of_children];
-  // store maximum degree of the collection
-  if(number_of_children > max_degree_)
-    max_degree_ = number_of_children;
+  // the leaf distance is the minimum leaf distance of a nodes children + 1
+  ++min_child_leaf_dist;
+  // increase leaf distance count for current node
+  ++leaf_dist_histogram[min_child_leaf_dist];
+  // store maximum leaf distance of the collection
+  if(min_child_leaf_dist > max_leaf_distance_)
+    max_leaf_distance_ = min_child_leaf_dist;
   // increase tree size
   ++tree_size;
+
+  return min_child_leaf_dist;
 }
 
 template<typename Label>
-const unsigned int Converter<Label>::get_maximum_degree() const {
-  return max_degree_;
+const unsigned int Converter<Label>::get_maximum_leaf_dist() const {
+  return max_leaf_distance_;
 }
 
 #endif // TREE_SIMILARITY_JOIN_DEGREE_HISTOGRAM_DEGREE_HISTOGRAM_CONVERTER_IMPL_H

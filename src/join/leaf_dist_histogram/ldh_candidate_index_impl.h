@@ -19,14 +19,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/// \file join/degree_histogram/dh_candidate_index_impl.h
+/// \file join/leaf_dist_histogram/ldh_candidate_index_impl.h
 ///
 /// \details
 /// Implements a candidate index that efficiently and effectively returns tree 
-/// pairs that satisfy the degree histogram lower bound. 
+/// pairs that satisfy the leaf distance histogram lower bound. 
 
-#ifndef TREE_SIMILARITY_JOIN_DEGREE_HISTOGRAM_DH_CANDIDATE_INDEX_IMPL_H
-#define TREE_SIMILARITY_JOIN_DEGREE_HISTOGRAM_DH_CANDIDATE_INDEX_IMPL_H
+#ifndef TREE_SIMILARITY_JOIN_LEAF_DIST_HISTOGRAM_LDH_CANDIDATE_INDEX_IMPL_H
+#define TREE_SIMILARITY_JOIN_LEAF_DIST_HISTOGRAM_LDH_CANDIDATE_INDEX_IMPL_H
 
 CandidateIndex::CandidateIndex() {
   pre_candidates_ = 0;
@@ -88,4 +88,4 @@ unsigned long int CandidateIndex::get_number_of_il_lookups() const {
   return il_lookups_;
 }
 
-#endif // TREE_SIMILARITY_JOIN_DEGREE_HISTOGRAM_DH_CANDIDATE_INDEX_IMPL_H
+#endif // TREE_SIMILARITY_JOIN_LEAF_DIST_HISTOGRAM_LDH_CANDIDATE_INDEX_IMPL_H
