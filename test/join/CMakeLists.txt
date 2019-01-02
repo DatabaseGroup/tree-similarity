@@ -114,3 +114,26 @@ add_test(
   NAME ldh_join_test           # TEST NAME
   COMMAND ldh_join_test_driver # EXECUTABLE NAME
 )
+
+# Testing label histogram results.
+
+# Copy test cases.
+file(
+  COPY lh_join_test_data.txt
+  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+add_executable(
+  lh_join_test_driver # EXECUTABLE NAME
+  lh_join_test.cc     # EXECUTABLE SOURCE
+)
+
+target_link_libraries(
+  lh_join_test_driver # EXECUTABLE NAME
+  TreeSimilarity       # LIBRARY NAME
+)
+
+add_test(
+  NAME lh_join_test           # TEST NAME
+  COMMAND lh_join_test_driver # EXECUTABLE NAME
+)

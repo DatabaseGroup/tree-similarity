@@ -19,23 +19,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/// \file join/leaf_dist_histogram/ldh_join_impl.h
+/// \file join/label_histogram/lh_join_impl.h
 ///
 /// \details
-/// Implements the LDHJoin tree similarity join.
+/// Implements the LHJoin tree similarity join.
 
-#ifndef TREE_SIMILARITY_JOIN_LEAF_DIST_HISTOGRAM_LDHJOIN_IMPL_H
-#define TREE_SIMILARITY_JOIN_LEAF_DIST_HISTOGRAM_LDHJOIN_IMPL_H
+#ifndef TREE_SIMILARITY_JOIN_LABEL_HISTOGRAM_LHJOIN_IMPL_H
+#define TREE_SIMILARITY_JOIN_LABEL_HISTOGRAM_LHJOIN_IMPL_H
 
 template <typename Label, typename CostModel, typename VerificationAlgorithm>
-LDHJoin<Label, CostModel, VerificationAlgorithm>::LDHJoin() {
+LHJoin<Label, CostModel, VerificationAlgorithm>::LHJoin() {
   pre_candidates_ = 0;
   sum_subproblem_counter_ = 0;
   il_lookups_ = 0;
 }
 
 template <typename Label, typename CostModel, typename VerificationAlgorithm>
-void LDHJoin<Label, CostModel, VerificationAlgorithm>::execute_join(
+void LHJoin<Label, CostModel, VerificationAlgorithm>::execute_join(
     std::vector<node::Node<Label>>& trees_collection,
     std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& histogram_collection,
     std::vector<std::pair<unsigned int, unsigned int>>& candidates,
@@ -54,18 +54,18 @@ void LDHJoin<Label, CostModel, VerificationAlgorithm>::execute_join(
 
 
 template <typename Label, typename CostModel, typename VerificationAlgorithm>
-void LDHJoin<Label, CostModel, VerificationAlgorithm>::convert_trees_to_sets(
+void LHJoin<Label, CostModel, VerificationAlgorithm>::convert_trees_to_sets(
     std::vector<node::Node<Label>>& trees_collection,
     std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& histogram_collection) {
 
   // Convert trees to sets and get the result.
-  leaf_dist_histogram_converter::Converter<Label> ldhc;
-  ldhc.create_histogram(trees_collection, histogram_collection);
-  il_size_ = ldhc.get_maximum_leaf_dist();
+  label_histogram_converter::Converter<Label> lhc;
+  lhc.create_histogram(trees_collection, histogram_collection);
+  il_size_ = lhc.get_number_of_labels();
 }
 
 template <typename Label, typename CostModel, typename VerificationAlgorithm>
-void LDHJoin<Label, CostModel, VerificationAlgorithm>::retrieve_candidates(
+void LHJoin<Label, CostModel, VerificationAlgorithm>::retrieve_candidates(
     std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& histogram_collection,
     std::vector<std::pair<unsigned int, unsigned int>>& candidates,
     const double distance_threshold) {
@@ -83,7 +83,7 @@ void LDHJoin<Label, CostModel, VerificationAlgorithm>::retrieve_candidates(
 }
 
 template <typename Label, typename CostModel, typename VerificationAlgorithm>
-void LDHJoin<Label, CostModel, VerificationAlgorithm>::verify_candidates(
+void LHJoin<Label, CostModel, VerificationAlgorithm>::verify_candidates(
     std::vector<node::Node<Label>>& trees_collection,
     std::vector<std::pair<unsigned int, unsigned int>>& candidates,
     std::vector<join::JoinResultElement>& join_result,
@@ -106,19 +106,19 @@ void LDHJoin<Label, CostModel, VerificationAlgorithm>::verify_candidates(
 
 template <typename Label, typename CostModel, typename VerificationAlgorithm>
 const unsigned long long int
-    LDHJoin<Label, CostModel, VerificationAlgorithm>::get_number_of_pre_candidates() const {
+    LHJoin<Label, CostModel, VerificationAlgorithm>::get_number_of_pre_candidates() const {
   return pre_candidates_;
 }
 
 template <typename Label, typename CostModel, typename VerificationAlgorithm>
-const unsigned long long int LDHJoin<Label, CostModel, VerificationAlgorithm>::get_subproblem_count() const {
+const unsigned long long int LHJoin<Label, CostModel, VerificationAlgorithm>::get_subproblem_count() const {
   return sum_subproblem_counter_;
 }
 
 template <typename Label, typename CostModel, typename VerificationAlgorithm>
 const unsigned long long int
-    LDHJoin<Label, CostModel, VerificationAlgorithm>::get_number_of_il_lookups() const {
+    LHJoin<Label, CostModel, VerificationAlgorithm>::get_number_of_il_lookups() const {
   return il_lookups_;
 }
 
-#endif // TREE_SIMILARITY_JOIN_LEAF_DIST_HISTOGRAM_LDHJOIN_IMPL_H
+#endif // TREE_SIMILARITY_JOIN_LABEL_HISTOGRAM_LHJOIN_IMPL_H

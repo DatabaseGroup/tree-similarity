@@ -19,36 +19,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/// \file join/leaf_dist_histogram/ldh_join.h
+/// \file join/label_histogram/lh_join.h
 ///
 /// \details
-/// Implements the LDHJoin tree similarity join. First, a tree is converted into a 
-/// leaf distance histogram. Second, a candidate index is used to retrieve candidates  
-/// by applying the leaf distance histogram lower bound by Kailing et al. Next, the 
+/// Implements the LHJoin tree similarity join. First, a tree is converted into a 
+/// label histogram. Second, a candidate index is used to retrieve candidates  
+/// by applying the label histogram lower bound by Kailing et al. Next, the 
 /// resulting tree pairs, called candidates, have to be verified. Therefore, the 
 /// greedy label guided mapping upper bound sends candidates to the result set 
 /// without TED computation. Last, the remaining candidates are evaluated by 
 /// Touzets algorithm.
 
-#ifndef TREE_SIMILARITY_JOIN_LEAF_DIST_HISTOGRAM_LDHJOIN_H
-#define TREE_SIMILARITY_JOIN_LEAF_DIST_HISTOGRAM_LDHJOIN_H
+#ifndef TREE_SIMILARITY_JOIN_LABEL_HISTOGRAM_LHJOIN_H
+#define TREE_SIMILARITY_JOIN_LABEL_HISTOGRAM_LHJOIN_H
 
 #include <vector>
 #include <functional>
 #include "join_result_element.h"
 #include "node.h"
 #include "greedy_ub.h"
-#include "ldh_candidate_index.h"
-#include "leaf_dist_histogram_converter.h"
+#include "lh_candidate_index.h"
+#include "label_histogram_converter.h"
 
 namespace join {
 
 template <typename Label, typename CostModel, typename VerificationAlgorithm>
-class LDHJoin {
+class LHJoin {
 // Member functions.
 public:
   /// Constructor.
-  LDHJoin();
+  LHJoin();
   /// Given a collection of trees, the candidates are retrieved by an 
   /// efficient and effective candidate index. Next, all candidates are 
   /// verified with the label guided mapping upper bound. Last, the 
@@ -56,7 +56,7 @@ public:
   ///
   /// \param trees_collection A vector holding an input collection of trees.
   /// \param histogram_collection A vector containing the according 
-  ///                             leaf distance histograms of the input 
+  ///                             label histograms of the input 
   ///                             trees in trees_collection.
   /// \param candidates A vector of candidate tree pairs.
   /// \param join_result A vector of result tree pairs and their TED value.
@@ -72,16 +72,16 @@ public:
   /// A given collection of trees is converted into a collection of label sets.
   ///
   /// \param trees_collection A vector holding an input collection of trees.
-  /// \return A vector containing the according leaf distance histograms of the 
+  /// \return A vector containing the according label histograms of the 
   ///         input trees in trees_collection.
   void convert_trees_to_sets(
       std::vector<node::Node<Label>>& trees_collection,
       std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& histogram_collection);
-  /// Uses the LDHJoin candidate index to retrieve candidates that are further 
+  /// Uses the LHJoin candidate index to retrieve candidates that are further 
   /// verified.
   ///
   /// \param histogram_collection A vector containing the according 
-  ///                             leaf distance histograms of the input 
+  ///                             label histograms of the input 
   ///                             trees in trees_collection.
   /// \param candidates A vector of candidate tree pairs.
   /// \param distance_threshold The maximum number of edit operations that
@@ -131,8 +131,8 @@ private:
 };
 
 // Implementation details.
-#include "ldh_join_impl.h"
+#include "lh_join_impl.h"
 
 }
 
-#endif // TREE_SIMILARITY_JOIN_LEAF_DIST_HISTOGRAM_LDHJOIN_H
+#endif // TREE_SIMILARITY_JOIN_LABEL_HISTOGRAM_LHJOIN_H
