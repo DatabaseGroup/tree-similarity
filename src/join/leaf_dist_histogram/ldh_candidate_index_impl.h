@@ -65,8 +65,8 @@ void CandidateIndex::lookup(
 
     // verify all pre candidates
     for(unsigned int pre_cand_id: pre_candidates) {
-      if((histogram_collection[current_tree_id].first + histogram_collection[pre_cand_id].first - 
-          (2 * intersection_cnt[pre_cand_id])) / 3 <= distance_threshold)
+      if(histogram_collection[current_tree_id].first + histogram_collection[pre_cand_id].first - 
+          (2 * intersection_cnt[pre_cand_id]) <= distance_threshold)
         join_candidates.emplace_back(current_tree_id, pre_cand_id);
       // reset intersection counter
       intersection_cnt[pre_cand_id] = 0;

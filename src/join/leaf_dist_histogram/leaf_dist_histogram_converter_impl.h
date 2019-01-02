@@ -56,24 +56,24 @@ int Converter<Label>::create_leaf_dist_histrogram(
     unsigned int& tree_size) {
 
   // the leaf distance is the minimum leaf distance of a nodes children + 1
-  unsigned int min_child_leaf_dist = -1;
+  unsigned int max_child_leaf_dist = 0;
   // do recursively for all children
   for (const auto& child: tree_node.get_children()) {
     int child_dist = create_leaf_dist_histrogram(child, leaf_dist_histogram, tree_size);
-    if(min_child_leaf_dist > child_dist || min_child_leaf_dist == -1)
-      min_child_leaf_dist = child_dist;
+    if(max_child_leaf_dist < child_dist)
+      max_child_leaf_dist = child_dist;
   }
   // the leaf distance is the minimum leaf distance of a nodes children + 1
-  ++min_child_leaf_dist;
+  ++max_child_leaf_dist;
   // increase leaf distance count for current node
-  ++leaf_dist_histogram[min_child_leaf_dist];
+  ++leaf_dist_histogram[max_child_leaf_dist];
   // store maximum leaf distance of the collection
-  if(min_child_leaf_dist > max_leaf_distance_)
-    max_leaf_distance_ = min_child_leaf_dist;
+  if(max_child_leaf_dist > max_leaf_distance_)
+    max_leaf_distance_ = max_child_leaf_dist;
   // increase tree size
   ++tree_size;
 
-  return min_child_leaf_dist;
+  return max_child_leaf_dist;
 }
 
 template<typename Label>
