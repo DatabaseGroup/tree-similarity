@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "lh_join.h"
+#include "bb_join.h"
 #include "bracket_notation_parser.h"
 #include "join_result_element.h"
 #include "node.h"
@@ -19,7 +19,7 @@ int main() {
   using VerificationTouzet = ted::Touzet<Label, CostModel>;
 
   // File path to input tree collection.
-  std::string file_path = "lh_join_test_data.txt";
+  std::string file_path = "bb_join_test_data.txt";
   // Correct results for bolzano dataset (threshold 1 to 15).
   std::vector<unsigned int> results = {9, 37, 61, 109, 196, 344, 476, 596, 704, 840, 946, 1138, 1356, 1498, 1692};
 
@@ -36,9 +36,9 @@ int main() {
     parser::BracketNotationParser bnp;
     bnp.parse_collection(trees_collection, file_path);
 
-    // LHJoin with Touzet verification
-    join::LHJoin<Label, CostModel, VerificationTouzet> lhjoin;
-    lhjoin.execute_join(trees_collection, histogram_collection, candidates, join_result, (double)i);
+    // BBJoin with Touzet verification
+    join::BBJoin<Label, CostModel, VerificationTouzet> bbjoin;
+    bbjoin.execute_join(trees_collection, histogram_collection, candidates, join_result, (double)i);
     
     if(join_result.size() != results[i-1]) {
       std::cout << " --- incorrect result for threshold " << i << ": " << join_result.size() 

@@ -28,6 +28,7 @@ target_include_directories(TreeSimilarity INTERFACE
   src/join/degree_histogram
   src/join/leaf_dist_histogram
   src/join/label_histogram
+  src/join/binary_branches
   src/tree_generator
   src/ted_ub
 )

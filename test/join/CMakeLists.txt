@@ -137,3 +137,26 @@ add_test(
   NAME lh_join_test           # TEST NAME
   COMMAND lh_join_test_driver # EXECUTABLE NAME
 )
+
+# Testing binary branches results.
+
+# Copy test cases.
+file(
+  COPY bb_join_test_data.txt
+  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+add_executable(
+  bb_join_test_driver # EXECUTABLE NAME
+  bb_join_test.cc     # EXECUTABLE SOURCE
+)
+
+target_link_libraries(
+  bb_join_test_driver # EXECUTABLE NAME
+  TreeSimilarity       # LIBRARY NAME
+)
+
+add_test(
+  NAME bb_join_test           # TEST NAME
+  COMMAND bb_join_test_driver # EXECUTABLE NAME
+)

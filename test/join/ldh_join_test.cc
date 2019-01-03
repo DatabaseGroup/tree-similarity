@@ -19,12 +19,11 @@ int main() {
   using VerificationTouzet = ted::Touzet<Label, CostModel>;
 
   // File path to input tree collection.
-  // std::string file_path = "ldh_join_test_data.txt";
-  // std::string file_path = "/Users/huetterth/Documents/studies/phd/ted/ted-datasets/sentiment/sentiment_sorted.bracket";
-  std::string file_path = "/Users/huetterth/Documents/studies/phd/ted/ted-datasets/bolzano/bolzano_sorted.bracket";
+  std::string file_path = "ldh_join_test_data.txt";
+  // Correct results for bolzano dataset (threshold 1 to 15).
+  std::vector<unsigned int> results = {9, 37, 61, 109, 196, 344, 476, 596, 704, 840, 946, 1138, 1356, 1498, 1692};
 
-  // Set distance threshold - maximum number of allowed edit operations.
-  // double distance_threshold = 7.00;
+  // Execute for different thresholds.
   for (int i = 1; i < 16; i++) {
     std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>> histogram_collection;
     std::vector<std::pair<unsigned int, unsigned int>> candidates;
@@ -41,8 +40,11 @@ int main() {
     join::LDHJoin<Label, CostModel, VerificationTouzet> ldhjoin;
     ldhjoin.execute_join(trees_collection, histogram_collection, candidates, join_result, (double)i);
     
-    std::cout << "tau=" << i << ",\tpc=" << ldhjoin.get_number_of_pre_candidates() << 
-      ", cand=" << candidates.size() << ",\t|result|=" << join_result.size() << std::endl;
+    if(join_result.size() != results[i-1]) {
+      std::cout << " --- incorrect result for threshold " << i << ": " << join_result.size() 
+        << " instead of " << results[i-1] << std::endl;
+      return -1;
+    }
   }
 
   return 0;
