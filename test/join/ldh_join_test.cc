@@ -19,7 +19,7 @@ int main() {
   using VerificationTouzet = ted::Touzet<Label, CostModel>;
 
   // File path to input tree collection.
-  std::string file_path = "ldh_join_test_data.txt";
+  std::string file_path = "join_test_data.txt";
   // Correct results for bolzano dataset (threshold 1 to 15).
   std::vector<unsigned int> results = {9, 37, 61, 109, 196, 344, 476, 596, 704, 840, 946, 1138, 1356, 1498, 1692};
 

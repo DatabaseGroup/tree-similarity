@@ -23,13 +23,13 @@ add_test(
   COMMAND naive_join_test_driver # EXECUTABLE NAME
 )
 
-# Testing tjoin results.
-
 # Copy test cases.
 file(
-  COPY t_join_test_data.txt
+  COPY join_test_data.txt
   DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
 )
+
+# Testing tjoin results.
 
 add_executable(
   t_join_test_driver # EXECUTABLE NAME
@@ -48,12 +48,6 @@ add_test(
 
 # Testing tangjoin results.
 
-# Copy test cases.
-file(
-  COPY tang_join_test_data.txt
-  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
-)
-
 add_executable(
   tang_join_test_driver # EXECUTABLE NAME
   tang_join_test.cc     # EXECUTABLE SOURCE
@@ -70,12 +64,6 @@ add_test(
 )
 
 # Testing degree histogram results.
-
-# Copy test cases.
-file(
-  COPY dh_join_test_data.txt
-  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
-)
 
 add_executable(
   dh_join_test_driver # EXECUTABLE NAME
@@ -94,12 +82,6 @@ add_test(
 
 # Testing leaf distance histogram results.
 
-# Copy test cases.
-file(
-  COPY ldh_join_test_data.txt
-  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
-)
-
 add_executable(
   ldh_join_test_driver # EXECUTABLE NAME
   ldh_join_test.cc     # EXECUTABLE SOURCE
@@ -117,12 +99,6 @@ add_test(
 
 # Testing label histogram results.
 
-# Copy test cases.
-file(
-  COPY lh_join_test_data.txt
-  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
-)
-
 add_executable(
   lh_join_test_driver # EXECUTABLE NAME
   lh_join_test.cc     # EXECUTABLE SOURCE
@@ -139,12 +115,6 @@ add_test(
 )
 
 # Testing binary branches results.
-
-# Copy test cases.
-file(
-  COPY bb_join_test_data.txt
-  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
-)
 
 add_executable(
   bb_join_test_driver # EXECUTABLE NAME
