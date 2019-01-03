@@ -35,7 +35,7 @@
 #include <unordered_map>
 #include "node.h"
 
-namespace candidate_index {
+namespace ldh_candidate_index {
 
 class CandidateIndex {
 // Member functions.

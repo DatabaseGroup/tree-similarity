@@ -71,7 +71,7 @@ void BBJoin<Label, CostModel, VerificationAlgorithm>::retrieve_candidates(
     const double distance_threshold) {
 
   // Initialize candidate index.
-  candidate_index::CandidateIndex c_index;
+  bb_candidate_index::CandidateIndex c_index;
 
   // Retrieve candidates from the candidate index.
   c_index.lookup(histogram_collection, candidates, il_size_, distance_threshold);
