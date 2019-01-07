@@ -1,0 +1,24 @@
+# Test case 1
+{f{a}{e{c{b}}{d}}}
+{f{a}{c{e{b}{d}}}}
+2.0
+# Test case 2
+{a{b}{c{e}{f}}{d}}
+{a{b}{c{e}}{d}}
+1.0
+# Test case 3
+{a{b}{c{e}{f}}{d}}
+{a{b}{c}{d}}
+2.0
+# Test case 4
+{a{x}{c{e}{f}}{d}}
+{a{b}{c}{d}}
+3.0
+# Test case 5
+{a{b}{c{e}{f}}{d}}
+{a{b}{c}}
+3.0
+# Test case 17
+{x}
+{a{r}{d}{e{i}{l}{t{k}{g}{h}}}}
+10.0
