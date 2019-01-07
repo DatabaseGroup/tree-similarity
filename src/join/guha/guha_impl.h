@@ -53,7 +53,7 @@ void Guha<Label, CostModel, VerificationAlgorithm>::execute_join(
   std::vector<std::vector<double>> ted_vectors(trees_collection.size(), std::vector<double>(reference_set.size()));
   
   // Retrieves candidates from the candidate index.
-  retrieve_candidates(trees_collection, candidates, distance_threshold, reference_set, ted_vectors);
+  retrieve_candidates(trees_collection, candidates, join_result, distance_threshold, reference_set, ted_vectors);
 
   // Verify all computed join candidates and return the join result.
   verify_candidates(trees_collection, candidates, join_result, distance_threshold, ted_vectors);
@@ -63,6 +63,7 @@ template <typename Label, typename CostModel, typename VerificationAlgorithm>
 void Guha<Label, CostModel, VerificationAlgorithm>::retrieve_candidates(
     std::vector<node::Node<Label>>& trees_collection,
     std::vector<std::pair<unsigned int, unsigned int>>& candidates,
+    std::vector<join::JoinResultElement>& join_result,
     const double distance_threshold,
     std::vector<unsigned int>& reference_set,
     std::vector<std::vector<double>>& ted_vectors) {
@@ -106,13 +107,19 @@ void Guha<Label, CostModel, VerificationAlgorithm>::retrieve_candidates(
   // For each ted vector pair, verify the triangle unequality lower bound
   // condition. If the condition is satisfied, add the pair to candidate set.
   double pair_l_t = 0;
+  double pair_u_t = 0;
   for (unsigned int v1_id = 0; v1_id < ted_vectors.size(); ++v1_id) {
     for (unsigned int v2_id = v1_id+1; v2_id < ted_vectors.size(); ++v2_id) {
       // std::cout << v1_id << "," << v2_id << std::endl;
-      pair_l_t = l_t(ted_vectors[v1_id], ted_vectors[v2_id]);
-      // std::cout << "l_t = " << std::to_string(pair_l_t) << std::endl;
-      if (pair_l_t <= distance_threshold) {
-        candidates.push_back({v1_id, v2_id});
+      pair_u_t = u_t(ted_vectors[v1_id], ted_vectors[v2_id]);
+      if (pair_u_t <= distance_threshold) {
+        join_result.emplace_back(v1_id, v2_id, pair_u_t);
+      } else {
+        pair_l_t = l_t(ted_vectors[v1_id], ted_vectors[v2_id]);
+        // std::cout << "l_t = " << std::to_string(pair_l_t) << std::endl;
+        if (pair_l_t <= distance_threshold) {
+          candidates.push_back({v1_id, v2_id});
+        }
       }
     }
   }
@@ -136,25 +143,25 @@ void Guha<Label, CostModel, VerificationAlgorithm>::verify_candidates(
 
   VerificationAlgorithm ted_algorithm;
 
-  double pair_u_t = 0;
+  // double pair_u_t = 0;
   // Verify each pair in the candidate set
   for(const auto& pair: candidates) {
     // Verify the triangle unequality upper bound condition.
     // If the condition is satisfied, add the pair to result set.
     // std::cout << pair.first << "," << pair.second << std::endl;
-    pair_u_t = u_t(ted_vectors[pair.first], ted_vectors[pair.second]);
+    // pair_u_t = u_t(ted_vectors[pair.first], ted_vectors[pair.second]);
     // std::cout << "u_t = " << std::to_string(pair_u_t) << std::endl;
-    if (pair_u_t <= distance_threshold) {
-      join_result.emplace_back(pair.first, pair.second, pair_u_t);
-    } else {
+    // if (pair_u_t <= distance_threshold) {
+    //   join_result.emplace_back(pair.first, pair.second, pair_u_t);
+    // } else {
       // Verify with TED.
-      double ted_value = ted_algorithm.verify(trees_collection[pair.first],
-                                              trees_collection[pair.second],
-                                              distance_threshold);
-      if(ted_value <= distance_threshold) {
-        join_result.emplace_back(pair.first, pair.second, ted_value);
-      }
+    double ted_value = ted_algorithm.verify(trees_collection[pair.first],
+                                            trees_collection[pair.second],
+                                            distance_threshold);
+    if(ted_value <= distance_threshold) {
+      join_result.emplace_back(pair.first, pair.second, ted_value);
     }
+    // }
   }
 }
 

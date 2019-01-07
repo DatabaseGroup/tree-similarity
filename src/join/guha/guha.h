@@ -56,6 +56,7 @@ public:
   void retrieve_candidates(
       std::vector<node::Node<Label>>& trees_collection,
       std::vector<std::pair<unsigned int, unsigned int>>& candidates,
+      std::vector<join::JoinResultElement>& join_result,
       const double distance_threshold,
       std::vector<unsigned int>& reference_set,
       std::vector<std::vector<double>>& ted_vectors
