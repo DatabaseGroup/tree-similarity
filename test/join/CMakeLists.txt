@@ -130,3 +130,20 @@ add_test(
   NAME bb_join_test           # TEST NAME
   COMMAND bb_join_test_driver # EXECUTABLE NAME
 )
+
+# Testing histogram results.
+
+add_executable(
+  histo_join_test_driver # EXECUTABLE NAME
+  histo_join_test.cc     # EXECUTABLE SOURCE
+)
+
+target_link_libraries(
+  histo_join_test_driver # EXECUTABLE NAME
+  TreeSimilarity         # LIBRARY NAME
+)
+
+add_test(
+  NAME histo_join_test           # TEST NAME
+  COMMAND histo_join_test_driver # EXECUTABLE NAME
+)
