@@ -26,6 +26,7 @@ int main() {
   // Read test cases from a file line by line.
   for (std::string line; std::getline( test_cases_file, line);) {
     if (line[0] == '#') {
+      std::string comment = line;
       // Read the single test case.
       std::getline(test_cases_file, line);
       std::string input_tree_1_string = line;
@@ -54,6 +55,7 @@ int main() {
 
       if (correct_result != computed_results) {
         std::cerr << "Incorrect CTED result: " << computed_results << " instead of " << correct_result << std::endl;
+        std::cerr << "Test case: " << comment << std::endl;
         std::cerr << input_tree_1_string << std::endl;
         std::cerr << input_tree_2_string << std::endl;
         return -1;

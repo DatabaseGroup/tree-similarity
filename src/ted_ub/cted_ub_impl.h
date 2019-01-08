@@ -35,12 +35,9 @@ ConstrainedUB<Label, CostModel>::ConstrainedUB() : c_() {}
 template <typename Label, typename CostModel>
 double ConstrainedUB<Label, CostModel>::cted_ub_ted(const node::Node<Label>& t1,
                                                      const node::Node<Label>& t2) {
-
-  using data_structures::Matrix;
-
   init(t1, t2);
   
-  std::vector<double> dt2(t1_input_size_ + 1);
+  std::vector<double> dt2(t2_input_size_ + 1);
   std::vector<double> df2(t2_input_size_ + 1);
   
   double a = -1;
@@ -216,6 +213,7 @@ void ConstrainedUB<Label, CostModel>::init(const node::Node<Label>& t1,
   t1_input_size_ = t1.get_tree_size();
   t2_input_size_ = t2.get_tree_size();
   
+  // TODO: Verify if a move assignment operator is used here.
   dt_ = data_structures::Matrix<double>(t1_input_size_+1, t2_input_size_+1);
   df_ = data_structures::Matrix<double>(t1_input_size_+1, t2_input_size_+1);
   e_ = data_structures::Matrix<double>(t1_input_size_+1, t2_input_size_+1);
