@@ -28,7 +28,12 @@
 #define TREE_SIMILARITY_JOIN_GUHA_GUHA_IMPL_H
 
 template <typename Label, typename CostModel, typename VerificationAlgorithm>
-Guha<Label, CostModel, VerificationAlgorithm>::Guha() {}
+Guha<Label, CostModel, VerificationAlgorithm>::Guha() {
+  l_t_candidates_ = 0;
+  sed_candidates_ = 0;
+  u_t_result_pairs_ = 0;
+  cted_result_pairs_ = 0;
+}
 
 template <typename Label, typename CostModel, typename VerificationAlgorithm>
 void Guha<Label, CostModel, VerificationAlgorithm>::execute_join(
@@ -42,15 +47,10 @@ void Guha<Label, CostModel, VerificationAlgorithm>::execute_join(
       trees_collection, reference_set_size
   );
   
-  // std::string s("{");
-  // for (auto e : reference_set) {
-  //   s += std::to_string(e) + ",";
-  // }
-  // s.pop_back();
-  // s += "}";
-  // std::cout << s << std::endl;
-
   std::vector<std::vector<double>> ted_vectors(trees_collection.size(), std::vector<double>(reference_set.size()));
+  
+  // Compute the vectors.
+  compute_vectors(trees_collection, reference_set, ted_vectors);
   
   // Retrieves candidates from the candidate index.
   retrieve_candidates(trees_collection, candidates, join_result, distance_threshold, reference_set, ted_vectors);
@@ -58,6 +58,27 @@ void Guha<Label, CostModel, VerificationAlgorithm>::execute_join(
   // Verify all computed join candidates and return the join result.
   verify_candidates(trees_collection, candidates, join_result, distance_threshold, ted_vectors);
 }
+
+
+template <typename Label, typename CostModel, typename VerificationAlgorithm>
+void Guha<Label, CostModel, VerificationAlgorithm>::compute_vectors(
+    std::vector<node::Node<Label>>& trees_collection,
+    std::vector<unsigned int>& reference_set,
+    std::vector<std::vector<double>>& ted_vectors) {
+  // For each tree in the collection compute the distance to every element
+  // in the reference set. Store the values in a seperate vector for each tree.
+  ted::APTED<Label, CostModel> ted_algorithm;
+  unsigned int data_tree_id = 0;
+  unsigned int rs_tree_id = 0;
+  for (auto t : trees_collection) {
+    rs_tree_id = 0;
+    for (auto t_id_rs : reference_set) {
+      ted_vectors[data_tree_id][rs_tree_id] = ted_algorithm.apted_ted(t, trees_collection[t_id_rs]);
+      ++rs_tree_id;
+    }
+    ++data_tree_id;
+  }
+};
 
 template <typename Label, typename CostModel, typename VerificationAlgorithm>
 void Guha<Label, CostModel, VerificationAlgorithm>::retrieve_candidates(
@@ -67,71 +88,40 @@ void Guha<Label, CostModel, VerificationAlgorithm>::retrieve_candidates(
     const double distance_threshold,
     std::vector<unsigned int>& reference_set,
     std::vector<std::vector<double>>& ted_vectors) {
-
-  // TODO
-  
-  // For each tree in the collection compute the distance to every element
-  // in the reference set. Store the values in a seperate vector for each tree.
-  ted::ZhangShasha<Label, CostModel> zs_ted;
-  
-  unsigned int data_tree_id = 0;
-  unsigned int rs_tree_id = 0;
-  for (auto t : trees_collection) {
-    rs_tree_id = 0;
-    for (auto t_id_rs : reference_set) {
-      ted_vectors[data_tree_id][rs_tree_id] = zs_ted.zhang_shasha_ted(t, trees_collection[t_id_rs]);
-      ++rs_tree_id;
-    }
-    ++data_tree_id;
-  }
-  
-  // std::string s("{");
-  // for (auto ve : ted_vectors) {
-  //   s += "{";
-  //   for (auto e : ve) {
-  //     s += std::to_string(e) + ",";
-  //   }
-  //   s.pop_back();
-  //   s += "}\n";
-  // }
-  // s += "}";
-  // std::cout << s;
-  // 
-  // std::cout << "\n\n";
-  // 
-  // std::cout << "ted_vectors.size() = " << std::to_string(ted_vectors.size()) << std::endl;
-  // std::cout << "reference_set.size() = " << std::to_string(reference_set.size()) << std::endl;
-  // 
-  // std::cout << "\n\n";
   
   // For each ted vector pair, verify the triangle unequality lower bound
   // condition. If the condition is satisfied, add the pair to candidate set.
+  ted_lb::StringEditDistanceLB<Label, CostModel> sed_lb;
+  ted_ub::ConstrainedUB<Label, CostModel> cted_ub;
   double pair_l_t = 0;
   double pair_u_t = 0;
   for (unsigned int v1_id = 0; v1_id < ted_vectors.size(); ++v1_id) {
     for (unsigned int v2_id = v1_id+1; v2_id < ted_vectors.size(); ++v2_id) {
       // std::cout << v1_id << "," << v2_id << std::endl;
-      pair_u_t = u_t(ted_vectors[v1_id], ted_vectors[v2_id]);
-      if (pair_u_t <= distance_threshold) {
-        join_result.emplace_back(v1_id, v2_id, pair_u_t);
-      } else {
-        pair_l_t = l_t(ted_vectors[v1_id], ted_vectors[v2_id]);
-        // std::cout << "l_t = " << std::to_string(pair_l_t) << std::endl;
+      pair_l_t = l_t(ted_vectors[v1_id], ted_vectors[v2_id]);
+      if (pair_l_t <= distance_threshold) {
+        ++l_t_candidates_;
+        pair_u_t = u_t(ted_vectors[v1_id], ted_vectors[v2_id]);
+        if (pair_u_t <= distance_threshold) {
+          ++u_t_result_pairs_;
+          join_result.emplace_back(v1_id, v2_id, pair_u_t);
+          continue;
+        }
+        pair_l_t = sed_lb.sed_lb_ted(trees_collection[v1_id], trees_collection[v2_id]);
         if (pair_l_t <= distance_threshold) {
+          ++sed_candidates_;
+          pair_u_t = cted_ub.cted_ub_ted(trees_collection[v1_id], trees_collection[v2_id]);
+          if (pair_u_t <= distance_threshold) {
+            ++cted_result_pairs_;
+            join_result.emplace_back(v1_id, v2_id, pair_u_t);
+            continue;
+          }
           candidates.push_back({v1_id, v2_id});
         }
       }
     }
   }
-  
-  // s = "{";
-  // for (auto e : candidates) {
-  //   s += "(" + std::to_string(e.first) + "," + std::to_string(e.second) + "),";
-  // }
-  // s.pop_back();
-  // s += "}";
-  // std::cout << s << std::endl;
-}
+};
 
 template <typename Label, typename CostModel, typename VerificationAlgorithm>
 void Guha<Label, CostModel, VerificationAlgorithm>::verify_candidates(
@@ -143,27 +133,17 @@ void Guha<Label, CostModel, VerificationAlgorithm>::verify_candidates(
 
   VerificationAlgorithm ted_algorithm;
 
-  // double pair_u_t = 0;
   // Verify each pair in the candidate set
   for(const auto& pair: candidates) {
-    // Verify the triangle unequality upper bound condition.
-    // If the condition is satisfied, add the pair to result set.
-    // std::cout << pair.first << "," << pair.second << std::endl;
-    // pair_u_t = u_t(ted_vectors[pair.first], ted_vectors[pair.second]);
-    // std::cout << "u_t = " << std::to_string(pair_u_t) << std::endl;
-    // if (pair_u_t <= distance_threshold) {
-    //   join_result.emplace_back(pair.first, pair.second, pair_u_t);
-    // } else {
-      // Verify with TED.
+    // Verify with TED.
     double ted_value = ted_algorithm.verify(trees_collection[pair.first],
                                             trees_collection[pair.second],
                                             distance_threshold);
     if(ted_value <= distance_threshold) {
       join_result.emplace_back(pair.first, pair.second, ted_value);
     }
-    // }
   }
-}
+};
 
 template <typename Label, typename CostModel, typename VerificationAlgorithm>
 std::vector<unsigned int> Guha<Label, CostModel, VerificationAlgorithm>::get_random_reference_set(
@@ -200,4 +180,23 @@ double Guha<Label, CostModel, VerificationAlgorithm>::l_t(std::vector<double>& v
   return global_maximum;
 };
 
+template <typename Label, typename CostModel, typename VerificationAlgorithm>
+const unsigned long long int Guha<Label, CostModel, VerificationAlgorithm>::get_l_t_candidates() const {
+  return l_t_candidates_;
+};
+
+template <typename Label, typename CostModel, typename VerificationAlgorithm>
+const unsigned long long int Guha<Label, CostModel, VerificationAlgorithm>::get_sed_candidates() const {
+  return sed_candidates_;
+};
+
+template <typename Label, typename CostModel, typename VerificationAlgorithm>
+const unsigned long long int Guha<Label, CostModel, VerificationAlgorithm>::get_u_t_result_pairs() const {
+  return u_t_result_pairs_;
+};
+
+template <typename Label, typename CostModel, typename VerificationAlgorithm>
+const unsigned long long int Guha<Label, CostModel, VerificationAlgorithm>::get_cted_result_pairs() const {
+  return cted_result_pairs_;
+};
 #endif // TREE_SIMILARITY_JOIN_GUHA_GUHA_IMPL_H

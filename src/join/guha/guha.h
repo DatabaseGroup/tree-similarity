@@ -34,7 +34,9 @@
 #include <random>
 #include "join_result_element.h"
 #include "node.h"
-#include "zhang_shasha.h"
+#include "apted.h"
+#include "sed_lb.h"
+#include "cted_ub.h"
 
 namespace join {
 
@@ -51,6 +53,12 @@ public:
       std::vector<join::JoinResultElement>& join_result,
       const double distance_threshold,
       unsigned int reference_set_size
+  );
+  /// TODO
+  void compute_vectors(
+    std::vector<node::Node<Label>>& trees_collection,
+    std::vector<unsigned int>& reference_set,
+    std::vector<std::vector<double>>& ted_vectors
   );
   /// TODO
   void retrieve_candidates(
@@ -78,6 +86,17 @@ public:
   double u_t(std::vector<double>& v_1, std::vector<double>& v_2);
   /// TODO
   double l_t(std::vector<double>& v_1, std::vector<double>& v_2);
+  /// TODO
+  const unsigned long long int get_l_t_candidates() const;
+  const unsigned long long int get_sed_candidates() const;
+  const unsigned long long int get_u_t_result_pairs() const;
+  const unsigned long long int get_cted_result_pairs() const;
+private:
+  /// TODO
+  unsigned long long int l_t_candidates_;
+  unsigned long long int sed_candidates_;
+  unsigned long long int u_t_result_pairs_;
+  unsigned long long int cted_result_pairs_;
 };
 
 // Implementation details.
