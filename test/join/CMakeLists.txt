@@ -147,3 +147,26 @@ add_test(
   NAME histo_join_test           # TEST NAME
   COMMAND histo_join_test_driver # EXECUTABLE NAME
 )
+
+# Testing guha results.
+
+# Copy test cases.
+file(
+  COPY guha_test_data.txt
+  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+add_executable(
+  guha_test_driver # EXECUTABLE NAME
+  guha_test.cc     # EXECUTABLE SOURCE
+)
+
+target_link_libraries(
+  guha_test_driver # EXECUTABLE NAME
+  TreeSimilarity   # LIBRARY NAME
+)
+
+add_test(
+  NAME guha_test           # TEST NAME
+  COMMAND guha_test_driver # EXECUTABLE NAME
+)
