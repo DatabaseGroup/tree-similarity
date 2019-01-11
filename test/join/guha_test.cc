@@ -62,7 +62,7 @@ int main() {
   // Set distance threshold - maximum number of allowed edit operations.
   // double distance_threshold = 1.00;
   
-  for (int k = 2; k <= 4; k = k*2) {
+  for (int k = 2; k <= 32; k = k*2) {
     for (int i = 1; i <= 16; i = i*2) {
       std::vector<std::pair<unsigned int, unsigned int>> candidates;
       std::vector<join::JoinResultElement> join_result;
@@ -76,13 +76,13 @@ int main() {
 
       // Guha with Touzet verification
       join::Guha<Label, CostModel, VerificationTouzet> guha;
-      guha.execute_join(trees_collection, candidates, join_result, (double)i, k);
+      guha.execute_rsb_join(trees_collection, candidates, join_result, (double)i, k);
       
       std::cout << "tau=" << i << "\tk=" << k << "\tcand=" <<
           candidates.size() << "\t|result|=" << join_result.size() <<
           "\t#l_t_candidates=" << guha.get_l_t_candidates() <<
-          "\t#sed_candidates=" << guha.get_sed_candidates() <<
           "\t#u_t_result_pairs=" << guha.get_u_t_result_pairs() <<
+          "\t#sed_candidates=" << guha.get_sed_candidates() <<
           "\t#cted_result_pairs=" << guha.get_cted_result_pairs() << std::endl;
     }
   }

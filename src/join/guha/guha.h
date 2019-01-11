@@ -47,7 +47,15 @@ public:
   /// Constructor.
   Guha();
   /// TODO
-  void execute_join(
+  void execute_rsb_join(
+      std::vector<node::Node<Label>>& trees_collection,
+      std::vector<std::pair<unsigned int, unsigned int>>& candidates,
+      std::vector<join::JoinResultElement>& join_result,
+      const double distance_threshold,
+      unsigned int reference_set_size
+  );
+  /// TODO
+  void execute_rsc_join(
       std::vector<node::Node<Label>>& trees_collection,
       std::vector<std::pair<unsigned int, unsigned int>>& candidates,
       std::vector<join::JoinResultElement>& join_result,
@@ -61,21 +69,45 @@ public:
     std::vector<std::vector<double>>& ted_vectors
   );
   /// TODO
-  void retrieve_candidates(
+  void compute_vectors(
+    std::vector<node::Node<Label>>& trees_collection,
+    std::vector<unsigned int>& reference_set,
+    std::vector<std::vector<double>>& lb_vectors,
+    std::vector<std::vector<double>>& ub_vectors
+  );
+  /// TODO
+  /// Use only metric lower and upper bounds to get candidates.
+  void retrieve_metric_candidates(
       std::vector<node::Node<Label>>& trees_collection,
       std::vector<std::pair<unsigned int, unsigned int>>& candidates,
       std::vector<join::JoinResultElement>& join_result,
       const double distance_threshold,
-      std::vector<unsigned int>& reference_set,
       std::vector<std::vector<double>>& ted_vectors
+  );
+  /// TODO
+  /// Use only metric lower and upper bounds to get candidates.
+  void retrieve_metric_candidates(
+      std::vector<node::Node<Label>>& trees_collection,
+      std::vector<std::pair<unsigned int, unsigned int>>& candidates,
+      std::vector<join::JoinResultElement>& join_result,
+      const double distance_threshold,
+      std::vector<std::vector<double>>& lb_vectors,
+      std::vector<std::vector<double>>& ub_vectors
+  );
+  /// TODO
+  /// Use string edit distance and constrained edit distance to get candidates.
+  void retrieve_sc_candidates(
+      std::vector<node::Node<Label>>& trees_collection,
+      std::vector<std::pair<unsigned int, unsigned int>>& candidates,
+      std::vector<join::JoinResultElement>& join_result,
+      const double distance_threshold
   );
   /// TODO
   void verify_candidates(
       std::vector<node::Node<Label>>& trees_collection,
       std::vector<std::pair<unsigned int, unsigned int>>& candidates,
       std::vector<join::JoinResultElement>& join_result, 
-      const double distance_threshold,
-      std::vector<std::vector<double>>& ted_vectors
+      const double distance_threshold
   );
   /// TODO
   std::vector<unsigned int> get_random_reference_set(
@@ -86,6 +118,9 @@ public:
   double u_t(std::vector<double>& v_1, std::vector<double>& v_2);
   /// TODO
   double l_t(std::vector<double>& v_1, std::vector<double>& v_2);
+  /// TODO
+  double l_t(std::vector<double>& lb_v_i, std::vector<double>& ub_v_i,
+      std::vector<double>& lb_v_j, std::vector<double>& ub_v_j);
   /// TODO
   const unsigned long long int get_l_t_candidates() const;
   const unsigned long long int get_sed_candidates() const;

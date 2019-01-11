@@ -36,7 +36,7 @@ Guha<Label, CostModel, VerificationAlgorithm>::Guha() {
 }
 
 template <typename Label, typename CostModel, typename VerificationAlgorithm>
-void Guha<Label, CostModel, VerificationAlgorithm>::execute_join(
+void Guha<Label, CostModel, VerificationAlgorithm>::execute_rsb_join(
     std::vector<node::Node<Label>>& trees_collection,
     std::vector<std::pair<unsigned int, unsigned int>>& candidates,
     std::vector<join::JoinResultElement>& join_result,
@@ -53,12 +53,38 @@ void Guha<Label, CostModel, VerificationAlgorithm>::execute_join(
   compute_vectors(trees_collection, reference_set, ted_vectors);
   
   // Retrieves candidates from the candidate index.
-  retrieve_candidates(trees_collection, candidates, join_result, distance_threshold, reference_set, ted_vectors);
+  retrieve_metric_candidates(trees_collection, candidates, join_result, distance_threshold, ted_vectors);
+  retrieve_sc_candidates(trees_collection, candidates, join_result, distance_threshold);
 
   // Verify all computed join candidates and return the join result.
-  verify_candidates(trees_collection, candidates, join_result, distance_threshold, ted_vectors);
-}
+  verify_candidates(trees_collection, candidates, join_result, distance_threshold);
+};
 
+template <typename Label, typename CostModel, typename VerificationAlgorithm>
+void Guha<Label, CostModel, VerificationAlgorithm>::execute_rsc_join(
+    std::vector<node::Node<Label>>& trees_collection,
+    std::vector<std::pair<unsigned int, unsigned int>>& candidates,
+    std::vector<join::JoinResultElement>& join_result,
+    const double distance_threshold,
+    unsigned int reference_set_size) {
+
+  std::vector<unsigned int> reference_set = get_random_reference_set(
+      trees_collection, reference_set_size
+  );
+  
+  std::vector<std::vector<double>> lb_vectors(trees_collection.size(), std::vector<double>(reference_set.size()));
+  std::vector<std::vector<double>> ub_vectors(trees_collection.size(), std::vector<double>(reference_set.size()));
+  
+  // Compute the vectors.
+  compute_vectors(trees_collection, reference_set, lb_vectors, ub_vectors);
+  
+  // Retrieves candidates from the candidate index.
+  retrieve_metric_candidates(trees_collection, candidates, join_result, distance_threshold, lb_vectors, ub_vectors);
+  retrieve_sc_candidates(trees_collection, candidates, join_result, distance_threshold);
+
+  // Verify all computed join candidates and return the join result.
+  verify_candidates(trees_collection, candidates, join_result, distance_threshold);
+};
 
 template <typename Label, typename CostModel, typename VerificationAlgorithm>
 void Guha<Label, CostModel, VerificationAlgorithm>::compute_vectors(
@@ -81,18 +107,38 @@ void Guha<Label, CostModel, VerificationAlgorithm>::compute_vectors(
 };
 
 template <typename Label, typename CostModel, typename VerificationAlgorithm>
-void Guha<Label, CostModel, VerificationAlgorithm>::retrieve_candidates(
+void Guha<Label, CostModel, VerificationAlgorithm>::compute_vectors(
+    std::vector<node::Node<Label>>& trees_collection,
+    std::vector<unsigned int>& reference_set,
+    std::vector<std::vector<double>>& lb_vectors,
+    std::vector<std::vector<double>>& ub_vectors) {
+  // For each tree in the collection compute the distance to every element
+  // in the reference set. Store the values in a seperate vector for each tree.
+  ted_lb::StringEditDistanceLB<Label, CostModel> sed_lb;
+  ted_ub::ConstrainedUB<Label, CostModel> cted_ub;
+  unsigned int data_tree_id = 0;
+  unsigned int rs_tree_id = 0;
+  for (auto t : trees_collection) {
+    rs_tree_id = 0;
+    for (auto t_id_rs : reference_set) {
+      lb_vectors[data_tree_id][rs_tree_id] = sed_lb.sed_lb_ted(t, trees_collection[t_id_rs]);
+      ub_vectors[data_tree_id][rs_tree_id] = cted_ub.cted_ub_ted(t, trees_collection[t_id_rs]);
+      ++rs_tree_id;
+    }
+    ++data_tree_id;
+  }
+};
+
+template <typename Label, typename CostModel, typename VerificationAlgorithm>
+void Guha<Label, CostModel, VerificationAlgorithm>::retrieve_metric_candidates(
     std::vector<node::Node<Label>>& trees_collection,
     std::vector<std::pair<unsigned int, unsigned int>>& candidates,
     std::vector<join::JoinResultElement>& join_result,
     const double distance_threshold,
-    std::vector<unsigned int>& reference_set,
     std::vector<std::vector<double>>& ted_vectors) {
   
   // For each ted vector pair, verify the triangle unequality lower bound
   // condition. If the condition is satisfied, add the pair to candidate set.
-  ted_lb::StringEditDistanceLB<Label, CostModel> sed_lb;
-  ted_ub::ConstrainedUB<Label, CostModel> cted_ub;
   double pair_l_t = 0;
   double pair_u_t = 0;
   for (unsigned int v1_id = 0; v1_id < ted_vectors.size(); ++v1_id) {
@@ -107,18 +153,77 @@ void Guha<Label, CostModel, VerificationAlgorithm>::retrieve_candidates(
           join_result.emplace_back(v1_id, v2_id, pair_u_t);
           continue;
         }
-        pair_l_t = sed_lb.sed_lb_ted(trees_collection[v1_id], trees_collection[v2_id]);
-        if (pair_l_t <= distance_threshold) {
-          ++sed_candidates_;
-          pair_u_t = cted_ub.cted_ub_ted(trees_collection[v1_id], trees_collection[v2_id]);
-          if (pair_u_t <= distance_threshold) {
-            ++cted_result_pairs_;
-            join_result.emplace_back(v1_id, v2_id, pair_u_t);
-            continue;
-          }
-          candidates.push_back({v1_id, v2_id});
-        }
+        candidates.push_back({v1_id, v2_id});
       }
+    }
+  }
+};
+
+template <typename Label, typename CostModel, typename VerificationAlgorithm>
+void Guha<Label, CostModel, VerificationAlgorithm>::retrieve_metric_candidates(
+    std::vector<node::Node<Label>>& trees_collection,
+    std::vector<std::pair<unsigned int, unsigned int>>& candidates,
+    std::vector<join::JoinResultElement>& join_result,
+    const double distance_threshold,
+    std::vector<std::vector<double>>& lb_vectors,
+    std::vector<std::vector<double>>& ub_vectors) {
+  
+  // For each ted vector pair, verify the triangle unequality lower bound
+  // condition. If the condition is satisfied, add the pair to candidate set.
+  double pair_l_t = 0;
+  double pair_u_t = 0;
+  for (unsigned int v1_id = 0; v1_id < lb_vectors.size(); ++v1_id) {
+    for (unsigned int v2_id = v1_id+1; v2_id < lb_vectors.size(); ++v2_id) {
+      // std::cout << v1_id << "," << v2_id << std::endl;
+      pair_l_t = l_t(lb_vectors[v1_id], ub_vectors[v1_id], lb_vectors[v2_id], ub_vectors[v2_id]);
+      if (pair_l_t <= distance_threshold) {
+        ++l_t_candidates_;
+        pair_u_t = u_t(ub_vectors[v1_id], ub_vectors[v2_id]);
+        if (pair_u_t <= distance_threshold) {
+          ++u_t_result_pairs_;
+          join_result.emplace_back(v1_id, v2_id, pair_u_t);
+          continue;
+        }
+        candidates.push_back({v1_id, v2_id});
+      }
+    }
+  }
+};
+
+template <typename Label, typename CostModel, typename VerificationAlgorithm>
+void Guha<Label, CostModel, VerificationAlgorithm>::retrieve_sc_candidates(
+    std::vector<node::Node<Label>>& trees_collection,
+    std::vector<std::pair<unsigned int, unsigned int>>& candidates,
+    std::vector<join::JoinResultElement>& join_result,
+    const double distance_threshold) {
+  
+  // For each ted vector pair, verify the triangle unequality lower bound
+  // condition. If the condition is satisfied, add the pair to candidate set.
+  ted_lb::StringEditDistanceLB<Label, CostModel> sed_lb;
+  ted_ub::ConstrainedUB<Label, CostModel> cted_ub;
+  double pair_l_t = 0;
+  double pair_u_t = 0;
+  auto it = candidates.begin();
+  while(it != candidates.end()) {
+    pair_l_t = sed_lb.sed_lb_ted(trees_collection[it->first], trees_collection[it->second]);
+    if (pair_l_t <= distance_threshold) {
+      ++sed_candidates_;
+      pair_u_t = cted_ub.cted_ub_ted(trees_collection[it->first], trees_collection[it->second]);
+      if (pair_u_t <= distance_threshold) {
+        ++cted_result_pairs_;
+        join_result.emplace_back(it->first, it->second, pair_u_t);
+        // Take the last candidate and substitute with thte current.
+        // (remove the current candidate form candidates)
+        *it = candidates.back();
+        candidates.pop_back();
+      } else {
+        ++it;
+      }
+    } else {
+      // Take the last candidate and substitute with thte current.
+      // (remove the current candidate form candidates)
+      *it = candidates.back();
+      candidates.pop_back();
     }
   }
 };
@@ -128,8 +233,7 @@ void Guha<Label, CostModel, VerificationAlgorithm>::verify_candidates(
     std::vector<node::Node<Label>>& trees_collection,
     std::vector<std::pair<unsigned int, unsigned int>>& candidates,
     std::vector<join::JoinResultElement>& join_result,
-    const double distance_threshold,
-    std::vector<std::vector<double>>& ted_vectors) {
+    const double distance_threshold) {
 
   VerificationAlgorithm ted_algorithm;
 
@@ -177,6 +281,30 @@ double Guha<Label, CostModel, VerificationAlgorithm>::l_t(std::vector<double>& v
     current_diff = std::abs(v_1[i] - v_2[i]);
     global_maximum = std::max(global_maximum, current_diff);
   }
+  return global_maximum;
+};
+
+template <typename Label, typename CostModel, typename VerificationAlgorithm>
+double Guha<Label, CostModel, VerificationAlgorithm>::l_t(
+  std::vector<double>& lb_v_i, std::vector<double>& ub_v_i,
+  std::vector<double>& lb_v_j, std::vector<double>& ub_v_j) {
+  double global_maximum = 0;
+  double current_diff = 0;
+  for (unsigned int l = 0; l < lb_v_i.size(); ++l) {
+    
+    if (lb_v_j[l] > ub_v_i[l]) {
+      current_diff = lb_v_j[l] - ub_v_i[l];
+    } else if (lb_v_i[l] > ub_v_j[l]) {
+      current_diff = lb_v_i[l] - ub_v_j[l];
+    } else {
+      current_diff = 0.0;
+    }
+    
+    global_maximum = std::max(global_maximum, current_diff);
+  }
+  
+  
+  
   return global_maximum;
 };
 
