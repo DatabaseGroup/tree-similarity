@@ -42,6 +42,12 @@ double StringEditDistanceLB<Label, CostModel>::verify(const node::Node<Label>& t
 };
 
 template <typename Label, typename CostModel>
+double StringEditDistanceLB<Label, CostModel>::sed_lb_ted_k(const node::Node<Label>& t1,
+    const node::Node<Label>& t2, const int k) {
+  return sed_lb_ted(t1, t2);
+};
+
+template <typename Label, typename CostModel>
 double StringEditDistanceLB<Label, CostModel>::sed_lb_ted(const node::Node<Label>& t1,
     const node::Node<Label>& t2) {
   init(t1, t2);

@@ -30,7 +30,11 @@
 template <typename Label, typename CostModel>
 ConstrainedUB<Label, CostModel>::ConstrainedUB() : c_() {}
 
-
+template <typename Label, typename CostModel>
+double ConstrainedUB<Label, CostModel>::cted_ub_ted_k(const node::Node<Label>& t1,
+    const node::Node<Label>& t2, const int k) {
+  return cted_ub_ted(t1, t2);
+};
 
 template <typename Label, typename CostModel>
 double ConstrainedUB<Label, CostModel>::cted_ub_ted(const node::Node<Label>& t1,

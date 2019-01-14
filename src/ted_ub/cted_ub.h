@@ -46,12 +46,15 @@ class ConstrainedUB {
 public:
   /// Constructor. Creates the cost model based on the template.
   ConstrainedUB();
+  
   /// Computes the tree edit distance between two trees.
   ///
   /// \param t1 Source tree.
   /// \param t2 Destination tree.
   /// \return Tree edit distance value.
   double cted_ub_ted(const node::Node<Label>& t1, const node::Node<Label>& t2);
+  /// For common signature in experiments only. Calls zhang_shasha_ted.
+  double cted_ub_ted_k(const node::Node<Label>& t1, const node::Node<Label>& t2, const int k = 0);
   /// Verifies if the tree edit distance between trees t1 and t1 is smaller or
   /// equal than the distance_threshold value.
   ///

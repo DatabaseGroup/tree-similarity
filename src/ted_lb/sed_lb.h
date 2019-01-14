@@ -48,6 +48,8 @@ public:
       double similarity_threshold);
   /// TODO
   double sed_lb_ted(const node::Node<Label>& t1, const node::Node<Label>& t2);
+  /// For common signature in experiments only. Calls zhang_shasha_ted.
+  double sed_lb_ted_k(const node::Node<Label>& t1, const node::Node<Label>& t2, const int k = 0);
   /// TODO
   void init(const node::Node<Label>& t1, const node::Node<Label>& t2);
 // Member variables.
