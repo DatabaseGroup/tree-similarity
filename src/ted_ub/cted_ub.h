@@ -71,6 +71,11 @@ public:
   /// \param t1 Source tree.
   /// \param t2 Destination tree.
   void init(const node::Node<Label>& t1, const node::Node<Label>& t2);
+  /// If the TED algorithm has been executed, returns the number of subproblems
+  /// encountered during that execution.
+  ///
+  /// \return The number of subproblems acountered in the last TED computation.
+  const unsigned long long int get_subproblem_count() const;
 // Member variables.
 // Member variables.
 private:

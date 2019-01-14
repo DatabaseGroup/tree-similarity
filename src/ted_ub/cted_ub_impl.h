@@ -87,6 +87,7 @@ double ConstrainedUB<Label, CostModel>::cted_ub_ted(const node::Node<Label>& t1,
       // TODO: but we already went over each pair of children
       for (unsigned int s = 1; s <= t1_children_[i-1].size(); ++s) {
         for (unsigned int t = 1; t <= t2_children_[j-1].size(); ++t) {
+          ++subproblem_counter;
           a = e_.at(s, t-1) + dt_.at(0, t2_children_[j-1][t-1] + 1);
           b = e_.at(s-1, t) + dt_.at(t1_children_[i-1][s-1] + 1, 0);
           c = e_.at(s-1, t-1) + dt_.at(t1_children_[i-1][s-1] + 1, t2_children_[j-1][t-1] + 1); // TODO: This is a problematic part to reduce the memory. This requires to store distance for each pair of children of i and j.
@@ -229,6 +230,9 @@ void ConstrainedUB<Label, CostModel>::init(const node::Node<Label>& t1,
   
   index_nodes(t1, t1_parent_, t1_children_, t1_label_);
   index_nodes(t2, t2_parent_, t2_children_, t2_label_);
+  
+  // Reset subproblem counter.
+  subproblem_counter = 0;
 };
 
 #endif // TREE_SIMILARITY_TED_UB_CTED_UB_H_IMPL_H

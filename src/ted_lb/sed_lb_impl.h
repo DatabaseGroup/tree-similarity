@@ -67,6 +67,7 @@ double StringEditDistanceLB<Label, CostModel>::sed_lb_ted(const node::Node<Label
   for (int i = 1; i <= t1_input_size_; ++i) {
     cc[0] = i;
     for (int j = 1; j <= t2_input_size_; ++j) {
+      ++subproblem_counter;
       unsigned int c1 = t1_label_[i - 1];
       unsigned int c2 = t2_label_[j - 1];
       cc[j] = std::min({
@@ -138,6 +139,9 @@ void StringEditDistanceLB<Label, CostModel>::init(const node::Node<Label>& t1,
   
   index_nodes(t1, t1_label_);
   index_nodes(t2, t2_label_);
+  
+  // Reset subproblem counter.
+  subproblem_counter = 0;
 };
 
 #endif // TREE_SIMILARITY_TED_LB_SED_LB_IMPL_H

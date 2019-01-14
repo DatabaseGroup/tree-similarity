@@ -52,6 +52,11 @@ public:
   double sed_lb_ted_k(const node::Node<Label>& t1, const node::Node<Label>& t2, const int k = 0);
   /// TODO
   void init(const node::Node<Label>& t1, const node::Node<Label>& t2);
+  /// If the TED algorithm has been executed, returns the number of subproblems
+  /// encountered during that execution.
+  ///
+  /// \return The number of subproblems acountered in the last TED computation.
+  const unsigned long long int get_subproblem_count() const;
 // Member variables.
 private:
   /// The size of the source tree.
@@ -68,6 +73,10 @@ private:
   std::vector<int> t2_label_;
   /// Cost model.
   const CostModel c_;
+  /// Subproblem counter - for experiments only. Counts the number of
+  /// non-trivial values filled in fd_ matrix: subproblems where both forests
+  /// are not empty.
+  unsigned long long int subproblem_counter;
 // Member functions.
 private:
   
