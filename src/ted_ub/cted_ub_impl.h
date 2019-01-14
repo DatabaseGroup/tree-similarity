@@ -235,4 +235,9 @@ void ConstrainedUB<Label, CostModel>::init(const node::Node<Label>& t1,
   subproblem_counter = 0;
 };
 
+template <typename Label, typename CostModel>
+const unsigned long long int ConstrainedUB<Label, CostModel>::get_subproblem_count() const {
+  return subproblem_counter;
+}
+
 #endif // TREE_SIMILARITY_TED_UB_CTED_UB_H_IMPL_H

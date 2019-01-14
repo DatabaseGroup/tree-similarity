@@ -144,4 +144,9 @@ void StringEditDistanceLB<Label, CostModel>::init(const node::Node<Label>& t1,
   subproblem_counter = 0;
 };
 
+template <typename Label, typename CostModel>
+const unsigned long long int StringEditDistanceLB<Label, CostModel>::get_subproblem_count() const {
+  return subproblem_counter;
+}
+
 #endif // TREE_SIMILARITY_TED_LB_SED_LB_IMPL_H
