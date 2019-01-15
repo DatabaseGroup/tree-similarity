@@ -61,6 +61,8 @@ double StringEditDistanceLB<Label, CostModel>::sed_lb_ted(const node::Node<Label
   
   std::vector<double> cp(t2_input_size_ + 1);
   std::vector<double> cc(t2_input_size_ + 1);
+  
+  // Edit distance on postorder traversal.
   for (int j = 0; j <= t2_input_size_; ++j) {
     cp[j] = j;
   }
@@ -68,8 +70,8 @@ double StringEditDistanceLB<Label, CostModel>::sed_lb_ted(const node::Node<Label
     cc[0] = i;
     for (int j = 1; j <= t2_input_size_; ++j) {
       ++subproblem_counter;
-      unsigned int c1 = t1_label_[i - 1];
-      unsigned int c2 = t2_label_[j - 1];
+      unsigned int c1 = t1_label_post_[i - 1];
+      unsigned int c2 = t2_label_post_[j - 1];
       cc[j] = std::min({
           cp[j - 1] + ((c1 == c2) ? 0 : 1),
           cc[j - 1] + 1,
@@ -78,22 +80,50 @@ double StringEditDistanceLB<Label, CostModel>::sed_lb_ted(const node::Node<Label
     }
     std::swap(cp, cc);
   }
-  return cp[t2_input_size_]; // note: cc is asigned to cp, cc is overwritten!
+  double sed_post = cp[t2_input_size_];
+  
+  // Edit distance on preorder traversal.
+  for (int j = 0; j <= t2_input_size_; ++j) {
+    cp[j] = j;
+  }
+  for (int i = 1; i <= t1_input_size_; ++i) {
+    cc[0] = i;
+    for (int j = 1; j <= t2_input_size_; ++j) {
+      ++subproblem_counter;
+      unsigned int c1 = t1_label_pre_[i - 1];
+      unsigned int c2 = t2_label_pre_[j - 1];
+      cc[j] = std::min({
+          cp[j - 1] + ((c1 == c2) ? 0 : 1),
+          cc[j - 1] + 1,
+          cp[j] + 1
+          });
+    }
+    std::swap(cp, cc);
+  }
+  double sed_pre = cp[t2_input_size_];
+  
+  return std::max(sed_post, sed_pre); // note: cc is asigned to cp, cc is overwritten!
 };
 
 template <typename Label, typename CostModel>
 int StringEditDistanceLB<Label, CostModel>::index_nodes_recursion(
     const node::Node<Label>& node,
-    std::vector<int>& label,
+    std::vector<int>& label_post,
+    std::vector<int>& label_pre,
     int& start_postorder) {
   // Stores number of descendants of this node. Incrementally computed while
   // traversing the children.
   int desc_sum = 0;
   
+  // Hash the label.
+  unsigned int label_id_in_dict = dict_.insert(node.label());
+  
+  label_pre.push_back(label_id_in_dict);
+  
   auto children_start_it = std::begin(node.get_children());
   auto children_end_it = std::end(node.get_children());
   while (children_start_it != children_end_it) {
-    desc_sum += index_nodes_recursion(*children_start_it, label,
+    desc_sum += index_nodes_recursion(*children_start_it, label_post, label_pre,
                                       start_postorder);
     // Continue to consecutive children.
     ++children_start_it;
@@ -101,9 +131,7 @@ int StringEditDistanceLB<Label, CostModel>::index_nodes_recursion(
   
   // Here, start_postorder holds this node's postorder id here.
   
-  // New inverted list.
-  unsigned int label_id_in_dict = dict_.insert(node.label());
-  label.push_back(label_id_in_dict);
+  label_post.push_back(label_id_in_dict);
   
   // Increment start_postorder for the consecutive node in postorder have the
   // correct id.
@@ -116,10 +144,11 @@ int StringEditDistanceLB<Label, CostModel>::index_nodes_recursion(
 template <typename Label, typename CostModel>
 void StringEditDistanceLB<Label, CostModel>::index_nodes(
     const node::Node<Label>& root,
-    std::vector<int>& label) {
+    std::vector<int>& label_post,
+    std::vector<int>& label_pre) {
   // Orders start with '0'.
   int start_postorder = 0;
-  index_nodes_recursion(root, label, start_postorder);
+  index_nodes_recursion(root, label_post, label_pre, start_postorder);
   // Here, start_postorder and start_preorder store the size of tree minus 1.
 };
 
@@ -127,8 +156,10 @@ template <typename Label, typename CostModel>
 void StringEditDistanceLB<Label, CostModel>::init(const node::Node<Label>& t1,
                                     const node::Node<Label>& t2) {
   dict_.clear();
-  t1_label_.clear();
-  t2_label_.clear();
+  t1_label_post_.clear();
+  t2_label_post_.clear();
+  t1_label_pre_.clear();
+  t2_label_pre_.clear();
   
   // TODO: Do not call get_tree_size() that causes an additional tree traversal.
   //       Index subtree sizes instead - they'll be used anyways.
@@ -137,8 +168,8 @@ void StringEditDistanceLB<Label, CostModel>::init(const node::Node<Label>& t1,
   t1_input_size_ = t1.get_tree_size();
   t2_input_size_ = t2.get_tree_size();
   
-  index_nodes(t1, t1_label_);
-  index_nodes(t2, t2_label_);
+  index_nodes(t1, t1_label_post_, t1_label_pre_);
+  index_nodes(t2, t2_label_post_, t2_label_pre_);
   
   // Reset subproblem counter.
   subproblem_counter = 0;

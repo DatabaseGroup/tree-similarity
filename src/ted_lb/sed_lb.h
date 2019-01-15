@@ -68,9 +68,14 @@ private:
   label::LabelDictionary<Label> dict_;
   /// Stores the label id from dict_ for each node of the source tree.
   /// Indexed in postorder ids starting with 0.
-  std::vector<int> t1_label_;
-  /// See t1_label_.
-  std::vector<int> t2_label_;
+  std::vector<int> t1_label_post_;
+  /// See t1_label_post_.
+  std::vector<int> t2_label_post_;
+  /// Stores the label id from dict_ for each node of the source tree.
+  /// Indexed in preorder ids starting with 0.
+  std::vector<int> t1_label_pre_;
+  /// See t1_label_pre_.
+  std::vector<int> t2_label_pre_;
   /// Cost model.
   const CostModel c_;
   /// Subproblem counter - for experiments only. Counts the number of
@@ -85,7 +90,8 @@ private:
   /// Call this method to index nodes.
   /// TODO
   /// \param root The root node of the tree to index.
-  void index_nodes(const node::Node<Label>& root, std::vector<int>& label);
+  void index_nodes(const node::Node<Label>& root, std::vector<int>& label_post,
+      std::vector<int>& label_pre);
   /// Traverses an input tree rooted at root recursively and collects
   /// information into index structures.
   /// TODO
@@ -93,7 +99,8 @@ private:
   /// \param start_postorder Stores the postorder id of a node during traversal.
   /// \param start_preorder Stores the preorder id of a node during traversal.
   int index_nodes_recursion(const node::Node<Label>& root,
-                             std::vector<int>& label,
+                             std::vector<int>& label_post,
+                             std::vector<int>& label_pre,
                              int& start_postorder);
 };
 
