@@ -40,11 +40,10 @@ void Guha<Label, CostModel, VerificationAlgorithm>::execute_rsb_join(
     std::vector<node::Node<Label>>& trees_collection,
     std::vector<std::pair<unsigned int, unsigned int>>& candidates,
     std::vector<join::JoinResultElement>& join_result,
-    const double distance_threshold,
-    unsigned int reference_set_size) {
-
-  std::vector<unsigned int> reference_set = get_random_reference_set(
-      trees_collection, reference_set_size
+    const double distance_threshold) {
+  
+  std::vector<unsigned int> reference_set = get_reference_set(
+      trees_collection, distance_threshold
   );
   
   std::vector<std::vector<double>> ted_vectors(trees_collection.size(), std::vector<double>(reference_set.size()));
@@ -65,11 +64,10 @@ void Guha<Label, CostModel, VerificationAlgorithm>::execute_rsc_join(
     std::vector<node::Node<Label>>& trees_collection,
     std::vector<std::pair<unsigned int, unsigned int>>& candidates,
     std::vector<join::JoinResultElement>& join_result,
-    const double distance_threshold,
-    unsigned int reference_set_size) {
-
-  std::vector<unsigned int> reference_set = get_random_reference_set(
-      trees_collection, reference_set_size
+    const double distance_threshold) {
+  
+  std::vector<unsigned int> reference_set = get_reference_set(
+      trees_collection, distance_threshold
   );
   
   std::vector<std::vector<double>> lb_vectors(trees_collection.size(), std::vector<double>(reference_set.size()));
@@ -250,6 +248,122 @@ void Guha<Label, CostModel, VerificationAlgorithm>::verify_candidates(
 };
 
 template <typename Label, typename CostModel, typename VerificationAlgorithm>
+std::vector<unsigned int> Guha<Label, CostModel, VerificationAlgorithm>::get_reference_set(
+  std::vector<node::Node<Label>>& trees_collection,
+  const double distance_threshold) {
+    // Get sample size.
+    // According to Guha, at least O(sqrt(|T|)*log(|T|)), where |T|=trees_collection.size().
+    // We use 1*sqrt(|T|)*log(|T|).
+    unsigned int collection_size = trees_collection.size();
+    unsigned int sample_size = static_cast <unsigned int> (std::ceil(std::sqrt(collection_size) * std::log10(collection_size)));
+    
+    // std::cout << "sample_size = " << sample_size << std::endl;
+    
+    // Random generator.
+    std::mt19937 rd(1); // Fix the seed.
+    std::uniform_int_distribution<unsigned int> dist;
+    
+    // Draw the sample.
+    // std::cout << "-- Draw the sample." << std::endl;
+    std::vector<unsigned int> sample;
+    dist = std::uniform_int_distribution<unsigned int>(0, collection_size-1);
+    for (unsigned int i = 0; i < sample_size; ++i) {
+      sample.push_back(dist(rd));
+    }
+    
+    // std::cout << "sample.size() = " << sample.size() << std::endl;
+    
+    // Cluster the sample.
+    // std::cout << "-- Cluster the sample." << std::endl;
+    ted::APTED<Label, CostModel> ted_algorithm;
+    std::vector<std::vector<unsigned int>> clusters;
+    std::vector<unsigned int> remaining_sample(sample);
+    std::vector<unsigned int> temp_remaining_sample;
+    unsigned int sample_tree_id = 0;
+    while (remaining_sample.size() > 0) {
+      // std::cout << "remaining_sample.size() = " << remaining_sample.size() << std::endl;
+      temp_remaining_sample.clear();
+      dist = std::uniform_int_distribution<unsigned int>(0, remaining_sample.size()-1);
+      sample_tree_id = remaining_sample[dist(rd)];
+      // std::cout << "sample_tree_id = " << sample_tree_id << std::endl;
+      std::vector<unsigned int> new_cluster;
+      auto& sample_tree = trees_collection[sample_tree_id];
+      for (auto tree_id : remaining_sample) {
+        // Skip computing self distance between sample tree and itself.
+        // Add the tree to the cluster.
+        if (tree_id == sample_tree_id) {
+          new_cluster.push_back(tree_id);
+        } else {
+          if (ted_algorithm.apted_ted(trees_collection[tree_id], sample_tree) <= std::ceil(distance_threshold / 2.0)) {
+            new_cluster.push_back(tree_id);
+          } else {
+            temp_remaining_sample.push_back(tree_id);
+          }
+        }
+      }
+      // Push only clusters of size greater than one.
+      if (new_cluster.size() > 1) {
+        clusters.push_back(new_cluster);
+      }
+      remaining_sample = temp_remaining_sample;
+    }
+    // std::cout << "clusters.size() = " << clusters.size() << std::endl;
+    
+    // Sort the clusters by size.
+    // std::cout << "-- Sort the clusters by size." << std::endl;
+    std::sort(clusters.begin(), clusters.end(), [](const std::vector<unsigned int>& a, const std::vector<unsigned int>& b){ return a.size() > b.size(); });
+    
+    // Calculate k, but only if there are more than two clusters.
+    // Otherwise k=2 due to k >= i >= 2.
+    // std::cout << "-- Calculate k." << std::endl;
+    unsigned int k = 2;
+    if (clusters.size() > 2) {
+      unsigned int i = 0;
+      unsigned int cluster_size_sum = 0;
+      double i_fraction = 0.0; // Right side of the formula.
+      double fi = 1.0; // Denominator in the formula.
+      cluster_size_sum += clusters[i].size();
+      double fii = std::pow(1.0 - (double(cluster_size_sum) / double(sample_size)), 2); // Numerator in the formula.
+      // std::cout << "cluster_size_sum = " << cluster_size_sum << std::endl;
+      // std::cout << "fi = " << fi << std::endl;
+      // std::cout << "fii = " << fii << std::endl;
+      while ( (fii / fi) > i_fraction ) {
+        ++i;
+        // If there are no more clusters, break
+        if (i > clusters.size() - 1) {
+          break;
+        }
+        i_fraction = double(i) / (double(i) + 1.0);
+        fi = std::pow(1.0 - (double(cluster_size_sum) / double(sample_size)), 2);
+        cluster_size_sum += clusters[i].size();
+        fii = std::pow(1.0 - (double(cluster_size_sum) / double(sample_size)), 2);
+        // std::cout << "i_fraction = " << i_fraction << std::endl;
+        // std::cout << "cluster_size_sum = " << cluster_size_sum << std::endl;
+        // std::cout << "fi = " << fi << std::endl;
+        // std::cout << "fii = " << fii << std::endl;
+      }
+      k = i;
+    }
+    // std::cout << "k = " << k << std::endl;
+    
+    // Choose k reference points, one from each k largest clusters.
+    // std::cout << "-- Choose k reference points." << std::endl;
+    std::vector<unsigned int> reference_set;
+    for (unsigned int ci = 0; ci < k; ++ci) {
+      dist = std::uniform_int_distribution<unsigned int>(0, clusters[ci].size()-1);
+      reference_set.push_back(clusters[ci][dist(rd)]);
+    }
+    // std::string s("{");
+    // for (auto e : reference_set) {
+    //   s += std::to_string(e) + ",";
+    // }
+    // s.pop_back();
+    // s += "}";
+    // std::cout << "reference_set = " << s << std::endl;
+    return reference_set;
+};
+
+template <typename Label, typename CostModel, typename VerificationAlgorithm>
 std::vector<unsigned int> Guha<Label, CostModel, VerificationAlgorithm>::get_random_reference_set(
   std::vector<node::Node<Label>>& trees_collection,
   unsigned int k) {
@@ -291,7 +405,6 @@ double Guha<Label, CostModel, VerificationAlgorithm>::l_t(
   double global_maximum = 0;
   double current_diff = 0;
   for (unsigned int l = 0; l < lb_v_i.size(); ++l) {
-    
     if (lb_v_j[l] > ub_v_i[l]) {
       current_diff = lb_v_j[l] - ub_v_i[l];
     } else if (lb_v_i[l] > ub_v_j[l]) {
@@ -299,12 +412,8 @@ double Guha<Label, CostModel, VerificationAlgorithm>::l_t(
     } else {
       current_diff = 0.0;
     }
-    
     global_maximum = std::max(global_maximum, current_diff);
   }
-  
-  
-  
   return global_maximum;
 };
 

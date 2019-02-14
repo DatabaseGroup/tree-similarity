@@ -57,34 +57,32 @@ int main() {
 
   // File path to input tree collection.
   // std::string file_path = "guha_test_data.txt";
-  std::string file_path = "/home/mpawlik/Remote/ted-datasets/bolzano/bolzano_sorted.bracket";
+  std::string file_path = "/home/mpawlik/Remote/ted-datasets/sentiment/sentiment_sorted.bracket";
 
   // Set distance threshold - maximum number of allowed edit operations.
   // double distance_threshold = 1.00;
   
-  for (int k = 2; k <= 32; k = k*2) {
-    for (int i = 1; i <= 16; i = i*2) {
-      std::vector<std::pair<unsigned int, unsigned int>> candidates;
-      std::vector<join::JoinResultElement> join_result;
+  for (int i = 1; i <= 1; i = i*2) {
+    std::vector<std::pair<unsigned int, unsigned int>> candidates;
+    std::vector<join::JoinResultElement> join_result;
 
-      // Create the container to store all trees.
-      std::vector<node::Node<Label>> trees_collection;
+    // Create the container to store all trees.
+    std::vector<node::Node<Label>> trees_collection;
 
-      // Parse the dataset.
-      parser::BracketNotationParser bnp;
-      bnp.parse_collection(trees_collection, file_path);
+    // Parse the dataset.
+    parser::BracketNotationParser bnp;
+    bnp.parse_collection(trees_collection, file_path);
 
-      // Guha with Touzet verification
-      join::Guha<Label, CostModel, VerificationTouzet> guha;
-      guha.execute_rsb_join(trees_collection, candidates, join_result, (double)i, k);
-      
-      std::cout << "tau=" << i << "\tk=" << k << "\tcand=" <<
-          candidates.size() << "\t|result|=" << join_result.size() <<
-          "\t#l_t_candidates=" << guha.get_l_t_candidates() <<
-          "\t#u_t_result_pairs=" << guha.get_u_t_result_pairs() <<
-          "\t#sed_candidates=" << guha.get_sed_candidates() <<
-          "\t#cted_result_pairs=" << guha.get_cted_result_pairs() << std::endl;
-    }
+    // Guha with Touzet verification
+    join::Guha<Label, CostModel, VerificationTouzet> guha;
+    guha.execute_rsc_join(trees_collection, candidates, join_result, (double)i);
+    
+    std::cout << "tau=" << i << "\tcand=" <<
+        candidates.size() << "\t|result|=" << join_result.size() <<
+        "\t#l_t_candidates=" << guha.get_l_t_candidates() <<
+        "\t#u_t_result_pairs=" << guha.get_u_t_result_pairs() <<
+        "\t#sed_candidates=" << guha.get_sed_candidates() <<
+        "\t#cted_result_pairs=" << guha.get_cted_result_pairs() << std::endl;
   }
 
   
