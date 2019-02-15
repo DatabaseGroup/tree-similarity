@@ -23,7 +23,7 @@
 ///
 /// \details
 /// Implements an algorithm that converts a collection of trees into collections 
-/// of histograms. 
+/// of label, leaf distance, and degree histograms. 
 
 #ifndef TREE_SIMILARITY_JOIN_HISTOGRAM_HISTOGRAM_CONVERTER_IMPL_H
 #define TREE_SIMILARITY_JOIN_HISTOGRAM_HISTOGRAM_CONVERTER_IMPL_H

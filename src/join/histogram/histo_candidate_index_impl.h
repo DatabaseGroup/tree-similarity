@@ -60,6 +60,7 @@ void CandidateIndex::lookup(
       }
     }
 
+    // get precandidates from the inverted list by looking up all elements
     for (auto& element: histogram.second) {
       for (auto& il_entry: il_index[element.first]) {
         unsigned int intersection = std::min(element.second, il_entry.second);

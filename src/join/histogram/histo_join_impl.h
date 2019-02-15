@@ -44,8 +44,8 @@ void HJoin<Label, CostModel, VerificationAlgorithm>::execute_join(
     std::vector<join::JoinResultElement>& join_result,
     const double distance_threshold) {
 
-  // Convert trees to sets and get the result.
-  convert_trees_to_sets(trees_collection, label_histogram_collection, degree_histogram_collection, leaf_distance_histogram_collection);
+  // Convert trees to leaf distance, label, and degree histograms.
+  convert_trees_to_histograms(trees_collection, label_histogram_collection, degree_histogram_collection, leaf_distance_histogram_collection);
 
   // Retrieves candidates from the candidate index.
   retrieve_candidates(label_histogram_collection, degree_histogram_collection, leaf_distance_histogram_collection, candidates, distance_threshold);
@@ -56,7 +56,7 @@ void HJoin<Label, CostModel, VerificationAlgorithm>::execute_join(
 
 
 template <typename Label, typename CostModel, typename VerificationAlgorithm>
-void HJoin<Label, CostModel, VerificationAlgorithm>::convert_trees_to_sets(
+void HJoin<Label, CostModel, VerificationAlgorithm>::convert_trees_to_histograms(
     std::vector<node::Node<Label>>& trees_collection,
     std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& label_histogram_collection,
     std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& degree_histogram_collection,

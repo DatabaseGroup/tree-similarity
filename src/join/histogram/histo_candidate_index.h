@@ -24,7 +24,7 @@
 /// \details
 /// Implements a candidate index that efficiently and effectively returns tree 
 /// pairs that satisfy the label, leaf distance and degree histogram lower bound 
-/// by Kailing et al. 
+/// by Kailing et al and Li et al. 
 
 #ifndef TREE_SIMILARITY_JOIN_HISTOGRAM_HISTO_CANDIDATE_INDEX_H
 #define TREE_SIMILARITY_JOIN_HISTOGRAM_HISTO_CANDIDATE_INDEX_H
@@ -45,7 +45,9 @@ public:
   CandidateIndex();
   /// Returns a set of candidates that satisfy the structural filter. 
   ///
-  /// \param sets_collection Collection of all sets.
+  /// \param label_histogram_collection Collection of all label histograms.
+  /// \param degree_histogram_collection Collection of all degree histograms.
+  /// \param leaf_distance_histogram_collection Collection of all leaf distance histograms.
   /// \param join_candidates Resultset that contains all join candidates.
   /// \param il_size Size of the inverted list.
   /// \param distance_threshold Given similarity threshold.

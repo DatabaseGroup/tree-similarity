@@ -42,7 +42,7 @@ void DHJoin<Label, CostModel, VerificationAlgorithm>::execute_join(
     std::vector<join::JoinResultElement>& join_result,
     const double distance_threshold) {
 
-  // Convert trees to degree histograms and get the result.
+  // Convert trees to degree histograms.
   convert_trees_to_histograms(trees_collection, histogram_collection);
 
   // Retrieves candidates from the candidate index.

@@ -22,9 +22,8 @@
 /// \file join/histogram/histogram_converter.h
 ///
 /// \details
-/// Takes a collection of trees and and converts them into a histogram of label 
-/// leaf distance, and degree values. The histogram stores the number of nodes 
-/// with a certain label value. 
+/// Takes a collection of trees and and converts them into a histogram of label, 
+/// leaf distance, and degree values. 
 
 
 #ifndef TREE_SIMILARITY_JOIN_HISTOGRAM_HISTOGRAM_CONVERTER_H
@@ -66,9 +65,7 @@ public:
   const unsigned int get_number_of_labels() const;
 // Member variables.
 private:
-  /// Counter to give unique IDs to the tokens.
-  unsigned int number_of_labels_ = 0;
-  /// Counter to give unique IDs to the tokens.
+  /// Counter to give unique IDs to labels.
   unsigned int label_id_ = 0;
   // Map a label to a unique integer.
   typename std::unordered_map<Label, unsigned int, labelhash> label_id_map_;

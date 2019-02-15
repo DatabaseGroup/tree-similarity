@@ -22,8 +22,8 @@
 /// \file join/histogram/histo_join.h
 ///
 /// \details
-/// Implements the HJoin tree similarity join. First, a tree is converted into  
-/// histograms. Second, a candidate index is used to retrieve candidates  
+/// Implements the HJoin tree similarity join by Li et al. First, a tree is converted 
+/// into histograms. Second, a candidate index is used to retrieve candidates  
 /// by applying the label histogram lower bound by Kailing et al. Next, all 
 /// resulting candidates are checked against the leaf distance and degree lower 
 /// bound. Next, the resulting tree pairs, called candidates, have to be verified. 
@@ -71,12 +71,13 @@ public:
       std::vector<std::pair<unsigned int, unsigned int>>& candidates,
       std::vector<join::JoinResultElement>& join_result,
       const double distance_threshold);
-  /// A given collection of trees is converted into a collection of label sets.
+  /// A given collection of trees is converted into a collection of histograms
+  /// (label, leaf distance, degree).
   ///
   /// \param trees_collection A vector holding an input collection of trees.
   /// \return A vector containing the according label histograms of the 
   ///         input trees in trees_collection.
-  void convert_trees_to_sets(
+  void convert_trees_to_histograms(
       std::vector<node::Node<Label>>& trees_collection,
       std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& label_histogram_collection,
       std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& degree_histogram_collection,
