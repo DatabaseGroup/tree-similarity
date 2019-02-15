@@ -23,7 +23,7 @@
 ///
 /// \details
 /// Implements an algorithm that converts a collection of trees into a collection 
-/// of histograms. 
+/// of degree histograms. 
 
 #ifndef TREE_SIMILARITY_JOIN_DEGREE_HISTOGRAM_DEGREE_HISTOGRAM_CONVERTER_IMPL_H
 #define TREE_SIMILARITY_JOIN_DEGREE_HISTOGRAM_DEGREE_HISTOGRAM_CONVERTER_IMPL_H

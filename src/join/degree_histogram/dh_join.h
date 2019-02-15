@@ -25,10 +25,8 @@
 /// Implements the DHJoin tree similarity join. First, a tree is converted into a 
 /// degree histogram. Second, a candidate index is used to retrieve candidates by 
 /// applying the degree histogram lower bound by Kailing et al. Next, the 
-/// resulting tree pairs, called candidates, have to be verified. Therefore, the 
-/// greedy label guided mapping upper bound sends candidates to the result set 
-/// without TED computation. Last, the remaining candidates are evaluated by 
-/// Touzets algorithm.
+/// resulting tree pairs, called candidates, have to be verified. Last, the 
+/// remaining candidates are evaluated by Touzets algorithm.
 
 #ifndef TREE_SIMILARITY_JOIN_DEGREE_HISTOGRAM_DHJOIN_H
 #define TREE_SIMILARITY_JOIN_DEGREE_HISTOGRAM_DHJOIN_H
@@ -69,12 +67,12 @@ public:
       std::vector<std::pair<unsigned int, unsigned int>>& candidates,
       std::vector<join::JoinResultElement>& join_result,
       const double distance_threshold);
-  /// A given collection of trees is converted into a collection of label sets.
+  /// A given collection of trees is converted into a collection of degree histograms.
   ///
   /// \param trees_collection A vector holding an input collection of trees.
   /// \return A vector containing the according degree histograms of the input trees
   ///         in trees_collection.
-  void convert_trees_to_sets(
+  void convert_trees_to_histograms(
       std::vector<node::Node<Label>>& trees_collection,
       std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& histogram_collection);
   /// Uses the DHJoin candidate index to retrieve candidates that are further 

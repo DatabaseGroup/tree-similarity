@@ -55,7 +55,7 @@ public:
   const unsigned int get_maximum_degree() const;
 // Member variables.
 private:
-  /// Counter to give unique IDs to the tokens.
+  /// Maximum degree of a node in the tree collection.
   unsigned int max_degree_ = 0;
 // Member functions.
 private:
