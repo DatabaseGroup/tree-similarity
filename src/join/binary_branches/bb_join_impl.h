@@ -43,7 +43,7 @@ void BBJoin<Label, CostModel, VerificationAlgorithm>::execute_join(
     const double distance_threshold) {
 
   // Convert trees to binary branch histograms.
-  convert_trees_to_hitsograms(trees_collection, histogram_collection);
+  convert_trees_to_histograms(trees_collection, histogram_collection);
 
   // Retrieves candidates from the candidate index.
   retrieve_candidates(histogram_collection, candidates, distance_threshold);
@@ -54,7 +54,7 @@ void BBJoin<Label, CostModel, VerificationAlgorithm>::execute_join(
 
 
 template <typename Label, typename CostModel, typename VerificationAlgorithm>
-void BBJoin<Label, CostModel, VerificationAlgorithm>::convert_trees_to_hitsograms(
+void BBJoin<Label, CostModel, VerificationAlgorithm>::convert_trees_to_histograms(
     std::vector<node::Node<Label>>& trees_collection,
     std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& histogram_collection) {
 

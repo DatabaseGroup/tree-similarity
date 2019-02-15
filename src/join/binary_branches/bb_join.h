@@ -71,7 +71,7 @@ public:
   /// \param trees_collection A vector holding an input collection of trees.
   /// \return A vector containing the according binary branch histograms of the input trees
   ///         in trees_collection.
-  void convert_trees_to_hitsograms(
+  void convert_trees_to_histograms(
       std::vector<node::Node<Label>>& trees_collection,
       std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& histogram_collection);
   /// Uses the BBJoin candidate index to retrieve candidates that are further 
