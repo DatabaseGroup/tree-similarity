@@ -43,7 +43,7 @@ class CandidateIndex {
 public:
   /// Constructor.
   CandidateIndex();
-  /// Returns a set of candidates that satisfy the structural filter. 
+  /// Returns a set of candidates that satisfy the histogram lower bound. 
   ///
   /// \param label_histogram_collection Collection of all label histograms.
   /// \param degree_histogram_collection Collection of all degree histograms.

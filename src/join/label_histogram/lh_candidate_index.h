@@ -42,9 +42,9 @@ class CandidateIndex {
 public:
   /// Constructor.
   CandidateIndex();
-  /// Returns a set of candidates that satisfy the structural filter. 
+  /// Returns a set of candidates that satisfy the label histogram lower bound. 
   ///
-  /// \param sets_collection Collection of all sets.
+  /// \param histogram_collection Collection of all label histograms.
   /// \param join_candidates Resultset that contains all join candidates.
   /// \param il_size Size of the inverted list.
   /// \param distance_threshold Given similarity threshold.
