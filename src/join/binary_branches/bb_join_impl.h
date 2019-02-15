@@ -42,8 +42,8 @@ void BBJoin<Label, CostModel, VerificationAlgorithm>::execute_join(
     std::vector<join::JoinResultElement>& join_result,
     const double distance_threshold) {
 
-  // Convert trees to sets and get the result.
-  convert_trees_to_sets(trees_collection, histogram_collection);
+  // Convert trees to binary branch histograms and get the result.
+  convert_trees_to_hitsograms(trees_collection, histogram_collection);
 
   // Retrieves candidates from the candidate index.
   retrieve_candidates(histogram_collection, candidates, distance_threshold);
@@ -54,11 +54,11 @@ void BBJoin<Label, CostModel, VerificationAlgorithm>::execute_join(
 
 
 template <typename Label, typename CostModel, typename VerificationAlgorithm>
-void BBJoin<Label, CostModel, VerificationAlgorithm>::convert_trees_to_sets(
+void BBJoin<Label, CostModel, VerificationAlgorithm>::convert_trees_to_hitsograms(
     std::vector<node::Node<Label>>& trees_collection,
     std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& histogram_collection) {
 
-  // Convert trees to sets and get the result.
+  // Convert trees to binary branch histograms and get the result.
   bin_branch_histogram_converter::Converter<Label> bbhc;
   bbhc.create_histogram(trees_collection, histogram_collection);
   il_size_ = bbhc.get_number_of_bb();

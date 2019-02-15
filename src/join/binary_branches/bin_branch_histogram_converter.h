@@ -22,8 +22,8 @@
 /// \file join/binary_branches/bin_branch_histogram_converter.h
 ///
 /// \details
-/// Takes a collection of trees and and converts them into a histogram of binary 
-/// branches. The histogram stores the number of certain binary branch. 
+/// Takes a collection of trees and and converts them into histograms of binary 
+/// branches. The histogram stores the number of a certain binary branch. 
 
 
 #ifndef TREE_SIMILARITY_JOIN_BINARY_BRANCHES_BIN_BRANCH_HISTOGRAM_CONVERTER_H
@@ -55,9 +55,9 @@ public:
   const unsigned int get_number_of_bb() const;
 // Member variables.
 private:
-  /// Counter to give unique IDs to the tokens.
+  /// Counter to give unique IDs for each binary branch.
   unsigned int bb_id_ = 0;
-  // Map a label to a unique integer.
+  // Map a binary branch to a unique integer.
   typename std::unordered_map<std::string, unsigned int> bb_id_map_;
   /// String that is used as empty label. Therefore, no label should contain this string. 
   std::string empty_string_ = "!§$%&/()=?";

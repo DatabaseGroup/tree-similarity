@@ -23,7 +23,7 @@
 ///
 /// \details
 /// Implements an algorithm that converts a collection of trees into a collection 
-/// of histograms. 
+/// of binary branch histograms. 
 
 #ifndef TREE_SIMILARITY_JOIN_BINARY_BRANCHES_BIN_BRANCH_HISTOGRAM_CONVERTER_IMPL_H
 #define TREE_SIMILARITY_JOIN_BINARY_BRANCHES_BIN_BRANCH_HISTOGRAM_CONVERTER_IMPL_H

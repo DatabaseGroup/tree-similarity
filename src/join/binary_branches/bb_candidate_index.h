@@ -24,6 +24,8 @@
 /// \details
 /// Implements a candidate index that efficiently and effectively returns tree 
 /// pairs that satisfy the binary branches lower bound by Yang et al. 
+/// An inverted list considers only tree pairs that share at least one binary 
+/// branch.
 
 #ifndef TREE_SIMILARITY_JOIN_BINARY_BRANCHES_BB_CANDIDATE_INDEX_H
 #define TREE_SIMILARITY_JOIN_BINARY_BRANCHES_BB_CANDIDATE_INDEX_H
@@ -42,12 +44,12 @@ class CandidateIndex {
 public:
   /// Constructor.
   CandidateIndex();
-  /// Returns a set of candidates that satisfy the structural filter. 
+  /// Returns a set of candidates that satisfy the binary branch lower bound. 
   ///
-  /// \param sets_collection Collection of all sets.
+  /// \param histogram_collection Collection of all histograms.
   /// \param join_candidates Resultset that contains all join candidates.
   /// \param il_size Size of the inverted list.
-  /// \param distance_threshold Given similarity threshold.
+  /// \param distance_threshold Given distance threshold.
   void lookup(
       std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& histogram_collection,
       std::vector<std::pair<unsigned int, unsigned int>>& join_candidates,

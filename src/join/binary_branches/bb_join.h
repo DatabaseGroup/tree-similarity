@@ -66,12 +66,12 @@ public:
       std::vector<std::pair<unsigned int, unsigned int>>& candidates,
       std::vector<join::JoinResultElement>& join_result,
       const double distance_threshold);
-  /// A given collection of trees is converted into a collection of label sets.
+  /// A given collection of trees is converted into a collection of binary branch historgrams.
   ///
   /// \param trees_collection A vector holding an input collection of trees.
   /// \return A vector containing the according binary branch histograms of the input trees
   ///         in trees_collection.
-  void convert_trees_to_sets(
+  void convert_trees_to_hitsograms(
       std::vector<node::Node<Label>>& trees_collection,
       std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& histogram_collection);
   /// Uses the BBJoin candidate index to retrieve candidates that are further 

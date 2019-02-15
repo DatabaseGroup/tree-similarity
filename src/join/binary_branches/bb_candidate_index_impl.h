@@ -23,7 +23,9 @@
 ///
 /// \details
 /// Implements a candidate index that efficiently and effectively returns tree 
-/// pairs that satisfy the binary branches lower bound. 
+/// pairs that satisfy the binary branches lower bound by Yang et al. 
+/// An inverted list considers only tree pairs that share at least one binary 
+/// branch.
 
 #ifndef TREE_SIMILARITY_JOIN_BINARY_BRANCHES_BB_CANDIDATE_INDEX_IMPL_H
 #define TREE_SIMILARITY_JOIN_BINARY_BRANCHES_BB_CANDIDATE_INDEX_IMPL_H
@@ -46,11 +48,11 @@ void CandidateIndex::lookup(
   std::vector<unsigned int> intersection_cnt(histogram_collection.size());
   // store ids of all tree with an overlap, called pre candidates
 
-  // iterate through all histograms in the given collection
+  // iterate over all histograms in the given collection
   for (auto& histogram: histogram_collection) {
     std::vector<unsigned int> pre_candidates;
 
-    // add all small trees that does not have to share a common label in the prefix
+    // add all small trees that does not have to share a histogram
     if(histogram.first <= distance_threshold * 5) {
       for(unsigned int i = 0; i < current_tree_id; ++i) {
         if(histogram.first + histogram_collection[i].first <= distance_threshold * 5) {
@@ -62,6 +64,7 @@ void CandidateIndex::lookup(
       }
     }
 
+    // get precandidates from the inverted list by looking up all elements
     for (auto& element: histogram.second) {
       for (auto& il_entry: il_index[element.first]) {
         unsigned int intersection = std::min(element.second, il_entry.second);
