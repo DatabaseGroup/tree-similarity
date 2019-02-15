@@ -56,7 +56,7 @@ public:
   const unsigned int get_maximum_leaf_dist() const;
 // Member variables.
 private:
-  /// Counter to give unique IDs to the tokens.
+  /// Maximum leaf distance of a node of all trees.
   unsigned int max_leaf_distance_ = 0;
 // Member functions.
 private:

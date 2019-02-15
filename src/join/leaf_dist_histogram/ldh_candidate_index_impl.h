@@ -23,7 +23,7 @@
 ///
 /// \details
 /// Implements a candidate index that efficiently and effectively returns tree 
-/// pairs that satisfy the leaf distance histogram lower bound. 
+/// pairs that satisfy the leaf distance histogram lower bound by Kailing et al. 
 
 #ifndef TREE_SIMILARITY_JOIN_LEAF_DIST_HISTOGRAM_LDH_CANDIDATE_INDEX_IMPL_H
 #define TREE_SIMILARITY_JOIN_LEAF_DIST_HISTOGRAM_LDH_CANDIDATE_INDEX_IMPL_H
