@@ -368,7 +368,7 @@ std::vector<unsigned int> Guha<Label, CostModel, VerificationAlgorithm>::get_ran
   std::vector<node::Node<Label>>& trees_collection,
   unsigned int k) {
     std::vector<unsigned int> reference_set;
-    std::mt19937 rd;
+    std::mt19937 rd(1); // Fix the seed.
     std::uniform_int_distribution<unsigned int> nodes_dist(0, trees_collection.size()-1);
     for (unsigned int i = 0; i < k; ++i) {
       reference_set.push_back(nodes_dist(rd));
