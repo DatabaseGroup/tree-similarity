@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "tang_join.h"
+#include "histo_join.h"
 #include "bracket_notation_parser.h"
 #include "inverted_list_element.h"
 #include "join_result_element.h"
@@ -26,22 +26,27 @@ int main() {
 
   // Execute for different thresholds.
   for (int i = 1; i < 16; i++) {
-    std::unordered_set<std::pair<unsigned int, unsigned int>, join::hashintegerpair> candidates;
+    std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>> label_histogram_collection;
+    std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>> degree_histogram_collection;
+    std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>> leaf_distance_histogram_collection;
+    std::vector<std::pair<unsigned int, unsigned int>> candidates;
     std::vector<join::JoinResultElement> join_result;
 
     // Create the container to store all trees.
     std::vector<node::Node<Label>> trees_collection;
-    // Create the container to store all binary trees.
-    std::vector<node::BinaryNode<Label>> binary_trees_collection;
 
     // Parse the dataset.
     parser::BracketNotationParser bnp;
     bnp.parse_collection(trees_collection, file_path);
 
-    // BBJoin with Touzet verification
-    join::TangJoin<Label, CostModel, VerificationTouzet> tangjoin;
-    tangjoin.execute_join(trees_collection, binary_trees_collection, candidates, join_result, (double)i);
+    // HJoin with Touzet verification
+    join::HJoin<Label, CostModel, VerificationTouzet> hjoin;
+    hjoin.execute_join(trees_collection, label_histogram_collection, degree_histogram_collection, 
+        leaf_distance_histogram_collection, candidates, join_result, (double)i);
     
+    std::cout << " --- threshold=" << i << ": cand=" << candidates.size() 
+        << ", result=" << join_result.size() << std::endl;
+
     if(join_result.size() != results[i-1]) {
       std::cout << " --- incorrect result for threshold " << i << ": " << join_result.size() 
         << " instead of " << results[i-1] << std::endl;

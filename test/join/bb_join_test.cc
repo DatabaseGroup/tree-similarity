@@ -4,9 +4,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "tang_join.h"
+#include "bb_join.h"
 #include "bracket_notation_parser.h"
-#include "inverted_list_element.h"
 #include "join_result_element.h"
 #include "node.h"
 #include "string_label.h"
@@ -26,21 +25,20 @@ int main() {
 
   // Execute for different thresholds.
   for (int i = 1; i < 16; i++) {
-    std::unordered_set<std::pair<unsigned int, unsigned int>, join::hashintegerpair> candidates;
+    std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>> histogram_collection;
+    std::vector<std::pair<unsigned int, unsigned int>> candidates;
     std::vector<join::JoinResultElement> join_result;
 
     // Create the container to store all trees.
     std::vector<node::Node<Label>> trees_collection;
-    // Create the container to store all binary trees.
-    std::vector<node::BinaryNode<Label>> binary_trees_collection;
 
     // Parse the dataset.
     parser::BracketNotationParser bnp;
     bnp.parse_collection(trees_collection, file_path);
 
     // BBJoin with Touzet verification
-    join::TangJoin<Label, CostModel, VerificationTouzet> tangjoin;
-    tangjoin.execute_join(trees_collection, binary_trees_collection, candidates, join_result, (double)i);
+    join::BBJoin<Label, CostModel, VerificationTouzet> bbjoin;
+    bbjoin.execute_join(trees_collection, histogram_collection, candidates, join_result, (double)i);
     
     if(join_result.size() != results[i-1]) {
       std::cout << " --- incorrect result for threshold " << i << ": " << join_result.size() 
@@ -51,3 +49,4 @@ int main() {
 
   return 0;
 }
+

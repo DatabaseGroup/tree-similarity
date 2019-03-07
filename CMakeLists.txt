@@ -25,8 +25,15 @@ target_include_directories(TreeSimilarity INTERFACE
   src/join/naive
   src/join/tjoin
   src/join/tang
+  src/join/degree_histogram
+  src/join/leaf_dist_histogram
+  src/join/label_histogram
+  src/join/binary_branches
+  src/join/histogram
+  src/join/guha
   src/tree_generator
   src/ted_ub
+  src/ted_lb
 )
 
 # For using add_test().
