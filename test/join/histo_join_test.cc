@@ -24,6 +24,13 @@ int main() {
   // Correct results for bolzano dataset (threshold 1 to 15).
   std::vector<unsigned int> results = {9, 37, 61, 109, 196, 344, 476, 596, 704, 840, 946, 1138, 1356, 1498, 1692};
 
+  // Create the container to store all trees.
+  std::vector<node::Node<Label>> trees_collection;
+
+  // Parse the dataset.
+  parser::BracketNotationParser bnp;
+  bnp.parse_collection(trees_collection, file_path);
+
   // Execute for different thresholds.
   for (int i = 1; i < 16; i++) {
     std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>> label_histogram_collection;
@@ -31,13 +38,6 @@ int main() {
     std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>> leaf_distance_histogram_collection;
     std::vector<std::pair<unsigned int, unsigned int>> candidates;
     std::vector<join::JoinResultElement> join_result;
-
-    // Create the container to store all trees.
-    std::vector<node::Node<Label>> trees_collection;
-
-    // Parse the dataset.
-    parser::BracketNotationParser bnp;
-    bnp.parse_collection(trees_collection, file_path);
 
     // HJoin with Touzet verification
     join::HJoin<Label, CostModel, VerificationTouzet> hjoin;
