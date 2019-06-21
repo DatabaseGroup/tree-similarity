@@ -6,7 +6,9 @@ namespace common {
 ///
 /// \param v Vector of int values.
 /// \return String representation of v.
-const std::string vector_to_string(const std::vector<int>& v) {
+// TODO: Template it!
+template <typename T>
+const std::string vector_to_string(const std::vector<T>& v) {
   std::string s("{");
   for (auto e : v) {
     s += std::to_string(e) + ",";

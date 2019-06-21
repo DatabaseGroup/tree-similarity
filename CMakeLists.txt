@@ -1,13 +1,34 @@
 # TODO: Decide on the version.
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.7)
 
 # Create the project.
 project(tree_similarity)
 
+# Copied from https://stackoverflow.com/questions/14933172/how-can-i-add-a-minimum-compiler-version-requisite/14934542#14934542
+# Use "export CXX=clang++-3.9" to point cmake to use clang.
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    # require at least gcc 7.0
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0)
+        message(FATAL_ERROR "GCC version must be at least 7.0!")
+    endif()
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    # require at least clang 3.9
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.9)
+        message(FATAL_ERROR "Clang version must be at least 3.9!")
+    endif()
+else()
+    message(WARNING "You are using an unsupported compiler! Compilation has only been tested with Clang and GCC.")
+endif()
+
 # Compiler flags.
 # MUST be declared after project().
 # TODO: Explain the flags.
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1z -Wall")
+
+# It's possible to set compiler-specific flags.
+#if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+#  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1z -Wall")
+#endif()
 
 # Create header-only library 'TreeSimilarity'.
 #
