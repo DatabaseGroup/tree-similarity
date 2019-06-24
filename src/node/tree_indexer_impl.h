@@ -29,7 +29,7 @@
 
 template <typename TreeIndex, typename Label>
 void index_tree(TreeIndex& ti, const node::Node<Label>& n,
-    label::LabelDictionary<Label> ld) {
+    label::LabelDictionary<Label>& ld) {
   
   unsigned int tree_size = n.get_tree_size();
   
@@ -49,7 +49,7 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
 
 template <typename TreeIndex, typename Label>
 unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
-    label::LabelDictionary<Label> ld, unsigned int& start_preorder,
+    label::LabelDictionary<Label>& ld, unsigned int& start_preorder,
     unsigned int& start_postorder) {
   
   // Stores number of descendants of this node. Incrementally computed while
@@ -73,6 +73,7 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
 
   // Here, start_postorder holds this node's postorder id.
   
+  // PostLToSize index
   if constexpr (std::is_base_of<PostLToSize, TreeIndex>::value) {
     if (n.is_leaf()) {
       // Leaf has size 1.
@@ -81,6 +82,11 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
       // Inner node has size desc_sum+1.
       ti.postl_to_size_[start_postorder] = desc_sum + 1;
     }
+  }
+  
+  // PostLToLabelId index
+  if constexpr (std::is_base_of<PostLToLabelId, TreeIndex>::value) {
+    ti.postl_to_label_id_[start_postorder] = ld.insert(n.label());
   }
 
   // Increment start_postorder for the consecutive node in postorder to have the

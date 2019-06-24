@@ -60,7 +60,7 @@ class TreeIndexAll :
 /// \param n Root node of the input tree.
 /// \param ld LabelDictionary to collect node labels and assign their ids.
 template <typename TreeIndex, typename Label>
-void index_tree(TreeIndex& ti, const node::Node<Label>& n, label::LabelDictionary<Label> ld);
+void index_tree(TreeIndex& ti, const node::Node<Label>& n, label::LabelDictionary<Label>& ld);
 
 /// Tree traversal method that indexes a tree.
 /// Based on TreeIndex class, only index members of TreeIndex are filled in.
@@ -73,7 +73,7 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n, label::LabelDictionar
 /// \return Subtree size rooted at node n.
 template <typename TreeIndex, typename Label>
 unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
-    label::LabelDictionary<Label> ld, unsigned int& start_preorder,
+    label::LabelDictionary<Label>& ld, unsigned int& start_preorder,
     unsigned int& start_postorder);
 
 // Implementation details
