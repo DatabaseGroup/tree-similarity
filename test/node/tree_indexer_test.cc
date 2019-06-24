@@ -45,6 +45,8 @@ int main(int argc, char** argv) {
     v_index = &tia.postl_to_label_id_;
   } else if (index_test_name == "postl_to_lld_test") {
     v_index = &tia.postl_to_lld_;
+  } else if (index_test_name == "list_kr_test") {
+    v_index = &tia.list_kr_;
   } else {
     std::cerr << "Error while choosing index to test. Index test name = " + (index_test_name) + "." << std::endl;
     return -1;

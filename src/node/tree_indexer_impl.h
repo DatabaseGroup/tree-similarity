@@ -33,6 +33,7 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   
   unsigned int tree_size = n.get_tree_size();
   
+  // Resize and clear the indexes.
   if constexpr (std::is_base_of<PostLToSize, TreeIndex>::value) {
     ti.postl_to_size_.resize(tree_size);
   }
@@ -42,12 +43,19 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   if constexpr (std::is_base_of<PostLToLLD, TreeIndex>::value) {
     ti.postl_to_lld_.resize(tree_size);
   }
+  if constexpr (std::is_base_of<ListKR, TreeIndex>::value) {
+    ti.list_kr_.clear();
+  }
   
-  // Orders start with '0'.
+  // Orders start with '0'. Are modified by the recursive traversal.
   unsigned int start_preorder = 0;
   unsigned int start_postorder = 0;
   index_tree_recursion(ti, n, ld, start_preorder, start_postorder);
   
+  if constexpr (std::is_base_of<ListKR, TreeIndex>::value) {
+    // Add root to kr - not added in the recursion.
+    ti.list_kr_.push_back(start_postorder-1);
+  }
 };
 
 template <typename TreeIndex, typename Label>
@@ -77,7 +85,13 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
       // Here, start_postorder-1 is the postorder of the current child.
       // Set this node's lld to its first child's lld.
       first_child_postorder = start_postorder-1;
+    } else {
+      if constexpr (std::is_base_of<ListKR, TreeIndex>::value) {
+        // Add current child to kr.
+        ti.list_kr_.push_back(start_postorder-1);
+      }
     }
+    
     // Continue to consecutive children.
     ++children_start_it;
   }

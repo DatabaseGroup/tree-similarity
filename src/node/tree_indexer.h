@@ -52,12 +52,19 @@ class PostLToLLD {
   public: std::vector<unsigned int> postl_to_lld_;
 };
 
+/// Stores postorder ids of the keyroot nodes in the tree.
+/// Sorted in left-to-right postorder.
+class ListKR {
+  public: std::vector<unsigned int> list_kr_;
+};
+
 /// Contains all tree indexes.
 /// Used for correctness tests and prototyping.
 class TreeIndexAll :
     public PostLToLabelId,
     public PostLToSize,
-    public PostLToLLD
+    public PostLToLLD,
+    public ListKR
 {};
 
 /// Main method to index a tree. It executes further recursive tree traversal.

@@ -5,6 +5,7 @@ set(tree_indexer_test_list
   postl_to_label_id_test
   postl_to_size_test
   postl_to_lld_test
+  list_kr_test
 )
 
 # Test driver name.
