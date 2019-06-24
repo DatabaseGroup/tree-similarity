@@ -14,15 +14,6 @@ set(
   tree_indexer_test_driver
 )
 
-# All tests name.
-set(
-  all_tests_name
-  tree_indexer_all_tests
-)
-
-# Add custom target for building all tree indexer tests.
-add_custom_target(${all_tests_name})
-
 add_executable(
   ${test_driver_name}  # EXECUTABLE NAME
   tree_indexer_test.cc # EXECUTABLE SOURCE
@@ -44,13 +35,8 @@ foreach(loop_var ${tree_indexer_test_list})
     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
   )
   add_test(
-    NAME    ${loop_var}         # TEST NAME
-    COMMAND ${test_driver_name} # EXECUTABLE NAME
-    ${loop_var}                 # ARGUMENTS
-  )
-  # Add this target to tree_indexer_all_tests target.
-  add_dependencies(
-    ${all_tests_name}   # TARGET
-    ${test_driver_name} # TARGET DEPENDENCY
+    NAME    tree_indexer_${loop_var} # TEST NAME
+    COMMAND ${test_driver_name}      # EXECUTABLE NAME
+    ${loop_var}                      # ARGUMENTS
   )
 endforeach(loop_var)

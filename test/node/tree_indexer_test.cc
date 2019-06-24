@@ -53,8 +53,6 @@ int main(int argc, char** argv) {
   }
   
   using Label = label::StringLabel;
-  // Initialise label dictionary.
-  label::LabelDictionary<Label> ld;
 
   // Parse test cases from file.
   std::ifstream test_data_file(index_test_name + "_data.txt");
@@ -82,6 +80,10 @@ int main(int argc, char** argv) {
       
       // Parse test tree.
       node::Node<Label> tree = bnp.parse_single(input_tree);
+      
+      // Initialise label dictionary - separate dictionary for each test tree
+      // becuse it is easier to keep track of label ids.
+      label::LabelDictionary<Label> ld;
       
       // Index the tree with all indexes.
       node::index_tree(tia, tree, ld);
