@@ -39,6 +39,9 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   if constexpr (std::is_base_of<PostLToLabelId, TreeIndex>::value) {
     ti.postl_to_label_id_.resize(tree_size);
   }
+  if constexpr (std::is_base_of<PostLToLLD, TreeIndex>::value) {
+    ti.postl_to_lld_.resize(tree_size);
+  }
   
   // Orders start with '0'.
   unsigned int start_preorder = 0;
@@ -62,11 +65,19 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   // in preorder.
   ++start_preorder;
 
+  // Treat the first child separately (non-key-root, updates parent's lld).
+  unsigned int first_child_postorder = 0;
   // Recursions to childen nodes.
   auto children_start_it = std::begin(n.get_children());
   auto children_end_it = std::end(n.get_children());
   while (children_start_it != children_end_it) {
     desc_sum += index_tree_recursion(ti, *children_start_it, ld, start_preorder, start_postorder);
+    // Treat the first child separately.
+    if (children_start_it == n.get_children().begin()) {
+      // Here, start_postorder-1 is the postorder of the current child.
+      // Set this node's lld to its first child's lld.
+      first_child_postorder = start_postorder-1;
+    }
     // Continue to consecutive children.
     ++children_start_it;
   }
@@ -87,6 +98,18 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   // PostLToLabelId index
   if constexpr (std::is_base_of<PostLToLabelId, TreeIndex>::value) {
     ti.postl_to_label_id_[start_postorder] = ld.insert(n.label());
+  }
+  
+  // PostLToLLD index
+  if constexpr (std::is_base_of<PostLToLLD, TreeIndex>::value) {
+    if (n.is_leaf()) {
+      // Set lld of this node to this node's postorer.
+      ti.postl_to_lld_[start_postorder] = start_postorder;
+    } else {
+      // This node's lld must be pushed after its childrens llds.
+      // lld is indexed starting with 0, thus first_child_postorder-1.
+      ti.postl_to_lld_[start_postorder] = ti.postl_to_lld_[first_child_postorder];
+    }
   }
 
   // Increment start_postorder for the consecutive node in postorder to have the

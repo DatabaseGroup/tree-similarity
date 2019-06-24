@@ -46,11 +46,18 @@ class PostLToSize {
   public: std::vector<unsigned int> postl_to_size_;
 };
 
+/// Stores left-to-right postorder id of the leftmost leaf descendant of a node.
+/// Indexed in left-to-right postorder.
+class PostLToLLD {
+  public: std::vector<unsigned int> postl_to_lld_;
+};
+
 /// Contains all tree indexes.
 /// Used for correctness tests and prototyping.
 class TreeIndexAll :
     public PostLToLabelId,
-    public PostLToSize
+    public PostLToSize,
+    public PostLToLLD
 {};
 
 /// Main method to index a tree. It executes further recursive tree traversal.

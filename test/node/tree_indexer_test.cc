@@ -43,9 +43,16 @@ int main(int argc, char** argv) {
     v_index = &tia.postl_to_size_;
   } else if (index_test_name == "postl_to_label_id_test") {
     v_index = &tia.postl_to_label_id_;
+  } else if (index_test_name == "postl_to_lld_test") {
+    v_index = &tia.postl_to_lld_;
+  } else {
+    std::cerr << "Error while choosing index to test. Index test name = " + (index_test_name) + "." << std::endl;
+    return -1;
   }
   
   using Label = label::StringLabel;
+  // Initialise label dictionary.
+  label::LabelDictionary<Label> ld;
 
   // Parse test cases from file.
   std::ifstream test_data_file(index_test_name + "_data.txt");
@@ -73,9 +80,6 @@ int main(int argc, char** argv) {
       
       // Parse test tree.
       node::Node<Label> tree = bnp.parse_single(input_tree);
-      
-      // Initialise label dictionary.
-      label::LabelDictionary<Label> ld;
       
       // Index the tree with all indexes.
       node::index_tree(tia, tree, ld);
