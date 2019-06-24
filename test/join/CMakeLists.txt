@@ -152,7 +152,7 @@ add_test(
 
 # Copy test cases.
 file(
-  COPY guha_test_data.txt
+  COPY join_test_data.txt
   DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
 )
 
