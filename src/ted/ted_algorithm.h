@@ -1,5 +1,5 @@
 // The MIT License (MIT)
-// Copyright (c) 2017 Mateusz Pawlik, Nikolaus Augsten, and Daniel Kocher.
+// Copyright (c) 2017 Daniel Kocher, Mateusz Pawlik
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,44 +21,40 @@
 
 #pragma once
 
-template <class Label>
-int UnitCostModel<Label>::ren(const node::Node<Label>& node1,
-                              const node::Node<Label>& node2) const {
-  if (node1.label() == node2.label()) {
-    return 0;
-  }
-  return 1;
+namespace ted {
+
+/**
+ * Interface for all TED algorithms.
+ */
+template <typename CostModel, typename TreeIndex>
+class TEDAlgorithm {
+public:
+  /// Constructor. Takes cost model.
+  TEDAlgorithm(CostModel& c) : c_(c) {};
+  
+  /// Computes the tree edit distance between two trees.
+  /**
+   * \param t1 Source tree.
+   * \param t2 Destination tree.
+   * \return Tree edit distance value.
+   */
+  virtual double ted(const TreeIndex& t1, const TreeIndex& t2) = 0;
+  
+  /// Returns the number of subproblems encountered during TED computation.
+  /**
+   * \return The number of subproblems acountered in the last TED computation.
+   */
+  const unsigned long long int get_subproblem_count() { return subproblem_counter_; };
+protected:
+  /// Cost model.
+  const CostModel& c_;
+  
+  /// Subproblem counter - for experiments only.
+  /**
+   * Counts the number of non-trivial values filled in fd_ matrix: subproblems
+   * where both forests are not empty.
+   */
+  unsigned long long int subproblem_counter_;
 };
 
-template <class Label>
-int UnitCostModel<Label>::del(const node::Node<Label>& node) const {
-  return 1;
-};
-
-template <class Label>
-int UnitCostModel<Label>::ins(const node::Node<Label>& node) const {
-  return 1;
-};
-
-template <class Label>
-UnitCostModelLD<Label>::UnitCostModelLD(label::LabelDictionary<Label>& ld) :
-    ld_(ld) {};
-
-template <typename Label>
-double UnitCostModelLD<Label>::ren(const unsigned int label_id_1,
-    const unsigned int label_id_2) const {
-  if (label_id_1 == label_id_2) {
-    return 0.0;
-  }
-  return 1.0;
-};
-
-template <typename Label>
-double UnitCostModelLD<Label>::del(const unsigned int label_id) const {
-  return 1.0;
-};
-
-template <typename Label>
-double UnitCostModelLD<Label>::ins(const unsigned int label_id) const {
-  return 1.0;
-};
+}
