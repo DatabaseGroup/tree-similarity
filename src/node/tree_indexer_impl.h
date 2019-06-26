@@ -19,13 +19,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/// \file node/tree_indexer_impl.h
-///
-/// \details
-/// Contains the implementation of tree indexes.
-
-#ifndef TREE_SIMILARITY_NODE_TREE_INDEXER_IMPL_H
-#define TREE_SIMILARITY_NODE_TREE_INDEXER_IMPL_H
+#pragma once
 
 template <typename TreeIndex, typename Label>
 void index_tree(TreeIndex& ti, const node::Node<Label>& n,
@@ -134,5 +128,3 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   return desc_sum + 1;
   
 };
-
-#endif // TREE_SIMILARITY_NODE_TREE_INDEXER_IMPL_H
