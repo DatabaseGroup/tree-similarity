@@ -16,18 +16,6 @@ int main(int argc, char** argv) {
   // Index test name.
   std::string index_test_name = std::string(argv[1]);
   
-  // Indexes may use a vector or vector of vectors.
-  // Map of index test name to index data type id.
-  // 0 - std::vector<usigned int>
-  // 1 - std::vector<std::vector<unsigned int>
-  std::unordered_map<std::string, unsigned int> index_data_type_map = {
-    {"postl_to_label_id_test", 0},
-    {"postl_to_size_test", 0}
-  };
-  
-  // Index data type.
-  unsigned int index_data_type = index_data_type_map[index_test_name];
-  
   // TODO: Initialise the TreeIndex with all indexes.
   //       Can be done here. Only the indexes are empty.
   node::TreeIndexAll tia;
@@ -36,11 +24,24 @@ int main(int argc, char** argv) {
   // We use a pointer because we can't use reference at this point.
   // v_index has to point to the updated index inside the test-cases loop.
   std::vector<unsigned int>* v_index;
-  // std::vector<std::vector<unsigned int>>* vv_index;
+  std::vector<std::vector<unsigned int>>* vv_index;
+  
+  // Index data type - default.
+  unsigned int index_data_type = 0;
+  // TODO: Change index_data_type in an if statement below if needed.
   
   // Get a tree index by index test name.
   if (index_test_name == "postl_to_size_test") {
     v_index = &tia.postl_to_size_;
+  } else if (index_test_name == "prel_to_size_test") {
+    v_index = &tia.prel_to_size_;
+  } else if (index_test_name == "postl_to_prel_test") {
+    v_index = &tia.postl_to_prel_;
+  } else if (index_test_name == "prel_to_postl_test") {
+    v_index = &tia.prel_to_postl_;
+} else if (index_test_name == "prel_to_children_test") {
+    vv_index = &tia.prel_to_children_;
+    index_data_type = 1;
   } else if (index_test_name == "postl_to_label_id_test") {
     v_index = &tia.postl_to_label_id_;
   } else if (index_test_name == "postl_to_lld_test") {
@@ -93,15 +94,14 @@ int main(int argc, char** argv) {
       switch(index_data_type) {
         case 0 : computed_results = common::vector_to_string(*v_index);
           break;
-        // TODO: vector of vectors.
-        // case 1 : computed_results = common::vector_of_vectors_to_string(vv_index);
-        //   break;
+        case 1 : computed_results = common::vector_of_vectors_to_string(*vv_index);
+          break;
       }
       
       if (correct_result != computed_results) {
         std::cerr << "Incorrect " + index_test_name + " result: " <<
             computed_results << " instead of " << correct_result << std::endl;
-        std::cerr << input_tree << std::endl;
+        std::cerr << "Input: " <<  input_tree << std::endl;
         return -1;
       }
     }

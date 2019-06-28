@@ -46,12 +46,44 @@ class PostLToSize {
   public: std::vector<unsigned int> postl_to_size_;
 };
 
+/// Stores subtree size of each node in a tree.
+/**
+ * Indexed in left-to-right preorder.
+ */
+class PreLToSize {
+  public: std::vector<unsigned int> prel_to_size_;
+};
+
 /// Stores left-to-right postorder id of the leftmost leaf descendant of a node.
 /**
  * Indexed in left-to-right postorder.
  */
 class PostLToLLD {
   public: std::vector<unsigned int> postl_to_lld_;
+};
+
+/// Stores left-to-right preorder id of each node.
+/**
+ * Indexed in left-to-right postorder.
+ */
+class PostLToPreL {
+  public: std::vector<unsigned int> postl_to_prel_;
+};
+
+/// Stores left-to-right postorder id of each node.
+/**
+ * Indexed in left-to-right preorder.
+ */
+class PreLToPostL {
+  public: std::vector<unsigned int> prel_to_postl_;
+};
+
+/// Stores left-to-right preorder ids of each node's children.
+/**
+ * Indexed in left-to-right preorder.
+ */
+class PreLToChildren {
+  public: std::vector<std::vector<unsigned int>> prel_to_children_;
 };
 
 /// Stores postorder ids of the keyroot nodes in the tree.
@@ -73,6 +105,10 @@ class TreeIndexZhangShasha :
 class TreeIndexAll :
   public PostLToLabelId,
   public PostLToSize,
+  public PreLToSize,
+  public PostLToPreL,
+  public PreLToPostL,
+  public PreLToChildren,
   public PostLToLLD,
   public ListKR
 {};
