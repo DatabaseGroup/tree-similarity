@@ -76,6 +76,9 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   if constexpr (std::is_base_of<PostLToLLD, TreeIndex>::value) {
     ti.postl_to_lld_.resize(tree_size);
   }
+  if constexpr (std::is_base_of<PostLToDepth, TreeIndex>::value) {
+    ti.postl_to_depth_.resize(tree_size);
+  }
   if constexpr (std::is_base_of<ListKR, TreeIndex>::value) {
     ti.list_kr_.clear();
   }
@@ -83,7 +86,8 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   // Orders start with '0'. Are modified by the recursive traversal.
   unsigned int start_preorder = 0;
   unsigned int start_postorder = 0;
-  index_tree_recursion(ti, n, ld, start_preorder, start_postorder);
+  unsigned int start_depth = 0;
+  index_tree_recursion(ti, n, ld, start_preorder, start_postorder, start_depth);
   
   if constexpr (std::is_base_of<ListKR, TreeIndex>::value) {
     // Add root to kr - not added in the recursion.
@@ -94,7 +98,7 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
 template <typename TreeIndex, typename Label>
 unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
     label::LabelDictionary<Label>& ld, unsigned int& start_preorder,
-    unsigned int& start_postorder) {
+    unsigned int& start_postorder, unsigned int start_depth) {
   
   // Stores number of descendants of this node. Incrementally computed while
   // traversing the children.
@@ -124,7 +128,8 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
     // Add the preoder of the current child to children_preorders.
     children_preorders.push_back(start_preorder);
     
-    desc_sum += index_tree_recursion(ti, *children_start_it, ld, start_preorder, start_postorder);
+    desc_sum += index_tree_recursion(ti, *children_start_it, ld, start_preorder,
+        start_postorder, start_depth + 1);
     
     // Add the postoder of the current child to children_postorders.
     children_postorders.push_back(start_postorder-1);
@@ -232,6 +237,11 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   // PostLToLabelId index
   if constexpr (std::is_base_of<PostLToLabelId, TreeIndex>::value) {
     ti.postl_to_label_id_[start_postorder] = ld.insert(n.label());
+  }
+  
+  // PostLToDepth index
+  if constexpr (std::is_base_of<PostLToDepth, TreeIndex>::value) {
+    ti.postl_to_depth_[start_postorder] = start_depth;
   }
   
   // PostLToLLD index

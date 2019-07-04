@@ -16,6 +16,7 @@ set(tree_indexer_test_list
   postl_to_children_test
   prel_to_children_test
   postl_to_lld_test
+  postl_to_depth_test
   list_kr_test
 )
 
