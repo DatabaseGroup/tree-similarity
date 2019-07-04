@@ -24,9 +24,13 @@ int main(int argc, char** argv) {
   // We use a pointer because we can't use reference at this point.
   // v_index has to point to the updated index inside the test-cases loop.
   std::vector<unsigned int>* v_index;
+  std::vector<int>* v_int_index;
   std::vector<std::vector<unsigned int>>* vv_index;
   
-  // Index data type - default.
+  // Index data type:
+  // 0 - std::vector<unsigned int> (default)
+  // 1 - std::vector<std::vector<unsigned int>>
+  // 2 - std::vector<int>
   unsigned int index_data_type = 0;
   // TODO: Change index_data_type in an if statement below if needed.
   
@@ -35,11 +39,20 @@ int main(int argc, char** argv) {
     v_index = &tia.postl_to_size_;
   } else if (index_test_name == "prel_to_size_test") {
     v_index = &tia.prel_to_size_;
+  } else if (index_test_name == "postl_to_parent_test") {
+    v_int_index = &tia.postl_to_parent_;
+    index_data_type = 2;
+} else if (index_test_name == "prel_to_parent_test") {
+    v_int_index = &tia.prel_to_parent_;
+    index_data_type = 2;
   } else if (index_test_name == "postl_to_prel_test") {
     v_index = &tia.postl_to_prel_;
   } else if (index_test_name == "prel_to_postl_test") {
     v_index = &tia.prel_to_postl_;
-} else if (index_test_name == "prel_to_children_test") {
+  } else if (index_test_name == "postl_to_children_test") {
+    vv_index = &tia.postl_to_children_;
+    index_data_type = 1;
+  } else if (index_test_name == "prel_to_children_test") {
     vv_index = &tia.prel_to_children_;
     index_data_type = 1;
   } else if (index_test_name == "postl_to_label_id_test") {
@@ -95,6 +108,8 @@ int main(int argc, char** argv) {
         case 0 : computed_results = common::vector_to_string(*v_index);
           break;
         case 1 : computed_results = common::vector_of_vectors_to_string(*vv_index);
+          break;
+        case 2 : computed_results = common::vector_to_string(*v_int_index);
           break;
       }
       

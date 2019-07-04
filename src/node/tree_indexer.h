@@ -26,7 +26,7 @@
 #include <vector>
 #include <string>
 #include <type_traits>
-#include <label_dictionary.h>
+#include "label_dictionary.h"
 
 namespace node {
 
@@ -54,6 +54,26 @@ class PreLToSize {
   public: std::vector<unsigned int> prel_to_size_;
 };
 
+/// Stores left-to-right postorder id of the parent node.
+/**
+ * Indexed in left-to-right postorder.
+ * '-1' represents no parent.
+ * TODO: Maybe use unsigned int and a max value for no parent. Requires changes
+ *       in algorithms implementation. If done, apply in corresponding indexes.
+ */
+class PostLToParent {
+  public: std::vector<int> postl_to_parent_;
+};
+
+/// Stores left-to-right preorder id of the parent node.
+/**
+ * Indexed in left-to-right preorder.
+ * '-1' represents no parent.
+ */
+class PreLToParent {
+  public: std::vector<int> prel_to_parent_;
+};
+
 /// Stores left-to-right postorder id of the leftmost leaf descendant of a node.
 /**
  * Indexed in left-to-right postorder.
@@ -76,6 +96,14 @@ class PostLToPreL {
  */
 class PreLToPostL {
   public: std::vector<unsigned int> prel_to_postl_;
+};
+
+/// Stores left-to-right postorder ids of each node's children.
+/**
+ * Indexed in left-to-right postorder.
+ */
+class PostLToChildren {
+  public: std::vector<std::vector<unsigned int>> postl_to_children_;
 };
 
 /// Stores left-to-right preorder ids of each node's children.
@@ -108,8 +136,11 @@ class TreeIndexAll :
   public PreLToSize,
   public PostLToPreL,
   public PreLToPostL,
+  public PostLToChildren,
   public PreLToChildren,
   public PostLToLLD,
+  public PostLToParent,
+  public PreLToParent,
   public ListKR
 {};
 

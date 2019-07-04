@@ -5,8 +5,11 @@ set(tree_indexer_test_list
   postl_to_label_id_test
   postl_to_size_test
   prel_to_size_test
+  postl_to_parent_test
+  prel_to_parent_test
   postl_to_prel_test
   prel_to_postl_test
+  postl_to_children_test
   prel_to_children_test
   postl_to_lld_test
   list_kr_test
