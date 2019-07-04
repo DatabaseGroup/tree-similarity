@@ -71,6 +71,9 @@ int main(int argc, char** argv) {
     v_index = &tia.postl_to_label_id_;
   } else if (index_test_name == "postl_to_depth_test") {
     v_index = &tia.postl_to_depth_;
+  } else if (index_test_name == "postl_to_lch_test") {
+    v_int_index = &tia.postl_to_lch_;
+    index_data_type = 2;
   } else if (index_test_name == "list_kr_test") {
     v_index = &tia.list_kr_;
   } else {

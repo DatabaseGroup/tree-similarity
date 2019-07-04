@@ -160,6 +160,15 @@ class PostLToDepth {
 public: std::vector<unsigned int> postl_to_depth_;
 };
 
+/// Stores left-to-right postorder id of the leftmost (first) child for each node.
+/**
+ * Indexed in left-to-right postorder.
+ * '-1' represents no child.
+ */
+class PostLToLCh {
+public: std::vector<int> postl_to_lch_;
+};
+
 /// Stores postorder ids of the keyroot nodes in the tree.
 /**
  * Sorted in left-to-right postorder.
@@ -194,6 +203,7 @@ class TreeIndexAll :
   public PostLToParent,
   public PreLToParent,
   public PostLToDepth,
+  public PostLToLCh,
   public ListKR
 {};
 

@@ -79,6 +79,9 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   if constexpr (std::is_base_of<PostLToDepth, TreeIndex>::value) {
     ti.postl_to_depth_.resize(tree_size);
   }
+  if constexpr (std::is_base_of<PostLToLCh, TreeIndex>::value) {
+    ti.postl_to_lch_.resize(tree_size);
+  }
   if constexpr (std::is_base_of<ListKR, TreeIndex>::value) {
     ti.list_kr_.clear();
   }
@@ -113,14 +116,14 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   // Increment start_preorder to hold the correct id of the consecutive node
   // in preorder.
   ++start_preorder;
-
+  
   // To store postorder ids of this node's children.
   std::vector<unsigned int> children_postorders;
   // To store preorder ids of this node's children.
   std::vector<unsigned int> children_preorders;
   
   // Treat the first child separately (non-key-root, updates parent's lld).
-  unsigned int first_child_postorder = 0;
+  int first_child_postorder = -1;
   // Recursions to childen nodes.
   auto children_start_it = std::begin(n.get_children());
   auto children_end_it = std::end(n.get_children());
@@ -242,6 +245,11 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   // PostLToDepth index
   if constexpr (std::is_base_of<PostLToDepth, TreeIndex>::value) {
     ti.postl_to_depth_[start_postorder] = start_depth;
+  }
+  
+  // PostLToLCh index
+  if constexpr (std::is_base_of<PostLToLCh, TreeIndex>::value) {
+    ti.postl_to_lch_[start_postorder] = first_child_postorder;
   }
   
   // PostLToLLD index
