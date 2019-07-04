@@ -42,13 +42,21 @@ int main(int argc, char** argv) {
   } else if (index_test_name == "postl_to_parent_test") {
     v_int_index = &tia.postl_to_parent_;
     index_data_type = 2;
-} else if (index_test_name == "prel_to_parent_test") {
+  } else if (index_test_name == "prel_to_parent_test") {
     v_int_index = &tia.prel_to_parent_;
     index_data_type = 2;
   } else if (index_test_name == "postl_to_prel_test") {
     v_index = &tia.postl_to_prel_;
   } else if (index_test_name == "prel_to_postl_test") {
     v_index = &tia.prel_to_postl_;
+  } else if (index_test_name == "prel_to_prer_test") {
+    v_index = &tia.prel_to_prer_;
+  } else if (index_test_name == "prer_to_prel_test") {
+    v_index = &tia.prer_to_prel_;
+  } else if (index_test_name == "prel_to_postr_test") {
+    v_index = &tia.prel_to_postr_;
+  } else if (index_test_name == "postr_to_prel_test") {
+    v_index = &tia.postr_to_prel_;
   } else if (index_test_name == "postl_to_children_test") {
     vv_index = &tia.postl_to_children_;
     index_data_type = 1;

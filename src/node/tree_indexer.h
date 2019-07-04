@@ -30,6 +30,11 @@
 
 namespace node {
 
+/// Stores the size of the indexed tree.
+class Constants {
+  public: unsigned int tree_size_;
+};
+
 /// Stores label id of each node in a tree.
 /**
  * Indexed in left-to-right postorder.
@@ -98,6 +103,38 @@ class PreLToPostL {
   public: std::vector<unsigned int> prel_to_postl_;
 };
 
+/// Stores right-to-left preorder id of each node.
+/**
+ * Indexed in left-to-right preorder.
+ */
+class PreLToPreR {
+  public: std::vector<unsigned int> prel_to_prer_;
+};
+
+/// Stores left-to-right preorder id of each node.
+/**
+ * Indexed in right-to-left preorder.
+ */
+class PreRToPreL {
+  public: std::vector<unsigned int> prer_to_prel_;
+};
+
+/// Stores right-to-left postorder id of each node.
+/**
+ * Indexed in left-to-right preorder.
+ */
+class PreLToPostR {
+  public: std::vector<unsigned int> prel_to_postr_;
+};
+
+/// Stores left-to-right preorder id of each node.
+/**
+ * Indexed in right-to-left postorder.
+ */
+class PostRToPreL {
+public: std::vector<unsigned int> postr_to_prel_;
+};
+
 /// Stores left-to-right postorder ids of each node's children.
 /**
  * Indexed in left-to-right postorder.
@@ -124,6 +161,7 @@ class ListKR {
 
 /// Tree index for Zhangh and Shasha algorithm.
 class TreeIndexZhangShasha :
+  public Constants,
   public PostLToLabelId,
   public PostLToLLD,
   public ListKR
@@ -131,11 +169,16 @@ class TreeIndexZhangShasha :
 
 /// All tree indexes. Used for correctness tests and prototyping.
 class TreeIndexAll :
+  public Constants,
   public PostLToLabelId,
   public PostLToSize,
   public PreLToSize,
   public PostLToPreL,
   public PreLToPostL,
+  public PreLToPreR,
+  public PreRToPreL,
+  public PreLToPostR,
+  public PostRToPreL,
   public PostLToChildren,
   public PreLToChildren,
   public PostLToLLD,

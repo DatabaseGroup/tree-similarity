@@ -9,6 +9,10 @@ set(tree_indexer_test_list
   prel_to_parent_test
   postl_to_prel_test
   prel_to_postl_test
+  prel_to_prer_test
+  prer_to_prel_test
+  prel_to_postr_test
+  postr_to_prel_test
   postl_to_children_test
   prel_to_children_test
   postl_to_lld_test

@@ -26,6 +26,7 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
     label::LabelDictionary<Label>& ld) {
   
   unsigned int tree_size = n.get_tree_size();
+  ti.tree_size_ = tree_size;
   
   // Resize and clear the indexes.
   // TODO: Resizing is not enough for some vectors in case the same TreeIndex
@@ -50,6 +51,18 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   }
   if constexpr (std::is_base_of<PreLToPostL, TreeIndex>::value) {
     ti.prel_to_postl_.resize(tree_size);
+  }
+  if constexpr (std::is_base_of<PreLToPreR, TreeIndex>::value) {
+    ti.prel_to_prer_.resize(tree_size);
+  }
+  if constexpr (std::is_base_of<PreRToPreL, TreeIndex>::value) {
+    ti.prer_to_prel_.resize(tree_size);
+  }
+  if constexpr (std::is_base_of<PreLToPostR, TreeIndex>::value) {
+    ti.prel_to_postr_.resize(tree_size);
+  }
+  if constexpr (std::is_base_of<PostRToPreL, TreeIndex>::value) {
+    ti.postr_to_prel_.resize(tree_size);
   }
   if constexpr (std::is_base_of<PostLToChildren, TreeIndex>::value) {
     ti.postl_to_children_.resize(tree_size);
@@ -90,6 +103,8 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   // Here, start_preorder holds this node's preorder id.
   
   unsigned int preorder_temp = start_preorder;
+  unsigned int preorder_r = 0;
+  unsigned int postorder_r = 0;
 
   // Increment start_preorder to hold the correct id of the consecutive node
   // in preorder.
@@ -131,6 +146,12 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   }
 
   // Here, start_postorder holds this node's postorder id.
+  
+  // Calculate right-to-left preorder.
+  preorder_r = ti.tree_size_ - 1 - start_postorder;
+  
+  // Calculate right-to-left postorder.
+  postorder_r = ti.tree_size_ - 1 - preorder_temp;
   
   // PostLToSize index
   if constexpr (std::is_base_of<PostLToSize, TreeIndex>::value) {
@@ -176,6 +197,26 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   // PreLToPostL index
   if constexpr (std::is_base_of<PreLToPostL, TreeIndex>::value) {
     ti.prel_to_postl_[preorder_temp] = start_postorder;
+  }
+  
+  // PreLToPreR index
+  if constexpr (std::is_base_of<PreLToPreR, TreeIndex>::value) {
+    ti.prel_to_prer_[preorder_temp] = preorder_r;
+  }
+  
+  // PreRToPreL index
+  if constexpr (std::is_base_of<PreRToPreL, TreeIndex>::value) {
+    ti.prer_to_prel_[preorder_r] = preorder_temp;
+  }
+  
+  // PreLToPostR index
+  if constexpr (std::is_base_of<PreLToPostR, TreeIndex>::value) {
+    ti.prel_to_postr_[preorder_temp] = postorder_r;
+  }
+  
+  // PostRToPreL index
+  if constexpr (std::is_base_of<PostRToPreL, TreeIndex>::value) {
+    ti.postr_to_prel_[postorder_r] = preorder_temp;
   }
   
   // PostLToChildren index
