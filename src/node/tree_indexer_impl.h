@@ -76,6 +76,9 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   if constexpr (std::is_base_of<PostLToLLD, TreeIndex>::value) {
     ti.postl_to_lld_.resize(tree_size);
   }
+  if constexpr (std::is_base_of<PostRToRLD, TreeIndex>::value) {
+    ti.postr_to_rld_.resize(tree_size);
+  }
   if constexpr (std::is_base_of<PostLToDepth, TreeIndex>::value) {
     ti.postl_to_depth_.resize(tree_size);
   }
@@ -115,6 +118,11 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
 
   if constexpr (std::is_base_of<PreToLn, TreeIndex>::value) {
     fill_ln(ti.prel_to_ln_, ti.prer_to_ln_, ti.prel_to_size_, ti.prer_to_prel_);
+  }
+
+  if constexpr (std::is_base_of<PostRToRLD, TreeIndex>::value) {
+    fill_rld(ti.postr_to_rld_, ti.prel_to_size_, ti.postr_to_prel_,
+        ti.prel_to_postr_, ti.prel_to_children_);
   }
 };
 
@@ -333,3 +341,20 @@ void fill_ln(std::vector<int>& prel_to_ln, std::vector<int>& prer_to_ln,
     }
   }
 };
+
+void fill_rld(std::vector<unsigned int>& postr_to_rld,
+    const std::vector<unsigned int>& prel_to_size,
+    const std::vector<unsigned int>& postr_to_prel,
+    const std::vector<unsigned int>& prel_to_postr,
+    const std::vector<std::vector<unsigned int>>& prel_to_children) {
+  // The loop iterates over right-to-left postorder.
+  unsigned int preorder = 0;
+  for(unsigned int i = 0; i < prel_to_size[0]; ++i) {
+    preorder = postr_to_prel[i];
+    if (prel_to_size[preorder] == 1) {
+      postr_to_rld[i] = i;
+    } else {
+      postr_to_rld[i] = postr_to_rld[prel_to_postr[prel_to_children[preorder][prel_to_children[preorder].size()-1]]];
+    }
+  }
+}

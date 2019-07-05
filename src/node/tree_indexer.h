@@ -87,6 +87,15 @@ class PostLToLLD {
   public: std::vector<unsigned int> postl_to_lld_;
 };
 
+/// Stores right-to-left postorder id of the rightmost leaf descendant of a node.
+/**
+ * Indexed in right-to-left postorder.
+ * Depends on: PreLToSize, PostRToPreL, PreLToPostR, PreLToChildren.
+ */
+class PostRToRLD {
+  public: std::vector<unsigned int> postr_to_rld_;
+};
+
 /// Stores left-to-right preorder id of each node.
 /**
  * Indexed in left-to-right postorder.
@@ -231,6 +240,7 @@ class TreeIndexAll :
   public PostLToChildren,
   public PreLToChildren,
   public PostLToLLD,
+  public PostRToRLD,
   public PostLToParent,
   public PreLToParent,
   public PostLToDepth,
@@ -279,10 +289,19 @@ void fill_kr_ancestors(std::vector<unsigned int>& kr_ancestors,
 /// Fills in the PreToLn indexes.
 /**
  * See description of the classes PreToLn.
- * Depends on: 
  */
 void fill_ln(std::vector<int>& prel_to_ln, std::vector<int>& prer_to_ln,
     const std::vector<unsigned int>& prel_to_size, const std::vector<unsigned int>& prer_to_prel);
+
+/// Fills in the PostRToRLD indexes.
+/**
+ * See description of the classes PostRToRLD.
+ */
+void fill_rld(std::vector<unsigned int>& postr_to_rld,
+    const std::vector<unsigned int>& prel_to_size,
+    const std::vector<unsigned int>& postr_to_prel,
+    const std::vector<unsigned int>& prel_to_postr,
+    const std::vector<std::vector<unsigned int>>& prel_to_children);
 
 // Implementation details
 #include "tree_indexer_impl.h"
