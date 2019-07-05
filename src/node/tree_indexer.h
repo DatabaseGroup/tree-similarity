@@ -182,6 +182,7 @@ class PostLToSubtreeMaxDepth {
 /**
  * Indexed in left-to-right postorder.
  * The nearest keyroot ancestor of a keyroot node n is n.
+ * Depends on: PostLToLCh, ListKR.
  */
 class PostLToKRAncestor {
   public: std::vector<unsigned int> postl_to_kr_ancestor_;
@@ -260,7 +261,7 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
  * See description of the class PostLToKRAncestor.
  */
 void fill_kr_ancestors(std::vector<unsigned int>& kr_ancestors,
-    std::vector<int>& postl_to_lch, std::vector<unsigned int>& list_kr);
+    const std::vector<int>& postl_to_lch, const std::vector<unsigned int>& list_kr);
 
 // Implementation details
 #include "tree_indexer_impl.h"

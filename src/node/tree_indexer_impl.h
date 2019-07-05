@@ -300,7 +300,7 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
 };
 
 void fill_kr_ancestors(std::vector<unsigned int>& postl_to_kr_ancestor,
-    std::vector<int>& postl_to_lch, std::vector<unsigned int>& list_kr) {
+    const std::vector<int>& postl_to_lch, const std::vector<unsigned int>& list_kr) {
   for (auto i : list_kr) {
     int l = i;
     while (l >= 0) {
@@ -308,4 +308,4 @@ void fill_kr_ancestors(std::vector<unsigned int>& postl_to_kr_ancestor,
       l = postl_to_lch[l];
     }
   }
-}
+};
