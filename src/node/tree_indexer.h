@@ -188,6 +188,18 @@ class PostLToKRAncestor {
   public: std::vector<unsigned int> postl_to_kr_ancestor_;
 };
 
+// Stores preorder id of the first leaf node to the left/right.
+/**
+ * prel_to_ln_: left-to-right preorder of the first leaf to the left.
+ * prer_to_ln_: right-to-left preorder of the first leaf to the right.
+ * '-1' represents no such node.
+ * Depends on: PreLToSize, PreRToPreL.
+ */
+class PreToLn {
+  public: std::vector<int> prel_to_ln_;
+  public: std::vector<int> prer_to_ln_;
+};
+
 /// Stores postorder ids of the keyroot nodes in the tree.
 /**
  * Sorted in left-to-right postorder.
@@ -225,6 +237,7 @@ class TreeIndexAll :
   public PostLToLCh,
   public PostLToSubtreeMaxDepth,
   public PostLToKRAncestor,
+  public PreToLn,
   public ListKR
 {};
 
@@ -262,6 +275,14 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
  */
 void fill_kr_ancestors(std::vector<unsigned int>& kr_ancestors,
     const std::vector<int>& postl_to_lch, const std::vector<unsigned int>& list_kr);
+
+/// Fills in the PreToLn indexes.
+/**
+ * See description of the classes PreToLn.
+ * Depends on: 
+ */
+void fill_ln(std::vector<int>& prel_to_ln, std::vector<int>& prer_to_ln,
+    const std::vector<unsigned int>& prel_to_size, const std::vector<unsigned int>& prer_to_prel);
 
 // Implementation details
 #include "tree_indexer_impl.h"

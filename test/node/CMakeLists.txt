@@ -20,6 +20,8 @@ set(tree_indexer_test_list
   postl_to_lch_test
   postl_to_subtree_max_depth_test
   postl_to_kr_ancestor_test
+  prel_to_ln_test
+  prer_to_ln_test
   list_kr_test
 )
 

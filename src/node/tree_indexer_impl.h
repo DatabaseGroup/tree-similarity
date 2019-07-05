@@ -88,6 +88,10 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   if constexpr (std::is_base_of<PostLToKRAncestor, TreeIndex>::value) {
     ti.postl_to_kr_ancestor_.resize(tree_size);
   }
+  if constexpr (std::is_base_of<PreToLn, TreeIndex>::value) {
+    ti.prel_to_ln_.resize(tree_size);
+    ti.prer_to_ln_.resize(tree_size);
+  }
   if constexpr (std::is_base_of<ListKR, TreeIndex>::value) {
     ti.list_kr_.clear();
   }
@@ -107,6 +111,10 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
 
   if constexpr (std::is_base_of<PostLToKRAncestor, TreeIndex>::value) {
     fill_kr_ancestors(ti.postl_to_kr_ancestor_, ti.postl_to_lch_, ti.list_kr_);
+  }
+
+  if constexpr (std::is_base_of<PreToLn, TreeIndex>::value) {
+    fill_ln(ti.prel_to_ln_, ti.prer_to_ln_, ti.prel_to_size_, ti.prer_to_prel_);
   }
 };
 
@@ -306,6 +314,22 @@ void fill_kr_ancestors(std::vector<unsigned int>& postl_to_kr_ancestor,
     while (l >= 0) {
       postl_to_kr_ancestor[l] = i;
       l = postl_to_lch[l];
+    }
+  }
+};
+
+void fill_ln(std::vector<int>& prel_to_ln, std::vector<int>& prer_to_ln,
+    const std::vector<unsigned int>& prel_to_size, const std::vector<unsigned int>& prer_to_prel) {
+  int current_leaf_prel = -1;
+  int current_leaf_prer = -1;
+  for(unsigned int i = 0; i < prel_to_size[0]; ++i) {
+    prel_to_ln[i] = current_leaf_prel;
+    if(prel_to_size[i] == 1) {
+      current_leaf_prel = i;
+    }
+    prer_to_ln[i] = current_leaf_prer;
+    if(prel_to_size[prer_to_prel[i]] == 1) {
+      current_leaf_prer = i;
     }
   }
 };
