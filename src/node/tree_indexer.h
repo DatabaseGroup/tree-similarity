@@ -178,6 +178,15 @@ class PostLToSubtreeMaxDepth {
   public: std::vector<unsigned int> postl_to_subtree_max_depth_;
 };
 
+/// Stores the left-to-right postorder id of the nearest keyroot ancestor.
+/**
+ * Indexed in left-to-right postorder.
+ * The nearest keyroot ancestor of a keyroot node n is n.
+ */
+class PostLToKRAncestor {
+  public: std::vector<unsigned int> postl_to_kr_ancestor_;
+};
+
 /// Stores postorder ids of the keyroot nodes in the tree.
 /**
  * Sorted in left-to-right postorder.
@@ -214,6 +223,7 @@ class TreeIndexAll :
   public PostLToDepth,
   public PostLToLCh,
   public PostLToSubtreeMaxDepth,
+  public PostLToKRAncestor,
   public ListKR
 {};
 
@@ -244,6 +254,13 @@ template <typename TreeIndex, typename Label>
 unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
     label::LabelDictionary<Label>& ld, unsigned int& start_preorder,
     unsigned int& start_postorder, unsigned int start_depth, unsigned int& subtree_max_depth);
+
+/// Fills in the PostLToKRAncestor index.
+/**
+ * See description of the class PostLToKRAncestor.
+ */
+void fill_kr_ancestors(std::vector<unsigned int>& kr_ancestors,
+    std::vector<int>& postl_to_lch, std::vector<unsigned int>& list_kr);
 
 // Implementation details
 #include "tree_indexer_impl.h"

@@ -85,6 +85,9 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   if constexpr (std::is_base_of<PostLToSubtreeMaxDepth, TreeIndex>::value) {
     ti.postl_to_subtree_max_depth_.resize(tree_size);
   }
+  if constexpr (std::is_base_of<PostLToKRAncestor, TreeIndex>::value) {
+    ti.postl_to_kr_ancestor_.resize(tree_size);
+  }
   if constexpr (std::is_base_of<ListKR, TreeIndex>::value) {
     ti.list_kr_.clear();
   }
@@ -100,6 +103,10 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   if constexpr (std::is_base_of<ListKR, TreeIndex>::value) {
     // Add root to kr - not added in the recursion.
     ti.list_kr_.push_back(start_postorder-1);
+  }
+
+  if constexpr (std::is_base_of<PostLToKRAncestor, TreeIndex>::value) {
+    fill_kr_ancestors(ti.postl_to_kr_ancestor_, ti.postl_to_lch_, ti.list_kr_);
   }
 };
 
@@ -291,3 +298,14 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   return desc_sum + 1;
   
 };
+
+void fill_kr_ancestors(std::vector<unsigned int>& postl_to_kr_ancestor,
+    std::vector<int>& postl_to_lch, std::vector<unsigned int>& list_kr) {
+  for (auto i : list_kr) {
+    int l = i;
+    while (l >= 0) {
+      postl_to_kr_ancestor[l] = i;
+      l = postl_to_lch[l];
+    }
+  }
+}
