@@ -132,7 +132,7 @@ class PreLToPostR {
  * Indexed in right-to-left postorder.
  */
 class PostRToPreL {
-public: std::vector<unsigned int> postr_to_prel_;
+  public: std::vector<unsigned int> postr_to_prel_;
 };
 
 /// Stores left-to-right postorder ids of each node's children.
@@ -157,7 +157,7 @@ class PreLToChildren {
  * Depth of the root node is 0.
  */
 class PostLToDepth {
-public: std::vector<unsigned int> postl_to_depth_;
+  public: std::vector<unsigned int> postl_to_depth_;
 };
 
 /// Stores left-to-right postorder id of the leftmost (first) child for each node.
@@ -166,7 +166,16 @@ public: std::vector<unsigned int> postl_to_depth_;
  * '-1' represents no child.
  */
 class PostLToLCh {
-public: std::vector<int> postl_to_lch_;
+  public: std::vector<int> postl_to_lch_;
+};
+
+/// Stores the maximum depth for each subtree.
+/**
+ * Indexed in left-to-right postorder.
+ * Depth of the root node is 0.
+ */
+class PostLToSubtreeMaxDepth {
+  public: std::vector<unsigned int> postl_to_subtree_max_depth_;
 };
 
 /// Stores postorder ids of the keyroot nodes in the tree.
@@ -204,6 +213,7 @@ class TreeIndexAll :
   public PreLToParent,
   public PostLToDepth,
   public PostLToLCh,
+  public PostLToSubtreeMaxDepth,
   public ListKR
 {};
 
@@ -233,7 +243,7 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n, label::LabelDictionar
 template <typename TreeIndex, typename Label>
 unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
     label::LabelDictionary<Label>& ld, unsigned int& start_preorder,
-    unsigned int& start_postorder, unsigned int start_depth);
+    unsigned int& start_postorder, unsigned int start_depth, unsigned int& subtree_max_depth);
 
 // Implementation details
 #include "tree_indexer_impl.h"

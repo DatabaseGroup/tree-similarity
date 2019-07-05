@@ -82,6 +82,9 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   if constexpr (std::is_base_of<PostLToLCh, TreeIndex>::value) {
     ti.postl_to_lch_.resize(tree_size);
   }
+  if constexpr (std::is_base_of<PostLToSubtreeMaxDepth, TreeIndex>::value) {
+    ti.postl_to_subtree_max_depth_.resize(tree_size);
+  }
   if constexpr (std::is_base_of<ListKR, TreeIndex>::value) {
     ti.list_kr_.clear();
   }
@@ -90,7 +93,9 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   unsigned int start_preorder = 0;
   unsigned int start_postorder = 0;
   unsigned int start_depth = 0;
-  index_tree_recursion(ti, n, ld, start_preorder, start_postorder, start_depth);
+  // Maximum input tree depth - the first reference passed to recursion.
+  unsigned int subtree_max_depth = 0;
+  index_tree_recursion(ti, n, ld, start_preorder, start_postorder, start_depth, subtree_max_depth);
   
   if constexpr (std::is_base_of<ListKR, TreeIndex>::value) {
     // Add root to kr - not added in the recursion.
@@ -101,7 +106,7 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
 template <typename TreeIndex, typename Label>
 unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
     label::LabelDictionary<Label>& ld, unsigned int& start_preorder,
-    unsigned int& start_postorder, unsigned int start_depth) {
+    unsigned int& start_postorder, unsigned int start_depth, unsigned int& subtree_max_depth) {
   
   // Stores number of descendants of this node. Incrementally computed while
   // traversing the children.
@@ -121,6 +126,9 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   std::vector<unsigned int> children_postorders;
   // To store preorder ids of this node's children.
   std::vector<unsigned int> children_preorders;
+
+  // This node subtree's max depth.
+  unsigned int this_subtree_max_depth = 0;
   
   // Treat the first child separately (non-key-root, updates parent's lld).
   int first_child_postorder = -1;
@@ -132,7 +140,7 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
     children_preorders.push_back(start_preorder);
     
     desc_sum += index_tree_recursion(ti, *children_start_it, ld, start_preorder,
-        start_postorder, start_depth + 1);
+        start_postorder, start_depth + 1, this_subtree_max_depth);
     
     // Add the postoder of the current child to children_postorders.
     children_postorders.push_back(start_postorder-1);
@@ -172,7 +180,7 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
     }
   }
   
-  // PostLToSize index
+  // PreLToSize index
   if constexpr (std::is_base_of<PreLToSize, TreeIndex>::value) {
     if (n.is_leaf()) {
       // Leaf has size 1.
@@ -250,6 +258,17 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   // PostLToLCh index
   if constexpr (std::is_base_of<PostLToLCh, TreeIndex>::value) {
     ti.postl_to_lch_[start_postorder] = first_child_postorder;
+  }
+
+  // PostLToSubtreeMaxDepth index
+  if constexpr (std::is_base_of<PostLToSubtreeMaxDepth, TreeIndex>::value) {
+    if (n.is_leaf()) {
+      // If this node has no children, set the max depth to this node's depth.
+      this_subtree_max_depth = start_depth;
+    }
+    ti.postl_to_subtree_max_depth_[start_postorder] = this_subtree_max_depth;
+    // Update parent subtree's max depth.
+    subtree_max_depth = std::max(subtree_max_depth, this_subtree_max_depth);
   }
   
   // PostLToLLD index
