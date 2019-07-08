@@ -25,6 +25,7 @@ set(tree_indexer_test_list
   prer_to_ln_test
   prel_to_type_left_test
   prel_to_type_right_test
+  prel_to_cost_all_test
   list_kr_test
 )
 

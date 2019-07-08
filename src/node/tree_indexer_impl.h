@@ -103,6 +103,10 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
     ti.prel_to_type_right_.resize(tree_size);
     std::fill(ti.prel_to_type_right_.begin(), ti.prel_to_type_right_.end(), false);
   }
+  if constexpr (std::is_base_of<PreLToCostAll, TreeIndex>::value) {
+    ti.prel_to_cost_all_.resize(tree_size);
+    std::fill(ti.prel_to_cost_all_.begin(), ti.prel_to_cost_all_.end(), 0);
+  }
   if constexpr (std::is_base_of<ListKR, TreeIndex>::value) {
     ti.list_kr_.clear();
   }
@@ -149,6 +153,9 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   unsigned int preorder_r = 0;
   unsigned int postorder_r = 0;
 
+  // This node's preorder id.
+  unsigned int this_nodes_preorder = start_preorder;
+
   // Increment start_preorder to hold the correct id of the consecutive node
   // in preorder.
   ++start_preorder;
@@ -160,7 +167,7 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
 
   // This node subtree's max depth.
   unsigned int this_subtree_max_depth = 0;
-  
+
   // Treat the first child separately (non-key-root, updates parent's lld).
   int first_child_postorder = -1;
   // Count number of children.
@@ -171,6 +178,11 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   while (children_start_it != children_end_it) {
     // Add the preoder of the current child to children_preorders.
     children_preorders.push_back(start_preorder);
+
+    // PreLToParent index
+    if constexpr (std::is_base_of<PreLToParent, TreeIndex>::value) {
+      ti.prel_to_parent_[start_preorder] = this_nodes_preorder;
+    }
     
     desc_sum += index_tree_recursion(ti, *children_start_it, ld, start_preorder,
         start_postorder, start_depth + 1, this_subtree_max_depth);
@@ -230,13 +242,6 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   if constexpr (std::is_base_of<PostLToParent, TreeIndex>::value) {
     for (const auto& child_id : children_postorders) {
       ti.postl_to_parent_[child_id] = start_postorder;
-    }
-  }
-  
-  // PreLToParent index
-  if constexpr (std::is_base_of<PreLToParent, TreeIndex>::value) {
-    for (const auto& child_id : children_preorders) {
-      ti.prel_to_parent_[child_id] = preorder_temp;
     }
   }
   
@@ -325,11 +330,25 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
     }
   }
 
-  // PreLToTypeLeft index
+  // PreLToTypeRight index
   if constexpr (std::is_base_of<PreLToTypeRight, TreeIndex>::value) {
     if (num_children > 0) {
       ti.prel_to_type_right_[children_preorders[num_children-1]] = true;
     }
+  }
+
+  // Increment the sum of descendants sizes of this node by the size of
+  // its child.
+  if constexpr (std::is_base_of<PreLToCostAll, TreeIndex>::value) {
+    // Add this node's subtree size to this node's sum.
+    ti.prel_to_cost_all_[this_nodes_preorder] += desc_sum + 1;
+    // Update the parent with this node's sum.
+    if (this_nodes_preorder > 0) {
+      ti.prel_to_cost_all_[ti.prel_to_parent_[this_nodes_preorder]] += ti.prel_to_cost_all_[this_nodes_preorder];
+    }
+    // Calculate the cost and store.
+    ti.prel_to_cost_all_[this_nodes_preorder] =
+        (desc_sum + 1) * (desc_sum + 1 + 3) / 2 - ti.prel_to_cost_all_[this_nodes_preorder];
   }
 
   // Increment start_postorder for the consecutive node in postorder to have the

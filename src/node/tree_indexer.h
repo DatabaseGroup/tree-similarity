@@ -225,6 +225,16 @@ class PreLToTypeRight {
   public: std::vector<bool> prel_to_type_right_;
 };
 
+// Stores cost of spf_A for each node [1, Section 5.2].
+/**
+ * spf_A is the single path function that uses an inner path.
+ * Indexed in left-to-right preorder.
+ * Depends on: PreLToParent.
+ */
+class PreLToCostAll {
+  public: std::vector<unsigned int> prel_to_cost_all_;
+};
+
 /// Stores postorder ids of the keyroot nodes in the tree.
 /**
  * Sorted in left-to-right postorder.
@@ -266,6 +276,7 @@ class TreeIndexAll :
   public PreToLn,
   public PreLToTypeLeft,
   public PreLToTypeRight,
+  public PreLToCostAll,
   public ListKR
 {};
 

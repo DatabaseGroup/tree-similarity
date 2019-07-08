@@ -94,6 +94,8 @@ int main(int argc, char** argv) {
   } else if (index_test_name == "prel_to_type_right_test") {
     v_bool_index = &tia.prel_to_type_right_;
     index_data_type = 3;
+  } else if (index_test_name == "prel_to_cost_all_test") {
+    v_index = &tia.prel_to_cost_all_;
   } else if (index_test_name == "list_kr_test") {
     v_index = &tia.list_kr_;
   } else {
