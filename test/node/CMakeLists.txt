@@ -23,6 +23,8 @@ set(tree_indexer_test_list
   postl_to_kr_ancestor_test
   prel_to_ln_test
   prer_to_ln_test
+  prel_to_type_left_test
+  prel_to_type_right_test
   list_kr_test
 )
 

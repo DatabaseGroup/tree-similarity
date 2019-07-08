@@ -95,6 +95,14 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
     ti.prel_to_ln_.resize(tree_size);
     ti.prer_to_ln_.resize(tree_size);
   }
+  if constexpr (std::is_base_of<PreLToTypeLeft, TreeIndex>::value) {
+    ti.prel_to_type_left_.resize(tree_size);
+    std::fill(ti.prel_to_type_left_.begin(), ti.prel_to_type_left_.end(), false);
+  }
+  if constexpr (std::is_base_of<PreLToTypeRight, TreeIndex>::value) {
+    ti.prel_to_type_right_.resize(tree_size);
+    std::fill(ti.prel_to_type_right_.begin(), ti.prel_to_type_right_.end(), false);
+  }
   if constexpr (std::is_base_of<ListKR, TreeIndex>::value) {
     ti.list_kr_.clear();
   }
@@ -155,6 +163,8 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   
   // Treat the first child separately (non-key-root, updates parent's lld).
   int first_child_postorder = -1;
+  // Count number of children.
+  unsigned int num_children = 0;
   // Recursions to childen nodes.
   auto children_start_it = std::begin(n.get_children());
   auto children_end_it = std::end(n.get_children());
@@ -179,6 +189,8 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
         ti.list_kr_.push_back(start_postorder-1);
       }
     }
+    
+    ++num_children;
     
     // Continue to consecutive children.
     ++children_start_it;
@@ -303,6 +315,20 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
       // This node's lld must be pushed after its childrens llds.
       // lld is indexed starting with 0, thus first_child_postorder-1.
       ti.postl_to_lld_[start_postorder] = ti.postl_to_lld_[first_child_postorder];
+    }
+  }
+
+  // PreLToTypeLeft index
+  if constexpr (std::is_base_of<PreLToTypeLeft, TreeIndex>::value) {
+    if (num_children > 0) {
+      ti.prel_to_type_left_[children_preorders[0]] = true;
+    }
+  }
+
+  // PreLToTypeLeft index
+  if constexpr (std::is_base_of<PreLToTypeRight, TreeIndex>::value) {
+    if (num_children > 0) {
+      ti.prel_to_type_right_[children_preorders[num_children-1]] = true;
     }
   }
 

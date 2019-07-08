@@ -209,6 +209,22 @@ class PreToLn {
   public: std::vector<int> prer_to_ln_;
 };
 
+// Stores true if a node is leftmost child of its parent.
+/**
+ * Indexed in left-to-right preorder.
+ */
+class PreLToTypeLeft {
+  public: std::vector<bool> prel_to_type_left_;
+};
+
+// Stores true if a node is rightmost child of its parent.
+/**
+ * Indexed in left-to-right preorder.
+ */
+class PreLToTypeRight {
+  public: std::vector<bool> prel_to_type_right_;
+};
+
 /// Stores postorder ids of the keyroot nodes in the tree.
 /**
  * Sorted in left-to-right postorder.
@@ -248,6 +264,8 @@ class TreeIndexAll :
   public PostLToSubtreeMaxDepth,
   public PostLToKRAncestor,
   public PreToLn,
+  public PreLToTypeLeft,
+  public PreLToTypeRight,
   public ListKR
 {};
 

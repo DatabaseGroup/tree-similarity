@@ -24,13 +24,15 @@ int main(int argc, char** argv) {
   // We use a pointer because we can't use reference at this point.
   // v_index has to point to the updated index inside the test-cases loop.
   std::vector<unsigned int>* v_index;
-  std::vector<int>* v_int_index;
   std::vector<std::vector<unsigned int>>* vv_index;
+  std::vector<int>* v_int_index;
+  std::vector<bool>* v_bool_index;
   
   // Index data type:
   // 0 - std::vector<unsigned int> (default)
   // 1 - std::vector<std::vector<unsigned int>>
   // 2 - std::vector<int>
+  // 3 - std::vector<bool>
   unsigned int index_data_type = 0;
   // TODO: Change index_data_type in an if statement below if needed.
   
@@ -86,6 +88,12 @@ int main(int argc, char** argv) {
   } else if (index_test_name == "prer_to_ln_test") {
     v_int_index = &tia.prer_to_ln_;
     index_data_type = 2;
+  } else if (index_test_name == "prel_to_type_left_test") {
+    v_bool_index = &tia.prel_to_type_left_;
+    index_data_type = 3;
+  } else if (index_test_name == "prel_to_type_right_test") {
+    v_bool_index = &tia.prel_to_type_right_;
+    index_data_type = 3;
   } else if (index_test_name == "list_kr_test") {
     v_index = &tia.list_kr_;
   } else {
@@ -137,6 +145,8 @@ int main(int argc, char** argv) {
         case 1 : computed_results = common::vector_of_vectors_to_string(*vv_index);
           break;
         case 2 : computed_results = common::vector_to_string(*v_int_index);
+          break;
+        case 3 : computed_results = common::vector_to_string(*v_bool_index);
           break;
       }
       
