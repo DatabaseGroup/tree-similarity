@@ -28,6 +28,8 @@ set(tree_indexer_test_list
   prel_to_spf_cost_all_test
   prel_to_spf_cost_left_test
   prel_to_spf_cost_right_test
+  prel_to_subtree_del_cost_test
+  prel_to_subtree_ins_cost_test
   list_kr_test
 )
 

@@ -21,9 +21,9 @@
 
 #pragma once
 
-template <typename TreeIndex, typename Label>
+template <typename TreeIndex, typename Label, typename CostModel>
 void index_tree(TreeIndex& ti, const node::Node<Label>& n,
-    label::LabelDictionary<Label>& ld) {
+    label::LabelDictionary<Label>& ld, CostModel& cm) {
   
   unsigned int tree_size = n.get_tree_size();
   ti.tree_size_ = tree_size;
@@ -111,6 +111,12 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
     ti.prel_to_cost_right_.resize(tree_size);
     std::fill(ti.prel_to_cost_right_.begin(), ti.prel_to_cost_right_.end(), 0);
   }
+  if constexpr (std::is_base_of<PreLToSubtreeCost, TreeIndex>::value) {
+    ti.prel_to_subtree_del_cost_.resize(tree_size);
+    std::fill(ti.prel_to_subtree_del_cost_.begin(), ti.prel_to_subtree_del_cost_.end(), 0.0);
+    ti.prel_to_subtree_ins_cost_.resize(tree_size);
+    std::fill(ti.prel_to_subtree_ins_cost_.begin(), ti.prel_to_subtree_ins_cost_.end(), 0.0);
+  }
   if constexpr (std::is_base_of<ListKR, TreeIndex>::value) {
     ti.list_kr_.clear();
   }
@@ -122,8 +128,8 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   
   // Maximum input tree depth - the first reference passed to recursion.
   unsigned int subtree_max_depth = 0;
-  index_tree_recursion(ti, n, ld, start_preorder, start_postorder, start_depth,
-      subtree_max_depth, -1, false);
+  index_tree_recursion(ti, n, ld, cm, start_preorder, start_postorder,
+      start_depth, subtree_max_depth, -1, false);
   
   if constexpr (std::is_base_of<ListKR, TreeIndex>::value) {
     // Add root to kr - not added in the recursion.
@@ -144,16 +150,19 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   }
 };
 
-template <typename TreeIndex, typename Label>
+template <typename TreeIndex, typename Label, typename CostModel>
 unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
-    label::LabelDictionary<Label>& ld, unsigned int& start_preorder,
-    unsigned int& start_postorder, unsigned int start_depth,
-    unsigned int& subtree_max_depth, int parent_preorder,
-    bool is_rightmost_child) {
+    label::LabelDictionary<Label>& ld, CostModel& cm,
+    unsigned int& start_preorder, unsigned int& start_postorder,
+    unsigned int start_depth, unsigned int& subtree_max_depth,
+    int parent_preorder, bool is_rightmost_child) {
   
   // Stores number of descendants of this node. Incrementally computed while
   // traversing the children.
   unsigned int desc_sum = 0;
+
+  // Stores the current node's label id.
+  unsigned int label_id = ld.insert(n.label());
 
   // Here, start_preorder holds this node's preorder id.
   
@@ -199,7 +208,7 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
       ti.prel_to_parent_[start_preorder] = this_nodes_preorder;
     }
     
-    desc_sum += index_tree_recursion(ti, *children_start_it, ld,
+    desc_sum += index_tree_recursion(ti, *children_start_it, ld, cm,
         start_preorder, start_postorder, start_depth + 1,
         this_subtree_max_depth, this_nodes_preorder, is_current_child_rightmost);
     
@@ -303,7 +312,7 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   
   // PostLToLabelId index
   if constexpr (std::is_base_of<PostLToLabelId, TreeIndex>::value) {
-    ti.postl_to_label_id_[start_postorder] = ld.insert(n.label());
+    ti.postl_to_label_id_[start_postorder] = label_id;
   }
   
   // PostLToDepth index
@@ -378,6 +387,19 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
     // Add this node's subtree size to this node's sum.
     ti.prel_to_cost_left_[this_nodes_preorder] += desc_sum + 1;
     ti.prel_to_cost_right_[this_nodes_preorder] += desc_sum + 1;
+  }
+
+  // PreLToSubtreeCost indexes
+  if constexpr (std::is_base_of<PreLToSubtreeCost, TreeIndex>::value) {
+    // Add the cost of this node's subtree.
+    ti.prel_to_subtree_del_cost_[this_nodes_preorder] += cm.del(label_id);
+    ti.prel_to_subtree_ins_cost_[this_nodes_preorder] += cm.ins(label_id);
+    // If this node has a parent.
+    if (parent_preorder >= 0) {
+      // Update the cost of the parent node subtree.
+      ti.prel_to_subtree_del_cost_[parent_preorder] += ti.prel_to_subtree_del_cost_[this_nodes_preorder];
+      ti.prel_to_subtree_ins_cost_[parent_preorder] += ti.prel_to_subtree_ins_cost_[this_nodes_preorder];
+    }
   }
 
   // Increment start_postorder for the consecutive node in postorder to have the

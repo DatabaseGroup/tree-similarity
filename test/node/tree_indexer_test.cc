@@ -27,12 +27,14 @@ int main(int argc, char** argv) {
   std::vector<std::vector<unsigned int>>* vv_index;
   std::vector<int>* v_int_index;
   std::vector<bool>* v_bool_index;
+  std::vector<double>* v_double_index;
   
   // Index data type:
   // 0 - std::vector<unsigned int> (default)
   // 1 - std::vector<std::vector<unsigned int>>
   // 2 - std::vector<int>
   // 3 - std::vector<bool>
+  // 4 - std::vector<double>
   unsigned int index_data_type = 0;
   // TODO: Change index_data_type in an if statement below if needed.
   
@@ -100,6 +102,12 @@ int main(int argc, char** argv) {
     v_index = &tia.prel_to_cost_left_;
   } else if (index_test_name == "prel_to_spf_cost_right_test") {
     v_index = &tia.prel_to_cost_right_;
+  } else if (index_test_name == "prel_to_subtree_del_cost_test") {
+    v_double_index = &tia.prel_to_subtree_del_cost_;
+    index_data_type = 4;
+  } else if (index_test_name == "prel_to_subtree_ins_cost_test") {
+    v_double_index = &tia.prel_to_subtree_ins_cost_;
+    index_data_type = 4;
   } else if (index_test_name == "list_kr_test") {
     v_index = &tia.list_kr_;
   } else {
@@ -108,6 +116,8 @@ int main(int argc, char** argv) {
   }
   
   using Label = label::StringLabel;
+  using CostModel = cost_model::UnitCostModelLD<Label>;
+  using LabelDictionary = label::LabelDictionary<Label>;
 
   // Parse test cases from file.
   std::ifstream test_data_file(index_test_name + "_data.txt");
@@ -115,7 +125,7 @@ int main(int argc, char** argv) {
     std::cerr << "Error while opening file: " + (index_test_name + "_data.txt") + "." << std::endl;
     return -1;
   }
-  
+
   // Iterate over all test cases from test_data_file.
   for (std::string line; std::getline( test_data_file, line);) {
     if (line[0] == '#') {
@@ -138,10 +148,13 @@ int main(int argc, char** argv) {
       
       // Initialise label dictionary - separate dictionary for each test tree
       // becuse it is easier to keep track of label ids.
-      label::LabelDictionary<Label> ld;
+      LabelDictionary ld;
+      
+      // Initialise cost model.
+      CostModel ucm(ld);
       
       // Index the tree with all indexes.
-      node::index_tree(tia, tree, ld);
+      node::index_tree(tia, tree, ld, ucm);
       
       // Convert the computed results based on index output type.
       std::string computed_results;
@@ -153,6 +166,8 @@ int main(int argc, char** argv) {
         case 2 : computed_results = common::vector_to_string(*v_int_index);
           break;
         case 3 : computed_results = common::vector_to_string(*v_bool_index);
+          break;
+        case 4 : computed_results = common::vector_to_string(*v_double_index);
           break;
       }
       

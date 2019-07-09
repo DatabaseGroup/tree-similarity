@@ -27,6 +27,7 @@
 #include <string>
 #include <type_traits>
 #include "label_dictionary.h"
+#include "unit_cost_model.h"
 
 namespace node {
 
@@ -37,6 +38,8 @@ class Constants {
 
 /// Stores label id of each node in a tree.
 /**
+ * Labels are inserted into a dictionary in their left-to-right preorder
+ * appearance.
  * Indexed in left-to-right postorder.
  */
 class PostLToLabelId {
@@ -238,6 +241,17 @@ class PreLToSpfCost {
   public: std::vector<unsigned int> prel_to_cost_right_;
 };
 
+// Stores cost of deleting/inserting entire subtree for each node.
+/**
+ * prel_to_subtree_del_cost_: cost of deleting entire subtree
+ * prel_to_subtree_ins_cost_: cost of inserting entire subtree
+ * Indexed in left-to-right preorder.
+ */
+class PreLToSubtreeCost {
+  public: std::vector<double> prel_to_subtree_del_cost_;
+  public: std::vector<double> prel_to_subtree_ins_cost_;
+};
+
 /// Stores postorder ids of the keyroot nodes in the tree.
 /**
  * Sorted in left-to-right postorder.
@@ -280,6 +294,7 @@ class TreeIndexAll :
   public PreLToTypeLeft,
   public PreLToTypeRight,
   public PreLToSpfCost,
+  public PreLToSubtreeCost,
   public ListKR
 {};
 
@@ -292,8 +307,9 @@ class TreeIndexAll :
  * \param n Root node of the input tree.
  * \param ld LabelDictionary to collect node labels and assign their ids.
  */
-template <typename TreeIndex, typename Label>
-void index_tree(TreeIndex& ti, const node::Node<Label>& n, label::LabelDictionary<Label>& ld);
+template <typename TreeIndex, typename Label, typename CostModel>
+void index_tree(TreeIndex& ti, const node::Node<Label>& n,
+    label::LabelDictionary<Label>& ld, CostModel& cm);
 
 /// Recursive tree traversal method that indexes a tree.
 /**
@@ -302,6 +318,7 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n, label::LabelDictionar
  * \param ti Tree index.
  * \param n Root node of the input tree.
  * \param ld LabelDictionary to collect node labels and assign their ids.
+ * \param cm CostModel - used for PreLToSubtreeCost indexes.
  * \param start_preorder Variable to hold current preorder id; modified during the recursion.
  * \param start_postorder Variable to hold current postorder id; modified during the recursion.
  * \param start_depth Variable to hold current depth of a node.
@@ -310,10 +327,11 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n, label::LabelDictionar
  * \param is_rightmost_child Is true if the node is the rightmost child of its parent.
  * \return Subtree size rooted at node n.
  */
-template <typename TreeIndex, typename Label>
+template <typename TreeIndex, typename Label, typename CostModel>
 unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
-    label::LabelDictionary<Label>& ld, unsigned int& start_preorder,
-    unsigned int& start_postorder, unsigned int start_depth, unsigned int& subtree_max_depth,
+    label::LabelDictionary<Label>& ld, CostModel& cm,
+    unsigned int& start_preorder, unsigned int& start_postorder,
+    unsigned int start_depth, unsigned int& subtree_max_depth,
     int parent_preorder, bool is_rightmost_child);
 
 /// Fills in the PostLToKRAncestor index.
