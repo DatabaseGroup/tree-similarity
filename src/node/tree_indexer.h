@@ -225,14 +225,17 @@ class PreLToTypeRight {
   public: std::vector<bool> prel_to_type_right_;
 };
 
-// Stores cost of spf_A for each node [1, Section 5.2].
+// Stores cost of a single-path function for each node [1, Section 5.2].
 /**
- * spf_A is the single path function that uses an inner path.
+ * prel_to_cost_all_: spf_A - single-path function using inner path
+ * prel_to_cost_left_: spf_L - single-path function using left path
+ * prel_to_cost_right_: spf_R - single-path function using right path
  * Indexed in left-to-right preorder.
- * Depends on: PreLToParent.
  */
-class PreLToCostAll {
+class PreLToSpfCost {
   public: std::vector<unsigned int> prel_to_cost_all_;
+  public: std::vector<unsigned int> prel_to_cost_left_;
+  public: std::vector<unsigned int> prel_to_cost_right_;
 };
 
 /// Stores postorder ids of the keyroot nodes in the tree.
@@ -276,7 +279,7 @@ class TreeIndexAll :
   public PreToLn,
   public PreLToTypeLeft,
   public PreLToTypeRight,
-  public PreLToCostAll,
+  public PreLToSpfCost,
   public ListKR
 {};
 
@@ -301,12 +304,17 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n, label::LabelDictionar
  * \param ld LabelDictionary to collect node labels and assign their ids.
  * \param start_preorder Variable to hold current preorder id; modified during the recursion.
  * \param start_postorder Variable to hold current postorder id; modified during the recursion.
+ * \param start_depth Variable to hold current depth of a node.
+ * \param subtree_max_depth Variable to hold current maximum depth of a subtree; modified during the recursion.
+ * \param parent_preorder The left-to-right preorder id of a parent node.
+ * \param is_rightmost_child Is true if the node is the rightmost child of its parent.
  * \return Subtree size rooted at node n.
  */
 template <typename TreeIndex, typename Label>
 unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
     label::LabelDictionary<Label>& ld, unsigned int& start_preorder,
-    unsigned int& start_postorder, unsigned int start_depth, unsigned int& subtree_max_depth);
+    unsigned int& start_postorder, unsigned int start_depth, unsigned int& subtree_max_depth,
+    int parent_preorder, bool is_rightmost_child);
 
 /// Fills in the PostLToKRAncestor index.
 /**
