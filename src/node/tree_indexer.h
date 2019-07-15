@@ -334,6 +334,9 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
     unsigned int start_depth, unsigned int& subtree_max_depth,
     int parent_preorder, bool is_rightmost_child);
 
+// TODO: Combine fill_kr_ancestors, fill_ln, and fill_rld into a single
+//       function. Check the base type inside.
+
 /// Fills in the PostLToKRAncestor index.
 /**
  * See description of the class PostLToKRAncestor.
