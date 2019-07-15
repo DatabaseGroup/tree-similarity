@@ -70,11 +70,23 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   if constexpr (std::is_base_of<PreLToChildren, TreeIndex>::value) {
     ti.prel_to_children_.resize(tree_size);
   }
+  if constexpr (std::is_base_of<PreLToLabelId, TreeIndex>::value) {
+    ti.prel_to_label_id_.resize(tree_size);
+  }
   if constexpr (std::is_base_of<PostLToLabelId, TreeIndex>::value) {
     ti.postl_to_label_id_.resize(tree_size);
   }
+  if constexpr (std::is_base_of<PostRToLabelId, TreeIndex>::value) {
+    ti.postr_to_label_id_.resize(tree_size);
+  }
   if constexpr (std::is_base_of<PostLToLLD, TreeIndex>::value) {
     ti.postl_to_lld_.resize(tree_size);
+  }
+  if constexpr (std::is_base_of<PreLToLLD, TreeIndex>::value) {
+    ti.prel_to_lld_.resize(tree_size);
+  }
+  if constexpr (std::is_base_of<PreLToRLD, TreeIndex>::value) {
+    ti.prel_to_rld_.resize(tree_size);
   }
   if constexpr (std::is_base_of<PostRToRLD, TreeIndex>::value) {
     ti.postr_to_rld_.resize(tree_size);
@@ -298,9 +310,19 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
     ti.prel_to_children_[this_nodes_preorder] = children_preorders;
   }
   
+  // PreLToLabelId index
+  if constexpr (std::is_base_of<PreLToLabelId, TreeIndex>::value) {
+    ti.prel_to_label_id_[this_nodes_preorder] = label_id;
+  }
+  
   // PostLToLabelId index
   if constexpr (std::is_base_of<PostLToLabelId, TreeIndex>::value) {
     ti.postl_to_label_id_[start_postorder] = label_id;
+  }
+  
+  // PostRToLabelId index
+  if constexpr (std::is_base_of<PostRToLabelId, TreeIndex>::value) {
+    ti.postr_to_label_id_[postorder_r] = label_id;
   }
   
   // PostLToDepth index
@@ -334,6 +356,23 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
       // lld is indexed starting with 0, thus first_child_postorder-1.
       ti.postl_to_lld_[start_postorder] = ti.postl_to_lld_[first_child_postorder];
     }
+  }
+
+  // PreLToLLD index
+  if constexpr (std::is_base_of<PreLToLLD, TreeIndex>::value) {
+    if (n.is_leaf()) {
+      // Set lld of this node to this node's preorder.
+      ti.prel_to_lld_[this_nodes_preorder] = this_nodes_preorder;
+    } else {
+      // Push this node's lld to its first child (this_nodes_preorder + 1).
+      ti.prel_to_lld_[this_nodes_preorder] = ti.prel_to_lld_[this_nodes_preorder + 1];
+    }
+  }
+
+  // PreLToRLD index
+  if constexpr (std::is_base_of<PreLToRLD, TreeIndex>::value) {
+    // RLD of a node n is: pre(n)+size(n)-1; size(n)=desc_sum+1
+    ti.prel_to_rld_[this_nodes_preorder] = this_nodes_preorder + desc_sum;
   }
 
   // PreLToTypeLeft index

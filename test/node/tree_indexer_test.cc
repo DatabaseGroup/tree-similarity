@@ -67,10 +67,18 @@ int main(int argc, char** argv) {
   } else if (index_test_name == "prel_to_children_test") {
     vv_index = &tia.prel_to_children_;
     index_data_type = 1;
+  } else if (index_test_name == "prel_to_label_id_test") {
+    v_index = &tia.prel_to_label_id_;
   } else if (index_test_name == "postl_to_label_id_test") {
     v_index = &tia.postl_to_label_id_;
+  } else if (index_test_name == "postr_to_label_id_test") {
+    v_index = &tia.postr_to_label_id_;
   } else if (index_test_name == "postl_to_lld_test") {
     v_index = &tia.postl_to_lld_;
+  } else if (index_test_name == "prel_to_lld_test") {
+    v_index = &tia.prel_to_lld_;
+  } else if (index_test_name == "prel_to_rld_test") {
+    v_index = &tia.prel_to_rld_;
   } else if (index_test_name == "postr_to_rld_test") {
     v_index = &tia.postr_to_rld_;
   } else if (index_test_name == "postl_to_label_id_test") {

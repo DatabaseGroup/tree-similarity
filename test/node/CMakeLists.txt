@@ -2,7 +2,9 @@
 
 # List of tests and test files string prefixes.
 set(tree_indexer_test_list
+  prel_to_label_id_test
   postl_to_label_id_test
+  postr_to_label_id_test
   postl_to_size_test
   prel_to_size_test
   postl_to_parent_test
@@ -16,6 +18,8 @@ set(tree_indexer_test_list
   postl_to_children_test
   prel_to_children_test
   postl_to_lld_test
+  prel_to_lld_test
+  prel_to_rld_test
   postr_to_rld_test
   postl_to_depth_test
   postl_to_lch_test

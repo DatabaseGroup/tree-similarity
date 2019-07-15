@@ -40,10 +40,30 @@ class Constants {
 /**
  * Labels are inserted into a dictionary in their left-to-right preorder
  * appearance.
+ * Indexed in left-to-right preorder.
+ */
+class PreLToLabelId {
+  public: std::vector<unsigned int> prel_to_label_id_;
+};
+
+/// Stores label id of each node in a tree.
+/**
+ * Labels are inserted into a dictionary in their left-to-right preorder
+ * appearance.
  * Indexed in left-to-right postorder.
  */
 class PostLToLabelId {
   public: std::vector<unsigned int> postl_to_label_id_;
+};
+
+/// Stores label id of each node in a tree.
+/**
+ * Labels are inserted into a dictionary in their left-to-right preorder
+ * appearance.
+ * Indexed in right-to-left postorder.
+ */
+class PostRToLabelId {
+  public: std::vector<unsigned int> postr_to_label_id_;
 };
 
 /// Stores subtree size of each node in a tree.
@@ -88,6 +108,22 @@ class PreLToParent {
  */
 class PostLToLLD {
   public: std::vector<unsigned int> postl_to_lld_;
+};
+
+/// Stores left-to-right preorder id of the leftmost leaf descendant of a node.
+/**
+ * Indexed in left-to-right preorder.
+ */
+class PreLToLLD {
+  public: std::vector<unsigned int> prel_to_lld_;
+};
+
+/// Stores left-to-right preorder id of the rightmost leaf descendant of a node.
+/**
+ * Indexed in left-to-right preorder.
+ */
+class PreLToRLD {
+  public: std::vector<unsigned int> prel_to_rld_;
 };
 
 /// Stores right-to-left postorder id of the rightmost leaf descendant of a node.
@@ -268,10 +304,29 @@ class TreeIndexZhangShasha :
   public ListKR
 {};
 
+/// APTED-specific functionality.
+/**
+ * current_node_ is used to remember the root of the currently processed
+ * subtree. It is getters and setters only. Does not need testing.
+ */
+class APTEDSpecific {
+  private:
+    unsigned int current_node_ = 0; // preorder = 0 -> root node
+  public:
+    unsigned int get_current_node() {
+      return current_node_;
+    };
+    void set_current_node(unsigned int preorder_id) {
+      current_node_ = preorder_id;
+    };
+};
+
 /// All tree indexes. Used for correctness tests and prototyping.
 class TreeIndexAll :
   public Constants,
+  public PreLToLabelId,
   public PostLToLabelId,
+  public PostRToLabelId,
   public PostLToSize,
   public PreLToSize,
   public PostLToPreL,
@@ -283,6 +338,8 @@ class TreeIndexAll :
   public PostLToChildren,
   public PreLToChildren,
   public PostLToLLD,
+  public PreLToLLD,
+  public PreLToRLD,
   public PostRToRLD,
   public PostLToParent,
   public PreLToParent,
