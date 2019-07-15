@@ -243,24 +243,12 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   
   // PostLToSize index
   if constexpr (std::is_base_of<PostLToSize, TreeIndex>::value) {
-    if (n.is_leaf()) {
-      // Leaf has size 1.
-      ti.postl_to_size_[start_postorder] = 1;
-    } else {
-      // Inner node has size desc_sum+1.
-      ti.postl_to_size_[start_postorder] = desc_sum + 1;
-    }
+    ti.postl_to_size_[start_postorder] = desc_sum + 1;
   }
   
   // PreLToSize index
   if constexpr (std::is_base_of<PreLToSize, TreeIndex>::value) {
-    if (n.is_leaf()) {
-      // Leaf has size 1.
-      ti.prel_to_size_[this_nodes_preorder] = 1;
-    } else {
-      // Inner node has size desc_sum+1.
-      ti.prel_to_size_[this_nodes_preorder] = desc_sum + 1;
-    }
+    ti.prel_to_size_[this_nodes_preorder] = desc_sum + 1;
   }
   
   // PostLToParent index
