@@ -161,7 +161,7 @@ int main(int argc, char** argv) {
       switch(index_data_type) {
         case 0 : computed_results = common::vector_to_string(*v_index);
           break;
-        case 1 : computed_results = common::vector_of_vectors_to_string(*vv_index);
+        case 1 : computed_results = common::vector_to_string(*vv_index);
           break;
         case 2 : computed_results = common::vector_to_string(*v_int_index);
           break;
