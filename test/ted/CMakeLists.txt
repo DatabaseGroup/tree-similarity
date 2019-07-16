@@ -3,7 +3,7 @@
 # List of tests and test string prefixes.
 set(ted_test_list
   zhang_shasha
-  # apted
+  apted
 )
 
 # Test driver name.

@@ -7,6 +7,7 @@
 #include "node.h"
 #include "bracket_notation_parser.h"
 #include "zhang_shasha_tree_index.h"
+#include "apted_tree_index.h"
 #include "tree_indexer.h"
 
 int main(int argc, char** argv) {
@@ -35,15 +36,16 @@ int main(int argc, char** argv) {
   // TODO: All algorithms need to be initialised.
   // Initialise ZS algorithm.
   ted::ZhangShashaTreeIndex<CostModel, node::TreeIndexAll> zhang_shasha_algorithm(ucm);
+  // Initialise ZS algorithm.
+  ted::APTEDTreeIndex<CostModel, node::TreeIndexAll> apted_algorithm(ucm);
   
   // Assign ted algorithm by its name.
   if (ted_algorithm_name == "zhang_shasha") {
     ted_algorithm = &zhang_shasha_algorithm;
   }
-  // TODO: APTED
-  // else if (ted_algorithm_name == "apted") {
-  //   v_index = &tia.postl_to_label_id_;
-  // } 
+  else if (ted_algorithm_name == "apted") {
+    ted_algorithm = &apted_algorithm;
+  } 
   else {
     std::cerr << "Error while choosing TED algorithm to test. TED algorithm name = " +
         (ted_algorithm_name) + "." << std::endl;
@@ -89,8 +91,8 @@ int main(int argc, char** argv) {
       node::Node<Label> t2 = bnp.parse_single(input_tree_2_string);
       
       // Index input trees.
-      node::index_tree(ti1, t1, ld);
-      node::index_tree(ti2, t2, ld);
+      node::index_tree(ti1, t1, ld, ucm);
+      node::index_tree(ti2, t2, ld, ucm);
       
       // Execute the algorithm.
       double computed_results = ted_algorithm->ted(ti1, ti2);
