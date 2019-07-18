@@ -40,11 +40,13 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   }
   if constexpr (std::is_base_of<PostLToParent, TreeIndex>::value) {
     ti.postl_to_parent_.resize(tree_size);
-    std::fill(ti.postl_to_parent_.begin(), ti.postl_to_parent_.end(), -1);
+    std::fill(ti.postl_to_parent_.begin(), ti.postl_to_parent_.end(),
+        std::numeric_limits<unsigned int>::max());
   }
   if constexpr (std::is_base_of<PreLToParent, TreeIndex>::value) {
     ti.prel_to_parent_.resize(tree_size);
-    std::fill(ti.prel_to_parent_.begin(), ti.prel_to_parent_.end(), -1);
+    std::fill(ti.prel_to_parent_.begin(), ti.prel_to_parent_.end(),
+        std::numeric_limits<unsigned int>::max());
   }
   if constexpr (std::is_base_of<PostLToPreL, TreeIndex>::value) {
     ti.postl_to_prel_.resize(tree_size);
@@ -141,7 +143,8 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   // Maximum input tree depth - the first reference passed to recursion.
   unsigned int subtree_max_depth = 0;
   index_tree_recursion(ti, n, ld, cm, start_preorder, start_postorder,
-      start_depth, subtree_max_depth, -1, false);
+      start_depth, subtree_max_depth, std::numeric_limits<unsigned int>::max(),
+      false);
   
   if constexpr (std::is_base_of<ListKR, TreeIndex>::value) {
     // Add root to kr - not added in the recursion.
@@ -167,7 +170,7 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
     label::LabelDictionary<Label>& ld, CostModel& cm,
     unsigned int& start_preorder, unsigned int& start_postorder,
     unsigned int start_depth, unsigned int& subtree_max_depth,
-    int parent_preorder, bool is_rightmost_child) {
+    unsigned int parent_preorder, bool is_rightmost_child) {
   
   // Stores number of descendants of this node. Incrementally computed while
   // traversing the children.
@@ -394,7 +397,7 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
     // Add this node's subtree size to this node's sum.
     ti.prel_to_cost_all_[this_nodes_preorder] += desc_sum + 1;
     // If this node has a parent.
-    if (parent_preorder >= 0) {
+    if (parent_preorder != std::numeric_limits<unsigned int>::max()) {
       // Update the parent with this node's sum.
       ti.prel_to_cost_all_[parent_preorder] += ti.prel_to_cost_all_[this_nodes_preorder];
       ti.prel_to_cost_left_[parent_preorder] += ti.prel_to_cost_left_[this_nodes_preorder];
@@ -422,7 +425,7 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
     ti.prel_to_subtree_del_cost_[this_nodes_preorder] += cm.del(label_id);
     ti.prel_to_subtree_ins_cost_[this_nodes_preorder] += cm.ins(label_id);
     // If this node has a parent.
-    if (parent_preorder >= 0) {
+    if (parent_preorder != std::numeric_limits<unsigned int>::max()) {
       // Update the cost of the parent node subtree.
       ti.prel_to_subtree_del_cost_[parent_preorder] += ti.prel_to_subtree_del_cost_[this_nodes_preorder];
       ti.prel_to_subtree_ins_cost_[parent_preorder] += ti.prel_to_subtree_ins_cost_[this_nodes_preorder];
@@ -449,10 +452,12 @@ void fill_kr_ancestors(std::vector<unsigned int>& postl_to_kr_ancestor,
   }
 };
 
-void fill_ln(std::vector<int>& prel_to_ln, std::vector<int>& prer_to_ln,
-    const std::vector<unsigned int>& prel_to_size, const std::vector<unsigned int>& prer_to_prel) {
-  int current_leaf_prel = -1;
-  int current_leaf_prer = -1;
+void fill_ln(std::vector<unsigned int>& prel_to_ln,
+    std::vector<unsigned int>& prer_to_ln,
+    const std::vector<unsigned int>& prel_to_size,
+    const std::vector<unsigned int>& prer_to_prel) {
+  unsigned int current_leaf_prel = std::numeric_limits<unsigned int>::max();
+  unsigned int current_leaf_prer = std::numeric_limits<unsigned int>::max();
   for(unsigned int i = 0; i < prel_to_size[0]; ++i) {
     prel_to_ln[i] = current_leaf_prel;
     if(prel_to_size[i] == 1) {

@@ -26,6 +26,7 @@
 #include <vector>
 #include <string>
 #include <type_traits>
+#include <limits>
 #include "label_dictionary.h"
 #include "unit_cost_model.h"
 
@@ -85,21 +86,19 @@ class PreLToSize {
 /// Stores left-to-right postorder id of the parent node.
 /**
  * Indexed in left-to-right postorder.
- * '-1' represents no parent.
- * TODO: Maybe use unsigned int and a max value for no parent. Requires changes
- *       in algorithms implementation. If done, apply in corresponding indexes.
+ * `std::numeric_limits<unsigned int>::max()` represents no parent.
  */
 class PostLToParent {
-  public: std::vector<int> postl_to_parent_;
+  public: std::vector<unsigned int> postl_to_parent_;
 };
 
 /// Stores left-to-right preorder id of the parent node.
 /**
  * Indexed in left-to-right preorder.
- * '-1' represents no parent.
+ * `std::numeric_limits<unsigned int>::max()` represents no parent.
  */
 class PreLToParent {
-  public: std::vector<int> prel_to_parent_;
+  public: std::vector<unsigned int> prel_to_parent_;
 };
 
 /// Stores left-to-right postorder id of the leftmost leaf descendant of a node.
@@ -240,12 +239,12 @@ class PostLToKRAncestor {
 /**
  * prel_to_ln_: left-to-right preorder of the first leaf to the left.
  * prer_to_ln_: right-to-left preorder of the first leaf to the right.
- * '-1' represents no such node.
+ * `std::numeric_limits<unsigned int>::max()` represents no such node.
  * Depends on: PreLToSize, PreRToPreL.
  */
 class PreToLn {
-  public: std::vector<int> prel_to_ln_;
-  public: std::vector<int> prer_to_ln_;
+  public: std::vector<unsigned int> prel_to_ln_;
+  public: std::vector<unsigned int> prer_to_ln_;
 };
 
 // Stores true if a node is leftmost child of its parent.
@@ -417,7 +416,7 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
     label::LabelDictionary<Label>& ld, CostModel& cm,
     unsigned int& start_preorder, unsigned int& start_postorder,
     unsigned int start_depth, unsigned int& subtree_max_depth,
-    int parent_preorder, bool is_rightmost_child);
+    unsigned int parent_preorder, bool is_rightmost_child);
 
 // TODO: Combine fill_kr_ancestors, fill_ln, and fill_rld into a single
 //       function. Check the base type inside.
@@ -433,8 +432,10 @@ void fill_kr_ancestors(std::vector<unsigned int>& kr_ancestors,
 /**
  * See description of the classes PreToLn.
  */
-void fill_ln(std::vector<int>& prel_to_ln, std::vector<int>& prer_to_ln,
-    const std::vector<unsigned int>& prel_to_size, const std::vector<unsigned int>& prer_to_prel);
+void fill_ln(std::vector<unsigned int>& prel_to_ln,
+    std::vector<unsigned int>& prer_to_ln,
+    const std::vector<unsigned int>& prel_to_size,
+    const std::vector<unsigned int>& prer_to_prel);
 
 /// Fills in the PostRToRLD indexes.
 /**

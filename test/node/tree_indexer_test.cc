@@ -44,11 +44,9 @@ int main(int argc, char** argv) {
   } else if (index_test_name == "prel_to_size_test") {
     v_index = &tia.prel_to_size_;
   } else if (index_test_name == "postl_to_parent_test") {
-    v_int_index = &tia.postl_to_parent_;
-    index_data_type = 2;
+    v_index = &tia.postl_to_parent_;
   } else if (index_test_name == "prel_to_parent_test") {
-    v_int_index = &tia.prel_to_parent_;
-    index_data_type = 2;
+    v_index = &tia.prel_to_parent_;
   } else if (index_test_name == "postl_to_prel_test") {
     v_index = &tia.postl_to_prel_;
   } else if (index_test_name == "prel_to_postl_test") {
@@ -93,11 +91,9 @@ int main(int argc, char** argv) {
   } else if (index_test_name == "postl_to_kr_ancestor_test") {
     v_index = &tia.postl_to_kr_ancestor_;
   } else if (index_test_name == "prel_to_ln_test") {
-    v_int_index = &tia.prel_to_ln_;
-    index_data_type = 2;
+    v_index = &tia.prel_to_ln_;
   } else if (index_test_name == "prer_to_ln_test") {
-    v_int_index = &tia.prer_to_ln_;
-    index_data_type = 2;
+    v_index = &tia.prer_to_ln_;
   } else if (index_test_name == "prel_to_type_left_test") {
     v_bool_index = &tia.prel_to_type_left_;
     index_data_type = 3;

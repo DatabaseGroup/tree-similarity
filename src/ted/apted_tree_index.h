@@ -73,8 +73,8 @@ private:
       int subtreeRootNode2);
   
   double spfA(const TreeIndex& t1, unsigned int t1_current_subtree,
-      const TreeIndex& t2, unsigned int t2_current_subtree, int pathID,
-      int pathType, bool treesSwapped);
+      const TreeIndex& t2, unsigned int t2_current_subtree, unsigned int pathID,
+      unsigned int pathType, bool treesSwapped);
   
   double spfL(const TreeIndex& t1, unsigned int t1_current_subtree,
       const TreeIndex& t2, unsigned int t2_current_subtree, bool treesSwapped);
@@ -86,17 +86,18 @@ private:
   
   double spfR(const TreeIndex& t1, unsigned int t1_current_subtree,
       const TreeIndex& t2, unsigned int t2_current_subtree, bool treesSwapped);
-  int computeRevKeyRoots(const TreeIndex& t2, int subtreeRootNode, int pathID,
-      std::vector<int>& revKeyRoots, int index);
-  void revTreeEditDist(const TreeIndex& t1, const TreeIndex& t2, int it1subtree,
-      int it2subtree, data_structures::Matrix<double>& forestdist,
+  unsigned int computeRevKeyRoots(const TreeIndex& t2, unsigned int subtreeRootNode, unsigned int pathID,
+      std::vector<unsigned int>& revKeyRoots, unsigned int index);
+  void revTreeEditDist(const TreeIndex& t1, const TreeIndex& t2, unsigned int it1subtree,
+      unsigned int it2subtree, data_structures::Matrix<double>& forestdist,
       bool treesSwapped);
   
-  int get_strategy_path_type(int pathIDWithPathIDOffset, int pathIDOffset,
-      int currentRootNodePreL, int currentSubtreeSize);
-  void updateFnArray(int lnForNode, unsigned int node,
+  unsigned int get_strategy_path_type(int pathIDWithPathIDOffset,
+      unsigned int pathIDOffset, unsigned int currentRootNodePreL,
+      unsigned int currentSubtreeSize);
+  void updateFnArray(unsigned int lnForNode, unsigned int node,
       unsigned int currentSubtreePreL);
-  void updateFtArray(int lnForNode, unsigned int node);
+  void updateFtArray(unsigned int lnForNode, unsigned int node);
 
   /// Matrix storing subtree distances.
   data_structures::Matrix<double> delta_;
@@ -106,11 +107,17 @@ private:
   // data_structures::Matrix<double> t_;
   
   std::vector<double> q_;
-  std::vector<int> fn_;
-  std::vector<int> ft_;
+
+  // TODO: I don't really remember what are these arrays exactly for.
+  //       Java documentation says `Do not use it [1, Section 8.4]`.
+  // Have to be modified to hold `unsigned int` values. Be careful because
+  // they're initialised with `-1` in the code. Check if this value is
+  // verified throughout the code.
+  std::vector<unsigned int> fn_;
+  std::vector<unsigned int> ft_;
   
-  int input_size_1_;
-  int input_size_2_;
+  // int input_size_1_;
+  // int input_size_2_;
 };
 
 // Implementation details.

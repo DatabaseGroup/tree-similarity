@@ -44,7 +44,7 @@ public:
   /**
    * \return The number of subproblems acountered in the last TED computation.
    */
-  const unsigned long long int get_subproblem_count() { return subproblem_counter_; };
+  unsigned long long int get_subproblem_count() { return subproblem_counter_; };
 protected:
   /// Cost model.
   const CostModel& c_;

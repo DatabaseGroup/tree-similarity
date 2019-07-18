@@ -69,8 +69,8 @@ data_structures::Matrix<double> APTEDTreeIndex<CostModel, TreeIndex>::compute_op
   const std::vector<unsigned int>& preL_to_preR_2 = t2.prel_to_prer_;
   const std::vector<unsigned int>& preR_to_preL_1 = t1.prer_to_prel_;
   const std::vector<unsigned int>& preR_to_preL_2 = t2.prer_to_prel_;
-  const std::vector<int>& pre2parent1 = t1.prel_to_parent_;
-  const std::vector<int>& pre2parent2 = t2.prel_to_parent_;
+  const std::vector<unsigned int>& pre2parent1 = t1.prel_to_parent_;
+  const std::vector<unsigned int>& pre2parent2 = t2.prel_to_parent_;
   const std::vector<bool>& nodeType_L_1 = t1.prel_to_type_left_;
   const std::vector<bool>& nodeType_L_2 = t2.prel_to_type_left_;
   const std::vector<bool>& nodeType_R_1 = t1.prel_to_type_right_;
@@ -82,12 +82,12 @@ data_structures::Matrix<double> APTEDTreeIndex<CostModel, TreeIndex>::compute_op
   const std::vector<unsigned int>& postL_to_preL_1 = t1.postl_to_prel_;
   const std::vector<unsigned int>& postL_to_preL_2 = t2.postl_to_prel_;
 
-  int size_v = -1;
-  int parent_v_preL = -1;
-  int parent_w_preL = -1;
-  int parent_w_postL = -1;
-  int size_w = -1;
-  int parent_v_postL = -1;
+  unsigned int size_v = 0;
+  unsigned int parent_v_preL = std::numeric_limits<unsigned int>::max();
+  unsigned int parent_w_preL = std::numeric_limits<unsigned int>::max();
+  unsigned int parent_w_postL = std::numeric_limits<unsigned int>::max();
+  unsigned int size_w = 0;
+  unsigned int parent_v_postL = std::numeric_limits<unsigned int>::max();
   int leftPath_v;
   int rightPath_v;
   std::shared_ptr<std::vector<double>> cost_Lpointer_v;
@@ -112,13 +112,13 @@ data_structures::Matrix<double> APTEDTreeIndex<CostModel, TreeIndex>::compute_op
   std::stack<std::shared_ptr<std::vector<double>>> rowsToReuse_R;
   std::stack<std::shared_ptr<std::vector<double>>> rowsToReuse_I;
 
-  for(int v = 0; v < size1; ++v) {
+  for(unsigned int v = 0; v < size1; ++v) {
     v_in_preL = postL_to_preL_1[v];
 
     is_v_leaf = t1.prel_to_size_[v_in_preL] == 1;
     parent_v_preL = pre2parent1[v_in_preL];
 
-    if (parent_v_preL != -1) {
+    if (parent_v_preL != std::numeric_limits<unsigned int>::max()) {
       parent_v_postL = preL_to_postL_1[parent_v_preL];
     }
 
@@ -136,7 +136,7 @@ data_structures::Matrix<double> APTEDTreeIndex<CostModel, TreeIndex>::compute_op
       cost1_L[v] = leafRow;
       cost1_R[v] = leafRow;
       cost1_I[v] = leafRow;
-      for(int i = 0; i < size2; ++i) {
+      for(unsigned int i = 0; i < size2; ++i) {
         // strategypointer_v[postL_to_preL_2[i]] = v_in_preL;
         strategy.at(strategypointer_v, postL_to_preL_2[i]) = v_in_preL;
       }
@@ -146,7 +146,7 @@ data_structures::Matrix<double> APTEDTreeIndex<CostModel, TreeIndex>::compute_op
     cost_Rpointer_v = cost1_R[v];
     cost_Ipointer_v = cost1_I[v];
 
-    if(parent_v_preL != -1 && cost1_L[parent_v_postL] == nullptr) {
+    if(parent_v_preL != std::numeric_limits<unsigned int>::max() && cost1_L[parent_v_postL] == nullptr) {
       if (rowsToReuse_L.empty()) {
         cost1_L[parent_v_postL] = std::make_shared<std::vector<double>>(size2);
         cost1_R[parent_v_postL] = std::make_shared<std::vector<double>>(size2);
@@ -161,7 +161,7 @@ data_structures::Matrix<double> APTEDTreeIndex<CostModel, TreeIndex>::compute_op
       }
     }
 
-    if (parent_v_preL != -1) {
+    if (parent_v_preL != std::numeric_limits<unsigned int>::max()) {
       cost_Lpointer_parent_v = cost1_L[parent_v_postL];
       cost_Rpointer_parent_v = cost1_R[parent_v_postL];
       cost_Ipointer_parent_v = cost1_I[parent_v_postL];
@@ -178,11 +178,11 @@ data_structures::Matrix<double> APTEDTreeIndex<CostModel, TreeIndex>::compute_op
     // Arrays.fill(cost2_path, 0);
     std::fill(cost2_path.begin(),cost2_path.end(), 0);
 
-    for(int w = 0; w < size2; ++w) {
+    for(unsigned int w = 0; w < size2; ++w) {
       w_in_preL = postL_to_preL_2[w];
 
       parent_w_preL = pre2parent2[w_in_preL];
-      if (parent_w_preL != -1) {
+      if (parent_w_preL != std::numeric_limits<unsigned int>::max()) {
         parent_w_postL = preL_to_postL_2[parent_w_preL];
       }
 
@@ -233,7 +233,7 @@ data_structures::Matrix<double> APTEDTreeIndex<CostModel, TreeIndex>::compute_op
         }
       }
 
-      if (parent_v_preL != -1) {
+      if (parent_v_preL != std::numeric_limits<unsigned int>::max()) {
         (*cost_Rpointer_parent_v)[w] += minCost;
         tmpCost = -minCost + (*cost1_I[v])[w];
         if (tmpCost < (*cost1_I[parent_v_postL])[w]) {
@@ -251,7 +251,7 @@ data_structures::Matrix<double> APTEDTreeIndex<CostModel, TreeIndex>::compute_op
           (*cost_Lpointer_parent_v)[w] += minCost;
         }
       }
-      if (parent_w_preL != -1) {
+      if (parent_w_preL != std::numeric_limits<unsigned int>::max()) {
         cost2_R[parent_w_postL] += minCost;
         tmpCost = -minCost + cost2_I[w];
         if (tmpCost < cost2_I[parent_w_postL]) {
@@ -305,7 +305,7 @@ void APTEDTreeIndex<CostModel, TreeIndex>::ted_init(const TreeIndex& t1, const T
   // Reset the subproblems counter.
   subproblem_counter_ = 0;
   // Initialize arrays.
-  unsigned int max_size = std::max(input_size_1_, input_size_2_) + 1;
+  unsigned int max_size = std::max(t1.tree_size_, t2.tree_size_) + 1;
   // TODO: Move q initialisation to spfA.
   q_.resize(max_size);
   // TODO: Do not use fn and ft arrays [1, Section 8.4].
@@ -318,10 +318,10 @@ void APTEDTreeIndex<CostModel, TreeIndex>::ted_init(const TreeIndex& t1, const T
   // int parent_x = -1;
   // int parent_y = -1;
   // Loop over the nodes in reversed left-to-right preorder.
-  for(int x = 0; x < input_size_1_; ++x) {
+  for(unsigned int x = 0; x < t1.tree_size_; ++x) {
     size_x = t1.prel_to_size_[x];
     // parent_x = ni_1.preL_to_parent_[x];
-    for(int y = 0; y < input_size_2_; ++y) {
+    for(unsigned int y = 0; y < t2.tree_size_; ++y) {
       size_y = t2.prel_to_size_[y];
       // parent_y = ni_2.preL_to_parent_[y];
       // Set values in delta based on the sums of deletion and insertion
@@ -355,20 +355,22 @@ double APTEDTreeIndex<CostModel, TreeIndex>::gted(const TreeIndex& t1,
   // Use spf1.
   if ((subtreeSize1 == 1 || subtreeSize2 == 1)) {
     result = spf1(t1, currentSubtree1, t2, currentSubtree2);
-    // std::cout << "spf1(" << currentSubtree1 << "," << currentSubtree2 << ") = " << result << std::endl;
+    // std::cerr << "spf1(" << currentSubtree1 << "," << currentSubtree2 << ") = " << result << std::endl;
     return result;
   }
 
-  int strategyPathID = (int)delta_.read_at(currentSubtree1, currentSubtree2);
+  int strategyPathID = static_cast<int>(delta_.read_at(currentSubtree1, currentSubtree2));
 
-  int strategyPathType = -1;
-  int currentPathNode = std::abs(strategyPathID) - 1;
-  int pathIDOffset = t1.tree_size_;
+  unsigned int strategyPathType = 0; // left by default
+  unsigned int currentPathNode = static_cast<unsigned int>(std::abs(strategyPathID) - 1);
+  unsigned int pathIDOffset = t1.tree_size_;
 
-  int parent = -1;
+  unsigned int parent = std::numeric_limits<unsigned int>::max();
   if(currentPathNode < pathIDOffset) {
     strategyPathType = get_strategy_path_type(strategyPathID, pathIDOffset, currentSubtree1, subtreeSize1);
-    while((parent = t1.prel_to_parent_[currentPathNode]) >= currentSubtree1) {
+    parent = t1.prel_to_parent_[currentPathNode];
+    while(parent != std::numeric_limits<unsigned int>::max() &&
+        parent >= currentSubtree1) {
       auto& ai = t1.prel_to_children_[parent];
       unsigned int k = ai.size();
       for(unsigned int i = 0; i < k; ++i) {
@@ -379,6 +381,7 @@ double APTEDTreeIndex<CostModel, TreeIndex>::gted(const TreeIndex& t1,
         }
       }
       currentPathNode = parent;
+      parent = t1.prel_to_parent_[currentPathNode];
     }
     // TODO: Move this property away from node indexer and pass directly to spfs.
     // t1.set_current_node(currentSubtree1);
@@ -389,25 +392,27 @@ double APTEDTreeIndex<CostModel, TreeIndex>::gted(const TreeIndex& t1,
     // [1, Section 3.4].
     if (strategyPathType == 0) {
       result = spfL(t1, t1_current_subtree, t2, t2_current_subtree, false);
-      // std::cout << "spfL(" << ni_1.get_current_node() << "," << ni_2.get_current_node() << ") = " << result << std::endl;
+      // std::cerr << "spfL(" << t1_current_subtree << "," << t2_current_subtree << ") = " << result << std::endl;
       return result;
     }
     if (strategyPathType == 1) {
       result = spfR(t1, t1_current_subtree, t2, t2_current_subtree, false);
-      // std::cout << "spfR(" << ni_1.get_current_node() << "," << ni_2.get_current_node() << ") = " << result << std::endl;
+      // std::cerr << "spfR(" << t1_current_subtree << "," << t2_current_subtree << ") = " << result << std::endl;
       return result;
     }
     result = spfA(t1, t1_current_subtree, t2, t2_current_subtree,
         std::abs(strategyPathID) - 1, strategyPathType, false);
-    // std::cout << "spfA(" << ni_1.get_current_node() << "," << ni_2.get_current_node() << ") = " << result << std::endl;
+    // std::cerr << "spfA(" << t1_current_subtree << "," << t2_current_subtree << ") = " << result << std::endl;
     return result;
   }
 
   currentPathNode -= pathIDOffset;
   strategyPathType = get_strategy_path_type(strategyPathID, pathIDOffset, currentSubtree2, subtreeSize2);
-  while((parent = t2.prel_to_parent_[currentPathNode]) >= currentSubtree2) {
-    std::cerr << "parent = " << parent << std::endl;
-    std::cerr << "# parent's children = " << t2.prel_to_children_[parent].size() << std::endl;
+  parent = t2.prel_to_parent_[currentPathNode];
+  while(parent != std::numeric_limits<unsigned int>::max() &&
+      parent >= currentSubtree2) {
+    // std::cerr << "parent = " << parent << std::endl;
+    // std::cerr << "# parent's children = " << t2.prel_to_children_[parent].size() << std::endl;
     auto& ai1 = t2.prel_to_children_[parent];
     unsigned int l = ai1.size();
     for(unsigned int j = 0; j < l; ++j) {
@@ -418,6 +423,7 @@ double APTEDTreeIndex<CostModel, TreeIndex>::gted(const TreeIndex& t1,
       }
     }
     currentPathNode = parent;
+    parent = t2.prel_to_parent_[currentPathNode];
   }
   // TODO: Move this property away from node indexer and pass directly to spfs.
   // t2.set_current_node(currentSubtree2);
@@ -428,17 +434,17 @@ double APTEDTreeIndex<CostModel, TreeIndex>::gted(const TreeIndex& t1,
   // [1, Section 3.4].
   if (strategyPathType == 0) {
     result = spfL(t2, t2_current_subtree, t1, t1_current_subtree, true);
-    // std::cout << "spfL(" << ni_1.get_current_node() << "," << ni_2.get_current_node() << ") = " << result << std::endl;
+    // std::cerr << "spfL(" << t1_current_subtree << "," << t2_current_subtree << ") = " << result << std::endl;
     return result;
   }
   if (strategyPathType == 1) {
     result = spfR(t2, t2_current_subtree, t1, t1_current_subtree, true);
-    // std::cout << "spfR(" << ni_1.get_current_node() << "," << ni_2.get_current_node() << ") = " << result << std::endl;
+    // std::cerr << "spfR(" << t1_current_subtree << "," << t2_current_subtree << ") = " << result << std::endl;
     return result;
   }
   result = spfA(t2, t2_current_subtree, t1, t1_current_subtree,
       std::abs(strategyPathID) - pathIDOffset - 1, strategyPathType, true);
-  // std::cout << "spfA(" << ni_1.get_current_node() << "," << ni_2.get_current_node() << ") = " << result << std::endl;
+  // std::cerr << "spfA(" << t1_current_subtree << "," << t2_current_subtree << ") = " << result << std::endl;
   return result;
 };
 
@@ -461,7 +467,7 @@ double APTEDTreeIndex<CostModel, TreeIndex>::spf1(const TreeIndex& t1,
     double maxCost = cost + c_.del(label1);
     double minRenMinusIns = cost;
     double nodeRenMinusIns = 0;
-    for (int i = subtreeRootNode2; i < subtreeRootNode2 + subtreeSize2; i++) {
+    for (unsigned int i = subtreeRootNode2; i < subtreeRootNode2 + subtreeSize2; ++i) {
       unsigned int label2 = t2.prel_to_label_id_[i];
       nodeRenMinusIns = c_.ren(label1, label2) - c_.ins(label2);
       if (nodeRenMinusIns < minRenMinusIns) {
@@ -478,7 +484,7 @@ double APTEDTreeIndex<CostModel, TreeIndex>::spf1(const TreeIndex& t1,
     double maxCost = cost + c_.ins(label2);
     double minRenMinusDel = cost;
     double nodeRenMinusDel = 0;
-    for (int i = subtreeRootNode1; i < subtreeRootNode1 + subtreeSize1; i++) {
+    for (unsigned int i = subtreeRootNode1; i < subtreeRootNode1 + subtreeSize1; ++i) {
       unsigned int label1 = t1.prel_to_label_id_[i];
       nodeRenMinusDel = c_.ren(label1, label2) - c_.del(label1);
       if (nodeRenMinusDel < minRenMinusDel) {
@@ -496,14 +502,14 @@ double APTEDTreeIndex<CostModel, TreeIndex>::spf1(const TreeIndex& t1,
 template <typename CostModel, typename TreeIndex>
 double APTEDTreeIndex<CostModel, TreeIndex>::spfA(const TreeIndex& t1,
     unsigned int t1_current_subtree, const TreeIndex& t2,
-    unsigned int t2_current_subtree, int pathID, int pathType,
+    unsigned int t2_current_subtree, unsigned int pathID, unsigned int pathType,
     bool treesSwapped) {
   const std::vector<unsigned int>& it2labels = t2.prel_to_label_id_;
   // const node::Node<Label>& lFNode;
   const std::vector<unsigned int>& it1sizes = t1.prel_to_size_;
   const std::vector<unsigned int>& it2sizes = t2.prel_to_size_;
-  const std::vector<int>& it1parents = t1.prel_to_parent_;
-  const std::vector<int>& it2parents = t2.prel_to_parent_;
+  const std::vector<unsigned int>& it1parents = t1.prel_to_parent_;
+  const std::vector<unsigned int>& it2parents = t2.prel_to_parent_;
   const std::vector<unsigned int>& it1preL_to_preR = t1.prel_to_prer_;
   const std::vector<unsigned int>& it2preL_to_preR = t2.prel_to_prer_;
   const std::vector<unsigned int>& it1preR_to_preL = t1.prer_to_prel_;
@@ -533,44 +539,57 @@ double APTEDTreeIndex<CostModel, TreeIndex>::spfA(const TreeIndex& t1,
   double sp1 = 0;
   double sp2 = 0;
   double sp3 = 0;
-  int startPathNode = -1;
-  int endPathNode = pathID;
-  int it1PreLoff = endPathNode;
-  int it2PreLoff = currentSubtreePreL2;
-  int it1PreRoff = it1preL_to_preR[endPathNode];
-  int it2PreRoff = it2preL_to_preR[it2PreLoff];
+  unsigned int startPathNode = std::numeric_limits<unsigned int>::max(); // dumme node on the bottom of the path
+  unsigned int endPathNode = pathID;
+  unsigned int it1PreLoff = endPathNode;
+  unsigned int it2PreLoff = currentSubtreePreL2;
+  unsigned int it1PreRoff = it1preL_to_preR[endPathNode];
+  unsigned int it2PreRoff = it2preL_to_preR[it2PreLoff];
   // variable declarations which were inside the loops
-  int rFlast,lFlast,endPathNode_in_preR,startPathNode_in_preR,parent_of_endPathNode,parent_of_endPathNode_in_preR, lFfirst,rFfirst,rGlast,rGfirst,lGfirst,rG_in_preL,rGminus1_in_preL,parent_of_rG_in_preL,lGlast,lF_in_preR,lFSubtreeSize, lGminus1_in_preR,parent_of_lG,parent_of_lG_in_preR,rF_in_preL,rFSubtreeSize, rGfirst_in_preL;
-  bool leftPart,rightPart,fForestIsTree,lFIsConsecutiveNodeOfCurrentPathNode,lFIsLeftSiblingOfCurrentPathNode, rFIsConsecutiveNodeOfCurrentPathNode,rFIsRightSiblingOfCurrentPathNode;
+  bool leftPart,rightPart,fForestIsTree,lFIsConsecutiveNodeOfCurrentPathNode,
+    lFIsLeftSiblingOfCurrentPathNode, rFIsConsecutiveNodeOfCurrentPathNode,
+    rFIsRightSiblingOfCurrentPathNode;
   
+  unsigned int parent_of_endPathNode, startPathNode_in_preR, rGminus1_in_preL,
+    rGlast, lGfirst, lGminus1_in_preR, parent_of_rG_in_preL, lFSubtreeSize,
+    lFlast, lGlast, rGfirst, lF_in_preR, rFSubtreeSize, parent_of_lG,
+    parent_of_lG_in_preR, rFlast, endPathNode_in_preR,
+    parent_of_endPathNode_in_preR, lFfirst, rFfirst, rG_in_preL, rF_in_preL,
+    rGfirst_in_preL;
+
   std::size_t sp1spointer,sp2spointer,sp3spointer,sp3deltapointer,swritepointer,sp1tpointer,sp3tpointer;
   
   // These variables store the id of the source (which array) of looking up
   // elements of the minimum in the recursive formula [1, Figures 12,13].
-  int sp1source,sp3source;
+  unsigned int sp1source,sp3source;
   // Loop A [1, Algorithm 3] - walk up the path.
-  while (endPathNode >= currentSubtreePreL1) {
+  // TODO: With max for root's parent, this loop keeps on going.
+  while (endPathNode >= currentSubtreePreL1 && endPathNode != std::numeric_limits<unsigned int>::max()) {
     it1PreLoff = endPathNode;
     it1PreRoff = it1preL_to_preR[endPathNode];
-    rFlast = -1;
-    lFlast = -1;
+    // rFlast = -1; // is only reset here
+    // lFlast = std::numeric_limits<unsigned int>::max(); // is only reset here
     endPathNode_in_preR = it1preL_to_preR[endPathNode];
-    startPathNode_in_preR = startPathNode == -1 ? std::numeric_limits<int>::max() : it1preL_to_preR[startPathNode];
+    startPathNode_in_preR = startPathNode == std::numeric_limits<unsigned int>::max() ? std::numeric_limits<unsigned int>::max() : it1preL_to_preR[startPathNode];
     parent_of_endPathNode = it1parents[endPathNode];
-    parent_of_endPathNode_in_preR = parent_of_endPathNode == -1 ? std::numeric_limits<int>::max() : it1preL_to_preR[parent_of_endPathNode];
-    if (startPathNode - endPathNode > 1) {
+    parent_of_endPathNode_in_preR = parent_of_endPathNode == std::numeric_limits<unsigned int>::max() ? std::numeric_limits<unsigned int>::max() : it1preL_to_preR[parent_of_endPathNode];
+    // TODO: Overflow problem again if startPathNode = max.
+    // TODO: Double check what to do if the endPathNode is a leaf.
+    if (startPathNode != std::numeric_limits<unsigned int>::max() &&
+        startPathNode - endPathNode > 1) {
       leftPart = true;
     } else {
       leftPart = false;
     }
-    if (startPathNode >= 0 && startPathNode_in_preR - endPathNode_in_preR > 1) {
+    if (startPathNode != std::numeric_limits<unsigned int>::max() &&
+        startPathNode_in_preR - endPathNode_in_preR > 1) {
       rightPart = true;
     } else {
       rightPart = false;
     }
     // Deal with nodes to the left of the path.
     if (pathType == 1 || (pathType == 2 && leftPart)) {
-      if (startPathNode == -1) {
+      if (startPathNode == std::numeric_limits<unsigned int>::max()) {
         rFfirst = endPathNode_in_preR;
         lFfirst = endPathNode;
       } else {
@@ -583,23 +602,29 @@ double APTEDTreeIndex<CostModel, TreeIndex>::spfA(const TreeIndex& t1,
       rGlast = it2preL_to_preR[currentSubtreePreL2];
       rGfirst = (rGlast + subtreeSize2) - 1;
       lFlast = rightPart ? endPathNode + 1 : endPathNode;
-      fn_[fn_.size() - 1] = -1;
-      for (int i = currentSubtreePreL2; i < currentSubtreePreL2 + subtreeSize2; ++i) {
-          fn_[i] = -1;
-          ft_[i] = -1;
+      fn_[fn_.size() - 1] = std::numeric_limits<unsigned int>::max();
+      for (unsigned int i = currentSubtreePreL2; i < currentSubtreePreL2 + subtreeSize2; ++i) {
+          fn_[i] = std::numeric_limits<unsigned int>::max();
+          ft_[i] = std::numeric_limits<unsigned int>::max();
       }
       // Store the current size and cost of forest in F.
       tmpForestSize1 = currentForestSize1;
       tmpForestCost1 = currentForestCost1;
       // Loop B [1, Algoritm 3] - for all nodes in G (right-hand input tree).
-      for (int rG = rGfirst; rG >= rGlast; --rG) {
+      // TODO: With unsigned int there's an overflow: 0 - 1 = max!
+      for (unsigned int rG = rGfirst; rG >= rGlast && rG != static_cast<unsigned int>(-1); --rG) {
         lGfirst = it2preR_to_preL[rG];
         rG_in_preL = it2preR_to_preL[rG];
-        rGminus1_in_preL = rG <= it2preL_to_preR[currentSubtreePreL2] ? std::numeric_limits<int>::max() : it2preR_to_preL[rG - 1];
-        parent_of_rG_in_preL = it2parents[rG_in_preL];
+        rGminus1_in_preL = rG <= it2preL_to_preR[currentSubtreePreL2] ?
+          std::numeric_limits<unsigned int>::max() : it2preR_to_preL[rG - 1];
+        parent_of_rG_in_preL = it2parents[rG_in_preL]; // Now, after changing the indexes, parent is max, not -1.
         // This if statement decides on the last lG node for Loop D [1, Algorithm 3];
-        if (pathType == 1){
-          if (lGfirst == currentSubtreePreL2 || rGminus1_in_preL != parent_of_rG_in_preL) {
+        if (pathType == 1){ // Right path.
+          // `rGminus1_in_preL == parent_of_rG_in_preL` checks if rG is the rightmost child of its parent
+          // TODO: With max as parent of root, and max for rG-1 (rG=0; 3 lines above), this evaluates
+          // incorrectly to true.
+          // if (lGfirst == currentSubtreePreL2 || rGminus1_in_preL != parent_of_rG_in_preL) {
+          if (lGfirst == currentSubtreePreL2 || !t2.prel_to_type_right_[rG_in_preL]) {
             lGlast = lGfirst;
           } else {
             lGlast = it2parents[lGfirst]+1;
@@ -609,12 +634,13 @@ double APTEDTreeIndex<CostModel, TreeIndex>::spfA(const TreeIndex& t1,
         }
         updateFnArray(t2.prel_to_ln_[lGfirst], lGfirst, currentSubtreePreL2);
         updateFtArray(t2.prel_to_ln_[lGfirst], lGfirst);
-        int rF = rFfirst;
+        unsigned int rF = rFfirst;
         // Reset size and cost of the forest in F.
         currentForestSize1 = tmpForestSize1;
         currentForestCost1 = tmpForestCost1;
         // Loop C [1, Algorithm 3] - for all nodes to the left of the path node.
-        for (int lF = lFfirst; lF >= lFlast; --lF) {
+        // TODO: With unsigned int there's an overflow: 0 - 1 = max!
+        for (unsigned int lF = lFfirst; lF >= lFlast && lF != static_cast<unsigned int>(-1); --lF) {
           // This if statement fixes rF node.
           if (lF == lFlast && !rightPart) {
             rF = rFlast;
@@ -664,7 +690,7 @@ double APTEDTreeIndex<CostModel, TreeIndex>::spfA(const TreeIndex& t1,
             sp3spointer = (lF + lFSubtreeSize) - it1PreLoff;//s[(lF + lFSubtreeSize) - it1PreLoff];
           }
           // Go to first lG.
-          int lG = lGfirst;
+          unsigned int lG = lGfirst;
           // currentForestSize2++;
           // sp1, sp2, sp3 -- Done here for the first node in Loop D. It differs for consecutive nodes.
           // sp1 -- START
@@ -705,7 +731,7 @@ double APTEDTreeIndex<CostModel, TreeIndex>::spfA(const TreeIndex& t1,
           lG = ft_[lG];
           ++subproblem_counter_;
           // Loop D [1, Algorithm 3] - for all nodes to the left of rG.
-          while (lG >= lGlast) {
+          while (lG != std::numeric_limits<unsigned int>::max() && lG >= lGlast) {
             // Increment size and cost of G forest by node lG.
             ++currentForestSize2;
             currentForestCost2 += (treesSwapped ? c_.del(it2labels[lG]) : c_.ins(it2labels[lG]));
@@ -743,36 +769,57 @@ double APTEDTreeIndex<CostModel, TreeIndex>::spfA(const TreeIndex& t1,
             ++subproblem_counter_;
           }
         }
-        if (rGminus1_in_preL == parent_of_rG_in_preL) {
+        // `rGminus1_in_preL == parent_of_rG_in_preL` checks if rG is the rightmost child of its parent
+        // TODO: With max as parent of root, and max for rG-1 (rG=0; 3 lines above),
+        // this evaluates incorrectly to true.
+        // if (rGminus1_in_preL == parent_of_rG_in_preL) {
+        // TODO: rG not only has to be rightmost child of its parent, but also
+        //       the parent has to be within the current subtree - before
+        //       it was dealt by using rGminus1_in_preL=max, and then
+        //       rGminus1_in_preL != parent_of_rG_in_preL
+        if (t2.prel_to_type_right_[rG_in_preL] && rG_in_preL > currentSubtreePreL2) {
           if (!rightPart) {
             if (leftPart) {
               if (treesSwapped) {
-                delta_.at(parent_of_rG_in_preL, endPathNode) = s.read_at((lFlast + 1) - it1PreLoff, (rGminus1_in_preL + 1) - it2PreLoff);
+                // TODO: What is rGminus1_in_preL + 1?
+                // TODO: Again problems with overflow. But of a different nature.
+                delta_.at(parent_of_rG_in_preL, endPathNode) =
+                    // s.read_at((lFlast + 1) - it1PreLoff, (rGminus1_in_preL + 1) - it2PreLoff);
+                    s.read_at((lFlast + 1) - it1PreLoff, (parent_of_rG_in_preL + 1) - it2PreLoff);
               } else {
-                delta_.at(endPathNode, parent_of_rG_in_preL) = s.read_at((lFlast + 1) - it1PreLoff, (rGminus1_in_preL + 1) - it2PreLoff);
+                delta_.at(endPathNode, parent_of_rG_in_preL) =
+                    // s.read_at((lFlast + 1) - it1PreLoff, (rGminus1_in_preL + 1) - it2PreLoff);
+                    s.read_at((lFlast + 1) - it1PreLoff, (parent_of_rG_in_preL + 1) - it2PreLoff);
               }
             }
-            if (endPathNode > 0 && endPathNode == parent_of_endPathNode + 1 && endPathNode_in_preR == parent_of_endPathNode_in_preR + 1) {
+            if (endPathNode > 0 && endPathNode == parent_of_endPathNode + 1 &&
+                endPathNode_in_preR == parent_of_endPathNode_in_preR + 1) {
               if (treesSwapped) {
-                delta_.at(parent_of_rG_in_preL, parent_of_endPathNode) = s.read_at(lFlast - it1PreLoff, (rGminus1_in_preL + 1) - it2PreLoff);
+                delta_.at(parent_of_rG_in_preL, parent_of_endPathNode) =
+                    s.read_at(lFlast - it1PreLoff, (rGminus1_in_preL + 1) - it2PreLoff);
               } else {
-                delta_.at(parent_of_endPathNode, parent_of_rG_in_preL) = s.read_at(lFlast - it1PreLoff, (rGminus1_in_preL + 1) - it2PreLoff);
+                delta_.at(parent_of_endPathNode, parent_of_rG_in_preL) =
+                    s.read_at(lFlast - it1PreLoff, (rGminus1_in_preL + 1) - it2PreLoff);
               }
             }
           }
-          for (int lF = lFfirst; lF >= lFlast; --lF) {
+          // TODO: With unsigned int there's an overflow: 0-1=max.
+          // TODO: What is (parent_of_rG_in_preL + 1) - it2PreLoff?
+          for (unsigned int lF = lFfirst; lF >= lFlast && lF != static_cast<unsigned int>(-1); --lF) {
             q_[lF] = s.read_at(lF - it1PreLoff, (parent_of_rG_in_preL + 1) - it2PreLoff);
           }
         }
         // TODO: first pointers can be precomputed
-        for (int lG = lGfirst; lG >= lGlast; lG = ft_[lG]) {
+        for (unsigned int lG = lGfirst;
+            lG != std::numeric_limits<unsigned int>::max() && lG >= lGlast;
+            lG = ft_[lG]) {
           t.at(lG - it2PreLoff, rG - it2PreRoff) = s.read_at(lFlast - it1PreLoff, lG - it2PreLoff);
         }
       }
     }
     // Deal with nodes to the right of the path.
     if (pathType == 0 || (pathType == 2 && rightPart) || (pathType == 2 && !leftPart && !rightPart)) {
-      if (startPathNode == -1) {
+      if (startPathNode == std::numeric_limits<unsigned int>::max()) {
         lFfirst = endPathNode;
         rFfirst = it1preL_to_preR[endPathNode];
       } else {
@@ -783,23 +830,26 @@ double APTEDTreeIndex<CostModel, TreeIndex>::spfA(const TreeIndex& t1,
       lGlast = currentSubtreePreL2;
       lGfirst = (lGlast + subtreeSize2) - 1;
       rFlast = it1preL_to_preR[endPathNode];
-      fn_[fn_.size() - 1] = -1;
-      for (int i = currentSubtreePreL2; i < currentSubtreePreL2 + subtreeSize2; i++){
-        fn_[i] = -1;
-        ft_[i] = -1;
+      fn_[fn_.size() - 1] = std::numeric_limits<unsigned int>::max();
+      for (unsigned int i = currentSubtreePreL2; i < currentSubtreePreL2 + subtreeSize2; ++i){
+        fn_[i] = std::numeric_limits<unsigned int>::max();
+        ft_[i] = std::numeric_limits<unsigned int>::max();
       }
       // Store size and cost of the current forest in F.
       tmpForestSize1 = currentForestSize1;
       tmpForestCost1 = currentForestCost1;
       // Loop B' [1, Algorithm 3] - for all nodes in G.
-      for (int lG = lGfirst; lG >= lGlast; lG--) {
+      // TODO: With unsigned int there's an overflow: 0-1=max.
+      for (unsigned int lG = lGfirst; lG >= lGlast && lG != static_cast<unsigned int>(-1); --lG) {
         rGfirst = it2preL_to_preR[lG];
         updateFnArray(t2.prer_to_ln_[rGfirst], rGfirst, it2preL_to_preR[currentSubtreePreL2]);
         updateFtArray(t2.prer_to_ln_[rGfirst], rGfirst);
-        int lF = lFfirst;
-        lGminus1_in_preR = lG <= currentSubtreePreL2 ? std::numeric_limits<int>::max() : it2preL_to_preR[lG - 1];
+        unsigned int lF = lFfirst;
+        lGminus1_in_preR = lG <= currentSubtreePreL2 ?
+          std::numeric_limits<unsigned int>::max() : it2preL_to_preR[lG - 1];
         parent_of_lG = it2parents[lG];
-        parent_of_lG_in_preR = parent_of_lG == -1 ? -1 : it2preL_to_preR[parent_of_lG];
+        parent_of_lG_in_preR = parent_of_lG == std::numeric_limits<unsigned int>::max() ?
+          std::numeric_limits<unsigned int>::max() : it2preL_to_preR[parent_of_lG];
         // Reset size and cost of forest if F.
         currentForestSize1 = tmpForestSize1;
         currentForestCost1 = tmpForestCost1;
@@ -812,10 +862,12 @@ double APTEDTreeIndex<CostModel, TreeIndex>::spfA(const TreeIndex& t1,
             rGlast = it2preL_to_preR[parent_of_lG]+1;
           }
         } else {
-          rGlast = rGfirst == it2preL_to_preR[currentSubtreePreL2] ? rGfirst : it2preL_to_preR[currentSubtreePreL2];
+          rGlast = rGfirst == it2preL_to_preR[currentSubtreePreL2] ?
+              rGfirst : it2preL_to_preR[currentSubtreePreL2];
         }
         // Loop C' [1, Algorithm 3] - for all nodes to the right of the path node.
-        for (int rF = rFfirst; rF >= rFlast; --rF) {
+        // TODO: With unsigned int there's an overflow: 0-1=max.
+        for (unsigned int rF = rFfirst; rF >= rFlast && rF != static_cast<unsigned int>(-1); --rF) {
           if (rF == rFlast) {
             lF = lFlast;
           }
@@ -827,7 +879,7 @@ double APTEDTreeIndex<CostModel, TreeIndex>::spfA(const TreeIndex& t1,
           currentForestSize2 = it2sizes[lG];
           currentForestCost2 = (treesSwapped ? t2.prel_to_subtree_del_cost_[lG] : t2.prel_to_subtree_ins_cost_[lG]); // TODO: USE COST MODEL - reset to subtree insertion cost.
           rFSubtreeSize = it1sizes[rF_in_preL];
-          if (startPathNode > 0) {
+          if (startPathNode > 0 && startPathNode != std::numeric_limits<unsigned int>::max()) {
             rFIsConsecutiveNodeOfCurrentPathNode = startPathNode_in_preR - rF == 1;
             rFIsRightSiblingOfCurrentPathNode = rF + rFSubtreeSize == startPathNode_in_preR;
           } else {
@@ -871,7 +923,7 @@ double APTEDTreeIndex<CostModel, TreeIndex>::spfA(const TreeIndex& t1,
           } else {
             sp2 = q_[rF];
           }
-          int rG = rGfirst;
+          unsigned int rG = rGfirst;
           rGfirst_in_preL = it2preR_to_preL[rGfirst];
           ++currentForestSize2;
           switch (sp1source) {
@@ -898,7 +950,7 @@ double APTEDTreeIndex<CostModel, TreeIndex>::spfA(const TreeIndex& t1,
           rG = ft_[rG];
           ++subproblem_counter_;
           // Loop D' [1, Algorithm 3] - for all nodes to the right of lG;
-          while (rG >= rGlast) {
+          while (rG != std::numeric_limits<unsigned int>::max() && rG >= rGlast) {
             rG_in_preL = it2preR_to_preL[rG];
             // Increment size and cost of G forest by node rG.
             ++currentForestSize2;
@@ -947,12 +999,15 @@ double APTEDTreeIndex<CostModel, TreeIndex>::spfA(const TreeIndex& t1,
               delta_.at(parent_of_endPathNode, parent_of_lG) = s.read_at(rFlast - it1PreRoff, (lGminus1_in_preR + 1) - it2PreRoff);
             }
           }
-          for (int rF = rFfirst; rF >= rFlast; --rF) {
+          // TODO: With unsigned int there's an overflow: 0-1=max.
+          for (unsigned int rF = rFfirst; rF >= rFlast && rF != static_cast<unsigned int>(-1); --rF) {
             q_[rF] = s.read_at(rF - it1PreRoff, (parent_of_lG_in_preR + 1) - it2PreRoff);
           }
         }
         // TODO: first pointers can be precomputed
-        for (int rG = rGfirst; rG >= rGlast; rG = ft_[rG]) {
+        for (unsigned int rG = rGfirst;
+            rG != std::numeric_limits<unsigned int>::max() && rG >= rGlast;
+            rG = ft_[rG]) {
           t.at(lG - it2PreLoff, rG - it2PreRoff) = s.read_at(rFlast - it1PreRoff, rG - it2PreRoff);
         }
       }
@@ -1080,16 +1135,16 @@ double APTEDTreeIndex<CostModel, TreeIndex>::spfR(const TreeIndex& t1,
     unsigned int t2_current_subtree, bool treesSwapped) {
   // Initialise the array to store the keyroot nodes in the right-hand input
   // subtree.
-  std::vector<int> revKeyRoots(t2.prel_to_size_[t2_current_subtree]);
+  std::vector<unsigned int> revKeyRoots(t2.prel_to_size_[t2_current_subtree]);
   // Arrays.fill(revKeyRoots, -1);
-  std::fill(revKeyRoots.begin(), revKeyRoots.end(), -1);
+  std::fill(revKeyRoots.begin(), revKeyRoots.end(), std::numeric_limits<unsigned int>::max());
   // Get the rightmost leaf node of the right-hand input subtree.
-  int pathID = t2.prel_to_rld_[t2_current_subtree];
+  unsigned int pathID = t2.prel_to_rld_[t2_current_subtree];
   // Calculate the keyroot nodes in the right-hand input subtree.
   // firstKeyRoot is the index in keyRoots of the first keyroot node that
   // we have to process. We need this index because keyRoots array is larger
   // than the number of keyroot nodes.
-  int firstKeyRoot = computeRevKeyRoots(t2, t2_current_subtree, pathID, revKeyRoots, 0);
+  unsigned int firstKeyRoot = computeRevKeyRoots(t2, t2_current_subtree, pathID, revKeyRoots, 0);
   // Initialise an array to store intermediate distances for subforest pairs.
   data_structures::Matrix<double> forestdist(t1.prel_to_size_[t1_current_subtree]+1, t2.prel_to_size_[t2_current_subtree]+1);
   // Compute the distances between pairs of keyroot nodes. In the left-hand
@@ -1105,23 +1160,25 @@ double APTEDTreeIndex<CostModel, TreeIndex>::spfR(const TreeIndex& t1,
 };
 
 template <typename CostModel, typename TreeIndex>
-int APTEDTreeIndex<CostModel, TreeIndex>::computeRevKeyRoots(
-    const TreeIndex& t2, int subtreeRootNode, int pathID,
-    std::vector<int>& revKeyRoots, int index) {
+unsigned int APTEDTreeIndex<CostModel, TreeIndex>::computeRevKeyRoots(
+    const TreeIndex& t2, unsigned int subtreeRootNode, unsigned int pathID,
+    std::vector<unsigned int>& revKeyRoots, unsigned int index) {
   // The subtreeRootNode is a keyroot node. Add it to keyRoots.
   revKeyRoots[index] = subtreeRootNode;
   // Increment the index to know where to store the next keyroot node.
   ++index;
   // Walk up the right path starting with the rightmost leaf of
   // subtreeRootNode, until the child of subtreeRootNode.
-  int pathNode = pathID;
+  unsigned int pathNode = pathID;
   while (pathNode > subtreeRootNode) {
-    int parent = t2.prel_to_parent_[pathNode];
+    unsigned int parent = t2.prel_to_parent_[pathNode];
     // For each sibling to the left of pathNode, execute this method recursively.
     // Each left sibling of pathNode is a keyroot node.
-    for (int child : t2.prel_to_children_[parent]) {
+    for (unsigned int child : t2.prel_to_children_[parent]) {
       // Execute computeRevKeyRoots recursively for the new subtree rooted at child and child's rightmost leaf node.
-      if (child != pathNode) index = computeRevKeyRoots(t2, child, t2.prel_to_rld_[child], revKeyRoots, index);
+      if (child != pathNode) {
+        index = computeRevKeyRoots(t2, child, t2.prel_to_rld_[child], revKeyRoots, index);
+      }
     }
     // Walk up.
     pathNode = parent;
@@ -1131,18 +1188,18 @@ int APTEDTreeIndex<CostModel, TreeIndex>::computeRevKeyRoots(
 
 template <typename CostModel, typename TreeIndex>
 void APTEDTreeIndex<CostModel, TreeIndex>::revTreeEditDist(const TreeIndex& t1,
-    const TreeIndex& t2, int it1subtree, int it2subtree,
+    const TreeIndex& t2, unsigned int it1subtree, unsigned int it2subtree,
     data_structures::Matrix<double>& forestdist, bool treesSwapped) {
   // Translate input subtree root nodes to right-to-left postorder.
-  int i = t1.prel_to_postr_[it1subtree];
-  int j = t2.prel_to_postr_[it2subtree];
+  unsigned int i = t1.prel_to_postr_[it1subtree];
+  unsigned int j = t2.prel_to_postr_[it2subtree];
   // We need to offset the node ids for accessing forestdist array which has
   // indices from 0 to subtree size. However, the subtree node indices do not
   // necessarily start with 0.
   // Whenever the original right-to-left postorder id has to be accessed, use
   // i+ioff and j+joff.
-  int ioff = t1.postr_to_rld_[i] - 1;
-  int joff = t2.postr_to_rld_[j] - 1;
+  unsigned int ioff = t1.postr_to_rld_[i] - 1;
+  unsigned int joff = t2.postr_to_rld_[j] - 1;
   // Variables holding costs of each minimum element.
   float da = 0;
   float db = 0;
@@ -1150,15 +1207,15 @@ void APTEDTreeIndex<CostModel, TreeIndex>::revTreeEditDist(const TreeIndex& t1,
   // Initialize forestdist array with deletion and insertion costs of each
   // relevant subforest.
   forestdist.at(0,0) = 0;
-  for (int i1 = 1; i1 <= i - ioff; ++i1) {
+  for (unsigned int i1 = 1; i1 <= i - ioff; ++i1) {
     forestdist.at(i1, 0) = forestdist.read_at(i1 - 1, 0) + (treesSwapped ? c_.ins(t1.postr_to_label_id_[i1 + ioff]) : c_.del(t1.postr_to_label_id_[i1 + ioff])); // TODO: USE COST MODEL - delete i1.
   }
-  for (int j1 = 1; j1 <= j - joff; ++j1) {
+  for (unsigned int j1 = 1; j1 <= j - joff; ++j1) {
     forestdist.at(0, j1) = forestdist.read_at(0, j1 - 1) + (treesSwapped ? c_.del(t2.postr_to_label_id_[j1 + joff]) : c_.ins(t2.postr_to_label_id_[j1 + joff])); // TODO: USE COST MODEL - insert j1.
   }
   // Fill in the remaining costs.
-  for (int i1 = 1; i1 <= i - ioff; ++i1) {
-    for (int j1 = 1; j1 <= j - joff; ++j1) {
+  for (unsigned int i1 = 1; i1 <= i - ioff; ++i1) {
+    for (unsigned int j1 = 1; j1 <= j - joff; ++j1) {
       // Increment the number of subproblems.
       ++subproblem_counter_;
       // Calculate partial distance values for this subproblem.
@@ -1180,31 +1237,35 @@ void APTEDTreeIndex<CostModel, TreeIndex>::revTreeEditDist(const TreeIndex& t1,
       }
       // Calculate final minimum.
       forestdist.at(i1, j1) = da >= db ? db >= dc ? dc : db : da >= dc ? dc : da;
-      // std::cout << "forestdist.at(i1, j1) = " << forestdist.at(i1, j1) << std::endl;
+      // std::cerr << "forestdist.at(i1, j1) = " << forestdist.at(i1, j1) << std::endl;
     }
   }
 };
 
 
 template <typename CostModel, typename TreeIndex>
-int APTEDTreeIndex<CostModel, TreeIndex>::get_strategy_path_type(int pathIDWithPathIDOffset, int pathIDOffset, int currentRootNodePreL, int currentSubtreeSize) {
+unsigned int APTEDTreeIndex<CostModel, TreeIndex>::get_strategy_path_type(
+    int pathIDWithPathIDOffset, unsigned int pathIDOffset,
+    unsigned int currentRootNodePreL, unsigned int currentSubtreeSize) {
   // if (Integer.signum(pathIDWithPathIDOffset) == -1) {
   if (pathIDWithPathIDOffset < 0) {
     return 0;
   }
   int pathID = std::abs(pathIDWithPathIDOffset) - 1;
-  if (pathID >= pathIDOffset) {
+  if (pathID >= static_cast<int>(pathIDOffset)) {
     pathID = pathID - pathIDOffset;
   }
-  if (pathID == (currentRootNodePreL + currentSubtreeSize) - 1) {
+  if (pathID == static_cast<int>(currentRootNodePreL + currentSubtreeSize) - 1) {
     return 1;
   }
   return 2;
 };
 
 template <typename CostModel, typename TreeIndex>
-void APTEDTreeIndex<CostModel, TreeIndex>::updateFnArray(int lnForNode, unsigned int node, unsigned int currentSubtreePreL) {
-  if (lnForNode >= currentSubtreePreL) {
+void APTEDTreeIndex<CostModel, TreeIndex>::updateFnArray(unsigned int lnForNode,
+    unsigned int node, unsigned int currentSubtreePreL) {
+  if (lnForNode != std::numeric_limits<unsigned int>::max() &&
+      lnForNode >= currentSubtreePreL) {
     fn_[node] = fn_[lnForNode];
     fn_[lnForNode] = node;
   } else {
@@ -1214,9 +1275,10 @@ void APTEDTreeIndex<CostModel, TreeIndex>::updateFnArray(int lnForNode, unsigned
 };
 
 template <typename CostModel, typename TreeIndex>
-void APTEDTreeIndex<CostModel, TreeIndex>::updateFtArray(int lnForNode, unsigned int node) {
+void APTEDTreeIndex<CostModel, TreeIndex>::updateFtArray(unsigned int lnForNode,
+    unsigned int node) {
   ft_[node] = lnForNode;
-  if(fn_[node] > -1) {
+  if(fn_[node] != std::numeric_limits<unsigned int>::max()) {
     ft_[fn_[node]] = node;
   }
 };
