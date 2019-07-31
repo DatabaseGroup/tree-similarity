@@ -85,6 +85,11 @@ int APTEDNodeIndexer<Label, CostModel>::index_nodes(const node::Node<Label>& nod
     // Store the preorder id of the current node to use it after the recursion.
     ++preorder_tmp_;
 
+    // Store reference to a node object under the corresponding preorder id.
+    // A tree is recursively traversed in preorder which ensures correct order
+    // of executing emplace_back.
+    preL_to_node_.emplace_back(std::ref(node));
+
     // Loop over children of a node.
     const std::vector<node::Node<Label>>& children = node.get_children();
     for (auto children_it = children.begin(); children_it != children.end(); ++children_it) {
@@ -119,9 +124,6 @@ int APTEDNodeIndexer<Label, CostModel>::index_nodes(const node::Node<Label>& nod
     preL_to_desc_sum_[preorder] = ((current_size + 1) * (current_size + 1 + 3)) / 2 - current_desc_sizes;
     preL_to_kr_sum_[preorder] = kr_sizes_sum + current_size + 1;
     preL_to_rev_kr_sum_[preorder] = rev_kr_sizes_sum + current_size + 1;
-
-    // Store pointer to a node object corresponding to preorder.
-    preL_to_node_[preorder] = std::ref(node);
 
     preL_to_size_[preorder] = current_size + 1;
     preorder_r = tree_size_ - 1 - postorder;
