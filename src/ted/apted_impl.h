@@ -307,7 +307,7 @@ data_structures::Matrix<double> APTED<Label, CostModel>::compute_opt_strategy_po
   std::vector<double> cost2_path(size2);
   std::shared_ptr<std::vector<unsigned long long int>> leafRow(new std::vector<unsigned long long int>(size2));
   double pathIDOffset = static_cast<double>(size1);
-  unsigned long long int minCost = std::numeric_limits<unsigned long long int>::infinity();
+  unsigned long long int minCost = std::numeric_limits<unsigned long long int>::max();
   double strategyPath = -1.0;
 
   std::vector<int>& pre2size1 = ni_1.preL_to_size_;
@@ -446,9 +446,9 @@ data_structures::Matrix<double> APTED<Label, CostModel>::compute_opt_strategy_po
         cost2_I[w] = 0;
         cost2_path[w] = w_in_preL;
       }
-      minCost = std::numeric_limits<unsigned long long int>::infinity();
+      minCost = std::numeric_limits<unsigned long long int>::max();
       strategyPath = -1.0;
-      unsigned long long int tmpCost = std::numeric_limits<unsigned long long int>::infinity();
+      unsigned long long int tmpCost = std::numeric_limits<unsigned long long int>::max();
 
       if (size_v <= 1 || size_w <= 1) { // USE NEW SINGLE_PATH FUNCTIONS FOR SMALL SUBTREES
         minCost = std::max(size_v, size_w);
