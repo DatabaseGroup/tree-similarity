@@ -20,6 +20,9 @@ else()
     message(WARNING "You are using an unsupported compiler! Compilation has only been tested with Clang and GCC.")
 endif()
 
+# TODO: Make it compile under Windows without Visual Studio.
+#       Document the steps.
+
 # Compiler flags.
 # MUST be declared after project().
 # TODO: Explain the flags.
