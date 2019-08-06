@@ -34,7 +34,7 @@ file(
 # Create tests in a loop. Use the same executable.
 foreach(loop_var ${ted_test_list})
   add_test(
-    NAME    ted_${loop_var}_test # TEST NAME
+    NAME    ted_correctness_test_${loop_var} # TEST NAME
     COMMAND ${test_driver_name}  # EXECUTABLE NAME
     ${loop_var}                  # ARGUMENTS
   )
