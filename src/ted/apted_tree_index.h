@@ -92,9 +92,9 @@ private:
       unsigned int it2subtree, data_structures::Matrix<double>& forestdist,
       bool treesSwapped);
   
-  unsigned int get_strategy_path_type(int pathIDWithPathIDOffset,
-      unsigned int pathIDOffset, unsigned int currentRootNodePreL,
-      unsigned int currentSubtreeSize);
+  int get_strategy_path_type(int pathIDWithPathIDOffset,
+      int pathIDOffset, int currentRootNodePreL,
+      int currentSubtreeSize);
   void updateFnArray(unsigned int lnForNode, unsigned int node,
       unsigned int currentSubtreePreL);
   void updateFtArray(unsigned int lnForNode, unsigned int node);

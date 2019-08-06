@@ -393,6 +393,8 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   }
 
   // PreLToSpfCost indexes
+  // TODO: Indexes store unsigned long long int, but desc_sum is an
+  //       unsigned int. Verify if there is no weird conversion.
   if constexpr (std::is_base_of<PreLToSpfCost, TreeIndex>::value) {
     // Add this node's subtree size to this node's sum.
     ti.prel_to_cost_all_[this_nodes_preorder] += desc_sum + 1;

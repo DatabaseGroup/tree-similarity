@@ -271,9 +271,9 @@ class PreLToTypeRight {
  * Indexed in left-to-right preorder.
  */
 class PreLToSpfCost {
-  public: std::vector<unsigned int> prel_to_cost_all_;
-  public: std::vector<unsigned int> prel_to_cost_left_;
-  public: std::vector<unsigned int> prel_to_cost_right_;
+  public: std::vector<unsigned long long int> prel_to_cost_all_;
+  public: std::vector<unsigned long long int> prel_to_cost_left_;
+  public: std::vector<unsigned long long int> prel_to_cost_right_;
 };
 
 // Stores cost of deleting/inserting entire subtree for each node.

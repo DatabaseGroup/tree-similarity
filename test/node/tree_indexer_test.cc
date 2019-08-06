@@ -28,6 +28,7 @@ int main(int argc, char** argv) {
   std::vector<int>* v_int_index;
   std::vector<bool>* v_bool_index;
   std::vector<double>* v_double_index;
+  std::vector<unsigned long long int>* v_ll_index;
   
   // Index data type:
   // 0 - std::vector<unsigned int> (default)
@@ -35,6 +36,7 @@ int main(int argc, char** argv) {
   // 2 - std::vector<int>
   // 3 - std::vector<bool>
   // 4 - std::vector<double>
+  // 5 - std::vector<unsigned long long int>
   unsigned int index_data_type = 0;
   // TODO: Change index_data_type in an if statement below if needed.
   
@@ -101,11 +103,14 @@ int main(int argc, char** argv) {
     v_bool_index = &tia.prel_to_type_right_;
     index_data_type = 3;
   } else if (index_test_name == "prel_to_spf_cost_all_test") {
-    v_index = &tia.prel_to_cost_all_;
+    v_ll_index = &tia.prel_to_cost_all_;
+    index_data_type = 5;
   } else if (index_test_name == "prel_to_spf_cost_left_test") {
-    v_index = &tia.prel_to_cost_left_;
+    v_ll_index = &tia.prel_to_cost_left_;
+    index_data_type = 5;
   } else if (index_test_name == "prel_to_spf_cost_right_test") {
-    v_index = &tia.prel_to_cost_right_;
+    v_ll_index = &tia.prel_to_cost_right_;
+    index_data_type = 5;
   } else if (index_test_name == "prel_to_subtree_del_cost_test") {
     v_double_index = &tia.prel_to_subtree_del_cost_;
     index_data_type = 4;
@@ -172,6 +177,8 @@ int main(int argc, char** argv) {
         case 3 : computed_results = common::vector_to_string(*v_bool_index);
           break;
         case 4 : computed_results = common::vector_to_string(*v_double_index);
+          break;
+        case 5 : computed_results = common::vector_to_string(*v_ll_index);
           break;
       }
       
