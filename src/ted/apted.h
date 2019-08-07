@@ -73,9 +73,9 @@ public:
   std::vector<int> preL_to_postR_;
   std::vector<int> postR_to_preL_;
   // Cost indices.
-  std::vector<int> preL_to_kr_sum_;
-  std::vector<int> preL_to_rev_kr_sum_;
-  std::vector<int> preL_to_desc_sum_;
+  std::vector<unsigned long long int> preL_to_kr_sum_;
+  std::vector<unsigned long long int> preL_to_rev_kr_sum_;
+  std::vector<unsigned long long int> preL_to_desc_sum_;
   std::vector<int> preL_to_sumDelCost_;
   std::vector<int> preL_to_sumInsCost_;
   // Structure single-value variables.
@@ -87,9 +87,9 @@ private:
   int current_node_;
   // Variables used temporarily while indexing.
   int size_tmp_;
-  int desc_sizes_tmp_;
-  int kr_sizes_sum_tmp_;
-  int rev_kr_sizes_sum_tmp_;
+  unsigned long long int desc_sizes_tmp_;
+  unsigned long long int kr_sizes_sum_tmp_;
+  unsigned long long int rev_kr_sizes_sum_tmp_;
   int preorder_tmp_;
   /// Cost model.
   const CostModel c_;
