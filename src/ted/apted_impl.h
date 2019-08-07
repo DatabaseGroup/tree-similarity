@@ -73,9 +73,9 @@ int APTEDNodeIndexer<Label, CostModel>::index_nodes(const node::Node<Label>& nod
     // Initialise variables.
     int current_size = 0;
     int children_count = 0;
-    int desc_sizes = 0;
-    int kr_sizes_sum = 0;
-    int rev_kr_sizes_sum = 0;
+    unsigned long long int desc_sizes = 0;
+    unsigned long long int kr_sizes_sum = 0;
+    unsigned long long int rev_kr_sizes_sum = 0;
     int preorder = preorder_tmp_;
     int preorder_r = 0;
     int current_preorder = -1;
@@ -84,6 +84,11 @@ int APTEDNodeIndexer<Label, CostModel>::index_nodes(const node::Node<Label>& nod
 
     // Store the preorder id of the current node to use it after the recursion.
     ++preorder_tmp_;
+
+    // Store reference to a node object under the corresponding preorder id.
+    // A tree is recursively traversed in preorder which ensures correct order
+    // of executing emplace_back.
+    preL_to_node_.emplace_back(std::ref(node));
 
     // Loop over children of a node.
     const std::vector<node::Node<Label>>& children = node.get_children();
@@ -119,9 +124,6 @@ int APTEDNodeIndexer<Label, CostModel>::index_nodes(const node::Node<Label>& nod
     preL_to_desc_sum_[preorder] = ((current_size + 1) * (current_size + 1 + 3)) / 2 - current_desc_sizes;
     preL_to_kr_sum_[preorder] = kr_sizes_sum + current_size + 1;
     preL_to_rev_kr_sum_[preorder] = rev_kr_sizes_sum + current_size + 1;
-
-    // Store pointer to a node object corresponding to preorder.
-    preL_to_node_[preorder] = std::ref(node);
 
     preL_to_size_[preorder] = current_size + 1;
     preorder_r = tree_size_ - 1 - postorder;
@@ -296,26 +298,26 @@ data_structures::Matrix<double> APTED<Label, CostModel>::compute_opt_strategy_po
   int size1 = ni_1.tree_size_;
   int size2 = ni_2.tree_size_;
   data_structures::Matrix<double> strategy(size1, size2);
-  std::vector<std::shared_ptr<std::vector<double>>> cost1_L(size1);
-  std::vector<std::shared_ptr<std::vector<double>>> cost1_R(size1);
-  std::vector<std::shared_ptr<std::vector<double>>> cost1_I(size1);
-  std::vector<double> cost2_L(size2);
-  std::vector<double> cost2_R(size2);
-  std::vector<double> cost2_I(size2);
-  std::vector<int> cost2_path(size2);
-  std::shared_ptr<std::vector<double>> leafRow(new std::vector<double>(size2));
-  int pathIDOffset = size1;
-  double minCost = std::numeric_limits<double>::infinity();
-  int strategyPath = -1;
+  std::vector<std::shared_ptr<std::vector<unsigned long long int>>> cost1_L(size1);
+  std::vector<std::shared_ptr<std::vector<unsigned long long int>>> cost1_R(size1);
+  std::vector<std::shared_ptr<std::vector<unsigned long long int>>> cost1_I(size1);
+  std::vector<unsigned long long int> cost2_L(size2);
+  std::vector<unsigned long long int> cost2_R(size2);
+  std::vector<unsigned long long int> cost2_I(size2);
+  std::vector<double> cost2_path(size2);
+  std::shared_ptr<std::vector<unsigned long long int>> leafRow(new std::vector<unsigned long long int>(size2));
+  double pathIDOffset = static_cast<double>(size1);
+  unsigned long long int minCost = std::numeric_limits<unsigned long long int>::max();
+  double strategyPath = -1.0;
 
   std::vector<int>& pre2size1 = ni_1.preL_to_size_;
   std::vector<int>& pre2size2 = ni_2.preL_to_size_;
-  std::vector<int>& pre2descSum1 = ni_1.preL_to_desc_sum_;
-  std::vector<int>& pre2descSum2 = ni_2.preL_to_desc_sum_;
-  std::vector<int>& pre2krSum1 = ni_1.preL_to_kr_sum_;
-  std::vector<int>& pre2krSum2 = ni_2.preL_to_kr_sum_;
-  std::vector<int>& pre2revkrSum1 = ni_1.preL_to_rev_kr_sum_;
-  std::vector<int>& pre2revkrSum2 = ni_2.preL_to_rev_kr_sum_;
+  std::vector<unsigned long long int>& pre2descSum1 = ni_1.preL_to_desc_sum_;
+  std::vector<unsigned long long int>& pre2descSum2 = ni_2.preL_to_desc_sum_;
+  std::vector<unsigned long long int>& pre2krSum1 = ni_1.preL_to_kr_sum_;
+  std::vector<unsigned long long int>& pre2krSum2 = ni_2.preL_to_kr_sum_;
+  std::vector<unsigned long long int>& pre2revkrSum1 = ni_1.preL_to_rev_kr_sum_;
+  std::vector<unsigned long long int>& pre2revkrSum2 = ni_2.preL_to_rev_kr_sum_;
   std::vector<int>& preL_to_preR_1 = ni_1.preL_to_preR_;
   std::vector<int>& preL_to_preR_2 = ni_2.preL_to_preR_;
   std::vector<int>& preR_to_preL_1 = ni_1.preR_to_preL_;
@@ -339,29 +341,29 @@ data_structures::Matrix<double> APTED<Label, CostModel>::compute_opt_strategy_po
   int parent_w_postL = -1;
   int size_w = -1;
   int parent_v_postL = -1;
-  int leftPath_v;
-  int rightPath_v;
-  std::shared_ptr<std::vector<double>> cost_Lpointer_v;
-  std::shared_ptr<std::vector<double>> cost_Rpointer_v;
-  std::shared_ptr<std::vector<double>> cost_Ipointer_v;
+  double leftPath_v;
+  double rightPath_v;
+  std::shared_ptr<std::vector<unsigned long long int>> cost_Lpointer_v;
+  std::shared_ptr<std::vector<unsigned long long int>> cost_Rpointer_v;
+  std::shared_ptr<std::vector<unsigned long long int>> cost_Ipointer_v;
   // std::vector<double>* strategypointer_v;
   std::size_t strategypointer_v;
-  std::shared_ptr<std::vector<double>> cost_Lpointer_parent_v;
-  std::shared_ptr<std::vector<double>> cost_Rpointer_parent_v;
-  std::shared_ptr<std::vector<double>> cost_Ipointer_parent_v;
+  std::shared_ptr<std::vector<unsigned long long int>> cost_Lpointer_parent_v;
+  std::shared_ptr<std::vector<unsigned long long int>> cost_Rpointer_parent_v;
+  std::shared_ptr<std::vector<unsigned long long int>> cost_Ipointer_parent_v;
   // std::vector<double>* strategypointer_parent_v;
   std::size_t strategypointer_parent_v;
-  int krSum_v;
-  int revkrSum_v;
-  int descSum_v;
+  unsigned long long int krSum_v;
+  unsigned long long int revkrSum_v;
+  unsigned long long int descSum_v;
   bool is_v_leaf;
 
   int v_in_preL;
   int w_in_preL;
 
-  std::stack<std::shared_ptr<std::vector<double>>> rowsToReuse_L;
-  std::stack<std::shared_ptr<std::vector<double>>> rowsToReuse_R;
-  std::stack<std::shared_ptr<std::vector<double>>> rowsToReuse_I;
+  std::stack<std::shared_ptr<std::vector<unsigned long long int>>> rowsToReuse_L;
+  std::stack<std::shared_ptr<std::vector<unsigned long long int>>> rowsToReuse_R;
+  std::stack<std::shared_ptr<std::vector<unsigned long long int>>> rowsToReuse_I;
 
   for(int v = 0; v < size1; ++v) {
     v_in_preL = postL_to_preL_1[v];
@@ -377,8 +379,8 @@ data_structures::Matrix<double> APTED<Label, CostModel>::compute_opt_strategy_po
     strategypointer_v = v_in_preL;
 
     size_v = pre2size1[v_in_preL];
-    leftPath_v = -(preR_to_preL_1[preL_to_preR_1[v_in_preL] + size_v - 1] + 1);// this is the left path's ID which is the leftmost leaf node: l-r_preorder(r-l_preorder(v) + |Fv| - 1)
-    rightPath_v = v_in_preL + size_v - 1 + 1; // this is the right path's ID which is the rightmost leaf node: l-r_preorder(v) + |Fv| - 1
+    leftPath_v = static_cast<double>(-(preR_to_preL_1[preL_to_preR_1[v_in_preL] + size_v - 1] + 1));// this is the left path's ID which is the leftmost leaf node: l-r_preorder(r-l_preorder(v) + |Fv| - 1)
+    rightPath_v = static_cast<double>(v_in_preL + size_v - 1 + 1); // this is the right path's ID which is the rightmost leaf node: l-r_preorder(v) + |Fv| - 1
     krSum_v = pre2krSum1[v_in_preL];
     revkrSum_v = pre2revkrSum1[v_in_preL];
     descSum_v = pre2descSum1[v_in_preL];
@@ -389,7 +391,7 @@ data_structures::Matrix<double> APTED<Label, CostModel>::compute_opt_strategy_po
       cost1_I[v] = leafRow;
       for(int i = 0; i < size2; ++i) {
         // strategypointer_v[postL_to_preL_2[i]] = v_in_preL;
-        strategy.at(strategypointer_v, postL_to_preL_2[i]) = v_in_preL;
+        strategy.at(strategypointer_v, postL_to_preL_2[i]) = static_cast<double>(v_in_preL);
       }
     }
 
@@ -399,9 +401,9 @@ data_structures::Matrix<double> APTED<Label, CostModel>::compute_opt_strategy_po
 
     if(parent_v_preL != -1 && cost1_L[parent_v_postL] == nullptr) {
       if (rowsToReuse_L.empty()) {
-        cost1_L[parent_v_postL] = std::make_shared<std::vector<double>>(size2);
-        cost1_R[parent_v_postL] = std::make_shared<std::vector<double>>(size2);
-        cost1_I[parent_v_postL] = std::make_shared<std::vector<double>>(size2);
+        cost1_L[parent_v_postL] = std::make_shared<std::vector<unsigned long long int>>(size2);
+        cost1_R[parent_v_postL] = std::make_shared<std::vector<unsigned long long int>>(size2);
+        cost1_I[parent_v_postL] = std::make_shared<std::vector<unsigned long long int>>(size2);
       } else {
         cost1_L[parent_v_postL] = rowsToReuse_L.top();
         cost1_R[parent_v_postL] = rowsToReuse_R.top();
@@ -444,9 +446,9 @@ data_structures::Matrix<double> APTED<Label, CostModel>::compute_opt_strategy_po
         cost2_I[w] = 0;
         cost2_path[w] = w_in_preL;
       }
-      minCost = std::numeric_limits<double>::infinity();
-      strategyPath = -1;
-      double tmpCost = std::numeric_limits<double>::infinity();
+      minCost = std::numeric_limits<unsigned long long int>::max();
+      strategyPath = -1.0;
+      unsigned long long int tmpCost = std::numeric_limits<unsigned long long int>::max();
 
       if (size_v <= 1 || size_w <= 1) { // USE NEW SINGLE_PATH FUNCTIONS FOR SMALL SUBTREES
         minCost = std::max(size_v, size_w);
@@ -465,22 +467,22 @@ data_structures::Matrix<double> APTED<Label, CostModel>::compute_opt_strategy_po
         if (tmpCost < minCost) {
           minCost = tmpCost;
           // strategyPath = (int)strategypointer_v[w_in_preL] + 1;
-          strategyPath = (int)strategy.at(strategypointer_v, w_in_preL) + 1;
+          strategyPath = strategy.at(strategypointer_v, w_in_preL) + 1.0;
         }
         tmpCost = size_w * krSum_v + cost2_L[w];
         if (tmpCost < minCost) {
           minCost = tmpCost;
-          strategyPath = -(preR_to_preL_2[preL_to_preR_2[w_in_preL] + size_w - 1] + pathIDOffset + 1);
+          strategyPath = -(static_cast<double>(preR_to_preL_2[preL_to_preR_2[w_in_preL] + size_w - 1]) + pathIDOffset + 1.0);
         }
         tmpCost = size_w * revkrSum_v + cost2_R[w];
         if (tmpCost < minCost) {
           minCost = tmpCost;
-          strategyPath = w_in_preL + size_w - 1 + pathIDOffset + 1;
+          strategyPath = static_cast<double>(w_in_preL + size_w - 1) + pathIDOffset + 1.0;
         }
         tmpCost = size_w * descSum_v + cost2_I[w];
         if (tmpCost < minCost) {
           minCost = tmpCost;
-          strategyPath = cost2_path[w] + pathIDOffset + 1;
+          strategyPath = cost2_path[w] + pathIDOffset + 1.0;
         }
       }
 
@@ -525,11 +527,11 @@ data_structures::Matrix<double> APTED<Label, CostModel>::compute_opt_strategy_po
 
     if (!ni_1.is_leaf(v_in_preL)) {
       // Arrays.fill(cost1_L[v], 0);
-      std::fill(cost1_L[v]->begin(), cost1_L[v]->end(), 0);
+      std::fill(cost1_L[v]->begin(), cost1_L[v]->end(), 0.0);
       // Arrays.fill(cost1_R[v], 0);
-      std::fill(cost1_R[v]->begin(), cost1_R[v]->end(), 0);
+      std::fill(cost1_R[v]->begin(), cost1_R[v]->end(), 0.0);
       // Arrays.fill(cost1_I[v], 0);
-      std::fill(cost1_I[v]->begin(), cost1_I[v]->end(), 0);
+      std::fill(cost1_I[v]->begin(), cost1_I[v]->end(), 0.0);
       rowsToReuse_L.push(cost1_L[v]);
       rowsToReuse_R.push(cost1_R[v]);
       rowsToReuse_I.push(cost1_I[v]);
@@ -608,7 +610,7 @@ double APTED<Label, CostModel>::gted(APTEDNodeIndexer<Label, CostModel>& ni_1, A
     return result;
   }
 
-  int strategyPathID = (int)delta_.read_at(currentSubtree1, currentSubtree2);
+  int strategyPathID = static_cast<int>(delta_.read_at(currentSubtree1, currentSubtree2));
 
   int strategyPathType = -1;
   int currentPathNode = std::abs(strategyPathID) - 1;
