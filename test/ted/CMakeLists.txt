@@ -4,6 +4,7 @@
 set(ted_test_list
   zhang_shasha
   apted
+  touzet_baseline
 )
 
 # Test driver name.

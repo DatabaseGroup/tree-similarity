@@ -9,6 +9,7 @@
 #include "zhang_shasha_tree_index.h"
 #include "apted_tree_index.h"
 #include "tree_indexer.h"
+#include "touzet_baseline_tree_index.h"
 
 int main(int argc, char** argv) {
 
@@ -39,13 +40,19 @@ int main(int argc, char** argv) {
   // Initialise ZS algorithm.
   ted::APTEDTreeIndex<CostModel, node::TreeIndexAll> apted_algorithm(ucm);
   
+  // Initialise Touzet algorithm.
+  ted::TouzetBaselineTreeIndex<CostModel, node::TreeIndexAll> touzet_baseline_algorithm(ucm);
+  
   // Assign ted algorithm by its name.
   if (ted_algorithm_name == "zhang_shasha") {
     ted_algorithm = &zhang_shasha_algorithm;
   }
   else if (ted_algorithm_name == "apted") {
     ted_algorithm = &apted_algorithm;
-  } 
+  }
+  else if (ted_algorithm_name == "touzet_baseline") {
+    ted_algorithm = &touzet_baseline_algorithm;
+  }
   else {
     std::cerr << "Error while choosing TED algorithm to test. TED algorithm name = " +
         (ted_algorithm_name) + "." << std::endl;
