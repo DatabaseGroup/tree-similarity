@@ -26,7 +26,7 @@ endif()
 # Compiler flags.
 # MUST be declared after project().
 # TODO: Explain the flags.
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1z -Wall -Wextra")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1z -Wall -Wextra -Wpedantic")
 
 # It's possible to set compiler-specific flags.
 #if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
