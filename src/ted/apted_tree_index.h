@@ -47,6 +47,8 @@ namespace ted {
  *     Distance. ACM Transactions on Database Systems (TODS). 2015.
  * [4] M. Pawlik and N. Augsten. Tree edit distance: Robust and
  *     memory-efficient. Information Systems. 2016.
+ *
+ * NOTE: only node::TreeIndexAPTED can be used with APTED.
  */
 template <typename CostModel, typename TreeIndex = node::TreeIndexAPTED>
 class APTEDTreeIndex : public TEDAlgorithm<CostModel, TreeIndex> {
