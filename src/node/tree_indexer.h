@@ -347,6 +347,13 @@ class TreeIndexAPTED :
   public PreLToSubtreeCost
 {};
 
+/// Tree index for all Touzet algorithms.
+class TreeIndexTouzet :
+  public Constants,
+  public PostLToLabelId,
+  public PostLToSize
+{};
+
 /// All tree indexes. Used for correctness tests and prototyping.
 class TreeIndexAll :
   public Constants,
