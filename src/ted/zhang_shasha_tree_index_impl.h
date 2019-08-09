@@ -29,8 +29,8 @@ double ZhangShashaTreeIndex<CostModel, TreeIndex>::ted(
   
   using data_structures::Matrix;
 
-  const unsigned int kT1Size = t1.tree_size_;
-  const unsigned int kT2Size = t2.tree_size_;
+  const int kT1Size = t1.tree_size_;
+  const int kT2Size = t2.tree_size_;
 
   // NOTE: The default constructor of Matrix is called while constructing ZS-Algorithm.
   // NOTE: Shouldn't we implement Matrix::resize() instead of constructing matrix again?
@@ -55,29 +55,29 @@ template <typename CostModel, typename TreeIndex>
 void ZhangShashaTreeIndex<CostModel, TreeIndex>::forest_distance(
     const TreeIndex& t1,
     const TreeIndex& t2,
-    unsigned int kr1,
-    unsigned int kr2) {
-  const unsigned int kKr1Lld = t1.postl_to_lld_[kr1 - 1]+1; // See declaration of t1_lld_.
-  const unsigned int kKr2Lld = t2.postl_to_lld_[kr2 - 1]+1;
+    int kr1,
+    int kr2) {
+  const int kKr1Lld = t1.postl_to_lld_[kr1 - 1]+1; // See declaration of t1_lld_.
+  const int kKr2Lld = t2.postl_to_lld_[kr2 - 1]+1;
   const int kT1Empty = kKr1Lld - 1;
   const int kT2Empty = kKr2Lld - 1;
   // Distance between two empty forests.
   fd_.at(kT1Empty, kT2Empty) = 0.0;
 
   // Distances between a source forest and an empty forest.
-  for (unsigned int i = kKr1Lld; i <= kr1; ++i) {
+  for (int i = kKr1Lld; i <= kr1; ++i) {
     fd_.at(i, kT2Empty) = fd_.at(i - 1, kT2Empty) + c_.del(t1.postl_to_label_id_[i - 1]);
     // For t1_node_[i - 1] see declaration of t1_node_.
   }
 
   // Distances between a destination forest and an empty forest.
-  for (unsigned int j = kKr2Lld; j <= kr2; ++j) {
+  for (int j = kKr2Lld; j <= kr2; ++j) {
     fd_.at(kT1Empty, j) = fd_.at(kT1Empty, j - 1) + c_.ins(t2.postl_to_label_id_[j - 1]);
   }
 
   // Distances between non-empty forests.
-  for (unsigned int i = kKr1Lld; i <= kr1; ++i) {
-    for (unsigned int j = kKr2Lld; j <= kr2; ++j) {
+  for (int i = kKr1Lld; i <= kr1; ++i) {
+    for (int j = kKr2Lld; j <= kr2; ++j) {
       ++subproblem_counter_;
       // If we have two subtrees.
       if (t1.postl_to_lld_[i - 1]+1 == kKr1Lld && t2.postl_to_lld_[j - 1]+1 == kKr2Lld) {

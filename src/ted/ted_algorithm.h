@@ -44,7 +44,7 @@ public:
   /**
    * \return The number of subproblems acountered in the last TED computation.
    */
-  unsigned long long int get_subproblem_count() { return subproblem_counter_; };
+  long long int get_subproblem_count() { return subproblem_counter_; };
 protected:
   /// Cost model.
   const CostModel& c_;
@@ -54,7 +54,7 @@ protected:
    * Counts the number of non-trivial values filled in fd_ matrix: subproblems
    * where both forests are not empty.
    */
-  unsigned long long int subproblem_counter_;
+  long long int subproblem_counter_;
 };
 
 }

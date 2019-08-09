@@ -64,7 +64,7 @@ private:
    * \param kr2 Current keyroot node in destination tree.
    */
   void forest_distance(const TreeIndex& t1, const TreeIndex& t2,
-      unsigned int kr1, unsigned int kr2);
+      int kr1, int kr2);
 };
 
 // Implementation details.
