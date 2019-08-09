@@ -27,12 +27,12 @@ template <typename CostModel, typename TreeIndex>
 double TouzetBaselineTreeIndex<CostModel, TreeIndex>::ted_k(const TreeIndex& t1,
     const TreeIndex& t2, const int k) {
   
-  int t1_size = static_cast<int>(t1.tree_size_);
-  int t2_size = static_cast<int>(t2.tree_size_);
+  const int t1_size = t1.tree_size_;
+  const int t2_size = t2.tree_size_;
 
   // If the pair of root nodes is not in k-strip (input tree size difference is
   // greater than k), return infinity.
-  if (abs_diff(t1_size, t2_size) > k) {
+  if (std::abs(t1_size - t2_size) > k) {
     return std::numeric_limits<double>::infinity();
   }
   

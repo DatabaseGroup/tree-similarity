@@ -70,6 +70,14 @@ class TEDAlgorithmTouzet : public TEDAlgorithm<CostModel, TreeIndex> {
 
 public:
   /// Implements ted function from the TEDAlgorithm<CostModel, TreeIndex> class.
+  /**
+   * Originally, Touzet's algorithm requires a TED upper bound value to
+   * return the exact distance. Touzet mentions only an incremental way of
+   * how to avoid that. A stopping condition is needed, but not given.
+   *
+   * The algorithm is executed multiple times with increasing values of k.
+   * When k exceeds the returned distance, the algorithm terminates.
+   */
   double ted(const TreeIndex& t1, const TreeIndex& t2) {
     using data_structures::BandMatrix;
     
@@ -78,7 +86,7 @@ public:
 
     // `+1` due to possible 0 size difference - then increase by mutliplication
     // doesn't work.
-    int k = static_cast<int>(abs_diff(t1.tree_size_, t2.tree_size_)) + 1; // tree_size_ is an unsigned int
+    int k = std::abs(t1.tree_size_ - t2.tree_size_) + 1; // tree_size_ is an unsigned int
     
     // NOTE: The default constructor of Matrix is called while constructing
     //       the algorithm object.
@@ -104,7 +112,7 @@ public:
     double distance = ted_k(t1, t2, k);
     while (k + 1 < distance) {
       k = k * 2;
-      std::cerr << k << std::endl;
+      // std::cerr << k << std::endl;
       td_ = BandMatrix<double>(t1.tree_size_, k);
       td_.Matrix::fill_with(std::numeric_limits<double>::infinity());
       fd_ = BandMatrix<double>(t1.tree_size_ + 1, k + 1);
@@ -114,31 +122,38 @@ public:
     return distance;
   };
 
-  /// Computes the tree edit distance between two trees assuming a maximum
-  /// number of allowed structural modifications (deletions, insertions).
-  ///
-  /// \param t1 Source tree.
-  /// \param t2 Destination tree.
-  /// \param k Maximum number of allowed structural modifications (deletions,
-  ///          insertions).
-  /// \return Tree edit distance regarding k.
+  /// Computes the tree edit distance given a maximum number of deletions and insertions.
+  /**
+   * \param t1 TreeIndex of source tree.
+   * \param t2 TreeIndex of destination tree.
+   * \param k Maximum number of allowed structural modifications (deletions,
+   *          insertions).
+   * \return Tree edit distance regarding k.
+   */
   virtual double ted_k(const TreeIndex& t1, const TreeIndex& t2,
       const int k) = 0;
 
-  // TODO: unsigned int vs int.
-  
   /// Matrix storing subtree distances.
   data_structures::BandMatrix<double> td_;
   /// Matrix storing subforest distances.
   data_structures::BandMatrix<double> fd_;
 
-  // Used for absolute value of a difference of unsigned ints.
-  template<typename T>
-  T abs_diff(const T& a, const T& b) const {
-    return (a > b) ? (a - b) : (b - a);
-  };
-
-  // Fills in the forest distance matrix for two subtrees.
+  /// Calculates the tree edit distance between two subtrees.
+  /**
+   * It considers the remaining budget of errors, `e`, and not the input `k`.
+   * Uses dynamic programming, with previously computed results stored in td_.
+   * Itself it fills in fd_ matrix.
+   *
+   * This is implementation of the original Touzet's algorithm with
+   * a modification to store intermediate subtree pair distances. Used for
+   * the algorithm versions that remove redundancy by useng keyroot nodes.
+   *
+   * \param t1 TreeIndex of source tree.
+   * \param t2 TreeIndex of destination tree.
+   * \param x Postorder ID of a subtree in the source tree.
+   * \param y Postorder ID of a subtree in the destination tree.
+   * \param e The remaining budget of structural modifications for (x,y).
+   */
   double tree_dist(const TreeIndex& t1, const TreeIndex& t2, const int x,
       const int y, const int e) {
     int x_size = t1.postl_to_size_[x];
@@ -235,61 +250,64 @@ public:
     return candidate_result;
   };
 
-  /// Calculates e(x,y) - a budget of the remaining number of errors
-  /// (deletions and insertions) that are left for the pair of subtrees
-  /// (T1_x,T2_y) after computing the lower bound for the nodes around them.
-  ///
-  /// \param x Postorder ID of a subtree in the source tree.
-  /// \param y Postorder ID of a subtree in the destination tree.
-  /// \param k Original threshold for the number of structural modifications.
-  /// \return e(x,y) = k - |(|T1|-(x+1))-(|T2|-(y+1))| - |((x+1)-|T1_x|)-((y+1)-|T2_y|)|
-  ///
-  /// TODO: unsigned int vs int.
+  /// Calculates a budget of the remaining number of errors.
+  /**
+   * The remaining deletions and insertions are left for the pair of subtrees
+   * (T1_x,T2_y) after computing the lower bound for the nodes around them.
+   *
+   * \param t1 TreeIndex of source tree.
+   * \param t2 TreeIndex of destination tree.
+   * \param x Postorder ID of a subtree in the source tree.
+   * \param y Postorder ID of a subtree in the destination tree.
+   * \param k Original threshold for the number of structural modifications.
+   * \return e(x,y) = k - |(|T1|-(x+1))-(|T2|-(y+1))| - |((x+1)-|T1_x|)-((y+1)-|T2_y|)|
+   */
   int e_budget(const TreeIndex& t1, const TreeIndex& t2, const int x, const int y, const int k) const {
     // Lower bound formula (k - RA - L):
     // e(x,y) = k - |(|T1|-(x+1))-(|T2|-(y+1))| - |((x+1)-|T1_x|)-((y+1)-|T2_y|)|
     // New lower bound formula (k - R - A - L):
     // e(x,y) = k - |(|T1|-(x+1)-depth(x))-(|T2|-(y+1)-depth(y))| - |depth(x)-depth(y)| - |((x+1)-|T1_x|)-((y+1)-|T2_y|)|
-    unsigned int x_size = t1.postl_to_size_[x];
-    unsigned int y_size = t2.postl_to_size_[y];
+    int x_size = t1.postl_to_size_[x];
+    int y_size = t2.postl_to_size_[y];
     // int lower_bound = std::abs((t1_size_.back() - (x+1)) - (t2_size_.back() - (y+1))) +
     //                   std::abs(((x+1) - x_size) - ((y+1) - y_size));
-    int lower_bound = abs_diff((t1.tree_size_ - (x+1) - t1.postl_to_depth_[x]),
+    int lower_bound = std::abs((t1.tree_size_ - (x+1) - t1.postl_to_depth_[x]) -
         (t2.tree_size_ - (y+1) - t2.postl_to_depth_[y])) +
-        abs_diff(t1.postl_to_depth_[x], t2.postl_to_depth_[y]) +
-        abs_diff(((x+1) - x_size), ((y+1) - y_size));
+        std::abs(t1.postl_to_depth_[x] - t2.postl_to_depth_[y]) +
+        std::abs(((x+1) - x_size) - ((y+1) - y_size));
     return (k - lower_bound); // TODO: Verify this -> BUG: There is a bug here possibly returning a negative number.
   };
 
   /// Verifies if subtrees T1_x and T2_y are k-relevant.
-  ///
-  /// T1_x and T2_y are k-relevant if
-  /// |(|T1|-(x+1))-(|T2|-(y+1))| + ||T1_x|-|T2_y|| + |((x+1)-|T1_x|)-((y+1)-|T2_y|)| < k.
-  ///
-  /// NOTE: x and y are increased by one due to node indexing starting with 0.
-  ///
-  /// \param x postorder id of a node in source tree T1.
-  /// \param y postorder id of a node in destination tree T2.
-  /// \param k maximum number of structural canges.
-  /// \return True if subtrees T1_x and T2_y are k-relevant, and false otherwise.
-  ///
-  /// TODO: unsigned int vs int.
+  /**
+   * T1_x and T2_y are k-relevant if
+   * |(|T1|-(x+1))-(|T2|-(y+1))| + ||T1_x|-|T2_y|| + |((x+1)-|T1_x|)-((y+1)-|T2_y|)| < k.
+   *
+   * NOTE: x and y are increased by one due to node indexing starting with 0.
+   *
+   * \param t1 TreeIndex of source tree.
+   * \param t2 TreeIndex of destination tree.
+   * \param x postorder id of a node in source tree T1.
+   * \param y postorder id of a node in destination tree T2.
+   * \param k maximum number of structural canges.
+   * \return True if subtrees T1_x and T2_y are k-relevant, and false otherwise.
+   */
   bool k_relevant(const TreeIndex& t1, const TreeIndex& t2, const int x, const int y, const int k) const {
     // The lower bound formula (RA + D + L):
     // |(|T1|-(x+1))-(|T2|-(y+1))| + ||T1_x|-|T2_y|| + |((x+1)-|T1_x|)-((y+1)-|T2_y|)| < k
     // New lower bound formula (R + A + D + L):
     // |(|T1|-(x+1)-depth(x))-(|T2|-(y+1)-depth(y))| + |depth(x)-depth(y)| + ||T1_x|-|T2_y|| + |((x+1)-|T1_x|)-((y+1)-|T2_y|)| < k
-    unsigned int x_size = t1.postl_to_size_[x];
-    unsigned int y_size = t2.postl_to_size_[y];
+    int x_size = t1.postl_to_size_[x];
+    int y_size = t2.postl_to_size_[y];
     // int lower_bound = std::abs((t1_size_.back() - (x+1)) - (t2_size_.back() - (y+1))) +
     //                   std::abs(x_size - y_size) +
     //                   std::abs(((x+1) - x_size) - ((y+1) - y_size));
     
-    int lower_bound = abs_diff((t1.tree_size_ - (x+1) - t1.postl_to_depth_[x]),
+    int lower_bound = std::abs((t1.tree_size_ - (x+1) - t1.postl_to_depth_[x]) -
         (t2.tree_size_ - (y+1) - t2.postl_to_depth_[y])) +
-        abs_diff(t1.postl_to_depth_[x], t2.postl_to_depth_[y]) +
-        abs_diff(x_size, y_size) +
-        abs_diff(((x+1) - x_size), ((y+1) - y_size));
+        std::abs(t1.postl_to_depth_[x] - t2.postl_to_depth_[y]) +
+        std::abs(x_size - y_size) +
+        std::abs(((x+1) - x_size) - ((y+1) - y_size));
 
     // NOTE: The pair (x,y) is k-relevant if lower_bound <= k.
     //       lower_bound < k is not correct because then (x,y) would be

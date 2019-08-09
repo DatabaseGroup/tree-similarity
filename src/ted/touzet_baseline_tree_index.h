@@ -47,7 +47,6 @@ class TouzetBaselineTreeIndex : public TEDAlgorithmTouzet<CostModel, TreeIndex> 
   // Base class members made visible for this class.
   using TEDAlgorithmTouzet<CostModel, TreeIndex>::td_;
   using TEDAlgorithmTouzet<CostModel, TreeIndex>::fd_;
-  using TEDAlgorithmTouzet<CostModel, TreeIndex>::abs_diff;
   using TEDAlgorithmTouzet<CostModel, TreeIndex>::e_budget;
   using TEDAlgorithmTouzet<CostModel, TreeIndex>::k_relevant;
   using TEDAlgorithmTouzet<CostModel, TreeIndex>::TEDAlgorithmTouzet;
