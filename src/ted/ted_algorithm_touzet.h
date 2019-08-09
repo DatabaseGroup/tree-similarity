@@ -124,6 +124,11 @@ public:
 
   /// Computes the tree edit distance given a maximum number of deletions and insertions.
   /**
+   * If k is a proper upper bound, the result is the exact TED.
+   * Otherwise, the result is a TED upper bounds. It may be infinity if
+   * k is too low and there is no edit mapping with maximum number of k
+   * deletions and insertions.
+   *
    * \param t1 TreeIndex of source tree.
    * \param t2 TreeIndex of destination tree.
    * \param k Maximum number of allowed structural modifications (deletions,
