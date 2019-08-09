@@ -23,21 +23,19 @@ int main(int argc, char** argv) {
   // A tree index is either a vector or vector of vectors.
   // We use a pointer because we can't use reference at this point.
   // v_index has to point to the updated index inside the test-cases loop.
-  std::vector<unsigned int>* v_index;
-  std::vector<std::vector<unsigned int>>* vv_index;
-  std::vector<int>* v_int_index;
+  std::vector<int>* v_index;
+  std::vector<std::vector<int>>* vv_index;
   std::vector<bool>* v_bool_index;
   std::vector<double>* v_double_index;
-  std::vector<unsigned long long int>* v_ll_index;
+  std::vector<long long int>* v_ll_index;
   
   // Index data type:
-  // 0 - std::vector<unsigned int> (default)
-  // 1 - std::vector<std::vector<unsigned int>>
-  // 2 - std::vector<int>
-  // 3 - std::vector<bool>
-  // 4 - std::vector<double>
-  // 5 - std::vector<unsigned long long int>
-  unsigned int index_data_type = 0;
+  const int kVInt = 0; // std::vector<int> (default)
+  const int kVVInt = 1; // std::vector<std::vector<int>>
+  const int kVBool = 2; // std::vector<bool>
+  const int kVDouble = 3; // std::vector<double>
+  const int kVLLInt = 4; // std::vector<long long int>
+  int index_data_type = kVInt;
   // TODO: Change index_data_type in an if statement below if needed.
   
   // Get a tree index by index test name.
@@ -63,10 +61,10 @@ int main(int argc, char** argv) {
     v_index = &tia.postr_to_prel_;
   } else if (index_test_name == "postl_to_children_test") {
     vv_index = &tia.postl_to_children_;
-    index_data_type = 1;
+    index_data_type = kVVInt;
   } else if (index_test_name == "prel_to_children_test") {
     vv_index = &tia.prel_to_children_;
-    index_data_type = 1;
+    index_data_type = kVVInt;
   } else if (index_test_name == "prel_to_label_id_test") {
     v_index = &tia.prel_to_label_id_;
   } else if (index_test_name == "postl_to_label_id_test") {
@@ -86,8 +84,7 @@ int main(int argc, char** argv) {
   } else if (index_test_name == "postl_to_depth_test") {
     v_index = &tia.postl_to_depth_;
   } else if (index_test_name == "postl_to_lch_test") {
-    v_int_index = &tia.postl_to_lch_;
-    index_data_type = 2;
+    v_index = &tia.postl_to_lch_;
   } else if (index_test_name == "postl_to_subtree_max_depth_test") {
     v_index = &tia.postl_to_subtree_max_depth_;
   } else if (index_test_name == "postl_to_kr_ancestor_test") {
@@ -98,25 +95,25 @@ int main(int argc, char** argv) {
     v_index = &tia.prer_to_ln_;
   } else if (index_test_name == "prel_to_type_left_test") {
     v_bool_index = &tia.prel_to_type_left_;
-    index_data_type = 3;
+    index_data_type = kVBool;
   } else if (index_test_name == "prel_to_type_right_test") {
     v_bool_index = &tia.prel_to_type_right_;
-    index_data_type = 3;
+    index_data_type = kVBool;
   } else if (index_test_name == "prel_to_spf_cost_all_test") {
     v_ll_index = &tia.prel_to_cost_all_;
-    index_data_type = 5;
+    index_data_type = kVLLInt;
   } else if (index_test_name == "prel_to_spf_cost_left_test") {
     v_ll_index = &tia.prel_to_cost_left_;
-    index_data_type = 5;
+    index_data_type = kVLLInt;
   } else if (index_test_name == "prel_to_spf_cost_right_test") {
     v_ll_index = &tia.prel_to_cost_right_;
-    index_data_type = 5;
+    index_data_type = kVLLInt;
   } else if (index_test_name == "prel_to_subtree_del_cost_test") {
     v_double_index = &tia.prel_to_subtree_del_cost_;
-    index_data_type = 4;
+    index_data_type = kVDouble;
   } else if (index_test_name == "prel_to_subtree_ins_cost_test") {
     v_double_index = &tia.prel_to_subtree_ins_cost_;
-    index_data_type = 4;
+    index_data_type = kVDouble;
   } else if (index_test_name == "list_kr_test") {
     v_index = &tia.list_kr_;
   } else {
@@ -172,13 +169,11 @@ int main(int argc, char** argv) {
           break;
         case 1 : computed_results = common::vector_to_string(*vv_index);
           break;
-        case 2 : computed_results = common::vector_to_string(*v_int_index);
+        case 2 : computed_results = common::vector_to_string(*v_bool_index);
           break;
-        case 3 : computed_results = common::vector_to_string(*v_bool_index);
+        case 3 : computed_results = common::vector_to_string(*v_double_index);
           break;
-        case 4 : computed_results = common::vector_to_string(*v_double_index);
-          break;
-        case 5 : computed_results = common::vector_to_string(*v_ll_index);
+        case 4 : computed_results = common::vector_to_string(*v_ll_index);
           break;
       }
       

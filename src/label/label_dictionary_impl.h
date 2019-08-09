@@ -31,7 +31,7 @@ template<class Label>
 LabelDictionary<Label>::LabelDictionary() : labels_count_(0) {}
 
 template<class Label>
-unsigned int LabelDictionary<Label>::insert(const Label& l) {
+int LabelDictionary<Label>::insert(const Label& l) {
   // Try to insert the given label with labels_count as its id value.
   // If the label is already in the dictionary, it (and its id) will not be
   // overwritten.
@@ -52,7 +52,7 @@ void LabelDictionary<Label>::clear() {
 };
 
 template<class Label>
-const unsigned int LabelDictionary<Label>::size() const {
+int LabelDictionary<Label>::size() const {
   return dictionary_.size();
 };
 

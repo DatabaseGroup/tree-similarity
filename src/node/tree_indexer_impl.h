@@ -23,9 +23,9 @@
 
 template <typename TreeIndex, typename Label, typename CostModel>
 void index_tree(TreeIndex& ti, const node::Node<Label>& n,
-    label::LabelDictionary<Label>& ld, CostModel& cm) {
+    label::LabelDictionary<Label>& ld, const CostModel& cm) {
   
-  unsigned int tree_size = n.get_tree_size();
+  int tree_size = n.get_tree_size();
   ti.tree_size_ = tree_size;
   
   // Resize and clear the indexes.
@@ -40,13 +40,11 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   }
   if constexpr (std::is_base_of<PostLToParent, TreeIndex>::value) {
     ti.postl_to_parent_.resize(tree_size);
-    std::fill(ti.postl_to_parent_.begin(), ti.postl_to_parent_.end(),
-        std::numeric_limits<unsigned int>::max());
+    std::fill(ti.postl_to_parent_.begin(), ti.postl_to_parent_.end(), -1);
   }
   if constexpr (std::is_base_of<PreLToParent, TreeIndex>::value) {
     ti.prel_to_parent_.resize(tree_size);
-    std::fill(ti.prel_to_parent_.begin(), ti.prel_to_parent_.end(),
-        std::numeric_limits<unsigned int>::max());
+    std::fill(ti.prel_to_parent_.begin(), ti.prel_to_parent_.end(), -1);
   }
   if constexpr (std::is_base_of<PostLToPreL, TreeIndex>::value) {
     ti.postl_to_prel_.resize(tree_size);
@@ -136,15 +134,14 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   }
   
   // Orders start with '0'. Are modified by the recursive traversal.
-  unsigned int start_preorder = 0;
-  unsigned int start_postorder = 0;
-  unsigned int start_depth = 0;
+  int start_preorder = 0;
+  int start_postorder = 0;
+  int start_depth = 0;
   
   // Maximum input tree depth - the first reference passed to recursion.
-  unsigned int subtree_max_depth = 0;
+  int subtree_max_depth = 0;
   index_tree_recursion(ti, n, ld, cm, start_preorder, start_postorder,
-      start_depth, subtree_max_depth, std::numeric_limits<unsigned int>::max(),
-      false);
+      start_depth, subtree_max_depth, -1, false);
   
   if constexpr (std::is_base_of<ListKR, TreeIndex>::value) {
     // Add root to kr - not added in the recursion.
@@ -166,38 +163,38 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
 };
 
 template <typename TreeIndex, typename Label, typename CostModel>
-unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
-    label::LabelDictionary<Label>& ld, CostModel& cm,
-    unsigned int& start_preorder, unsigned int& start_postorder,
-    unsigned int start_depth, unsigned int& subtree_max_depth,
-    unsigned int parent_preorder, bool is_rightmost_child) {
+int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
+    label::LabelDictionary<Label>& ld, const CostModel& cm,
+    int& start_preorder, int& start_postorder,
+    int start_depth, int& subtree_max_depth,
+    int parent_preorder, bool is_rightmost_child) {
   
   // Stores number of descendants of this node. Incrementally computed while
   // traversing the children.
-  unsigned int desc_sum = 0;
+  int desc_sum = 0;
 
   // Stores the current node's label id.
-  unsigned int label_id = ld.insert(n.label());
+  int label_id = ld.insert(n.label());
 
   // Here, start_preorder holds this node's preorder id.
   
-  unsigned int preorder_r = 0;
-  unsigned int postorder_r = 0;
+  int preorder_r = 0;
+  int postorder_r = 0;
 
   // This node's preorder id.
-  unsigned int this_nodes_preorder = start_preorder;
+  int this_nodes_preorder = start_preorder;
 
   // Increment start_preorder to hold the correct id of the consecutive node
   // in preorder.
   ++start_preorder;
   
   // To store postorder ids of this node's children.
-  std::vector<unsigned int> children_postorders;
+  std::vector<int> children_postorders;
   // To store preorder ids of this node's children.
-  std::vector<unsigned int> children_preorders;
+  std::vector<int> children_preorders;
 
   // This node subtree's max depth.
-  unsigned int this_subtree_max_depth = 0;
+  int this_subtree_max_depth = 0;
 
   // To store if the current child in the loop is rightmost.
   bool is_current_child_rightmost = false;
@@ -205,7 +202,7 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   // Treat the first child separately (non-key-root, updates parent's lld).
   int first_child_postorder = -1;
   // Count number of children.
-  unsigned int num_children = 0;
+  int num_children = 0;
   // Recursions to childen nodes.
   auto children_start_it = std::begin(n.get_children());
   auto children_end_it = std::end(n.get_children());
@@ -393,13 +390,13 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   }
 
   // PreLToSpfCost indexes
-  // TODO: Indexes store unsigned long long int, but desc_sum is an
-  //       unsigned int. Verify if there is no weird conversion.
+  // TODO: Indexes store long long int, but desc_sum is an
+  //       int. Verify if there is no weird conversion.
   if constexpr (std::is_base_of<PreLToSpfCost, TreeIndex>::value) {
     // Add this node's subtree size to this node's sum.
     ti.prel_to_cost_all_[this_nodes_preorder] += desc_sum + 1;
     // If this node has a parent.
-    if (parent_preorder != std::numeric_limits<unsigned int>::max()) {
+    if (parent_preorder != -1) {
       // Update the parent with this node's sum.
       ti.prel_to_cost_all_[parent_preorder] += ti.prel_to_cost_all_[this_nodes_preorder];
       ti.prel_to_cost_left_[parent_preorder] += ti.prel_to_cost_left_[this_nodes_preorder];
@@ -427,7 +424,7 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
     ti.prel_to_subtree_del_cost_[this_nodes_preorder] += cm.del(label_id);
     ti.prel_to_subtree_ins_cost_[this_nodes_preorder] += cm.ins(label_id);
     // If this node has a parent.
-    if (parent_preorder != std::numeric_limits<unsigned int>::max()) {
+    if (parent_preorder != -1) {
       // Update the cost of the parent node subtree.
       ti.prel_to_subtree_del_cost_[parent_preorder] += ti.prel_to_subtree_del_cost_[this_nodes_preorder];
       ti.prel_to_subtree_ins_cost_[parent_preorder] += ti.prel_to_subtree_ins_cost_[this_nodes_preorder];
@@ -443,8 +440,8 @@ unsigned int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   
 };
 
-void fill_kr_ancestors(std::vector<unsigned int>& postl_to_kr_ancestor,
-    const std::vector<int>& postl_to_lch, const std::vector<unsigned int>& list_kr) {
+void fill_kr_ancestors(std::vector<int>& postl_to_kr_ancestor,
+    const std::vector<int>& postl_to_lch, const std::vector<int>& list_kr) {
   for (auto i : list_kr) {
     int l = i;
     while (l >= 0) {
@@ -454,13 +451,13 @@ void fill_kr_ancestors(std::vector<unsigned int>& postl_to_kr_ancestor,
   }
 };
 
-void fill_ln(std::vector<unsigned int>& prel_to_ln,
-    std::vector<unsigned int>& prer_to_ln,
-    const std::vector<unsigned int>& prel_to_size,
-    const std::vector<unsigned int>& prer_to_prel) {
-  unsigned int current_leaf_prel = std::numeric_limits<unsigned int>::max();
-  unsigned int current_leaf_prer = std::numeric_limits<unsigned int>::max();
-  for(unsigned int i = 0; i < prel_to_size[0]; ++i) {
+void fill_ln(std::vector<int>& prel_to_ln,
+    std::vector<int>& prer_to_ln,
+    const std::vector<int>& prel_to_size,
+    const std::vector<int>& prer_to_prel) {
+  int current_leaf_prel = -1;
+  int current_leaf_prer = -1;
+  for(int i = 0; i < prel_to_size[0]; ++i) {
     prel_to_ln[i] = current_leaf_prel;
     if(prel_to_size[i] == 1) {
       current_leaf_prel = i;
@@ -472,14 +469,14 @@ void fill_ln(std::vector<unsigned int>& prel_to_ln,
   }
 };
 
-void fill_rld(std::vector<unsigned int>& postr_to_rld,
-    const std::vector<unsigned int>& prel_to_size,
-    const std::vector<unsigned int>& postr_to_prel,
-    const std::vector<unsigned int>& prel_to_postr,
-    const std::vector<std::vector<unsigned int>>& prel_to_children) {
+void fill_rld(std::vector<int>& postr_to_rld,
+    const std::vector<int>& prel_to_size,
+    const std::vector<int>& postr_to_prel,
+    const std::vector<int>& prel_to_postr,
+    const std::vector<std::vector<int>>& prel_to_children) {
   // The loop iterates over right-to-left postorder.
-  unsigned int preorder = 0;
-  for(unsigned int i = 0; i < prel_to_size[0]; ++i) {
+  int preorder = 0;
+  for(int i = 0; i < prel_to_size[0]; ++i) {
     preorder = postr_to_prel[i];
     if (prel_to_size[preorder] == 1) {
       postr_to_rld[i] = i;

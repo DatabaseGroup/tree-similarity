@@ -12,11 +12,7 @@ template <typename T>
 const std::string vector_to_string(const std::vector<T>& v) {
   std::string s("{");
   for (auto e : v) {
-    if (e == std::numeric_limits<T>::max()) {
-      s += "max,";
-    } else {
-      s += std::to_string(e) + ",";
-    }
+    s += std::to_string(e) + ",";
   }
   s.pop_back();
   s += "}";
@@ -42,24 +38,6 @@ const std::string vector_to_string(const std::vector<double>& v) {
   return s;
 }
 
-/// Convert vector of bool values to its string representation.
-/**
- * Specialized vector_to_string.
- * \param v Vector of values.
- * \return String representation of v.
- */
-const std::string vector_to_string(const std::vector<bool>& v) {
-  char int_part[2];
-  // printf ("[%s] is a string %d chars long\n",buffer,n);
-  std::string s("{");
-  for (auto e : v) {
-    s += std::to_string(e) + ",";
-  }
-  s.pop_back();
-  s += "}";
-  return s;
-}
-
 /// Convert vector of vectors of values to its string representation.
 /**
  * Specialized vector_to_string.
@@ -72,11 +50,7 @@ const std::string vector_to_string(const std::vector<std::vector<T>>& vv) {
   for (auto v : vv) {
     s += "{";
     for (auto e : v) {
-      if (e == std::numeric_limits<T>::max()) {
-        s += "max,";
-      } else {
-        s += std::to_string(e) + ",";
-      }
+      s += std::to_string(e) + ",";
     }
     if (v.size() > 0) {
       s.pop_back();
