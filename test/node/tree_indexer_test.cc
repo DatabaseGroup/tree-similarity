@@ -116,6 +116,9 @@ int main(int argc, char** argv) {
     index_data_type = kVDouble;
   } else if (index_test_name == "list_kr_test") {
     v_index = &tia.list_kr_;
+  } else if (index_test_name == "inverted_list_depth_to_postl_test") {
+    vv_index = &tia.inverted_list_depth_to_postl_;
+    index_data_type = kVVInt;
   } else {
     std::cerr << "Error while choosing index to test. Index test name = " + (index_test_name) + "." << std::endl;
     return -1;

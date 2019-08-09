@@ -132,6 +132,9 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   if constexpr (std::is_base_of<ListKR, TreeIndex>::value) {
     ti.list_kr_.clear();
   }
+  if constexpr (std::is_base_of<InvertedListDepthToPostL, TreeIndex>::value) {
+    ti.inverted_list_depth_to_postl_.clear();
+  }
   
   // Orders start with '0'. Are modified by the recursive traversal.
   int start_preorder = 0;
@@ -193,6 +196,17 @@ int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   // To store preorder ids of this node's children.
   std::vector<int> children_preorders;
 
+  // InvertedListDepthToPostL index
+  if constexpr (std::is_base_of<InvertedListDepthToPostL, TreeIndex>::value) {
+    // Add a vector for depth=start_depth in depth inverted list.
+    // NOTE: `inverted_list_depth_to_postl_.size()`` returns an `unsigned int`.
+    //       If `inverted_list_depth_to_postl_.size = 0`, then
+    //       substracting 1 causes incorrect validation of the condition.
+    if (static_cast<int>(ti.inverted_list_depth_to_postl_.size()) < (start_depth + 1)) {
+      ti.inverted_list_depth_to_postl_.push_back(std::vector<int>());
+    }
+  }
+  
   // This node subtree's max depth.
   int this_subtree_max_depth = 0;
 
@@ -330,9 +344,9 @@ int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
     ti.postl_to_depth_[start_postorder] = start_depth;
   }
   
-  // PostLToLCh index
-  if constexpr (std::is_base_of<PostLToLCh, TreeIndex>::value) {
-    ti.postl_to_lch_[start_postorder] = first_child_postorder;
+  // InvertedListDepthToPostL index
+  if constexpr (std::is_base_of<InvertedListDepthToPostL, TreeIndex>::value) {
+    ti.inverted_list_depth_to_postl_.at(start_depth).push_back(start_postorder);
   }
 
   // PostLToSubtreeMaxDepth index
@@ -344,6 +358,11 @@ int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
     ti.postl_to_subtree_max_depth_[start_postorder] = this_subtree_max_depth;
     // Update parent subtree's max depth.
     subtree_max_depth = std::max(subtree_max_depth, this_subtree_max_depth);
+  }
+  
+  // PostLToLCh index
+  if constexpr (std::is_base_of<PostLToLCh, TreeIndex>::value) {
+    ti.postl_to_lch_[start_postorder] = first_child_postorder;
   }
   
   // PostLToLLD index

@@ -294,6 +294,14 @@ class ListKR {
   public: std::vector<int> list_kr_;
 };
 
+/// For each depth value stores left-to-right postorder ids of nodes with that depth.
+/**
+ * Indexed in depth value.
+ */
+class InvertedListDepthToPostL {
+  public: std::vector<std::vector<int>> inverted_list_depth_to_postl_;
+};
+
 /// Tree index for Zhangh and Shasha algorithm.
 class TreeIndexZhangShasha :
   public Constants,
@@ -366,7 +374,8 @@ class TreeIndexAll :
   public PreLToTypeRight,
   public PreLToSpfCost,
   public PreLToSubtreeCost,
-  public ListKR
+  public ListKR,
+  public InvertedListDepthToPostL
 {};
 
 /// Main method to index a tree.
