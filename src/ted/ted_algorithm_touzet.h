@@ -30,11 +30,10 @@
 
 namespace ted {
 
-  /**
-   * Interface for all Touzet algorithms.
-   */
 /**
- * This class implements the tree edit distance algorithm by Helene Touzet [1].
+ * Interface for all Touzet algorithms.
+ * 
+ * Implements the tree edit distance algorithm by Helene Touzet [1].
  *
  * The algorithm requires parameter k, that is the upper bound for the number
  * of allowed structural modifications (deletions and insertions). If the real
@@ -43,20 +42,22 @@ namespace ted {
  * If the value of k is unknown. The algorithm is executed multiple times,
  * each time doubling k, until the stopping condition is met.
  *
- * This is the memory-improved version. The base algorithm stores the
+ * This is the memory-improved version. The algorithm stores the
  * intermediate results values around diagonals of matrices td_ and fd_. These
  * diagonals are shifted left to use a reduced number of columns. The resulting
  * memory complexity is O(nk) instead of O(n^2).
  *
- * The algorithm is implemented as it operates on rectangular matrices, as in
- * the base version. The translation of indices is done in BandMatrix,
+ * The algorithm is implemented as it operates on rectangular matrices.
+ * The translation of indices is done in BandMatrix,
  * transparently to the algorithm's implementation. One only has to make sure,
  * that iterating over the BandMatrix is done correctly.
  *
  * [1] H. Touzet. Comparing similar ordered trees in linear-time. Journal of
  *     Discrete Algorithms. 2007.
  *
- * NOTE: only node::TreeIndexAPTED can be used with APTED.
+ * NOTE: node::TreeIndexTouzet is the base TreeIndex for all Touzet algorithms.
+ *       It is enough for TouzetBaselineTreeIndex. Other indices should
+ *       inherit from it.
  */
 template <typename CostModel, typename TreeIndex = node::TreeIndexTouzet>
 class TEDAlgorithmTouzet : public TEDAlgorithm<CostModel, TreeIndex> {
@@ -75,7 +76,8 @@ public:
     // Reset subproblem counter.
     subproblem_counter_ = 0;
 
-    // `+1` due to possible 0 size difference.
+    // `+1` due to possible 0 size difference - then increase by mutliplication
+    // doesn't work.
     int k = static_cast<int>(abs_diff(t1.tree_size_, t2.tree_size_)) + 1; // tree_size_ is an unsigned int
     
     // NOTE: The default constructor of Matrix is called while constructing
@@ -123,19 +125,14 @@ public:
   virtual double ted_k(const TreeIndex& t1, const TreeIndex& t2,
       const int k) = 0;
 
-// TODO: unsigned int vs int.
-
-// TODO: Add the elements common to all Touzet algorithms:
-//       [X] init() -> move to ted
-//       [X] k_relevant()
-//       [X] e_budget()
-//       [X] tree_dist()
+  // TODO: unsigned int vs int.
   
   /// Matrix storing subtree distances.
   data_structures::BandMatrix<double> td_;
   /// Matrix storing subforest distances.
   data_structures::BandMatrix<double> fd_;
 
+  // Used for absolute value of a difference of unsigned ints.
   template<typename T>
   T abs_diff(const T& a, const T& b) const {
     return (a > b) ? (a - b) : (b - a);
