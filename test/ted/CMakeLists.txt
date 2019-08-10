@@ -5,6 +5,7 @@ set(ted_test_list
   zhang_shasha
   apted
   touzet_baseline
+  touzet_depth_pruning
 )
 
 # Test driver name.

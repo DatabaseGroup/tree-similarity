@@ -42,7 +42,7 @@ double TouzetBaselineTreeIndex<CostModel, TreeIndex>::ted_k(const TreeIndex& t1,
     for (int y = std::max(0, x - k); y <= std::min(x + k, t2_size-1); ++y) {
       if (k_relevant(t1, t2, x, y, k)) {
         // Compute td(x, y) with e errors - the value of e(x, y, k).
-        td_.at(x, y) = tree_dist(t1, t2, x, y, e_budget(t1, t2, x, y, k));
+        td_.at(x, y) = tree_dist(t1, t2, x, y, k, e_budget(t1, t2, x, y, k));
       }
     }
   }

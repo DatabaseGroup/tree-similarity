@@ -10,6 +10,7 @@
 #include "apted_tree_index.h"
 #include "tree_indexer.h"
 #include "touzet_baseline_tree_index.h"
+#include "touzet_depth_pruning_tree_index.h"
 
 int main(int argc, char** argv) {
 
@@ -42,6 +43,7 @@ int main(int argc, char** argv) {
   
   // Initialise Touzet algorithm.
   ted::TouzetBaselineTreeIndex<CostModel, node::TreeIndexAll> touzet_baseline_algorithm(ucm);
+  ted::TouzetDepthPruningTreeIndex<CostModel, node::TreeIndexAll> touzet_depth_pruning_algorithm(ucm);
   
   // Assign ted algorithm by its name.
   if (ted_algorithm_name == "zhang_shasha") {
@@ -52,6 +54,9 @@ int main(int argc, char** argv) {
   }
   else if (ted_algorithm_name == "touzet_baseline") {
     ted_algorithm = &touzet_baseline_algorithm;
+  }
+  else if (ted_algorithm_name == "touzet_depth_pruning") {
+    ted_algorithm = &touzet_depth_pruning_algorithm;
   }
   else {
     std::cerr << "Error while choosing TED algorithm to test. TED algorithm name = " +
@@ -71,6 +76,7 @@ int main(int argc, char** argv) {
     return -1;
   }
 
+  long long int sub_count = 0;
   // Read test cases from a file line by line.
   for (std::string line; std::getline( test_cases_file, line);) {
     if (line[0] == '#') {
@@ -110,8 +116,10 @@ int main(int argc, char** argv) {
         std::cerr << input_tree_2_string << std::endl;
         return -1;
       }
+      sub_count += ted_algorithm->get_subproblem_count();
     }
   }
+  std::cout << "#sub = " << sub_count << std::endl;
 
   return 0;
 }

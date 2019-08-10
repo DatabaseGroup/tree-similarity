@@ -1,5 +1,5 @@
 // The MIT License (MIT)
-// Copyright (c) 2017 Mateusz Pawlik.
+// Copyright (c) 2019 Mateusz Pawlik.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -36,28 +36,36 @@
 namespace ted {
 
 /**
- * This is an implementation of the original Touzet's algorithm WITHOUT
+ * This is an implementation of the original Touzet's algorithm with
  * depth-based pruning.
  *
  * NOTE: only node::TreeIndexTouzet can be used with TouzetBaselineTreeIndex.
  */
 template <typename CostModel, typename TreeIndex = node::TreeIndexTouzet>
-class TouzetBaselineTreeIndex : public TEDAlgorithmTouzet<CostModel, TreeIndex> {
+class TouzetDepthPruningTreeIndex :
+    public TouzetBaselineTreeIndex<CostModel, TreeIndex> {
 
 public:
-  
+
   // Base class members made visible for this class.
   using TEDAlgorithmTouzet<CostModel, TreeIndex>::td_;
-  using TEDAlgorithmTouzet<CostModel, TreeIndex>::fd_;
+  using TouzetBaselineTreeIndex<CostModel, TreeIndex>::fd_;
   using TEDAlgorithmTouzet<CostModel, TreeIndex>::e_budget;
   using TEDAlgorithmTouzet<CostModel, TreeIndex>::k_relevant;
-  using TEDAlgorithmTouzet<CostModel, TreeIndex>::TEDAlgorithmTouzet;
-  using TEDAlgorithmTouzet<CostModel, TreeIndex>::tree_dist;
+  using TouzetBaselineTreeIndex<CostModel, TreeIndex>::TouzetBaselineTreeIndex;
+  using TEDAlgorithmTouzet<CostModel, TreeIndex>::c_;
+  using TEDAlgorithmTouzet<CostModel, TreeIndex>::subproblem_counter_;
 
-  double ted_k(const TreeIndex& t1, const TreeIndex& t2, const int k);
+  // Depth pruning heuristic requires a different `tree_dist` function.
+  // That from TEDAlgorithmTouzet is overriden here.
+  // It additionally needed `k` value - added to arguments.
+  double tree_dist(const TreeIndex& t1, const TreeIndex& t2, const int x,
+      const int y, const int k, const int e);
+  
+  // `ted_k` funtion is inherited from TouzetBaselineTreeIndex.
+  // double ted_k(const TreeIndex& t1, const TreeIndex& t2, const int k);
 };
 
 // Implementation details.
-#include "touzet_baseline_tree_index_impl.h"
-
+#include "touzet_depth_pruning_tree_index_impl.h"
 }

@@ -62,13 +62,14 @@ namespace ted {
 template <typename CostModel, typename TreeIndex = node::TreeIndexTouzet>
 class TEDAlgorithmTouzet : public TEDAlgorithm<CostModel, TreeIndex> {
 
+public:
+
   // Base class members made visible for this class.
   using TEDAlgorithm<CostModel, TreeIndex>::TEDAlgorithm;
   using TEDAlgorithm<CostModel, TreeIndex>::c_;
   using TEDAlgorithm<CostModel, TreeIndex>::subproblem_counter_;
   using TEDAlgorithm<CostModel, TreeIndex>::ted;
 
-public:
   /// Implements ted function from the TEDAlgorithm<CostModel, TreeIndex> class.
   /**
    * Originally, Touzet's algorithm requires a TED upper bound value to
@@ -159,11 +160,13 @@ public:
    * \param y Postorder ID of a subtree in the destination tree.
    * \param e The remaining budget of structural modifications for (x,y).
    */
-  double tree_dist(const TreeIndex& t1, const TreeIndex& t2, const int x,
-      const int y, const int e) {
+  virtual double tree_dist(const TreeIndex& t1, const TreeIndex& t2, const int x,
+      const int y, const int k, const int e) {
     int x_size = t1.postl_to_size_[x];
     int y_size = t2.postl_to_size_[y];
 
+    // std::cout << "TEDAlgorithmTouzet::tree_dist" << std::endl;
+    
     // Calculates offsets that lets us translate i and j to correct postorder
     // ids.
     int x_off = x - x_size;
