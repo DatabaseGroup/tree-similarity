@@ -6,6 +6,7 @@ set(ted_test_list
   apted
   touzet_baseline
   touzet_depth_pruning
+  touzet_depth_pruning_truncated_tree_fix
 )
 
 # Test driver name.
