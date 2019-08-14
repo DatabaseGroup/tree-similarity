@@ -336,11 +336,26 @@ class TreeIndexAPTED :
   public PreLToSubtreeCost
 {};
 
-/// Tree index for all Touzet algorithms.
-class TreeIndexTouzet :
+/// Tree index for Touzet Baseline algorithm.
+class TreeIndexTouzetBaseline :
   public Constants,
   public PostLToLabelId,
   public PostLToSize
+{};
+
+/// Tree index for Touzet Depth Pruning algorithm.
+class TreeIndexTouzetDepthPruning :
+  public TreeIndexTouzetBaseline,
+  public PostLToDepth,
+  public PostLToSubtreeMaxDepth,
+  public InvertedListDepthToPostL
+{};
+
+/// Tree index for Touzet Depth Pruning with truncated tree fix algorithm.
+class TreeIndexTouzetDepthPruningTruncatedTreeFix :
+  public TreeIndexTouzetBaseline,
+  public PostLToDepth,
+  public PostLToSubtreeMaxDepth
 {};
 
 /// All tree indexes. Used for correctness tests and prototyping.

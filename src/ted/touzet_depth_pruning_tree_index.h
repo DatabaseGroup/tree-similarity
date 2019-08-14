@@ -39,9 +39,10 @@ namespace ted {
  * This is an implementation of the original Touzet's algorithm with
  * depth-based pruning.
  *
- * NOTE: only node::TreeIndexTouzet can be used with TouzetBaselineTreeIndex.
+ * NOTE: Only node::TreeIndexTouzetDepthPruning or its superset can be used
+ *       with TouzetDepthPruningTreeIndex.
  */
-template <typename CostModel, typename TreeIndex = node::TreeIndexTouzet>
+template <typename CostModel, typename TreeIndex = node::TreeIndexTouzetDepthPruning>
 class TouzetDepthPruningTreeIndex :
     public TouzetBaselineTreeIndex<CostModel, TreeIndex> {
 

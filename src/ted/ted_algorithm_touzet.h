@@ -55,11 +55,11 @@ namespace ted {
  * [1] H. Touzet. Comparing similar ordered trees in linear-time. Journal of
  *     Discrete Algorithms. 2007.
  *
- * NOTE: node::TreeIndexTouzet is the base TreeIndex for all Touzet algorithms.
- *       It is enough for TouzetBaselineTreeIndex. Other indices should
- *       inherit from it.
+ * NOTE: node::TreeIndexTouzetBaseline is the base TreeIndex for all Touzet
+ *       algorithms. It is enough for TouzetBaselineTreeIndex. Other indices
+ *       should/could inherit from it.
  */
-template <typename CostModel, typename TreeIndex = node::TreeIndexTouzet>
+template <typename CostModel, typename TreeIndex = node::TreeIndexTouzetBaseline>
 class TEDAlgorithmTouzet : public TEDAlgorithm<CostModel, TreeIndex> {
 
 public:

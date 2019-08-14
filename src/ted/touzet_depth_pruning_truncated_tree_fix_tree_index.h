@@ -43,9 +43,10 @@ namespace ted {
  * in trucated tree are traversed. We traverse them once to find them, and
  * then second time to actually compute the distances.
  *
- * NOTE: only node::TreeIndexTouzet can be used with TouzetBaselineTreeIndex.
+ * NOTE: Only node::TreeIndexTouzetDepthPruningTruncatedTreeFix or its superset
+ *       can be used with TouzetDepthPruningTruncatedTreeFixTreeIndex.
  */
-template <typename CostModel, typename TreeIndex = node::TreeIndexTouzet>
+template <typename CostModel, typename TreeIndex = node::TreeIndexTouzetDepthPruningTruncatedTreeFix>
 class TouzetDepthPruningTruncatedTreeFixTreeIndex :
     public TouzetBaselineTreeIndex<CostModel, TreeIndex> {
 
