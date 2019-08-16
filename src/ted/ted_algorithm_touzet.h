@@ -87,7 +87,8 @@ public:
 
     // `+1` due to possible 0 size difference - then increase by mutliplication
     // doesn't work.
-    int k = std::abs(t1.tree_size_ - t2.tree_size_) + 1; // tree_size_ is an unsigned int
+    // NOTE: This `+1` influences BandMatrix width.
+    int k = std::abs(t1.tree_size_ - t2.tree_size_) + 1;
     
     // NOTE: The default constructor of Matrix is called while constructing
     //       the algorithm object.
@@ -111,7 +112,7 @@ public:
     //       implemented.
 
     double distance = ted_k(t1, t2, k);
-    while (k + 1 < distance) {
+    while (k < distance) {
       k = k * 2;
       // std::cerr << k << std::endl;
       td_ = BandMatrix<double>(t1.tree_size_, k);
@@ -217,7 +218,15 @@ public:
         // Otherwise, both forests are trees and the fd-part is empty.
         if (i_forest != 0 || j_forest != 0) { // TODO: Swap if-else conditions or use '>0'.
           // QUESTION: Is it possible that we read from outside the band? - No exception thrown.
-          td_read = td_.read_at(i + x_off, j + y_off);
+          td_read = inf;
+          if (std::abs((i + x_off) - (j + y_off)) <= k) {
+            // NOTE: If e is too large, TouzetKRLoop hits a bug here.
+            //       Also below in writing to `td_`.
+            //       `e` controlls only the loop over columns in `fd_`.
+            //       A forest may need a distance of a subtree pair form outside
+            //       the k-band. Similarly in writing.
+            td_read = td_.read_at(i + x_off, j + y_off);
+          }
           // If the values to read are outside of the band, they exceed
           // the threshold or are not present in the band-matrix.
           // Read the value from fd_ only if they exist and are in the band.
@@ -233,7 +242,11 @@ public:
           // Store the result only if it is within e budget.
           // Otherwise the inifinity value is already there from init.
           if (candidate_result <= e ) {
-            td_.at(i + x_off, j + y_off) = candidate_result;
+            if (std::abs((i + x_off) - (j + y_off)) <= k) {
+              // NOTE: If e is too large, TouzetKRLoop hits a bug here.
+              //       See the note above.
+              td_.at(i + x_off, j + y_off) = candidate_result;
+            }
           }
         }
 
