@@ -358,6 +358,13 @@ class TreeIndexTouzetDepthPruningTruncatedTreeFix :
   public PostLToSubtreeMaxDepth
 {};
 
+/// Tree index for Touzet KR Loop algorithm.
+class TreeIndexTouzetKRLoop :
+  public TreeIndexTouzetBaseline,
+  public ListKR,
+  public PostLToLCh
+{};
+
 /// All tree indexes. Used for correctness tests and prototyping.
 class TreeIndexAll :
   public Constants,
