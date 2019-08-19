@@ -365,6 +365,13 @@ class TreeIndexTouzetKRLoop :
   public PostLToLCh
 {};
 
+/// Tree index for Touzet KR Set algorithm.
+class TreeIndexTouzetKRSet :
+  public TreeIndexTouzetBaseline,
+  public PostLToLCh,
+  public PostLToKRAncestor
+{};
+
 /// All tree indexes. Used for correctness tests and prototyping.
 class TreeIndexAll :
   public Constants,

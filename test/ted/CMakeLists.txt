@@ -8,6 +8,7 @@ set(ted_test_list
   touzet_depth_pruning
   touzet_depth_pruning_truncated_tree_fix
   touzet_kr_loop
+  touzet_kr_set
 )
 
 # Test driver name.
