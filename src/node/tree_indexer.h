@@ -368,7 +368,9 @@ class TreeIndexTouzetKRLoop :
 class TreeIndexTouzetKRSet :
   public TreeIndexTouzetBaseline,
   public PostLToLCh,
-  public PostLToKRAncestor
+  public PostLToKRAncestor,
+  // missing dependency for PostLToKRAncestor
+  public ListKR
 {};
 
 /// All tree indexes. Used for correctness tests and prototyping.
