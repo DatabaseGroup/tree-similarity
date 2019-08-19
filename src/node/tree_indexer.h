@@ -340,13 +340,13 @@ class TreeIndexAPTED :
 class TreeIndexTouzetBaseline :
   public Constants,
   public PostLToLabelId,
-  public PostLToSize
+  public PostLToSize,
+  public PostLToDepth
 {};
 
 /// Tree index for Touzet Depth Pruning algorithm.
 class TreeIndexTouzetDepthPruning :
   public TreeIndexTouzetBaseline,
-  public PostLToDepth,
   public PostLToSubtreeMaxDepth,
   public InvertedListDepthToPostL
 {};
@@ -354,7 +354,6 @@ class TreeIndexTouzetDepthPruning :
 /// Tree index for Touzet Depth Pruning with truncated tree fix algorithm.
 class TreeIndexTouzetDepthPruningTruncatedTreeFix :
   public TreeIndexTouzetBaseline,
-  public PostLToDepth,
   public PostLToSubtreeMaxDepth
 {};
 
