@@ -7,12 +7,21 @@
 #include "string_label.h"
 #include "node.h"
 #include "bracket_notation_parser.h"
-#include "touzet.h"
+#include "touzet_depth_pruning_truncated_tree_fix_tree_index.h"
 
 int main() {
 
+  // Type aliases.
   using Label = label::StringLabel;
-  using CostModel = cost_model::UnitCostModel<Label>;
+  using CostModel = cost_model::UnitCostModelLD<Label>;
+  using LabelDictionary = label::LabelDictionary<Label>;
+  
+  // Initialise label dictionary - separate dictionary for each test tree
+  // becuse it is easier to keep track of label ids.
+  LabelDictionary ld;
+  
+  // Initialise cost model.
+  CostModel ucm(ld);
 
   // Parse test cases from file.
   std::ifstream test_cases_file("touzet_ted_test_data.txt");
@@ -22,7 +31,12 @@ int main() {
   }
 
   // Initialise Touzet's algorithm.
-  ted::Touzet<Label, CostModel> touzet_ted;
+  ted::TouzetDepthPruningTruncatedTreeFixTreeIndex<CostModel, node::TreeIndexAll> touzet_algorithm(ucm);
+
+  // Initialise two tree indexes.
+  // Use TreeIndexAll that is a superset of all algorithms' indexes.
+  node::TreeIndexAll ti1;
+  node::TreeIndexAll ti2;
 
   for (std::string line; std::getline( test_cases_file, line);) {
     if (line[0] == '#') {
@@ -55,8 +69,12 @@ int main() {
       node::Node<Label> t1 = bnp.parse_single(source_tree);
       node::Node<Label> t2 = bnp.parse_single(destination_tree);
 
+      // Index input trees.
+      node::index_tree(ti1, t1, ld, ucm);
+      node::index_tree(ti2, t2, ld, ucm);
+
       // Execute the algorithm and get the result.
-      double computed_result = touzet_ted.touzet_ted_depth_pruning_truncated_tree_fix(t1, t2, k_value);
+      double computed_result = touzet_algorithm.ted_k(ti1, ti2, k_value);
 
       if (computed_result != expected_result) {
         std::cerr << "Incorrect ted result:\n" << std::to_string(computed_result) << "\ninstead of\n" << std::to_string(expected_result) << std::endl;
