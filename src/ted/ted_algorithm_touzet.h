@@ -80,7 +80,6 @@ public:
    * When k exceeds the returned distance, the algorithm terminates.
    */
   double ted(const TreeIndex& t1, const TreeIndex& t2) {
-    using data_structures::BandMatrix;
     
     // Reset subproblem counter.
     subproblem_counter_ = 0;
@@ -89,23 +88,6 @@ public:
     // doesn't work.
     // NOTE: This `+1` influences BandMatrix width.
     int k = std::abs(t1.tree_size_ - t2.tree_size_) + 1;
-    
-    // NOTE: The default constructor of Matrix is called while constructing
-    //       the algorithm object.
-    // QUESTION: Shouldn't we implement Matrix::resize() instead of constructing
-    //           matrix again?
-    // NOTE: The k may be larger than |T2| that uses more memory than needed.
-    td_ = BandMatrix<double>(t1.tree_size_, k);
-    // Fill in for initially marking all subtree pairs as not eligable, and for debugging.
-    // td_.fill_with(std::numeric_limits<double>::signaling_NaN());
-    td_.Matrix::fill_with(std::numeric_limits<double>::infinity());
-    // NOTE: The band_width=e for Touzet's fd_ matrix varies. It is however
-    //       smaller or equal to the initialised band_width=k+1. As long as we
-    //       read and write using the original band_width, addresses are not
-    //       messed up. We only have to ensure that we do not iterate over too
-    //       many elements using k instead of e.
-    fd_ = BandMatrix<double>(t1.tree_size_ + 1, k + 1);
-    fd_.Matrix::fill_with(std::numeric_limits<double>::infinity());
 
     // TODO: When computing ted without k, the matrices are newly initialised.
     //       Maybe resizing would be more efficient - but it needs to be
@@ -115,13 +97,33 @@ public:
     while (k < distance) {
       k = k * 2;
       // std::cerr << k << std::endl;
-      td_ = BandMatrix<double>(t1.tree_size_, k);
-      td_.Matrix::fill_with(std::numeric_limits<double>::infinity());
-      fd_ = BandMatrix<double>(t1.tree_size_ + 1, k + 1);
-      fd_.Matrix::fill_with(std::numeric_limits<double>::infinity());
+      // td_ = BandMatrix<double>(t1.tree_size_, k);
+      // td_.Matrix::fill_with(std::numeric_limits<double>::infinity());
+      // fd_ = BandMatrix<double>(t1.tree_size_ + 1, k + 1);
+      // fd_.Matrix::fill_with(std::numeric_limits<double>::infinity());
       distance = ted_k(t1, t2, k);
     }
     return distance;
+  };
+
+  void init_matrices(int t1_size, int k) {
+    using data_structures::BandMatrix;
+    // NOTE: The default constructor of Matrix is called while constructing
+    //       the algorithm object.
+    // QUESTION: Shouldn't we implement Matrix::resize() instead of constructing
+    //           matrix again?
+    // NOTE: The k may be larger than |T2| that uses more memory than needed.
+    td_ = BandMatrix<double>(t1_size, k);
+    // Fill in for initially marking all subtree pairs as not eligable, and for debugging.
+    // td_.fill_with(std::numeric_limits<double>::signaling_NaN());
+    td_.Matrix::fill_with(std::numeric_limits<double>::infinity());
+    // NOTE: The band_width=e for Touzet's fd_ matrix varies. It is however
+    //       smaller or equal to the initialised band_width=k+1. As long as we
+    //       read and write using the original band_width, addresses are not
+    //       messed up. We only have to ensure that we do not iterate over too
+    //       many elements using k instead of e.
+    fd_ = BandMatrix<double>(t1_size + 1, k + 1);
+    fd_.Matrix::fill_with(std::numeric_limits<double>::infinity());
   };
 
   /// Computes the tree edit distance given a maximum number of deletions and insertions.

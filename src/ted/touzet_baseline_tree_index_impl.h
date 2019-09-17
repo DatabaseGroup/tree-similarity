@@ -30,6 +30,8 @@ double TouzetBaselineTreeIndex<CostModel, TreeIndex>::ted_k(const TreeIndex& t1,
   const int t1_size = t1.tree_size_;
   const int t2_size = t2.tree_size_;
 
+  init_matrices(t1_size, k);
+
   // If the pair of root nodes is not in k-strip (input tree size difference is
   // greater than k), return infinity.
   if (std::abs(t1_size - t2_size) > k) {

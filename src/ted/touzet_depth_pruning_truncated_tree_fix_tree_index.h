@@ -32,6 +32,7 @@
 #include "node.h"
 #include "matrix.h"
 #include "ted_algorithm_touzet.h"
+#include "touzet_baseline_tree_index.h"
 
 namespace ted {
 
@@ -54,7 +55,7 @@ public:
 
   // Base class members made visible for this class.
   using TEDAlgorithmTouzet<CostModel, TreeIndex>::td_;
-  using TouzetBaselineTreeIndex<CostModel, TreeIndex>::fd_;
+  using TEDAlgorithmTouzet<CostModel, TreeIndex>::fd_;
   using TEDAlgorithmTouzet<CostModel, TreeIndex>::e_budget;
   using TEDAlgorithmTouzet<CostModel, TreeIndex>::k_relevant;
   using TouzetBaselineTreeIndex<CostModel, TreeIndex>::TouzetBaselineTreeIndex;
