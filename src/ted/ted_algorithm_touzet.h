@@ -80,9 +80,6 @@ public:
    * When k exceeds the returned distance, the algorithm terminates.
    */
   double ted(const TreeIndex& t1, const TreeIndex& t2) {
-    
-    // Reset subproblem counter.
-    subproblem_counter_ = 0;
 
     // `+1` due to possible 0 size difference - then increase by mutliplication
     // doesn't work.

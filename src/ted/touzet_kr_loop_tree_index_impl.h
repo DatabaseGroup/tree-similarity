@@ -32,6 +32,9 @@ double TouzetKRLoopTreeIndex<CostModel, TreeIndex>::ted_k(const TreeIndex& t1,
 
   init_matrices(t1_size, k);
 
+  // Reset subproblem counter.
+  subproblem_counter_ = 0;
+
   // If the pair of root nodes is not in k-strip (input tree size difference is
   // greater than k), return infinity.
   if (std::abs(t1_size - t2_size) > k) {

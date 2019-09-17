@@ -60,6 +60,7 @@ public:
   using TEDAlgorithmTouzet<CostModel, TreeIndex>::td_;
   using TEDAlgorithmTouzet<CostModel, TreeIndex>::fd_;
   using TEDAlgorithmTouzet<CostModel, TreeIndex>::init_matrices;
+  using TEDAlgorithmTouzet<CostModel, TreeIndex>::subproblem_counter_;
   using TEDAlgorithmTouzet<CostModel, TreeIndex>::e_budget;
   using TEDAlgorithmTouzet<CostModel, TreeIndex>::k_relevant;
   using TEDAlgorithmTouzet<CostModel, TreeIndex>::TEDAlgorithmTouzet;
