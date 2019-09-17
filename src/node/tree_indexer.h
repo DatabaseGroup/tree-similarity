@@ -373,6 +373,12 @@ class TreeIndexTouzetKRSet :
   public ListKR
 {};
 
+class TreeIndexSED :
+  public Constants,
+  public PreLToLabelId,
+  public PostLToLabelId
+{};
+
 /// All tree indexes. Used for correctness tests and prototyping.
 class TreeIndexAll :
   public Constants,
