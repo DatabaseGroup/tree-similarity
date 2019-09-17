@@ -9,6 +9,8 @@
 #include "tree_indexer.h"
 #include "touzet_depth_pruning_truncated_tree_fix_tree_index.h"
 
+// Verifies the number of subproblems that are expected while executing Touzet
+// algorithm. Tests only the depth pruning version of Touzet.
 int main() {
 
   // Type aliases.

@@ -11,6 +11,8 @@
 #include "tree_indexer.h"
 #include "touzet_depth_pruning_truncated_tree_fix_tree_index.h"
 
+// Verifies the correctness of the values stored in the td matrix after
+// executing Touzet's algorithm. See also a NOTE below.
 int main() {
 
   // Type aliases.

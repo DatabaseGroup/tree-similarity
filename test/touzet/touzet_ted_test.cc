@@ -9,6 +9,9 @@
 #include "bracket_notation_parser.h"
 #include "touzet_depth_pruning_truncated_tree_fix_tree_index.h"
 
+
+// Verifies the return value of Touzet's algorithm. If k is too small, Touzet
+// should return infinity.
 int main() {
 
   // Type aliases.
