@@ -30,12 +30,12 @@ int main() {
   }
 
   // Initialise String Edit Distance algorithm.
-  ted_lb::SEDTreeIndex<CostModel, node::TreeIndexAll> sed_algorithm(ucm);
+  ted_lb::SEDTreeIndex<CostModel, node::TreeIndexSED> sed_algorithm(ucm);
   
   // Initialise two tree indexes.
   // Use TreeIndexAll that is a superset of all algorithms' indexes.
-  node::TreeIndexAll ti1;
-  node::TreeIndexAll ti2;
+  node::TreeIndexSED ti1;
+  node::TreeIndexSED ti2;
 
   // Read test cases from a file line by line.
   for (std::string line; std::getline( test_cases_file, line);) {
