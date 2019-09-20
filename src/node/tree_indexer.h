@@ -373,10 +373,19 @@ class TreeIndexTouzetKRSet :
   public ListKR
 {};
 
+/// Tree index for String Edit Distance algorithm.
 class TreeIndexSED :
   public Constants,
   public PreLToLabelId,
   public PostLToLabelId
+{};
+
+/// Tree index for Constrained Tree Edit Distance agorithm.
+class TreeIndexCTED :
+  public Constants,
+  public PostLToLabelId,
+  public PostLToChildren,
+  public PostLToParent
 {};
 
 /// All tree indexes. Used for correctness tests and prototyping.
