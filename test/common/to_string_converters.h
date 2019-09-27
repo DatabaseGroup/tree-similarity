@@ -41,6 +41,22 @@ const std::string vector_to_string(const std::vector<double>& v) {
   return s;
 };
 
+/// Convert vector of pairs of int values to its string representation.
+/**
+ * Specialized vector_to_string.
+ * \param v Vector of values.
+ * \return String representation of v.
+ */
+const std::string vector_to_string(const std::vector<std::pair<int, int>>& v) {
+  std::string s("{");
+  for (auto e : v) {
+    s += "(" + std::to_string(e.first) + "," + std::to_string(e.second) + "),";
+  }
+  if (s.size() > 1) s.pop_back();
+  s += "}";
+  return s;
+};
+
 /// Convert vector of vectors of values to its string representation.
 /**
  * Specialized vector_to_string.
