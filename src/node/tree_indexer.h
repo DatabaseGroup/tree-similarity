@@ -24,6 +24,7 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
 #include <string>
 #include <type_traits>
 #include "label_dictionary.h"
@@ -302,6 +303,20 @@ class InvertedListDepthToPostL {
   public: std::vector<std::vector<int>> inverted_list_depth_to_postl_;
 };
 
+/// For each label in the source tree, stores postorder ids of nodes that carry it.
+/**
+ * Each list is sorted in postorder.
+ *
+ * The inverted list is a hash map because we use a global LabelDictionary to
+ * assign labels ids for an entire tree collection.
+ *
+ * The postorder ids of nodes carrying a specific label are stored in a
+ * vector.
+ */
+class InvertedListLabelIdToPostL {
+  public: std::unordered_map<int, std::vector<int>> inverted_list_label_id_to_postl_;
+};
+
 /// Tree index for Zhangh and Shasha algorithm.
 class TreeIndexZhangShasha :
   public Constants,
@@ -388,6 +403,18 @@ class TreeIndexCTED :
   public PostLToParent
 {};
 
+/// Tree index for LGM upper bound.
+class TreeIndexLGM :
+  public Constants,
+  public PostLToLabelId,
+  public PostLToSize,
+  public PostLToDepth,
+  public PostLToParent,
+  public PostLToPreL,
+  public PreLToPostL,
+  public InvertedListLabelIdToPostL
+{};
+
 /// All tree indexes. Used for correctness tests and prototyping.
 class TreeIndexAll :
   public Constants,
@@ -420,7 +447,8 @@ class TreeIndexAll :
   public PreLToSpfCost,
   public PreLToSubtreeCost,
   public ListKR,
-  public InvertedListDepthToPostL
+  public InvertedListDepthToPostL,
+  public InvertedListLabelIdToPostL
 {};
 
 /// Main method to index a tree.

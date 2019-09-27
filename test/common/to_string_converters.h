@@ -1,6 +1,7 @@
 #include <string>
 #include <limits>
 #include <cmath>
+#include <unordered_map>
 #include "matrix.h"
 
 namespace common {
@@ -118,6 +119,31 @@ const std::string format_matrix_to_string(const data_structures::Matrix<double>&
     s += "\n";
   }
   s.pop_back();
+  return s;
+};
+
+/// Convert inverted list of label ids to its string representation.
+/**
+ * The string representation lists the elements in ascending order of the keys.
+ *
+ * \param m A hash map of (int, std::vector<int>) pairs.
+ * \return String representation of m.
+ */
+const std::string map_to_string(const std::unordered_map<int, std::vector<int>>& m) {
+  // Sort the elements on keys.
+  std::vector<std::pair<int, std::vector<int>>> sorted_m(m.begin(), m.end());
+  std::sort(sorted_m.begin(), sorted_m.end());
+  // Compose the string.
+  std::string s("{");
+  for (auto& p : sorted_m) {
+    s += "{" + std::to_string(p.first) + ":";
+    for (auto e : p.second) {
+      s += std::to_string(e) + ",";
+    }
+    s.pop_back();
+    s += "}";
+  }
+  s += "}";
   return s;
 };
 

@@ -36,6 +36,7 @@ set(tree_indexer_test_list
   prel_to_subtree_ins_cost_test
   list_kr_test
   inverted_list_depth_to_postl_test
+  inverted_list_label_id_to_postl_test
 )
 
 # Test driver name.

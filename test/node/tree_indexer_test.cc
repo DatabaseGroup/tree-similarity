@@ -28,6 +28,7 @@ int main(int argc, char** argv) {
   std::vector<bool>* v_bool_index;
   std::vector<double>* v_double_index;
   std::vector<long long int>* v_ll_index;
+  std::unordered_map<int, std::vector<int>>* m_ivi_index;
   
   // Index data type:
   const int kVInt = 0; // std::vector<int> (default)
@@ -35,6 +36,7 @@ int main(int argc, char** argv) {
   const int kVBool = 2; // std::vector<bool>
   const int kVDouble = 3; // std::vector<double>
   const int kVLLInt = 4; // std::vector<long long int>
+  const int kMIntVInt = 5; // std::unordered_map<int, std::vector<int>>
   int index_data_type = kVInt;
   // TODO: Change index_data_type in an if statement below if needed.
   
@@ -119,6 +121,9 @@ int main(int argc, char** argv) {
   } else if (index_test_name == "inverted_list_depth_to_postl_test") {
     vv_index = &tia.inverted_list_depth_to_postl_;
     index_data_type = kVVInt;
+  } else if (index_test_name == "inverted_list_label_id_to_postl_test") {
+    m_ivi_index = &tia.inverted_list_label_id_to_postl_;
+    index_data_type = kMIntVInt;
   } else {
     std::cerr << "Error while choosing index to test. Index test name = " + (index_test_name) + "." << std::endl;
     return -1;
@@ -177,6 +182,8 @@ int main(int argc, char** argv) {
         case 3 : computed_results = common::vector_to_string(*v_double_index);
           break;
         case 4 : computed_results = common::vector_to_string(*v_ll_index);
+          break;
+        case 5 : computed_results = common::map_to_string(*m_ivi_index);
           break;
       }
       

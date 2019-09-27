@@ -1,5 +1,5 @@
 // The MIT License (MIT)
-// Copyright (c) 2017 Mateusz Pawlik, Nikolaus Augsten, and Daniel Kocher.
+// Copyright (c) 2019 Mateusz Pawlik.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -134,6 +134,9 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   }
   if constexpr (std::is_base_of<InvertedListDepthToPostL, TreeIndex>::value) {
     ti.inverted_list_depth_to_postl_.clear();
+  }
+  if constexpr (std::is_base_of<InvertedListLabelIdToPostL, TreeIndex>::value) {
+    ti.inverted_list_label_id_to_postl_.clear();
   }
   
   // Orders start with '0'. Are modified by the recursive traversal.
@@ -332,6 +335,11 @@ int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   // PostLToLabelId index
   if constexpr (std::is_base_of<PostLToLabelId, TreeIndex>::value) {
     ti.postl_to_label_id_[start_postorder] = label_id;
+  }
+  
+  // InvertedListLabelIdToPostL index
+  if constexpr (std::is_base_of<InvertedListLabelIdToPostL, TreeIndex>::value) {
+    ti.inverted_list_label_id_to_postl_[label_id].push_back(start_postorder);
   }
   
   // PostRToLabelId index
