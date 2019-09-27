@@ -45,8 +45,8 @@ UnitCostModelLD<Label>::UnitCostModelLD(label::LabelDictionary<Label>& ld) :
     ld_(ld) {};
 
 template <typename Label>
-double UnitCostModelLD<Label>::ren(const unsigned int label_id_1,
-    const unsigned int label_id_2) const {
+double UnitCostModelLD<Label>::ren(const int label_id_1,
+    const int label_id_2) const {
   if (label_id_1 == label_id_2) {
     return 0.0;
   }
@@ -54,11 +54,11 @@ double UnitCostModelLD<Label>::ren(const unsigned int label_id_1,
 };
 
 template <typename Label>
-double UnitCostModelLD<Label>::del(const unsigned int label_id) const {
+double UnitCostModelLD<Label>::del(const int label_id) const {
   return 1.0;
 };
 
 template <typename Label>
-double UnitCostModelLD<Label>::ins(const unsigned int label_id) const {
+double UnitCostModelLD<Label>::ins(const int label_id) const {
   return 1.0;
 };
