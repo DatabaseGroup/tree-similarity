@@ -115,6 +115,15 @@ public:
    */
   std::vector<std::pair<int, int>> lb_mapping_fill_gaps(const TreeIndex& t1,
       const TreeIndex& t2, const int k);
+  /// Initializes the internals of the algorithm for testing intermediate steps.
+  /**
+   * When testing intermediate steps of the algorithm, `t2_label_il_` and
+   * `t2_label_il_start_pos_` have to be initialized for the input trees.
+   * This function is also called in `ted_k`.
+   *
+   * \param t2 TreeIndex of destination tree.
+   */
+  void init(const TreeIndex& t2);
 
 private:
   /// For every label id, stores the starting position of traversing the

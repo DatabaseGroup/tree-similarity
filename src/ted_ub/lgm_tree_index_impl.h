@@ -35,6 +35,19 @@ double LGMTreeIndex<CostModel, TreeIndex>::ted(const TreeIndex& t1,
 template <typename CostModel, typename TreeIndex>
 double LGMTreeIndex<CostModel, TreeIndex>::ted_k(const TreeIndex& t1,
     const TreeIndex& t2, const int k) {
+  // Initialize the internals.
+  init(t2);
+
+  // We don't compute the upper bound for node pairs with size lower bound
+  // greater than threshold.
+  if (std::abs(t1.tree_size_ - t2.tree_size_) > k) {
+    return std::numeric_limits<double>::infinity();
+  }
+  return mapping_cost(t1, t2, lb_mapping_fill_gaps(t1, t2, k));
+};
+
+template <typename CostModel, typename TreeIndex>
+void LGMTreeIndex<CostModel, TreeIndex>::init(const TreeIndex& t2) {
   // Reset subproblem counter.
   subproblem_counter_ = 0;
   
@@ -47,13 +60,6 @@ double LGMTreeIndex<CostModel, TreeIndex>::ted_k(const TreeIndex& t1,
   for (const auto& pair : t2_label_il_) {
     t2_label_il_start_pos_[pair.first] = 0;
   }
-
-  // We don't compute the upper bound for node pairs with size lower bound
-  // greater than threshold.
-  if (std::abs(t1.tree_size_ - t2.tree_size_) > k) {
-    return std::numeric_limits<double>::infinity();
-  }
-  return mapping_cost(t1, t2, lb_mapping_fill_gaps(t1, t2, k));
 };
 
 template <typename CostModel, typename TreeIndex>
@@ -75,13 +81,13 @@ std::vector<std::pair<int, int>> LGMTreeIndex<CostModel, TreeIndex>::lb_mapping(
   std::vector<std::pair<int, int>> mapping;
   int cand_id = 0; // Postorder id of a candidate node in T2 carrying a matching label.
   int end_pos = 0; // Maximum end position for reading postorder ids of nodes with specific label.
-  // int& pos = 0; // Position iterator.
+  int pos = 0; // Position iterator.
   int t1_label_id = 0;
   for (int i = 0; i < t1.tree_size_; ++i) { // Loop in postorder.
     t1_label_id = t1.postl_to_label_id_[i];
     std::vector<int>& candidate_ids = t2_label_il_[t1_label_id]; // Postorder ids of nodes in T2 carrying label t1_label_id.
     // Use 2k+1 window.
-    int& pos = t2_label_il_start_pos_[t1_label_id]; // Start position for reading postorder ids of nodes with specific label.
+    pos = t2_label_il_start_pos_[t1_label_id]; // Start position for reading postorder ids of nodes with specific label.
     end_pos = std::min(pos + 2 * k, (int)candidate_ids.size()-1);
     while (pos <= end_pos) {
       ++subproblem_counter_;
@@ -92,8 +98,7 @@ std::vector<std::pair<int, int>> LGMTreeIndex<CostModel, TreeIndex>::lb_mapping(
       }
       if (cand_id == -1 || i - cand_id > k) {
         // The label has been mapped or we're outside the window from the left side.
-        // NOTE: The line below is done by `++pos;` et the end of while because `pos` is a reference.
-        // ++t2_label_il_start_pos_[t1_label_id]; // For the consecutive values of i we don't need to start before.
+        ++t2_label_il_start_pos_[t1_label_id]; // For the consecutive values of i we don't need to start before.
       } else if (k_relevant(t1, t2, i, cand_id, k)) {
         // The pair can be mapped.
         mapping.push_back({i, cand_id});

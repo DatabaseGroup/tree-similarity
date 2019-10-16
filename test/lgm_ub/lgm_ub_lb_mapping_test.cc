@@ -80,7 +80,9 @@ int main() {
 
       std::string computed_results;
       try {
-        // TODO: LGM needs to be reset somehowe here.
+        // Internals of LGM need to be initialized between test cases because
+        // `ted_k` is not executed.
+        lgm_algorithm.init(ti2);
         computed_results = common::vector_to_string(lgm_algorithm.lb_mapping(ti1, ti2, k));
       } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
