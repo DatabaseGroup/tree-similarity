@@ -1,10 +1,46 @@
+#pragma once
+
 #include <string>
 #include <limits>
 #include <cmath>
 #include <unordered_map>
 #include "matrix.h"
+#include "join_result_element.h"
 
 namespace common {
+
+/// Convert vector of ResultElement to its string representation.
+/**
+ * Sorts the vector in case the result elements don't come in the input order.
+ * \param v Vector of JoinResultElement.
+ * \return String representation of v.
+ */
+std::string vector_to_string(std::vector<join::JoinResultElement>& v) {
+  // Sort the vector using lambda function implemented here.
+  std::sort(v.begin(), v.end(), [](const join::JoinResultElement& a,
+                                   const join::JoinResultElement& b){
+    if (a.tree_id_1 < b.tree_id_1) {
+      return true;
+    } else if (a.tree_id_1 == b.tree_id_1) {
+      if (a.tree_id_2 < b.tree_id_2) {
+        return true;
+      } else if (a.tree_id_2 == b.tree_id_2) {
+        if (a.ted_value < b.ted_value) {
+          return true;
+        }
+      }
+    }
+    return false;
+  });
+  // Convert vector to string.
+  std::string s;
+  for (auto e : v) {
+    s += "{" + std::to_string(e.tree_id_1) + "," + std::to_string(e.tree_id_2)
+        + "," + std::to_string(std::lround(e.ted_value)) + "},";
+  }
+  s.pop_back(); // Delete the last comma.
+  return s;
+}
 
 /// Convert vector of values to its string representation.
 /**

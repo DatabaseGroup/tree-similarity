@@ -45,6 +45,11 @@ public:
    * \return The number of subproblems acountered in the last TED computation.
    */
   long long int get_subproblem_count() { return subproblem_counter_; };
+  
+  /// To initialise VerificationAlgorithm and TreeIndex variables in join algorithms.
+  typedef CostModel AlgsCostModel;
+  typedef TreeIndex AlgsTreeIndex;
+  
 protected:
   /// Cost model.
   const CostModel& c_;
