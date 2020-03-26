@@ -26,7 +26,6 @@
 template <typename Label, typename VerificationAlgorithm>
 TJoinTI<Label, VerificationAlgorithm>::TJoinTI() {
   ld_ = label::LabelDictionary<Label>();
-  // cm_ = typename VerificationAlgorithm::AlgsCostModel(ld_);
   pre_candidates_ = 0;
   sum_subproblem_counter_ = 0;
   number_of_labels_ = 0;

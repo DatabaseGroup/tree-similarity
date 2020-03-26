@@ -107,7 +107,8 @@ int main(int argc, char** argv) {
       }
     }
   } else if (ted_join_algorithm_name == "guha") {
-    // NOTE: Two thresholds took ca. 270s. Thus, one threshold fixed.
+    // NOTE: Three thresholds (1, 6, and 13) took ca. 270s. Thus, one threshold
+    //       is fixed now, threshold 3, and takes ca. 97s.
     for (int i = 3; i <= 3; i += thres_step) {
       std::vector<std::pair<unsigned int, unsigned int>> candidates;
       std::vector<join::JoinResultElement> join_result;

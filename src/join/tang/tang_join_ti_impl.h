@@ -323,7 +323,7 @@ void TangJoinTI<Label, VerificationAlgorithm>::verify_candidates(
   typename VerificationAlgorithm::AlgsTreeIndex ti_2;
 
   // Verify each pair in the candidate set
-  for(auto pair: candidates) {
+  for(const auto& pair: candidates) {
     node::index_tree(ti_1, trees_collection[pair.first], ld, cm);
     node::index_tree(ti_2, trees_collection[pair.second], ld, cm);
     double ted_value = ted_algorithm.ted_k(ti_1, ti_2, distance_threshold);
