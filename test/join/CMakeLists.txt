@@ -6,6 +6,7 @@ set(ted_test_list
   tjoin
   tang
   guha
+  bbjoin
 )
 
 # Test driver name.

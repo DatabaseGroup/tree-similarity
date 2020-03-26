@@ -1,5 +1,3 @@
-#pragma once
-
 #include <iostream>
 #include <string>
 #include <vector>
@@ -15,6 +13,7 @@
 #include "t_join_ti.h"
 #include "tang_join_ti.h"
 #include "guha_join_ti.h"
+#include "bb_join_ti.h"
 
 int main(int argc, char** argv) {
 
@@ -114,6 +113,20 @@ int main(int argc, char** argv) {
       std::vector<join::JoinResultElement> join_result;
       join::GuhaJoinTI<Label, ted::TouzetBaselineTreeIndex<CostModel>> ted_join_algorithm;
       ted_join_algorithm.execute_rsc_join(trees_collection, candidates, join_result, (double)i);
+      if (join_result.size() != results[i - 1]) {
+        std::cout << " ERROR Incorrect join result for threshold " << i << ": " <<
+            join_result.size() << " instead of " << results[i - 1] << std::endl;
+        return -1;
+      }
+    }
+  } else if (ted_join_algorithm_name == "bbjoin") {
+    for (int i = min_thres; i <= max_thres; i += thres_step) {
+      std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>> histogram_collection;
+      std::vector<std::pair<unsigned int, unsigned int>> candidates;
+      std::vector<join::JoinResultElement> join_result;
+      join::BBJoinTI<Label, ted::TouzetBaselineTreeIndex<CostModel>> ted_join_algorithm;
+      ted_join_algorithm.execute_join(trees_collection,
+          histogram_collection, candidates, join_result, (double)i);
       if (join_result.size() != results[i - 1]) {
         std::cout << " ERROR Incorrect join result for threshold " << i << ": " <<
             join_result.size() << " instead of " << results[i - 1] << std::endl;
