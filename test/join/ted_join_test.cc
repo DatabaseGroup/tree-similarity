@@ -13,6 +13,7 @@
 #include "touzet_baseline_tree_index.h"
 #include "naive_join_ti.h"
 #include "t_join_ti.h"
+#include "tang_join_ti.h"
 
 int main(int argc, char** argv) {
 
@@ -64,8 +65,8 @@ int main(int argc, char** argv) {
   // TODO: Naive should do only some thresholds: thresholds 1-16 take < 20sec each
   
   if (ted_join_algorithm_name == "naive") {
-    join::NaiveJoinTI<Label, ted::TouzetBaselineTreeIndex<CostModel>> ted_join_algorithm;
     for (int i = min_thres; i <= max_thres; i += thres_step) {
+      join::NaiveJoinTI<Label, ted::TouzetBaselineTreeIndex<CostModel>> ted_join_algorithm;
       auto join_result = ted_join_algorithm.execute_join(trees_collection, (double)i);
       if (join_result.size() != results[i - 1]) {
         std::cout << " ERROR Incorrect join result for threshold " << i << ": " <<
@@ -74,13 +75,30 @@ int main(int argc, char** argv) {
       }
     }
   } else if (ted_join_algorithm_name == "tjoin") {
-    join::TJoinTI<Label, ted::TouzetBaselineTreeIndex<CostModel>> ted_join_algorithm;
     for (int i = min_thres; i <= max_thres; i += thres_step) {
       std::vector<std::pair<unsigned int, std::vector<label_set_converter::LabelSetElement>>> sets_collection;
       std::vector<std::pair<unsigned int, unsigned int>> candidates;
       std::vector<join::JoinResultElement> join_result;
+      join::TJoinTI<Label, ted::TouzetBaselineTreeIndex<CostModel>> ted_join_algorithm;
       ted_join_algorithm.execute_join(trees_collection,
           sets_collection, candidates, join_result, (double)i);
+      if (join_result.size() != results[i - 1]) {
+        std::cout << " ERROR Incorrect join result for threshold " << i << ": " <<
+            join_result.size() << " instead of " << results[i - 1] << std::endl;
+        return -1;
+      }
+    }
+  } else if (ted_join_algorithm_name == "tang") {
+    // TODO: If TangJoinTI is initialized here, SIGSEGV is reported on label
+    //       comparison in:
+    //       #4  0x000055555557049b in join::TangJoinTI<label::StringLabel, ted::TouzetBaselineTreeIndex<cost_model::UnitCostModelLD<label::StringLabel>, node::TreeIndexTouzetBaseline> >::check_subgraphs (this=0x7fffffffdcf0, left_tree_node=0x555557f54450, right_tree_node=0x555555b73dc0) at /home/mpawlik/Remote/tree-similarity/src/join/tang/tang_join_ti_impl.h:172
+    for (int i = min_thres; i <= max_thres; i += thres_step) {
+      std::unordered_set<std::pair<unsigned int, unsigned int>, join::hashintegerpair> candidates;
+      std::vector<join::JoinResultElement> join_result;
+      std::vector<node::BinaryNode<Label>> binary_trees_collection;
+      join::TangJoinTI<Label, ted::TouzetBaselineTreeIndex<CostModel>> ted_join_algorithm;
+      ted_join_algorithm.execute_join(trees_collection, binary_trees_collection,
+          candidates, join_result, (double)i);
       if (join_result.size() != results[i - 1]) {
         std::cout << " ERROR Incorrect join result for threshold " << i << ": " <<
             join_result.size() << " instead of " << results[i - 1] << std::endl;
