@@ -17,6 +17,7 @@
 #include "histo_join_ti.h"
 #include "dh_join_ti.h"
 #include "lh_join_ti.h"
+#include "ldh_join_ti.h"
 
 int main(int argc, char** argv) {
 
@@ -159,6 +160,20 @@ int main(int argc, char** argv) {
       std::vector<std::pair<unsigned int, unsigned int>> candidates;
       std::vector<join::JoinResultElement> join_result;
       join::LHJoinTI<Label, ted::TouzetBaselineTreeIndex<CostModel>> ted_join_algorithm;
+      ted_join_algorithm.execute_join(trees_collection, histogram_collection,
+          candidates, join_result, (double)i);
+      if (join_result.size() != results[i - 1]) {
+        std::cout << " ERROR Incorrect join result for threshold " << i << ": " <<
+            join_result.size() << " instead of " << results[i - 1] << std::endl;
+        return -1;
+      }
+    }
+  } else if (ted_join_algorithm_name == "ldhjoin") {
+    for (int i = min_thres; i <= max_thres; i += thres_step) {
+      std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>> histogram_collection;
+      std::vector<std::pair<unsigned int, unsigned int>> candidates;
+      std::vector<join::JoinResultElement> join_result;
+      join::LDHJoinTI<Label, ted::TouzetBaselineTreeIndex<CostModel>> ted_join_algorithm;
       ted_join_algorithm.execute_join(trees_collection, histogram_collection,
           candidates, join_result, (double)i);
       if (join_result.size() != results[i - 1]) {

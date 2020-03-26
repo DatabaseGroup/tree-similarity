@@ -10,6 +10,7 @@ set(ted_test_list
   hjoin
   dhjoin
   lhjoin
+  ldhjoin
 )
 
 # Test driver name.
