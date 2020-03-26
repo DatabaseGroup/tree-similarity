@@ -12,6 +12,7 @@
 #include "to_string_converters.h"
 #include "touzet_baseline_tree_index.h"
 #include "naive_join_ti.h"
+#include "t_join_ti.h"
 
 int main(int argc, char** argv) {
 
@@ -53,17 +54,38 @@ int main(int argc, char** argv) {
   parser::BracketNotationParser bnp;
   bnp.parse_collection(trees_collection, "join_test_data.txt");
   
-  join::NaiveJoinTI<Label, ted::TouzetBaselineTreeIndex<CostModel>> ted_join_algorithm;
+  // join::NaiveJoinTI<Label, ted::TouzetBaselineTreeIndex<CostModel>> ted_join_algorithm;
+
+  int min_thres = 1;
+  int max_thres = 15;
+  int thres_step = 5;
   
   // Execute for different thresholds.
   // TODO: Naive should do only some thresholds: thresholds 1-16 take < 20sec each
-  for (int i = 1; i <= 15; i += 5) {
-    auto result_set = ted_join_algorithm.execute_join(trees_collection, (double)i);
-    
-    if (result_set.size() != results[i - 1]) {
-      std::cout << " ERROR Incorrect join result for threshold " << i << ": " <<
-          result_set.size() << " instead of " << results[i - 1] << std::endl;
-      return -1;
+  
+  if (ted_join_algorithm_name == "naive") {
+    join::NaiveJoinTI<Label, ted::TouzetBaselineTreeIndex<CostModel>> ted_join_algorithm;
+    for (int i = min_thres; i <= max_thres; i += thres_step) {
+      auto join_result = ted_join_algorithm.execute_join(trees_collection, (double)i);
+      if (join_result.size() != results[i - 1]) {
+        std::cout << " ERROR Incorrect join result for threshold " << i << ": " <<
+            join_result.size() << " instead of " << results[i - 1] << std::endl;
+        return -1;
+      }
+    }
+  } else if (ted_join_algorithm_name == "tjoin") {
+    join::TJoinTI<Label, ted::TouzetBaselineTreeIndex<CostModel>> ted_join_algorithm;
+    for (int i = min_thres; i <= max_thres; i += thres_step) {
+      std::vector<std::pair<unsigned int, std::vector<label_set_converter::LabelSetElement>>> sets_collection;
+      std::vector<std::pair<unsigned int, unsigned int>> candidates;
+      std::vector<join::JoinResultElement> join_result;
+      ted_join_algorithm.execute_join(trees_collection,
+          sets_collection, candidates, join_result, (double)i);
+      if (join_result.size() != results[i - 1]) {
+        std::cout << " ERROR Incorrect join result for threshold " << i << ": " <<
+            join_result.size() << " instead of " << results[i - 1] << std::endl;
+        return -1;
+      }
     }
   }
   

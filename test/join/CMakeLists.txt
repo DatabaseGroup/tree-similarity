@@ -3,6 +3,7 @@
 # List of tests and test string prefixes.
 set(ted_test_list
   naive
+  tjoin
 )
 
 # Test driver name.
