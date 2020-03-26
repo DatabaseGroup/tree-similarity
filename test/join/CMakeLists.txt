@@ -2,12 +2,13 @@
 
 # List of tests and test string prefixes.
 set(ted_test_list
-  naive
+  naivejoin
   tjoin
-  tang
-  guha
+  tangjoin
+  guhajoin
   bbjoin
-  histo
+  hjoin
+  dhjoin
 )
 
 # Test driver name.
