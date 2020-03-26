@@ -14,6 +14,7 @@
 #include "tang_join_ti.h"
 #include "guha_join_ti.h"
 #include "bb_join_ti.h"
+#include "histo_join_ti.h"
 
 int main(int argc, char** argv) {
 
@@ -31,19 +32,6 @@ int main(int argc, char** argv) {
   
   // Initialise cost model.
   CostModel ucm(ld);
-  
-  // // Initialise a pointer to any TED join algorithm.
-  // join::NaiveJoin<Label, ted::ZhangShashaTreeIndex<CostModel,
-  //     node::TreeIndexZhangShasha>* ted_join_algorithm;
-  // 
-  // // Assign ted algorithm by its name.
-  // if (ted_algorithm_name == "naive") {
-  //   ted_join_algorithm = &zhang_shasha_algorithm;
-  // } else {
-  //   std::cerr << "Error while choosing TED join algorithm to test. TED join algorithm name = " +
-  //       (ted_join_algorithm_name) + "." << std::endl;
-  //   return -1;
-  // }
   
   // Correct results for bolzano dataset (threshold 1 to 15).
   std::vector<unsigned int> results = {9, 37, 61, 109, 196, 344, 476, 596, 704, 840, 946, 1138, 1356, 1498, 1692};
@@ -127,6 +115,22 @@ int main(int argc, char** argv) {
       join::BBJoinTI<Label, ted::TouzetBaselineTreeIndex<CostModel>> ted_join_algorithm;
       ted_join_algorithm.execute_join(trees_collection,
           histogram_collection, candidates, join_result, (double)i);
+      if (join_result.size() != results[i - 1]) {
+        std::cout << " ERROR Incorrect join result for threshold " << i << ": " <<
+            join_result.size() << " instead of " << results[i - 1] << std::endl;
+        return -1;
+      }
+    }
+  } else if (ted_join_algorithm_name == "histo") {
+    for (int i = min_thres; i <= max_thres; i += thres_step) {
+      std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>> label_histogram_collection;
+      std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>> degree_histogram_collection;
+      std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>> leaf_distance_histogram_collection;
+      std::vector<std::pair<unsigned int, unsigned int>> candidates;
+      std::vector<join::JoinResultElement> join_result;
+      join::HJoinTI<Label, ted::TouzetBaselineTreeIndex<CostModel>> ted_join_algorithm;
+      ted_join_algorithm.execute_join(trees_collection, label_histogram_collection, degree_histogram_collection, 
+          leaf_distance_histogram_collection, candidates, join_result, (double)i);
       if (join_result.size() != results[i - 1]) {
         std::cout << " ERROR Incorrect join result for threshold " << i << ": " <<
             join_result.size() << " instead of " << results[i - 1] << std::endl;
