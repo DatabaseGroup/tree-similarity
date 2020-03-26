@@ -14,6 +14,7 @@
 #include "naive_join_ti.h"
 #include "t_join_ti.h"
 #include "tang_join_ti.h"
+#include "guha_join_ti.h"
 
 int main(int argc, char** argv) {
 
@@ -105,7 +106,21 @@ int main(int argc, char** argv) {
         return -1;
       }
     }
+  } else if (ted_join_algorithm_name == "guha") {
+    // NOTE: Two thresholds took ca. 270s. Thus, one threshold fixed.
+    for (int i = 3; i <= 3; i += thres_step) {
+      std::vector<std::pair<unsigned int, unsigned int>> candidates;
+      std::vector<join::JoinResultElement> join_result;
+      join::GuhaJoinTI<Label, ted::TouzetBaselineTreeIndex<CostModel>> ted_join_algorithm;
+      ted_join_algorithm.execute_rsc_join(trees_collection, candidates, join_result, (double)i);
+      if (join_result.size() != results[i - 1]) {
+        std::cout << " ERROR Incorrect join result for threshold " << i << ": " <<
+            join_result.size() << " instead of " << results[i - 1] << std::endl;
+        return -1;
+      }
+    }
   }
+
   
   return 0;
 }

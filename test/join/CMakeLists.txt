@@ -5,6 +5,7 @@ set(ted_test_list
   naive
   tjoin
   tang
+  guha
 )
 
 # Test driver name.

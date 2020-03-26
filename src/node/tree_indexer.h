@@ -403,6 +403,15 @@ class TreeIndexCTED :
   public PostLToParent
 {};
 
+/// Tree index for SED and CTED agorithms.
+class TreeIndexSCTED :
+  public Constants,
+  public PreLToLabelId,
+  public PostLToLabelId,
+  public PostLToChildren,
+  public PostLToParent
+{};
+
 /// Tree index for LGM upper bound.
 class TreeIndexLGM :
   public Constants,
