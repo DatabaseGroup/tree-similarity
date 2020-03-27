@@ -3,68 +3,39 @@
 #include <vector>
 #include <fstream>
 #include <limits>
+#include "to_string_converters.h"
 #include "unit_cost_model.h"
 #include "string_label.h"
 #include "node.h"
 #include "bracket_notation_parser.h"
-#include "touzet.h"
+#include "tree_indexer.h"
+#include "touzet_depth_pruning_truncated_tree_fix_tree_index.h"
 
-
-const std::string format_matrix_to_string(const data_structures::Matrix<double>& m) {
-  std::string s("");
-  for (unsigned int x = 0; x < m.get_rows(); ++x){
-    for (unsigned int y = 0; y < m.get_columns(); ++y){
-      double e = m.read_at(x, y);
-      if (e == std::numeric_limits<double>::infinity()) {
-        s += "  @";
-      } else if (std::isnan(e)) {
-        s += "  -";
-      } else {
-        std::string e_string = std::to_string(e);
-        std::string e_string_int = e_string.substr(0, e_string.find("."));
-        if (e_string_int.length() == 1) {
-          s += "  " + e_string_int;
-        }
-        else if (e_string_int.length() == 2) {
-          s += " " + e_string_int;
-        } else {
-          s += e_string_int;
-        }
-      }
-    }
-    s += "\n";
-  }
-  s.pop_back();
-  return s;
-}
-
-const std::string matrix_to_string(const data_structures::Matrix<double>& m) {
-  std::string s("");
-  for (unsigned int x = 0; x < m.get_rows(); ++x){
-    for (unsigned int y = 0; y < m.get_columns(); ++y){
-      double e = m.read_at(x, y);
-      if (e == std::numeric_limits<double>::infinity()) {
-        s += "@";
-      } else if (std::isnan(e)) {
-        s += "-";
-      } else {
-        std::string e_string = std::to_string(e);
-        std::string e_string_int = e_string.substr(0, e_string.find("."));
-        s += e_string_int;
-      }
-    }
-    s += "\n";
-  }
-  s.pop_back();
-  return s;
-}
-
+// Verifies the correctness of the values stored in the td matrix after
+// executing Touzet's algorithm. See also a NOTE below.
 int main() {
 
+  // Type aliases.
   using Label = label::StringLabel;
-  using CostModel = cost_model::UnitCostModel<Label>;
+  using CostModel = cost_model::UnitCostModelLD<Label>;
+  using LabelDictionary = label::LabelDictionary<Label>;
+  
+  // Initialise label dictionary - separate dictionary for each test tree
+  // becuse it is easier to keep track of label ids.
+  LabelDictionary ld;
+  
+  // Initialise cost model.
+  CostModel ucm(ld);
 
   // Parse test cases from file.
+  // NOTE: Currently there are no NaN values in the matrices because it
+  //       makes the computation easier. We initialise all the values to
+  //       infinity and then modify only those of the relevant subtree
+  //       pairs.
+  //       The expected results using NaN values are in:
+  //       'touzet_td_test_data_with_nan.txt'
+  //       The expected results without memory improvement are in:
+  //       'touzet_td_test_data_without_memory_improvement.txt'
   std::ifstream test_cases_file("touzet_td_test_data.txt");
   if (!test_cases_file.is_open()) {
     std::cerr << "Error while opening file." << std::endl;
@@ -72,7 +43,12 @@ int main() {
   }
 
   // Initialise Touzet's algorithm.
-  ted::Touzet<Label, CostModel> touzet_ted;
+  ted::TouzetDepthPruningTruncatedTreeFixTreeIndex<CostModel, node::TreeIndexAll> touzet_algorithm(ucm);
+
+  // Initialise two tree indexes.
+  // Use TreeIndexAll that is a superset of all algorithms' indexes.
+  node::TreeIndexAll ti1;
+  node::TreeIndexAll ti2;
 
   for (std::string line; std::getline( test_cases_file, line);) {
     if (line[0] == '#') {
@@ -116,27 +92,23 @@ int main() {
       node::Node<Label> t1 = bnp.parse_single(source_tree);
       node::Node<Label> t2 = bnp.parse_single(destination_tree);
 
+      // Index input trees.
+      node::index_tree(ti1, t1, ld, ucm);
+      node::index_tree(ti2, t2, ld, ucm);
+
       // Execute the algorithm to perform node indexing.
       // Tests td_ entries after touzet with depth-based pruning.
-      touzet_ted.touzet_ted_depth_pruning(t1, t2, k_value);
+      touzet_algorithm.ted_k(ti1, ti2, k_value);
 
-      auto touzet_test_items = touzet_ted.get_test_items();
-
-      // NOTE: Currently there are no NaN values in the matrices because it
-      //       makes the computatio easier. We initialise all the values to
-      //       infinity and then modify only those of the relevant subtree
-      //       pairs.
-      //       The expected results using NaN values are in:
-      //       'touzet_td_test_data_with_nan.txt'
-      std::string computed_results = matrix_to_string(touzet_test_items.td);
+      std::string computed_results = common::matrix_to_string(touzet_algorithm.td_);
 
       if (correct_result != computed_results) {
         std::cerr << "Incorrect values in the td matrix:\n" << computed_results << "\ninstead of\n" << correct_result << std::endl;
         std::cerr << "for input trees: " << source_tree << " | " << destination_tree << std::endl;
         std::cerr << "and k: " << k_value << std::endl;
-        std::cerr << format_matrix_to_string(touzet_test_items.td) << std::endl;
+        std::cerr << common::format_matrix_to_string(touzet_algorithm.td_) << std::endl;
         std::cerr << "*************************************************" << std::endl;
-        std::cerr << format_matrix_to_string(touzet_test_items.fd) << std::endl;
+        std::cerr << common::format_matrix_to_string(touzet_algorithm.fd_) << std::endl;
         return -1;
       }
     }

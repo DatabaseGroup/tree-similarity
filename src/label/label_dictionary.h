@@ -27,8 +27,7 @@
 /// strings as labels, one could use this class as a template argument for the
 /// Node class to accomplish this.
 
-#ifndef TREE_SIMILARITY_LABEL_LABEL_DICTIONARY_H
-#define TREE_SIMILARITY_LABEL_LABEL_DICTIONARY_H
+#pragma once
 
 #include <unordered_map>
 
@@ -55,24 +54,22 @@ public:
   ///
   /// \param l A label to insert.
   /// \return The id of the given label.
-  unsigned int insert(const Label& l);
+  int insert(const Label& l);
   /// Removes all elements from the dictionary.
   /// Resets labels_count_ to 0;
   void clear();
   
-  const unsigned int size() const;
+  int size() const;
 private:
   /// A hash map storing the labels.
   /// TODO: Write requirements for Label and update them in string_label.
-  std::unordered_map<Label, unsigned int> dictionary_;
+  std::unordered_map<Label, int> dictionary_;
   /// The number of labels in dictionary. It is also used to assign ids to new
   /// inserted labels.
-  unsigned int labels_count_;
+  int labels_count_;
 };
 
 // Implementation details
 #include "label_dictionary_impl.h"
 
 } // namespace label
-
-#endif // TREE_SIMILARITY_LABEL_LABEL_DICTIONARY_H

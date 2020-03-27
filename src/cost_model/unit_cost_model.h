@@ -19,54 +19,65 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/// \file cost_model/unit_cost_model.h
-///
-/// \details
 /// Contains the declaration of a basic cost model, i.e., the unit costs.
 
-#ifndef TREE_SIMILARITY_COST_MODEL_UNIT_COST_MODEL_H
-#define TREE_SIMILARITY_COST_MODEL_UNIT_COST_MODEL_H
+#pragma once
 
 #include "node.h"
+#include "label_dictionary.h"
 
 namespace cost_model {
 
-/// \class UnitCostModel
-///
-/// \details
-/// Represents the unit cost model to be used for the distance computation.
-/// Costs are generic for different node classes. A cost model has to provide
-/// three cost functions:
-///  - ren(n1, n2); cost of updating the data (label) of n1 to the data (label)
-///    of n2.
-///  - del(n); cost of deleting node n.
-///  - ins(n); cost of inserting node n.
-/// All three cost functions must return an integer.
+// TODO: Deprecated. Substitute with UnitCostModelLD.
 template <class Label>
 struct UnitCostModel {
-    /// Basic rename cost function (unit cost model).
-    ///
-    /// \param node1 The node to be renamed.
-    /// \param node2  The node having the desired name.
-    /// \return Integer cost of renaming node1 to node2.
     int ren(const node::Node<Label>& node1, const node::Node<Label>& node2) const;
-
-    /// Basic delete cost function.
-    ///
-    /// \param node The node to be deleted.
-    /// \return Integer cost of deleting node.
     int del(const node::Node<Label>& node) const;
-
-    /// Basic insert cost function.
-    ///
-    /// \param node The node to be inserted.
-    /// \return Integer cost of inserting node.
     int ins(const node::Node<Label>& node) const;
+};
+
+/// Represents the unit cost model to be used for the distance computation.
+/**
+ * Costs are generic for different node classes. A cost model has to provide
+ * three cost functions:
+ * - ren(label_id_1, label_id_2): cost of renaming label with label_id_1 to
+ *   label with label_id_2.
+ * - del(label_id): cost of deleting node with label_id.
+ * - ins(label_id): cost of inserting node with label_id.
+ * All three cost functions must return a double.
+ */
+template <typename Label>
+struct UnitCostModelLD {
+  /// Label dictionary in case the labels are needed for cost calculations.
+  const label::LabelDictionary<Label>& ld_;
+  
+  /// Constructor. Takes LabelDictionary.
+  UnitCostModelLD(label::LabelDictionary<Label>& ld);
+  
+  /// Basic rename cost function (unit cost model).
+  /**
+   * \param label_id_1 Source label id.
+   * \param label_id_2 Destination label id.
+   * \return Double cost of renaming label_id_1 to label_id_1.
+   */
+  double ren(const int label_id_1, const int label_id_2) const;
+  
+  /// Basic delete cost function.
+  /**
+   * \param label_id Label id to be deleted.
+   * \return Double cost of deleting a node with label_id.
+   */
+  double del(const int label_id) const;
+  
+  /// Basic insert cost function.
+  /**
+   * \param label_id Label id to be inserted.
+   * \return Double cost of inserting a node with label_id.
+   */
+  double ins(const int label_id) const;
 };
 
 // Implementational details
 #include "unit_cost_model_impl.h"
 
 }
-
-#endif // TREE_SIMILARITY_COST_MODEL_UNIT_COST_MODEL_H

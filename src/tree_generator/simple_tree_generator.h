@@ -31,8 +31,7 @@
 ///
 /// Based on https://frosch.cosy.sbg.ac.at/mpawlik/tree-generator
 
-#ifndef TREE_GENERATOR_SIMPLE_TREE_GENERATOR_H
-#define TREE_GENERATOR_SIMPLE_TREE_GENERATOR_H
+#pragma once
 
 #include <iostream>
 #include <vector>
@@ -85,5 +84,3 @@ private:
 #include "simple_tree_generator_impl.h"
 
 };
-
-#endif // TREE_GENERATOR_SIMPLE_TREE_GENERATOR_H

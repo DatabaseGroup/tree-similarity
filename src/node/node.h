@@ -24,8 +24,7 @@
 /// \details
 /// Contains the declaration of the Node class (represents a node in a tree).
 
-#ifndef TREE_SIMILARITY_NODE_NODE_H
-#define TREE_SIMILARITY_NODE_NODE_H
+#pragma once
 
 #include <vector>
 #include <string>
@@ -117,5 +116,3 @@ private:
 #include "node_impl.h"
 
 }
-
-#endif // TREE_SIMILARITY_NODE_NODE_H

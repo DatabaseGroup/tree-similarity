@@ -27,8 +27,7 @@
 /// label frequency order number. Each set holds labels and each label holds all 
 /// elements with that label.
 
-#ifndef TREE_SIMILARITY_JOIN_TJOIN_LABEL_SET_CONVERTER_IMPL_H
-#define TREE_SIMILARITY_JOIN_TJOIN_LABEL_SET_CONVERTER_IMPL_H
+#pragma once
 
 template<typename Label>
 Converter<Label>::Converter() {}
@@ -36,23 +35,23 @@ Converter<Label>::Converter() {}
 template<typename Label>
 void Converter<Label>::assignFrequencyIdentifiers(
     std::vector<node::Node<Label>>& trees_collection,
-    std::vector<std::pair<unsigned int, std::vector<label_set_converter::LabelSetElement>>>& sets_collection) {
+    std::vector<std::pair<int, std::vector<label_set_converter::LabelSetElement>>>& sets_collection) {
   // token_map = {(token, tokcnt) -> id}
-  typename std::unordered_map<Label, unsigned int, labelhash> token_map;
+  typename std::unordered_map<Label, int, labelhash> token_map;
   // token_list = [(#occurrences, data_nr)]
-  std::vector<std::pair<unsigned int, unsigned int>> token_count_list;
+  std::vector<std::pair<int, int>> token_count_list;
 
   // for each tree in the tree collection
   for(const auto& tree: trees_collection) {
     // record = [tokid]
     std::vector<label_set_converter::LabelSetElement> record;
     // {tokid -> 1}
-    std::unordered_map<unsigned int, label_set_converter::LabelSetElement> record_labels;
+    std::unordered_map<int, label_set_converter::LabelSetElement> record_labels;
     // number of nodes of the tree
-    unsigned int tree_size = tree.get_tree_size();
+    int tree_size = tree.get_tree_size();
 
     // postorder id for recursive postorder traversal
-    unsigned int postorder_id = 0;
+    int postorder_id = 0;
 
     // array of records stored in sets_collection
     create_record(tree, postorder_id, tree_size, token_map, record_labels);
@@ -69,7 +68,7 @@ void Converter<Label>::assignFrequencyIdentifiers(
   }
 
   // token_count_list = [tokenfrequency, tokenid]
-  for(unsigned int i = 0; i < next_token_id_; ++i)
+  for(int i = 0; i < next_token_id_; ++i)
     token_count_list.emplace_back(0, i);
   for(const auto& record: sets_collection)
     for(const auto& token: record.second)
@@ -79,13 +78,13 @@ void Converter<Label>::assignFrequencyIdentifiers(
   std::sort(token_count_list.begin(), token_count_list.end(), pairComparator);
 
   // tokenmaplist[tokenid] = frequencyID
-  std::vector<unsigned int> tokenmaplist (token_count_list.size());
-  for(unsigned int i = 0; i < token_count_list.size(); ++i)
+  std::vector<int> tokenmaplist (token_count_list.size());
+  for(std::size_t i = 0; i < token_count_list.size(); ++i)
     tokenmaplist[token_count_list[i].second] = i;
 
   // substitute the tokenIDs with frequencyIDs
   for(auto& record: sets_collection) {
-    for(unsigned int i = 0; i < record.second.size(); ++i)
+    for(std::size_t i = 0; i < record.second.size(); ++i)
       record.second[i].id = tokenmaplist[record.second[i].id];
 
     // sort integers of a record ascending
@@ -93,7 +92,7 @@ void Converter<Label>::assignFrequencyIdentifiers(
 
     // weight of an element in the set up to its position
     int weight_sum = 0;
-    for(unsigned int i = 0; i < record.second.size(); ++i) {
+    for(std::size_t i = 0; i < record.second.size(); ++i) {
       weight_sum += record.second[i].weight;
       record.second[i].weight_so_far = weight_sum;
     }
@@ -107,13 +106,13 @@ void Converter<Label>::assignFrequencyIdentifiers(
 
 template<typename Label>
 int Converter<Label>::create_record(
-    const node::Node<Label>& tree_node, unsigned int& postorder_id, unsigned int tree_size,
-    std::unordered_map<Label, unsigned int, labelhash>& token_map, 
-    std::unordered_map<unsigned int, label_set_converter::LabelSetElement>& record_labels) {
+    const node::Node<Label>& tree_node, int& postorder_id, int tree_size,
+    std::unordered_map<Label, int, labelhash>& token_map, 
+    std::unordered_map<int, label_set_converter::LabelSetElement>& record_labels) {
 
   // number of children = subtree_size - 1
   // subtree_size = 1 -> actual node + sum of children
-  unsigned int subtree_size = 1;
+  int subtree_size = 1;
 
   // increase depth for children
   ++actual_depth_;
@@ -135,7 +134,7 @@ int Converter<Label>::create_record(
   std::string label_str = tree_node.label().to_string();
 
   // lookup key in token_map
-  typename std::unordered_map<Label, unsigned int, labelhash>::const_iterator 
+  typename std::unordered_map<Label, int, labelhash>::const_iterator 
                               token_in_map = token_map.find(key);
 
   // if tokenkey not in map
@@ -173,10 +172,6 @@ int Converter<Label>::create_record(
 }
 
 template<typename Label>
-const unsigned int Converter<Label>::get_number_of_labels() const {
+int Converter<Label>::get_number_of_labels() const {
   return next_token_id_;
 }
-
-
-
-#endif // TREE_SIMILARITY_JOIN_TJOIN_LABEL_SET_CONVERTER_IMPL_H

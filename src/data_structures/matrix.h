@@ -32,8 +32,7 @@
 /// down the actual access.
 
 
-#ifndef MATRIX_H
-#define MATRIX_H
+#pragma once
 
 #include <memory>
 #include <vector>
@@ -190,4 +189,3 @@ const ElementType& BandMatrix<ElementType>::read_at(size_t row, size_t col) cons
 
 } // namespace data_structures
 
-#endif // MATRIX_H

@@ -25,8 +25,7 @@
 /// Implements an algorithm that converts a collection of trees into collections 
 /// of label, leaf distance, and degree histograms. 
 
-#ifndef TREE_SIMILARITY_JOIN_HISTOGRAM_HISTOGRAM_CONVERTER_IMPL_H
-#define TREE_SIMILARITY_JOIN_HISTOGRAM_HISTOGRAM_CONVERTER_IMPL_H
+#pragma once
 
 template<typename Label>
 Converter<Label>::Converter() {}
@@ -34,20 +33,20 @@ Converter<Label>::Converter() {}
 template<typename Label>
 void Converter<Label>::create_histogram(
     const std::vector<node::Node<Label>>& trees_collection,
-    std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& label_histogram_collection,
-    std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& degree_histogram_collection,
-    std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& leaf_distance_histogram_collection) {
+    std::vector<std::pair<int, std::unordered_map<int, int>>>& label_histogram_collection,
+    std::vector<std::pair<int, std::unordered_map<int, int>>>& degree_histogram_collection,
+    std::vector<std::pair<int, std::unordered_map<int, int>>>& leaf_distance_histogram_collection) {
 
   // for each tree in the tree collection
   for (const auto& tree: trees_collection) {
     // stores the number of nodes per label
-    std::unordered_map<unsigned int, unsigned int> label_histogram;
+    std::unordered_map<int, int> label_histogram;
     // stores the number of nodes per leaf distance
-    std::unordered_map<unsigned int, unsigned int> leaf_dist_histogram;
+    std::unordered_map<int, int> leaf_dist_histogram;
     // stores the number of nodes per degree
-    std::unordered_map<unsigned int, unsigned int> degree_histogram;
+    std::unordered_map<int, int> degree_histogram;
     // size of the current tree
-    unsigned int tree_size = 0;
+    int tree_size = 0;
     // traverse tree and store number of nodes per label
     create_histrograms(tree, label_histogram, degree_histogram, leaf_dist_histogram, tree_size);
     // add label histogram to collection
@@ -62,15 +61,15 @@ void Converter<Label>::create_histogram(
 template<typename Label>
 int Converter<Label>::create_histrograms(
     const node::Node<Label>& tree_node, 
-    std::unordered_map<unsigned int, unsigned int>& label_histogram, 
-    std::unordered_map<unsigned int, unsigned int>& degree_histogram, 
-    std::unordered_map<unsigned int, unsigned int>& leaf_dist_histogram, 
-    unsigned int& tree_size) {
+    std::unordered_map<int, int>& label_histogram, 
+    std::unordered_map<int, int>& degree_histogram, 
+    std::unordered_map<int, int>& leaf_dist_histogram, 
+    int& tree_size) {
 
   // count number of children
-  unsigned int number_of_children = 0;
+  int number_of_children = 0;
   // the leaf distance is the minimum leaf distance of a nodes children + 1
-  unsigned int max_child_leaf_dist = 0;
+  int max_child_leaf_dist = 0;
 
   // do recursively for all children
   for (const auto& child: tree_node.get_children()) {
@@ -94,7 +93,7 @@ int Converter<Label>::create_histrograms(
   std::string label_str = tree_node.label().to_string();
 
   // lookup key in token_map
-  typename std::unordered_map<Label, unsigned int, labelhash>::const_iterator 
+  typename std::unordered_map<Label, int, labelhash>::const_iterator 
                               label_in_map = label_id_map_.find(key);
   // if label not in map
   if(label_in_map == label_id_map_.end())
@@ -110,8 +109,6 @@ int Converter<Label>::create_histrograms(
 }
 
 template<typename Label>
-const unsigned int Converter<Label>::get_number_of_labels() const {
+int Converter<Label>::get_number_of_labels() const {
   return label_id_;
 }
-
-#endif // TREE_SIMILARITY_JOIN_HISTOGRAM_HISTOGRAM_CONVERTER_IMPL_H

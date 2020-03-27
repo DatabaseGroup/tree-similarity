@@ -24,28 +24,25 @@
 /// \details
 /// Common data stored for each set.
 
-#ifndef TREE_SIMILARITY_JOIN_TJOIN_SET_DATA_H
-#define TREE_SIMILARITY_JOIN_TJOIN_SET_DATA_H
+#pragma once
 
 namespace candidate_index {
 
 /// This is an element holding data of a set.
 struct SetData {
   /// Overlap so far for a specific set.
-  unsigned int overlap = 0;
+  int overlap = 0;
   /// Index prefix for this set to avoid recomputations.
-  unsigned int prefix = 0;
+  int prefix = 0;
   /// Constructor.
   SetData();
   /// Constructor.
   SetData(int overlap, int prefix);
 };
 
-candidate_index::SetData::SetData() {};
+candidate_index::SetData::SetData() {}
 
 candidate_index::SetData::SetData(int overlap, int prefix)
-    : overlap(overlap), prefix(prefix) {};
+    : overlap(overlap), prefix(prefix) {}
 
 }
-
-#endif // TREE_SIMILARITY_JOIN_TJOIN_SET_DATA_H

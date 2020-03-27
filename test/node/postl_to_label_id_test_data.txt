@@ -1,0 +1,18 @@
+# Test case 1 - single node
+{a}
+{0}
+# Test case 2 - standard tree
+{a{b{c}{d{e}}}{f{g}{h{i{j}{k}}}}{l{m}}}
+{2,4,3,1,6,9,10,8,7,5,12,11,0}
+# Test case 3 - a path
+{{{{{{{{{{{{{{{{{{{{}}}}}}}}}}}}}}}}}}}}
+{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+# Test case 4 - right-branch tree
+{{}{{}{{}{{}{{}{}}}}}}
+{0,0,0,0,0,0,0,0,0,0,0}
+# Test case 5 - left-branch tree
+{{{{{{}{}}{}}{}}{}}{}}
+{0,0,0,0,0,0,0,0,0,0,0}
+# Test case 6 - standard tree, less labels than nodes
+{a{b{c}{c{b}}}{d{b}{d{c{a}{b}}}}{c{a}}}
+{2,1,2,1,1,0,1,2,3,3,0,2,0}

@@ -43,8 +43,7 @@
 /// TODO: This parses to StringLabel only. Should the label's type be assigned
 ///       based on user's choice?
 
-#ifndef TREE_SIMILARITY_PARSER_BRACKET_NOTATION_PARSER_H
-#define TREE_SIMILARITY_PARSER_BRACKET_NOTATION_PARSER_H
+#pragma once
 
 #include "node.h"
 #include "string_label.h"
@@ -123,5 +122,3 @@ private:
 #include "bracket_notation_parser_impl.h"
 
 }
-
-#endif // TREE_SIMILARITY_PARSER_BRACKET_NOTATION_PARSER_H

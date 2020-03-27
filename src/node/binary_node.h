@@ -25,8 +25,7 @@
 /// Contains the declaration of the BinaryNode class (represents a node in a 
 /// binary tree).
 
-#ifndef TREE_SIMILARITY_NODE_BINARY_NODE_H
-#define TREE_SIMILARITY_NODE_BINARY_NODE_H
+#pragma once
 
 #include <string>
 
@@ -122,10 +121,10 @@ public:
   void get_all_labels_recursion(std::vector<std::string>& labels) const;
 
   /// Prints the tree in inorder.
-  const void print_tree_inorder() const;
+  void print_tree_inorder() const;
 
   /// Prints the tree in postorder.
-  const void print_tree_postorder() const;
+  void print_tree_postorder() const;
 
   /// Returns a vector that contains all nodes of a tree in postorder.
   void get_node_postorder_vector(std::vector<BinaryNode<Label>*>& postorder_vector);
@@ -141,22 +140,22 @@ public:
   bool is_leaf() const;
 
   /// Set subgraph size.
-  void set_subgraph_size(unsigned int subgraph_size);
+  void set_subgraph_size(int subgraph_size);
 
   /// Get subgraph size.
-  unsigned int get_subgraph_size();
+  int get_subgraph_size();
 
   /// Set detached.
-  void set_detached(unsigned int detached);
+  void set_detached(int detached);
 
   /// Get detached.
-  unsigned int get_detached();
+  int get_detached();
 
   /// Set postorder id.
-  void set_postorder_id(unsigned int postorder_id);
+  void set_postorder_id(int postorder_id);
 
   /// Get postorder id.
-  unsigned int get_postorder_id();
+  int get_postorder_id();
 
 // Member variables
 private:
@@ -170,16 +169,14 @@ private:
 
   /// Needed for partition-based similarity join
   /// Subgraph size
-  unsigned int subgraph_size_ = 0;
+  int subgraph_size_ = 0;
   /// Number of nodes that have been cut off in the subtree rooted at this node
-  unsigned int detached_ = 0;
+  int detached_ = 0;
   /// Number of nodes that have been cut off in the subtree rooted at this node
-  unsigned int postorder_id_ = 0;
+  int postorder_id_ = 0;
 };
 
 // Implementation details
 #include "binary_node_impl.h"
 
 }
-
-#endif // TREE_SIMILARITY_NODE_BINARY_NODE_H

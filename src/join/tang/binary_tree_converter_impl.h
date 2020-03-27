@@ -25,8 +25,7 @@
 /// Implements an algorithm that converts a collection of trees into a collection 
 /// of binary trees.
 
-#ifndef TREE_SIMILARITY_JOIN_TANG_BINARY_TREE_CONVERTER_IMPL_H
-#define TREE_SIMILARITY_JOIN_TANG_BINARY_TREE_CONVERTER_IMPL_H
+#pragma once
 
 template<typename Label>
 Converter<Label>::Converter() {}
@@ -77,5 +76,3 @@ void Converter<Label>::create_binary_tree(
     first_child = false;
   }
 }
-
-#endif // TREE_SIMILARITY_JOIN_TANG_BINARY_TREE_CONVERTER_IMPL_H

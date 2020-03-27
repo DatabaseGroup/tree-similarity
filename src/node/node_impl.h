@@ -24,8 +24,7 @@
 /// \details
 /// Contains the implementation of the Node class.
 
-#ifndef TREE_SIMILARITY_NODE_NODE_IMPL_H
-#define TREE_SIMILARITY_NODE_NODE_IMPL_H
+#pragma once
 
 template<class Label>
 Node<Label>::Node(ConstReference label) : label_(label) {}
@@ -78,5 +77,3 @@ template<class Label>
 bool Node<Label>::is_leaf() const {
   return children_.size() == 0;
 }
-
-#endif // TREE_SIMILARITY_NODE_NODE_IMPL_H

@@ -25,8 +25,7 @@
 /// Implements a candidate index that efficiently and effectively returns tree 
 /// pairs that satisfy the structural filter. 
 
-#ifndef TREE_SIMILARITY_JOIN_TJOIN_CANDIDATE_INDEX_IMPL_H
-#define TREE_SIMILARITY_JOIN_TJOIN_CANDIDATE_INDEX_IMPL_H
+#pragma once
 
 CandidateIndex::CandidateIndex() {
   pre_candidates_ = 0;
@@ -34,33 +33,33 @@ CandidateIndex::CandidateIndex() {
 }
 
 void CandidateIndex::lookup(
-    std::vector<std::pair<unsigned int, std::vector<label_set_converter::LabelSetElement>>>& sets_collection,
-    std::vector<std::pair<unsigned int, unsigned int>>& join_candidates,
-    const unsigned int number_of_labels, 
+    std::vector<std::pair<int, std::vector<label_set_converter::LabelSetElement>>>& sets_collection,
+    std::vector<std::pair<int, int>>& join_candidates,
+    const int number_of_labels, 
     const double distance_threshold) {
   // inverted list index.
   std::vector<candidate_index::InvertedListElement> il_index(number_of_labels);
   // containing specific data of a set. (e.g. actual overlap, index prefix)
   std::vector<candidate_index::SetData> set_data(sets_collection.size());
   // position in label set while processing r
-  unsigned int p = 0;
+  std::size_t p = 0;
 
   // iterate through all sets in the given collection
-  std::vector<std::pair<unsigned int, std::vector<label_set_converter::LabelSetElement>>>::iterator r_it = sets_collection.begin();
+  std::vector<std::pair<int, std::vector<label_set_converter::LabelSetElement>>>::iterator r_it = sets_collection.begin();
   for (; r_it != sets_collection.end(); ++r_it) {
-    std::pair<unsigned int, std::vector<label_set_converter::LabelSetElement>>& r_pair = *r_it; // dereference iterator to current set once
+    std::pair<int, std::vector<label_set_converter::LabelSetElement>>& r_pair = *r_it; // dereference iterator to current set once
     std::vector<label_set_converter::LabelSetElement> r = r_pair.second; // dereference iterator to current set once
-    unsigned int r_id = r_it - sets_collection.begin(); // identifier for r (line number)
-    std::vector<unsigned int> M; // holds the set identifiers of the candidate pairs, 
+    int r_id = r_it - sets_collection.begin(); // identifier for r (line number)
+    std::vector<int> M; // holds the set identifiers of the candidate pairs, 
                                  // the overlap is stored in the set_data
-    unsigned int r_size = sets_collection[r_id].first; // number of elements in r
+    int r_size = sets_collection[r_id].first; // number of elements in r
 
     // *****************************
     // ** Generate pre candidates **
     // *****************************
     // add all small trees that does not have to share a common label in the prefix
     if(r_size <= distance_threshold) 
-      for(unsigned int i = 0; i < r_id; ++i) {
+      for(int i = 0; i < r_id; ++i) {
         if(set_data[i].overlap == 0) 
           M.push_back(i); // if not, add it to the candidate set M
         ++set_data[i].overlap; // increase overlap for set i
@@ -72,19 +71,19 @@ void CandidateIndex::lookup(
     while(p < r.size()) {
       // remove all entries in the inverted list index up to the position where 
       // the size is greater than the lower bound
-      for(unsigned int s = il_index[r[p].id].offset; s < il_index[r[p].id].element_list.size() &&
+      for(std::size_t s = il_index[r[p].id].offset; s < il_index[r[p].id].element_list.size() &&
           sets_collection[il_index[r[p].id].element_list[s].first].first < r_size - distance_threshold; s++)
         ++il_index[r[p].id].offset;
 
       // iterate through all remaining sets for the current token r[p] in the 
       // inverted list index and add them to the candidates
-      for(unsigned int s = il_index[r[p].id].offset; s < il_index[r[p].id].element_list.size(); s++) {
-        unsigned int set = il_index[r[p].id].element_list[s].first;
-        unsigned int pos = il_index[r[p].id].element_list[s].second;
+      for(std::size_t s = il_index[r[p].id].offset; s < il_index[r[p].id].element_list.size(); s++) {
+        int set = il_index[r[p].id].element_list[s].first;
+        int pos = il_index[r[p].id].element_list[s].second;
         // increase the number of lookups in the inverted list
         ++il_lookups_;
 
-        unsigned int tau_valid = structural_mapping(r[p], sets_collection[set].second[pos], distance_threshold);
+        int tau_valid = structural_mapping(r[p], sets_collection[set].second[pos], distance_threshold);
         if(tau_valid != 0 && set_data[set].overlap == 0) 
           M.push_back(set); // if not, add it to the candidate set M
         set_data[set].overlap += tau_valid;
@@ -102,17 +101,17 @@ void CandidateIndex::lookup(
     pre_candidates_ += M.size();
     
     // add all elements in the prefix of r in the inverted list
-    for(unsigned int p = 0; p < set_data[r_id].prefix; p++)
+    for(int p = 0; p < set_data[r_id].prefix; p++)
       il_index[r[p].id].element_list.push_back(std::make_pair(r_id, p));
 
     // *****************************
     // *** Verify pre candidates ***
     // *****************************
     // compute structural filter for each candidate (r, s) in M
-    for (unsigned int m: M) {
+    for (int m: M) {
       std::vector<label_set_converter::LabelSetElement>& s = sets_collection[m].second;
       // prefix positions for sets r and s in the candidate pair
-      int pr = 0, ps = 0;
+      std::size_t pr = 0, ps = 0;
 
       // check last prefix position; the smaller one starts at prefix position, 
       // the greater one starts at the overlap
@@ -146,9 +145,9 @@ bool CandidateIndex::structural_filter(
     std::vector<label_set_converter::LabelSetElement>& r, 
     std::vector<label_set_converter::LabelSetElement>& s, 
     const double t, 
-    unsigned int olap, 
-    unsigned int pr, 
-    unsigned int ps, 
+    int olap, 
+    int pr, 
+    int ps, 
     int distance_threshold, 
     int maxr, 
     int maxs) {
@@ -157,7 +156,7 @@ bool CandidateIndex::structural_filter(
   // stop if the threshold is reached or cannot be reached anymore
   while (maxr >= t && maxs >= t && olap < t) {
     if (r[pr].id == s[ps].id) {
-      unsigned int tau_valid = structural_mapping(r[pr], s[ps], distance_threshold);
+      int tau_valid = structural_mapping(r[pr], s[ps], distance_threshold);
       olap += tau_valid;
       maxr -= r[pr].weight - tau_valid;
       maxs -= s[ps].weight - tau_valid;
@@ -174,12 +173,12 @@ bool CandidateIndex::structural_filter(
   return olap >= t;
 }
 
-unsigned int CandidateIndex::structural_mapping(
+int CandidateIndex::structural_mapping(
     label_set_converter::LabelSetElement& sv_r, 
     label_set_converter::LabelSetElement& sv_s,
     const double distance_threshold) {
 
-  unsigned int tau_valid = 0;
+  int tau_valid = 0;
   // check if duplicates exist
   if(sv_s.weight == 1 && sv_r.weight == 1) {
     // no duplicates -> do positional filter
@@ -196,10 +195,10 @@ unsigned int CandidateIndex::structural_mapping(
       se = std::ref(sv_s);
       le = std::ref(sv_r);
     }
-    unsigned int pid_lower_bound_start = 0;
+    std::size_t pid_lower_bound_start = 0;
     for(int i = 0; i < se.get().weight; ++i) {
       label_set_converter::StructuralVector& left_hand_duplicate = se.get().struct_vect[i];
-      unsigned int left_side_k_window = std::max(0.0, left_hand_duplicate.postorder_id - distance_threshold);
+      int left_side_k_window = std::max(0.0, left_hand_duplicate.postorder_id - distance_threshold);
 
       // skip duplicates at the beginning that doesn't satisfy the postorder lower bound
       while(le.get().struct_vect[pid_lower_bound_start].postorder_id < left_side_k_window && pid_lower_bound_start < le.get().struct_vect.size())
@@ -226,17 +225,15 @@ unsigned int CandidateIndex::structural_mapping(
   return tau_valid;
 }
 
-unsigned long int CandidateIndex::get_number_of_pre_candidates() const {
+long int CandidateIndex::get_number_of_pre_candidates() const {
   return pre_candidates_;
 }
 
 void CandidateIndex::set_number_of_pre_candidates(
-    const unsigned long int pc) {
+    const long int pc) {
   pre_candidates_ = pc;
 }
 
-unsigned long int CandidateIndex::get_number_of_il_lookups() const {
+long int CandidateIndex::get_number_of_il_lookups() const {
   return il_lookups_;
 }
-
-#endif // TREE_SIMILARITY_JOIN_TJOIN_CANDIDATE_INDEX_IMPL_H

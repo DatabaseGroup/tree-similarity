@@ -19,17 +19,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/// \file command_line.cc
-///
-/// \details
-/// TED command-line interface.
+#include <iostream>
+#include <sys/time.h>
+#include <sys/resource.h>
+#include "node.h"
+#include "string_label.h"
+#include "unit_cost_model.h"
+#include "bracket_notation_parser.h"
+#include "lgm_tree_index.h"
 
-#include "main.h"
+/// Simple command-line tool for executing Tree Edit Distance.
 
 int main(int argc, char** argv) {
 
   using Label = label::StringLabel;
-  using CostModel = cost_model::UnitCostModel<Label>;
+  using CostModelLD = cost_model::UnitCostModelLD<Label>;
+  using LabelDictionary = label::LabelDictionary<Label>;
 
   // Runtime measurement variables (rusage).
   rusage before_rusage;
@@ -39,7 +44,7 @@ int main(int argc, char** argv) {
   unsigned int runtime;
 
   // Verify parameters.
-  if (argc != 3 && argc != 4 && argc != 5) {
+  if (argc != 5) {
     std::cerr << "Incorrect number of parameters." << std::endl;
     return -1;
   }
@@ -51,53 +56,53 @@ int main(int argc, char** argv) {
 
   parser::BracketNotationParser bnp;
   // Verify the input format before parsing.
-  if (!bnp.validate_input(argv[1])) {
+  
+
+  getrusage(RUSAGE_SELF, &before_rusage);
+  std::ifstream tree_file(argv[1]);
+  std::string tree_string;
+  std::getline(tree_file, tree_string);
+  if (!bnp.validate_input(tree_string)) {
     std::cerr << "Incorrect format of source tree. Is the number of opening and closing brackets equal?" << std::endl;
     return -1;
   }
-  if (!bnp.validate_input(argv[2])) {
-    std::cerr << "Incorrect format of destination tree. Is the number of opening and closing brackets equal?" << std::endl;
+  const node::Node<Label> source_tree = bnp.parse_single(tree_string);
+  tree_file.close();
+  tree_file = std::ifstream(argv[2]);
+  std::getline(tree_file, tree_string);
+  if (!bnp.validate_input(tree_string)) {
+    std::cerr << "Incorrect format of source tree. Is the number of opening and closing brackets equal?" << std::endl;
     return -1;
   }
-
-  getrusage(RUSAGE_SELF, &before_rusage);
-  const node::Node<Label> source_tree = bnp.parse_single(argv[1]);
-  const node::Node<Label> destination_tree = bnp.parse_single(argv[2]);
+  const node::Node<Label> destination_tree = bnp.parse_single(tree_string);
+  tree_file.close();
   getrusage(RUSAGE_SELF, &after_rusage);
   timersub(&after_rusage.ru_utime, &before_rusage.ru_utime, &runtime_utime);
   timersub(&after_rusage.ru_stime, &before_rusage.ru_stime, &runtime_stime);
   runtime = runtime_utime.tv_usec + runtime_utime.tv_sec * 1000000 +
       runtime_stime.tv_usec + runtime_stime.tv_sec * 1000000;
-  std::cout << runtime << " ";
+  std::cout << runtime << " " << source_tree.get_tree_size() << " " << destination_tree.get_tree_size() << " ";
 
-  if (argc == 3) {
-    ted::ZhangShasha<Label, CostModel> zs_ted;
+  if (std::strcmp(argv[3], "lgm") == 0) {
+    int k = std::stoi(argv[4]);
     getrusage(RUSAGE_SELF, &before_rusage);
-    std::cout << zs_ted.zhang_shasha_ted(source_tree, destination_tree);
+    LabelDictionary ld;
+    CostModelLD ucm(ld);
+    ted_ub::LGMTreeIndex<CostModelLD, node::TreeIndexLGM> lgm_algorithm(ucm);
+    node::TreeIndexLGM ti1;
+    node::TreeIndexLGM ti2;
+    node::index_tree(ti1, source_tree, ld, ucm);
+    node::index_tree(ti2, destination_tree, ld, ucm);
+    lgm_algorithm.init(ti2);
+    std::cout << lgm_algorithm.ted_k(ti1, ti2, k);
     getrusage(RUSAGE_SELF, &after_rusage);
-    std::cout << " " << zs_ted.get_subproblem_count();
+    std::cout << " " << lgm_algorithm.get_subproblem_count();
     timersub(&after_rusage.ru_utime, &before_rusage.ru_utime, &runtime_utime);
     timersub(&after_rusage.ru_stime, &before_rusage.ru_stime, &runtime_stime);
     runtime = runtime_utime.tv_usec + runtime_utime.tv_sec * 1000000 +
         runtime_stime.tv_usec + runtime_stime.tv_sec * 1000000;
     std::cout << " " << runtime << std::endl;
   }
-  if (argc > 3) {
-    int k = std::stoi(argv[3]);
-    ted::Touzet<Label, CostModel> touzet_ted;
-    getrusage(RUSAGE_SELF, &before_rusage);
-    if (argc == 5) {
-      std::cout << touzet_ted.touzet_ted_depth_pruning(source_tree, destination_tree, k);
-    } else {
-      std::cout << touzet_ted.touzet_ted(source_tree, destination_tree, k);
-    }
-    getrusage(RUSAGE_SELF, &after_rusage);
-    std::cout << " " << touzet_ted.get_subproblem_count();
-    timersub(&after_rusage.ru_utime, &before_rusage.ru_utime, &runtime_utime);
-    timersub(&after_rusage.ru_stime, &before_rusage.ru_stime, &runtime_stime);
-    runtime = runtime_utime.tv_usec + runtime_utime.tv_sec * 1000000 +
-        runtime_stime.tv_usec + runtime_stime.tv_sec * 1000000;
-    std::cout << " " << runtime << std::endl;
-  }
+
   return 0;
 }

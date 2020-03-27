@@ -25,8 +25,7 @@
 /// Implements an algorithm that converts a collection of trees into a collection 
 /// of binary branch histograms. 
 
-#ifndef TREE_SIMILARITY_JOIN_BINARY_BRANCHES_BIN_BRANCH_HISTOGRAM_CONVERTER_IMPL_H
-#define TREE_SIMILARITY_JOIN_BINARY_BRANCHES_BIN_BRANCH_HISTOGRAM_CONVERTER_IMPL_H
+#pragma once
 
 template<typename Label>
 Converter<Label>::Converter() {}
@@ -34,14 +33,14 @@ Converter<Label>::Converter() {}
 template<typename Label>
 void Converter<Label>::create_histogram(
     const std::vector<node::Node<Label>>& trees_collection,
-    std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& histogram_collection) {
+    std::vector<std::pair<int, std::unordered_map<int, int>>>& histogram_collection) {
 
   // for each tree in the tree collection
   for (const auto& tree: trees_collection) {
     // stores the number of nodes per binary branch
-    std::unordered_map<unsigned int, unsigned int> bb_histogram;
+    std::unordered_map<int, int> bb_histogram;
     // stores the number of nodes per binary branch
-    unsigned int tree_size = 0;
+    int tree_size = 0;
     // traverse tree and store number of nodes per binary branch
     create_bin_branch_histrogram(tree, empty_string_, bb_histogram, tree_size);
     // add binary branch histogram to collection
@@ -53,11 +52,11 @@ template<typename Label>
 void Converter<Label>::create_bin_branch_histrogram(
     const node::Node<Label>& tree_node, 
     std::string& right_sibling_label, 
-    std::unordered_map<unsigned int, unsigned int>& bb_histogram, 
-    unsigned int& tree_size) {
+    std::unordered_map<int, int>& bb_histogram, 
+    int& tree_size) {
 
   auto& children = tree_node.get_children();
-  unsigned int nr_of_children = children.size();
+  int nr_of_children = children.size();
   std::string bb_string = tree_node.label().to_string();
 
   // append left most child label
@@ -69,7 +68,7 @@ void Converter<Label>::create_bin_branch_histrogram(
   bb_string += right_sibling_label;
 
   // lookup binary branch in bb_map
-  typename std::unordered_map<std::string, unsigned int>::const_iterator 
+  typename std::unordered_map<std::string, int>::const_iterator 
                               bb_in_map = bb_id_map_.find(bb_string);
   // if binary branch not in map
   if(bb_in_map == bb_id_map_.end())
@@ -80,7 +79,7 @@ void Converter<Label>::create_bin_branch_histrogram(
   ++bb_histogram[bb_id_map_[bb_string]];
 
   // do recursively for all children
-  for (unsigned int i = 0; i < nr_of_children; i++) {
+  for (int i = 0; i < nr_of_children; i++) {
     std::string rs_string = empty_string_;
     if(i < nr_of_children - 1)
       rs_string = children[i+1].label().to_string();
@@ -91,8 +90,6 @@ void Converter<Label>::create_bin_branch_histrogram(
 }
 
 template<typename Label>
-const unsigned int Converter<Label>::get_number_of_bb() const {
+int Converter<Label>::get_number_of_bb() const {
   return bb_id_;
 }
-
-#endif // TREE_SIMILARITY_JOIN_BINARY_BRANCHES_BIN_BRANCH_HISTOGRAM_CONVERTER_IMPL_H

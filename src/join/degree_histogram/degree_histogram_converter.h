@@ -25,9 +25,7 @@
 /// Takes a collection of trees and and converts them into a histogram of degree 
 /// values. The histogram stores the number of nodes with a certain degree value. 
 
-
-#ifndef TREE_SIMILARITY_JOIN_DEGREE_HISTOGRAM_DEGREE_HISTOGRAM_CONVERTER_H
-#define TREE_SIMILARITY_JOIN_DEGREE_HISTOGRAM_DEGREE_HISTOGRAM_CONVERTER_H
+#pragma once
 
 #include <unordered_map>
 #include "node.h"
@@ -48,15 +46,15 @@ public:
   /// \param histogram_collection A collection of histograms.
   void create_histogram(
     const std::vector<node::Node<Label>>& trees_collection,
-    std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& histogram_collection);
+    std::vector<std::pair<int, std::unordered_map<int, int>>>& histogram_collection);
   /// Returns the maximum degree of a node in a tree collection.
   ///
   /// \return The the maximum degree of a node in a tree collection.
-  const unsigned int get_maximum_degree() const;
+  int get_maximum_degree() const;
 // Member variables.
 private:
   /// Maximum degree of a node in the tree collection.
-  unsigned int max_degree_ = 0;
+  int max_degree_ = 0;
 // Member functions.
 private:
   /// Recursively transforms a tree into a histogram. Each element holds a value 
@@ -66,12 +64,10 @@ private:
   /// \param degree_histogram Vector of histogram values.
   void create_degree_histrogram(
     const node::Node<Label>& tree_node, 
-    std::unordered_map<unsigned int, unsigned int>& degree_histogram, 
-    unsigned int& tree_size);
+    std::unordered_map<int, int>& degree_histogram, 
+    int& tree_size);
 };
 
 // Implementation details.
 #include "degree_histogram_converter_impl.h"
 }
-
-#endif // TREE_SIMILARITY_JOIN_DEGREE_HISTOGRAM_DEGREE_HISTOGRAM_CONVERTER_H

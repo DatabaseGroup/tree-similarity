@@ -24,8 +24,7 @@
 /// \details
 /// Contains the implementation of the StringLabel class.
 
-#ifndef TREE_SIMILARITY_LABEL_STRING_LABEL_IMPL_H
-#define TREE_SIMILARITY_LABEL_STRING_LABEL_IMPL_H
+#pragma once
 
 StringLabel::StringLabel(const std::string& label) : label_(label) {}
 
@@ -40,5 +39,3 @@ bool StringLabel::operator==(const StringLabel& other) const {
 const std::string& StringLabel::to_string() const {
   return label_;
 }
-
-#endif // TREE_SIMILARITY_LABEL_STRING_LABEL_IMPL_H
