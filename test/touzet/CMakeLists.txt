@@ -2,17 +2,9 @@
 
 # Specify list of test strings.
 set(touzet_test_list
-  touzet_subtree_size_test
-  touzet_node_depth_test
-  touzet_subtree_max_depth_test
-  touzet_depth_inverted_list_test
   touzet_td_test
   touzet_subproblem_count_depth_pruning_test
   touzet_ted_test
-  touzet_kr_test
-  touzet_left_child_test
-  touzet_parent_test
-  touzet_nodes_kr_test
 )
 
 # Add custom target for building all touzet's tests.

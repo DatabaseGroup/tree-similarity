@@ -34,7 +34,6 @@
 #include <functional>
 #include "join_result_element.h"
 #include "node.h"
-#include "greedy_ub.h"
 #include "lh_candidate_index.h"
 #include "label_histogram_converter.h"
 

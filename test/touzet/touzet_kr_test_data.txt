@@ -1,6 +1,0 @@
-# Test case 1
-{a}
-{0}
-# Test case 2
-{a{b{c}{d{e}}}{f{g}{h{i{j}{k}}}}{l{m}}}
-{2,6,8,9,11,12}

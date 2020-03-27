@@ -36,7 +36,6 @@
 #include <functional>
 #include "join_result_element.h"
 #include "node.h"
-#include "greedy_ub.h"
 #include "histo_candidate_index.h"
 #include "histogram_converter.h"
 
