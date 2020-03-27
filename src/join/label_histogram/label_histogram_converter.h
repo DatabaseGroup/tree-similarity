@@ -25,9 +25,7 @@
 /// Takes a collection of trees and and converts them into a histogram of label 
 /// values. The histogram stores the number of nodes with a certain label value. 
 
-
-#ifndef TREE_SIMILARITY_JOIN_LABEL_HISTOGRAM_LABEL_HISTOGRAM_CONVERTER_H
-#define TREE_SIMILARITY_JOIN_LABEL_HISTOGRAM_LABEL_HISTOGRAM_CONVERTER_H
+#pragma once
 
 #include <unordered_map>
 #include "node.h"
@@ -56,19 +54,19 @@ public:
   /// \param histogram_collection A collection of histograms.
   void create_histogram(
     const std::vector<node::Node<Label>>& trees_collection,
-    std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& histogram_collection);
+    std::vector<std::pair<int, std::unordered_map<int, int>>>& histogram_collection);
   /// Returns the number of labels of a node in a tree collection.
   ///
   /// \return The the number of labels of a node in a tree collection.
-  const unsigned int get_number_of_labels() const;
+  int get_number_of_labels() const;
 // Member variables.
 private:
   /// Counter to give unique IDs to the tokens.
-  unsigned int number_of_labels_ = 0;
+  int number_of_labels_ = 0;
   /// Counter to give unique IDs to the tokens.
-  unsigned int label_id_ = 0;
+  int label_id_ = 0;
   // Map a label to a unique integer.
-  typename std::unordered_map<Label, unsigned int, labelhash> label_id_map_;
+  typename std::unordered_map<Label, int, labelhash> label_id_map_;
 // Member functions.
 private:
   /// Recursively transforms a tree into a histogram. Each element holds a value 
@@ -78,12 +76,10 @@ private:
   /// \param label_histogram Vector of histogram values.
   void create_label_histrogram(
     const node::Node<Label>& tree_node, 
-    std::unordered_map<unsigned int, unsigned int>& label_histogram, 
-    unsigned int& tree_size);
+    std::unordered_map<int, int>& label_histogram, 
+    int& tree_size);
 };
 
 // Implementation details.
 #include "label_histogram_converter_impl.h"
 }
-
-#endif // TREE_SIMILARITY_JOIN_LABEL_HISTOGRAM_LABEL_HISTOGRAM_CONVERTER_H

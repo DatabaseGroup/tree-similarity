@@ -53,4 +53,4 @@ double TouzetBaselineTreeIndex<CostModel, TreeIndex>::ted_k(const TreeIndex& t1,
   }
   
   return td_.at(t1.tree_size_-1, t2.tree_size_-1);
-};
+}

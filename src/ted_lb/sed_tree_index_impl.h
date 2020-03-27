@@ -82,5 +82,4 @@ double SEDTreeIndex<CostModel, TreeIndex>::ted(const TreeIndex& t1, const TreeIn
   double sed_pre = cp[kT2Size];
   
   return std::max(sed_post, sed_pre); // note: cc is asigned to cp, cc is overwritten!
-};
-
+}

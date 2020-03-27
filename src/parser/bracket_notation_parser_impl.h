@@ -24,8 +24,7 @@
 /// \details
 /// Contains the implementation of the BracketNotationParser class.
 
-#ifndef TREE_SIMILARITY_PARSER_BRACKET_NOTATION_PARSER_IMPL_H
-#define TREE_SIMILARITY_PARSER_BRACKET_NOTATION_PARSER_IMPL_H
+#pragma once
 
 /// This is currently a copy of the previous version but with the efficient
 /// tokanization.
@@ -153,6 +152,4 @@ bool BracketNotationParser::validate_input(const std::string& tree_string) const
     return false;
   }
   return true;
-};
-
-#endif // TREE_SIMILARITY_PARSER_BRACKET_NOTATION_PARSER_IMPL_H
+}

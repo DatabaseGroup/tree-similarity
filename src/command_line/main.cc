@@ -33,7 +33,6 @@
 int main(int argc, char** argv) {
 
   using Label = label::StringLabel;
-  using CostModel = cost_model::UnitCostModel<Label>;
   using CostModelLD = cost_model::UnitCostModelLD<Label>;
   using LabelDictionary = label::LabelDictionary<Label>;
 

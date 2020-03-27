@@ -55,11 +55,11 @@ public:
   /**
    * \return sum_subproblem_counter_
    */
-  const unsigned long long int get_subproblem_count() const;
+  long long int get_subproblem_count() const;
 
 private:
   /// Number of subproblrems encoutered in the verification step.
-  unsigned long long int sum_subproblem_counter_;
+  long long int sum_subproblem_counter_;
 };
 
 // Implementation details.

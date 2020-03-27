@@ -24,8 +24,7 @@
 /// \details
 /// Contains the implementation of the BinaryNode class.
 
-#ifndef TREE_SIMILARITY_NODE_BINARY_NODE_IMPL_H
-#define TREE_SIMILARITY_NODE_BINARY_NODE_IMPL_H
+#pragma once
 
 template<class Label>
 BinaryNode<Label>::BinaryNode(ConstReference label) : label_(label) {}
@@ -103,7 +102,7 @@ void BinaryNode<Label>::get_all_labels_recursion(std::vector<std::string>& label
 }
 
 template<class Label>
-const void BinaryNode<Label>::print_tree_inorder() const {
+void BinaryNode<Label>::print_tree_inorder() const {
   std::cout << label_.to_string();
   if(left_child_ != nullptr) {
     std::cout << "{";
@@ -118,7 +117,7 @@ const void BinaryNode<Label>::print_tree_inorder() const {
 }
 
 template<class Label>
-const void BinaryNode<Label>::print_tree_postorder() const {
+void BinaryNode<Label>::print_tree_postorder() const {
   if(left_child_ != nullptr) {
     std::cout << "{";
     left_child_->print_tree_postorder();
@@ -160,34 +159,31 @@ bool BinaryNode<Label>::is_leaf() const {
 }
 
 template<class Label>
-void BinaryNode<Label>::set_subgraph_size(unsigned int subgraph_size) {
+void BinaryNode<Label>::set_subgraph_size(int subgraph_size) {
   subgraph_size_ = subgraph_size;
 }
 
 template<class Label>
-unsigned int BinaryNode<Label>::get_subgraph_size() {
+int BinaryNode<Label>::get_subgraph_size() {
   return subgraph_size_;
 }
 
 template<class Label>
-void BinaryNode<Label>::set_detached(unsigned int detached) {
+void BinaryNode<Label>::set_detached(int detached) {
   detached_ = detached;
 }
 
 template<class Label>
-unsigned int BinaryNode<Label>::get_detached() {
+int BinaryNode<Label>::get_detached() {
   return detached_;
 }
 
 template<class Label>
-void BinaryNode<Label>::set_postorder_id(unsigned int postorder_id) {
+void BinaryNode<Label>::set_postorder_id(int postorder_id) {
   postorder_id_ = postorder_id;
 }
 
 template<class Label>
-unsigned int BinaryNode<Label>::get_postorder_id() {
+int BinaryNode<Label>::get_postorder_id() {
   return postorder_id_;
 }
-
-
-#endif // TREE_SIMILARITY_NODE_BINARY_NODE_IMPL_H

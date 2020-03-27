@@ -68,8 +68,8 @@ public:
    */
   void execute_join(
       std::vector<node::Node<Label>>& trees_collection,
-      std::vector<std::pair<unsigned int, std::vector<label_set_converter::LabelSetElement>>>& sets_collection,
-      std::vector<std::pair<unsigned int, unsigned int>>& candidates,
+      std::vector<std::pair<int, std::vector<label_set_converter::LabelSetElement>>>& sets_collection,
+      std::vector<std::pair<int, int>>& candidates,
       std::vector<join::JoinResultElement>& join_result,
       const double distance_threshold);
   /// Converts a given collection of trees into a collection of label sets.
@@ -80,7 +80,7 @@ public:
    */
   void convert_trees_to_sets(
       std::vector<node::Node<Label>>& trees_collection,
-      std::vector<std::pair<unsigned int, std::vector<label_set_converter::LabelSetElement>>>& sets_collection);
+      std::vector<std::pair<int, std::vector<label_set_converter::LabelSetElement>>>& sets_collection);
   /// Retrieves candidate pairs from candidate index.
   /**
    * \param trees_collection A vector holding an input collection of trees.
@@ -91,8 +91,8 @@ public:
    *         considered candidates.
    */
   void retrieve_candidates(
-      std::vector<std::pair<unsigned int, std::vector<label_set_converter::LabelSetElement>>>& sets_collection,
-      std::vector<std::pair<unsigned int, unsigned int>>& candidates,
+      std::vector<std::pair<int, std::vector<label_set_converter::LabelSetElement>>>& sets_collection,
+      std::vector<std::pair<int, int>>& candidates,
       const double distance_threshold);
   /// Verifies candidates using Label Guided Mapping upper bound (LGM).
   /**
@@ -104,7 +104,7 @@ public:
    */
   void upperbound(
     std::vector<node::Node<Label>>& trees_collection,
-    std::vector<std::pair<unsigned int, unsigned int>>& candidates,
+    std::vector<std::pair<int, int>>& candidates,
     std::vector<join::JoinResultElement>& join_result, 
     const double distance_threshold);
   /// Verifies each candidate pair with the tree edit distance.
@@ -118,36 +118,36 @@ public:
    */
   void verify_candidates(
     std::vector<node::Node<Label>>& trees_collection,
-    std::vector<std::pair<unsigned int, unsigned int>>& candidates,
+    std::vector<std::pair<int, int>>& candidates,
     std::vector<join::JoinResultElement>& join_result, 
     const double distance_threshold);
   /// Returns the number of precandidates.
   /**
    * \return pre_candidates_
    */
-  const unsigned long long int get_number_of_pre_candidates() const;
+  long long int get_number_of_pre_candidates() const;
   /// Returns the cumulative number of subproblems of TED executions.
   /**
    * \return sum_subproblem_counter_
    */
-  const unsigned long long int get_subproblem_count() const;
+  long long int get_subproblem_count() const;
   /// Returns the number of inverted list lookups.
   /**
    * \return il_lookups_
    */
-  const unsigned long long int get_number_of_il_lookups() const;
+  long long int get_number_of_il_lookups() const;
 
 private:
   /// LabelDictionary for using with LGMTreeIndex and VerificationAlgorithm.
   label::LabelDictionary<Label> ld_;
   /// Number of different labels in the trees.
-  unsigned long long int number_of_labels_;
+  long long int number_of_labels_;
   /// Number of precandidates.
-  unsigned long long int pre_candidates_;
+  long long int pre_candidates_;
   /// Number of subproblrems encoutered in the verification step.
-  unsigned long long int sum_subproblem_counter_;
+  long long int sum_subproblem_counter_;
   /// Number of precandidates.
-  unsigned long long int il_lookups_;
+  long long int il_lookups_;
 };
 
 // Implementation details.

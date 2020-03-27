@@ -38,7 +38,7 @@ double APTEDTreeIndex<CostModel, TreeIndex>::ted(
   ted_init(t1, t2);
   // Compute the distance.
   return gted(t1, 0, t2, 0);
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 data_structures::Matrix<double> APTEDTreeIndex<CostModel, TreeIndex>::compute_opt_strategy_postL(const TreeIndex& t1, const TreeIndex& t2) {
@@ -305,7 +305,7 @@ data_structures::Matrix<double> APTEDTreeIndex<CostModel, TreeIndex>::compute_op
   
   // std::cout << "strategy[0][0] = " << strategy.read_at(0, 0) << std::endl;
   return strategy;
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 data_structures::Matrix<double> APTEDTreeIndex<CostModel, TreeIndex>::compute_opt_strategy_postR(const TreeIndex& t1, const TreeIndex& t2) {
@@ -313,8 +313,7 @@ data_structures::Matrix<double> APTEDTreeIndex<CostModel, TreeIndex>::compute_op
   const int size2 = t2.tree_size_;
   data_structures::Matrix<double> strategy(size1, size2);
   return strategy;
-};
-
+}
 
 template <typename CostModel, typename TreeIndex>
 void APTEDTreeIndex<CostModel, TreeIndex>::ted_init(const TreeIndex& t1, const TreeIndex& t2) {
@@ -353,7 +352,7 @@ void APTEDTreeIndex<CostModel, TreeIndex>::ted_init(const TreeIndex& t1, const T
       }
     }
   }
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 double APTEDTreeIndex<CostModel, TreeIndex>::gted(const TreeIndex& t1,
@@ -460,7 +459,7 @@ double APTEDTreeIndex<CostModel, TreeIndex>::gted(const TreeIndex& t1,
       std::abs(strategyPathID) - pathIDOffset - 1, strategyPathType, true);
   // std::cerr << "spfA(" << t1_current_subtree << "," << t2_current_subtree << ") = " << result << std::endl;
   return result;
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 double APTEDTreeIndex<CostModel, TreeIndex>::spf1(const TreeIndex& t1,
@@ -511,7 +510,7 @@ double APTEDTreeIndex<CostModel, TreeIndex>::spf1(const TreeIndex& t1,
   }
   // std::cout << "spf1 = -1" << std::endl;
   return -1;
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 double APTEDTreeIndex<CostModel, TreeIndex>::spfA(const TreeIndex& t1,
@@ -1010,7 +1009,7 @@ double APTEDTreeIndex<CostModel, TreeIndex>::spfA(const TreeIndex& t1,
   }
   // std::cout << "spfA = " << minCost << std::endl;
   return minCost;
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 double APTEDTreeIndex<CostModel, TreeIndex>::spfL(const TreeIndex& t1,
@@ -1040,7 +1039,7 @@ double APTEDTreeIndex<CostModel, TreeIndex>::spfL(const TreeIndex& t1,
   // Return the distance between the input subtrees.
   // std::cout << "spfL = " << forestdist.read_at(ni_1.preL_to_size_[ni_1.get_current_node()], ni_2.preL_to_size_[ni_2.get_current_node()]) << std::endl;
   return forestdist.read_at(t1.prel_to_size_[t1_current_subtree], t2.prel_to_size_[t2_current_subtree]);
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 int APTEDTreeIndex<CostModel, TreeIndex>::computeKeyRoots(const TreeIndex& t2,
@@ -1064,7 +1063,7 @@ int APTEDTreeIndex<CostModel, TreeIndex>::computeKeyRoots(const TreeIndex& t2,
     pathNode = parent;
   }
   return index;
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 void APTEDTreeIndex<CostModel, TreeIndex>::treeEditDist(const TreeIndex& t1,
@@ -1119,7 +1118,7 @@ void APTEDTreeIndex<CostModel, TreeIndex>::treeEditDist(const TreeIndex& t1,
       forestdist.at(i1, j1) = da >= db ? db >= dc ? dc : db : da >= dc ? dc : da;
     }
   }
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 double APTEDTreeIndex<CostModel, TreeIndex>::spfR(const TreeIndex& t1,
@@ -1149,7 +1148,7 @@ double APTEDTreeIndex<CostModel, TreeIndex>::spfR(const TreeIndex& t1,
   // Return the distance between the input subtrees.
   // std::cout << "spfR = " << forestdist.read_at(ni_1.preL_to_size_[ni_1.get_current_node()], ni_2.preL_to_size_[ni_2.get_current_node()]) << std::endl;
   return forestdist.read_at(t1.prel_to_size_[t1_current_subtree], t2.prel_to_size_[t2_current_subtree]);
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 int APTEDTreeIndex<CostModel, TreeIndex>::computeRevKeyRoots(
@@ -1176,7 +1175,7 @@ int APTEDTreeIndex<CostModel, TreeIndex>::computeRevKeyRoots(
     pathNode = parent;
   }
   return index;
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 void APTEDTreeIndex<CostModel, TreeIndex>::revTreeEditDist(const TreeIndex& t1,
@@ -1232,7 +1231,7 @@ void APTEDTreeIndex<CostModel, TreeIndex>::revTreeEditDist(const TreeIndex& t1,
       // std::cerr << "forestdist.at(i1, j1) = " << forestdist.at(i1, j1) << std::endl;
     }
   }
-};
+}
 
 
 template <typename CostModel, typename TreeIndex>
@@ -1251,7 +1250,7 @@ int APTEDTreeIndex<CostModel, TreeIndex>::get_strategy_path_type(
     return 1;
   }
   return 2;
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 void APTEDTreeIndex<CostModel, TreeIndex>::updateFnArray(int lnForNode,
@@ -1263,7 +1262,7 @@ void APTEDTreeIndex<CostModel, TreeIndex>::updateFnArray(int lnForNode,
     fn_[node] = fn_[fn_.size() - 1];
     fn_[fn_.size() - 1] = node;
   }
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 void APTEDTreeIndex<CostModel, TreeIndex>::updateFtArray(int lnForNode,
@@ -1272,4 +1271,4 @@ void APTEDTreeIndex<CostModel, TreeIndex>::updateFtArray(int lnForNode,
   if(fn_[node] > -1) {
     ft_[fn_[node]] = node;
   }
-};
+}

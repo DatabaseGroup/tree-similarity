@@ -36,8 +36,8 @@ LHJoinTI<Label, VerificationAlgorithm>::LHJoinTI() {
 template <typename Label, typename VerificationAlgorithm>
 void LHJoinTI<Label, VerificationAlgorithm>::execute_join(
     std::vector<node::Node<Label>>& trees_collection,
-    std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& histogram_collection,
-    std::vector<std::pair<unsigned int, unsigned int>>& candidates,
+    std::vector<std::pair<int, std::unordered_map<int, int>>>& histogram_collection,
+    std::vector<std::pair<int, int>>& candidates,
     std::vector<join::JoinResultElement>& join_result,
     const double distance_threshold) {
 
@@ -55,7 +55,7 @@ void LHJoinTI<Label, VerificationAlgorithm>::execute_join(
 template <typename Label, typename VerificationAlgorithm>
 void LHJoinTI<Label, VerificationAlgorithm>::convert_trees_to_histograms(
     std::vector<node::Node<Label>>& trees_collection,
-    std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& histogram_collection) {
+    std::vector<std::pair<int, std::unordered_map<int, int>>>& histogram_collection) {
 
   // Convert trees to histograms.
   label_histogram_converter::Converter<Label> lhc;
@@ -65,8 +65,8 @@ void LHJoinTI<Label, VerificationAlgorithm>::convert_trees_to_histograms(
 
 template <typename Label, typename VerificationAlgorithm>
 void LHJoinTI<Label, VerificationAlgorithm>::retrieve_candidates(
-    std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& histogram_collection,
-    std::vector<std::pair<unsigned int, unsigned int>>& candidates,
+    std::vector<std::pair<int, std::unordered_map<int, int>>>& histogram_collection,
+    std::vector<std::pair<int, int>>& candidates,
     const double distance_threshold) {
 
   // Initialize candidate index.
@@ -84,7 +84,7 @@ void LHJoinTI<Label, VerificationAlgorithm>::retrieve_candidates(
 template <typename Label, typename VerificationAlgorithm>
 void LHJoinTI<Label, VerificationAlgorithm>::verify_candidates(
     std::vector<node::Node<Label>>& trees_collection,
-    std::vector<std::pair<unsigned int, unsigned int>>& candidates,
+    std::vector<std::pair<int, int>>& candidates,
     std::vector<join::JoinResultElement>& join_result,
     const double distance_threshold) {
 
@@ -107,18 +107,18 @@ void LHJoinTI<Label, VerificationAlgorithm>::verify_candidates(
 }
 
 template <typename Label, typename VerificationAlgorithm>
-const unsigned long long int
+long long int
     LHJoinTI<Label, VerificationAlgorithm>::get_number_of_pre_candidates() const {
   return pre_candidates_;
 }
 
 template <typename Label, typename VerificationAlgorithm>
-const unsigned long long int LHJoinTI<Label, VerificationAlgorithm>::get_subproblem_count() const {
+long long int LHJoinTI<Label, VerificationAlgorithm>::get_subproblem_count() const {
   return sum_subproblem_counter_;
 }
 
 template <typename Label, typename VerificationAlgorithm>
-const unsigned long long int
+long long int
     LHJoinTI<Label, VerificationAlgorithm>::get_number_of_il_lookups() const {
   return il_lookups_;
 }

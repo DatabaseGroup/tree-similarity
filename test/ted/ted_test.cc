@@ -15,7 +15,8 @@
 #include "touzet_kr_loop_tree_index.h"
 #include "touzet_kr_set_tree_index.h"
 
-int main(int argc, char** argv) {
+// First argument's name omitted because not used.
+int main(int, char** argv) {
 
   // Index test name.
   std::string ted_algorithm_name = std::string(argv[1]);

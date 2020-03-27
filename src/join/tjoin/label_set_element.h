@@ -25,8 +25,7 @@
 /// Structure a label set element. Containing the id, number of nodes per label, 
 /// number of nodes until the actual element and positional information per node.
 
-#ifndef TREE_SIMILARITY_JOIN_TJOIN_LABEL_SET_ELEMENT_H
-#define TREE_SIMILARITY_JOIN_TJOIN_LABEL_SET_ELEMENT_H
+#pragma once
 
 #include <vector>
 
@@ -52,7 +51,7 @@ struct StructuralVector {
           int number_nodes_ancestor, int number_nodes_descendant);
 };
 
-label_set_converter::StructuralVector::StructuralVector() {};
+label_set_converter::StructuralVector::StructuralVector() {}
 
 label_set_converter::StructuralVector::StructuralVector(
   int postorder_id, int number_nodes_left, 
@@ -61,36 +60,34 @@ label_set_converter::StructuralVector::StructuralVector(
       number_nodes_left(number_nodes_left), 
       number_nodes_right(number_nodes_right),
       number_nodes_ancestor(number_nodes_ancestor), 
-      number_nodes_descendant(number_nodes_descendant) {};
+      number_nodes_descendant(number_nodes_descendant) {}
 
 
 /// This is an element holding relevant data of a set.
 struct LabelSetElement {
   /// Token ID.
-  unsigned int id = 0;
+  int id = 0;
   /// Weight of a token.
-  unsigned int weight = 0;
+  int weight = 0;
   /// Weight of a token.
-  unsigned int weight_so_far = 0;
+  int weight_so_far = 0;
   /// Overlap so far for a specific set.
   std::vector<label_set_converter::StructuralVector> struct_vect;
   /// Constructor.
   LabelSetElement();
   /// Constructor.
-  LabelSetElement(unsigned int id, int weight);
+  LabelSetElement(int id, int weight);
   /// Constructor.
-  LabelSetElement(unsigned int id, int weight, 
+  LabelSetElement(int id, int weight, 
       std::vector<label_set_converter::StructuralVector> &&struct_vect);
 };
 
-label_set_converter::LabelSetElement::LabelSetElement() {};
+label_set_converter::LabelSetElement::LabelSetElement() {}
 
-label_set_converter::LabelSetElement::LabelSetElement(unsigned int id, int weight)
-    : id(id), weight(weight) {};
+label_set_converter::LabelSetElement::LabelSetElement(int id, int weight)
+    : id(id), weight(weight) {}
 
-label_set_converter::LabelSetElement::LabelSetElement(unsigned int id, int weight, 
+label_set_converter::LabelSetElement::LabelSetElement(int id, int weight, 
       std::vector<label_set_converter::StructuralVector> &&struct_vect)
-    : id(id), weight(weight), struct_vect(std::move(struct_vect)) {};
+    : id(id), weight(weight), struct_vect(std::move(struct_vect)) {}
 }
-
-#endif // TREE_SIMILARITY_JOIN_TJOIN_LABEL_SET_ELEMENT_H

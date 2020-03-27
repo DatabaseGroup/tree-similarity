@@ -124,4 +124,4 @@ double CTEDTreeIndex<CostModel, TreeIndex>::ted(const TreeIndex& t1, const TreeI
   }
   
   return dt_.at(t1_input_size, t2_input_size);
-};
+}

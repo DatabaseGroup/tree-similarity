@@ -172,4 +172,4 @@ double TouzetDepthPruningTreeIndex<CostModel, TreeIndex>::tree_dist(
   } else {
     return candidate_result;
   }
-};
+}

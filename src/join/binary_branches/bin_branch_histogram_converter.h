@@ -26,8 +26,7 @@
 /// branches. The histogram stores the number of a certain binary branch. 
 
 
-#ifndef TREE_SIMILARITY_JOIN_BINARY_BRANCHES_BIN_BRANCH_HISTOGRAM_CONVERTER_H
-#define TREE_SIMILARITY_JOIN_BINARY_BRANCHES_BIN_BRANCH_HISTOGRAM_CONVERTER_H
+#pragma once
 
 #include <unordered_map>
 #include "node.h"
@@ -48,17 +47,17 @@ public:
   /// \param histogram_collection A collection of histograms.
   void create_histogram(
     const std::vector<node::Node<Label>>& trees_collection,
-    std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& histogram_collection);
+    std::vector<std::pair<int, std::unordered_map<int, int>>>& histogram_collection);
   /// Returns the maximum degree of a node in a tree collection.
   ///
   /// \return The the maximum degree of a node in a tree collection.
-  const unsigned int get_number_of_bb() const;
+  int get_number_of_bb() const;
 // Member variables.
 private:
   /// Counter to give unique IDs for each binary branch.
-  unsigned int bb_id_ = 0;
+  int bb_id_ = 0;
   // Map a binary branch to a unique integer.
-  typename std::unordered_map<std::string, unsigned int> bb_id_map_;
+  typename std::unordered_map<std::string, int> bb_id_map_;
   /// String that is used as empty label. Therefore, no label should contain this string. 
   std::string empty_string_ = "!§$%&/()=?";
 // Member functions.
@@ -71,12 +70,10 @@ private:
   void create_bin_branch_histrogram(
     const node::Node<Label>& tree_node, 
     std::string& right_sibling_label, 
-    std::unordered_map<unsigned int, unsigned int>& degree_histogram, 
-    unsigned int& tree_size);
+    std::unordered_map<int, int>& degree_histogram, 
+    int& tree_size);
 };
 
 // Implementation details.
 #include "bin_branch_histogram_converter_impl.h"
 }
-
-#endif // TREE_SIMILARITY_JOIN_BINARY_BRANCHES_BIN_BRANCH_HISTOGRAM_CONVERTER_H

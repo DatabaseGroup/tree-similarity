@@ -27,8 +27,7 @@
 /// strings as labels, one could use this class as a template argument for the
 /// Node class to accomplish this.
 
-#ifndef TREE_SIMILARITY_LABEL_STRING_LABEL_H
-#define TREE_SIMILARITY_LABEL_STRING_LABEL_H
+#pragma once
 
 #include <string>
 
@@ -85,5 +84,3 @@ namespace std
     }
   };
 }
-
-#endif // TREE_SIMILARITY_LABEL_STRING_LABEL_H

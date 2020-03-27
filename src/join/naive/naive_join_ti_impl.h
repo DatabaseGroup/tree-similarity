@@ -66,6 +66,6 @@ std::vector<join::JoinResultElement> NaiveJoinTI<Label, VerificationAlgorithm>::
 }
 
 template <typename Label, typename VerificationAlgorithm>
-const unsigned long long int NaiveJoinTI<Label, VerificationAlgorithm>::get_subproblem_count() const {
+long long int NaiveJoinTI<Label, VerificationAlgorithm>::get_subproblem_count() const {
   return sum_subproblem_counter_;
 }

@@ -25,8 +25,7 @@
 /// Implements a candidate index that efficiently and effectively returns tree 
 /// pairs that satisfy the structural filter. 
 
-#ifndef TREE_SIMILARITY_JOIN_TJOIN_CANDIDATE_INDEX_H
-#define TREE_SIMILARITY_JOIN_TJOIN_CANDIDATE_INDEX_H
+#pragma once
 
 #include <cmath>
 #include <climits>
@@ -54,34 +53,34 @@ public:
   ///        Needed to allocate the inverted list index.
   /// \param distance_threshold Given similarity threshold.
   void lookup(
-      std::vector<std::pair<unsigned int, std::vector<label_set_converter::LabelSetElement>>>& sets_collection,
-      std::vector<std::pair<unsigned int, unsigned int>>& join_candidates,
-      const unsigned int number_of_labels, 
+      std::vector<std::pair<int, std::vector<label_set_converter::LabelSetElement>>>& sets_collection,
+      std::vector<std::pair<int, int>>& join_candidates,
+      const int number_of_labels, 
       const double distance_threshold);
   /// Returns the resultset.
   ///
   /// \return Pairs in the resultset.
-  std::vector<std::pair<unsigned int, unsigned int>> get_result_pairs();
+  std::vector<std::pair<int, int>> get_result_pairs();
   /// Returns the number of pairs in the resultset.
   ///
   /// \return The number of pairs in the resultset.
-  unsigned long int get_number_of_result_pairs() const;
+  long int get_number_of_result_pairs() const;
   /// Returns the number of precandidates.
   ///
   /// \return The number of precandidates.
-  unsigned long int get_number_of_pre_candidates() const;
+  long int get_number_of_pre_candidates() const;
   /// Sets the number of precandidates.
-  void set_number_of_pre_candidates(const unsigned long int pc);
+  void set_number_of_pre_candidates(const long int pc);
   /// Returns the number of precandidates.
   ///
   /// \return The number of lookups in the inverted list.
-  unsigned long int get_number_of_il_lookups() const;
+  long int get_number_of_il_lookups() const;
 // Member variables.
 private:
   /// Number of precandidates.
-  unsigned long int pre_candidates_;
+  long int pre_candidates_;
   /// Number of lookups in the inverted list.
-  unsigned long int il_lookups_;
+  long int il_lookups_;
 // Member functions.
 private:
   /// Given two sets of nodes, the structural mapping identifies the number of 
@@ -91,7 +90,7 @@ private:
   /// \param sv_s All nodes with a specific label in set s.
   /// \param distance_threshold Given distance threshold.
   /// \return number of tau-valid node pairs in sv_r and sv_s.
-  unsigned int structural_mapping(
+  int structural_mapping(
     label_set_converter::LabelSetElement& sv_r, 
     label_set_converter::LabelSetElement& sv_s,
     const double distance_threshold);
@@ -107,7 +106,7 @@ private:
   /// \return Returns true if r and s satisfy the structural filter.
   bool structural_filter(std::vector<label_set_converter::LabelSetElement>& r, 
       std::vector<label_set_converter::LabelSetElement>& s, 
-      const double t, unsigned int olap, unsigned int pr, unsigned int ps, 
+      const double t, int olap, int pr, int ps, 
       int distance_threshold, int maxr, int maxs);
 };
 
@@ -115,5 +114,3 @@ private:
 #include "candidate_index_impl.h"
 
 }
-
-#endif // TREE_SIMILARITY_JOIN_TJOIN_CANDIDATE_INDEX_H

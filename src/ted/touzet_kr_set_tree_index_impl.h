@@ -130,4 +130,4 @@ double TouzetKRSetTreeIndex<CostModel, TreeIndex>::ted_k(const TreeIndex& t1,
   }
   
   return td_.read_at(t1_size-1, t2_size-1);
-};
+}

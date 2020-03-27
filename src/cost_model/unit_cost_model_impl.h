@@ -28,21 +28,21 @@ int UnitCostModel<Label>::ren(const node::Node<Label>& node1,
     return 0;
   }
   return 1;
-};
+}
 
 template <class Label>
 int UnitCostModel<Label>::del(const node::Node<Label>& node) const {
   return 1;
-};
+}
 
 template <class Label>
 int UnitCostModel<Label>::ins(const node::Node<Label>& node) const {
   return 1;
-};
+}
 
 template <class Label>
 UnitCostModelLD<Label>::UnitCostModelLD(label::LabelDictionary<Label>& ld) :
-    ld_(ld) {};
+    ld_(ld) {}
 
 template <typename Label>
 double UnitCostModelLD<Label>::ren(const int label_id_1,
@@ -51,14 +51,16 @@ double UnitCostModelLD<Label>::ren(const int label_id_1,
     return 0.0;
   }
   return 1.0;
-};
+}
 
+// Argument's name deleted because not used.
 template <typename Label>
-double UnitCostModelLD<Label>::del(const int label_id) const {
+double UnitCostModelLD<Label>::del(const int) const {
   return 1.0;
-};
+}
 
+// Argument's name deleted because not used.
 template <typename Label>
-double UnitCostModelLD<Label>::ins(const int label_id) const {
+double UnitCostModelLD<Label>::ins(const int) const {
   return 1.0;
-};
+}

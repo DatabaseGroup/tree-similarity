@@ -65,7 +65,7 @@ public:
   /// \param distance_threshold Join similarity threshold.
   void execute_rsb_join(
       std::vector<node::Node<Label>>& trees_collection,
-      std::vector<std::pair<unsigned int, unsigned int>>& candidates,
+      std::vector<std::pair<int, int>>& candidates,
       std::vector<join::JoinResultElement>& join_result,
       const double distance_threshold
   );
@@ -83,7 +83,7 @@ public:
   /// \param distance_threshold Join similarity threshold.
   void execute_rsc_join(
       std::vector<node::Node<Label>>& trees_collection,
-      std::vector<std::pair<unsigned int, unsigned int>>& candidates,
+      std::vector<std::pair<int, int>>& candidates,
       std::vector<join::JoinResultElement>& join_result,
       const double distance_threshold
   );
@@ -95,7 +95,7 @@ public:
   /// \param ted_vectors Output vector.
   void compute_vectors(
     std::vector<node::Node<Label>>& trees_collection,
-    std::vector<unsigned int>& reference_set,
+    std::vector<int>& reference_set,
     std::vector<std::vector<double>>& ted_vectors
   );
   /// Computes SED and CTED from each tree in trees_collection to all in
@@ -108,7 +108,7 @@ public:
   /// \param ub_vectors Output vector for CTED values.
   void compute_vectors(
     std::vector<node::Node<Label>>& trees_collection,
-    std::vector<unsigned int>& reference_set,
+    std::vector<int>& reference_set,
     std::vector<std::vector<double>>& lb_vectors,
     std::vector<std::vector<double>>& ub_vectors
   );
@@ -123,7 +123,7 @@ public:
   /// \param ted_vectors Vectors with TED values.
   void retrieve_metric_candidates(
       std::vector<node::Node<Label>>& trees_collection,
-      std::vector<std::pair<unsigned int, unsigned int>>& candidates,
+      std::vector<std::pair<int, int>>& candidates,
       std::vector<join::JoinResultElement>& join_result,
       const double distance_threshold,
       std::vector<std::vector<double>>& ted_vectors
@@ -139,8 +139,7 @@ public:
   /// \param lb_vectors Vectors with SED values.
   /// \param ub_vectors Vectors with CTED values.
   void retrieve_metric_candidates(
-      std::vector<node::Node<Label>>& trees_collection,
-      std::vector<std::pair<unsigned int, unsigned int>>& candidates,
+      std::vector<std::pair<int, int>>& candidates,
       std::vector<join::JoinResultElement>& join_result,
       const double distance_threshold,
       std::vector<std::vector<double>>& lb_vectors,
@@ -155,7 +154,7 @@ public:
   /// \param distance_threshold Join similarity threshold.
   void retrieve_sc_candidates(
       std::vector<node::Node<Label>>& trees_collection,
-      std::vector<std::pair<unsigned int, unsigned int>>& candidates,
+      std::vector<std::pair<int, int>>& candidates,
       std::vector<join::JoinResultElement>& join_result,
       const double distance_threshold
   );
@@ -168,7 +167,7 @@ public:
   /// \param distance_threshold Join similarity threshold.
   void verify_candidates(
       std::vector<node::Node<Label>>& trees_collection,
-      std::vector<std::pair<unsigned int, unsigned int>>& candidates,
+      std::vector<std::pair<int, int>>& candidates,
       std::vector<join::JoinResultElement>& join_result, 
       const double distance_threshold
   );
@@ -180,7 +179,7 @@ public:
   /// \param trees_collection Input dataset to a join.
   /// \param distance_threshold Join similarity threshold.
   /// \return Reference set as a vector of tree IDs.
-  std::vector<unsigned int> get_reference_set(
+  std::vector<int> get_reference_set(
     std::vector<node::Node<Label>>& trees_collection,
     const double distance_threshold
   );
@@ -191,9 +190,9 @@ public:
   /// \param trees_collection Input dataset to a join.
   /// \param k Size of reference set.
   /// \return Reference set as a vector of tree IDs.
-  std::vector<unsigned int> get_random_reference_set(
+  std::vector<int> get_random_reference_set(
     std::vector<node::Node<Label>>& trees_collection,
-    unsigned int k
+    int k
   );
   /// Computes the metric upper bound using either TED or CTED values.
   double u_t(std::vector<double>& v_1, std::vector<double>& v_2);
@@ -203,24 +202,24 @@ public:
   double l_t(std::vector<double>& lb_v_i, std::vector<double>& ub_v_i,
       std::vector<double>& lb_v_j, std::vector<double>& ub_v_j);
   /// Returns the number of candidates resulting from metric lower bound.
-  const unsigned long long int get_l_t_candidates() const;
+  long long int get_l_t_candidates() const;
   /// Returns the number of candidates resulting from SED lower bound.
-  const unsigned long long int get_sed_candidates() const;
+  long long int get_sed_candidates() const;
   /// Returns the number of result set pairs comming from metric upper bound.
-  const unsigned long long int get_u_t_result_pairs() const;
+  long long int get_u_t_result_pairs() const;
   /// Returns the number of result set pairs comming from CTED upper bound.
-  const unsigned long long int get_cted_result_pairs() const;
+  long long int get_cted_result_pairs() const;
 private:
   /// LabelDictionary for using with LGMTreeIndex and VerificationAlgorithm.
   label::LabelDictionary<Label> ld_;
   /// Stores the number of candidates resulting from metric lower bound.
-  unsigned long long int l_t_candidates_;
+  long long int l_t_candidates_;
   /// Stores the number of candidates resulting from SED lower bound.
-  unsigned long long int sed_candidates_;
+  long long int sed_candidates_;
   /// Stores the number of result set pairs comming from metric upper bound.
-  unsigned long long int u_t_result_pairs_;
+  long long int u_t_result_pairs_;
   /// Stores the number of result set pairs comming from CTED upper bound.
-  unsigned long long int cted_result_pairs_;
+  long long int cted_result_pairs_;
 };
 
 // Implementation details.

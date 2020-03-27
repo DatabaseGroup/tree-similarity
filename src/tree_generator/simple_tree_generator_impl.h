@@ -24,8 +24,7 @@
 /// \details
 /// Contains the implementation of the SimpleTreeGenerator class.
 
-#ifndef TREE_GENERATOR_SIMPLE_TREE_GENERATOR_IMPL_H
-#define TREE_GENERATOR_SIMPLE_TREE_GENERATOR_IMPL_H
+#pragma once
 
 SimpleTreeGenerator::SimpleTreeGenerator() : alphabet_(generate_random_alphabet(1, 1, 0.5)) {}
 
@@ -173,5 +172,3 @@ std::vector<std::string> SimpleTreeGenerator::generate_random_alphabet(
   std::vector<std::string> alphabet = {"a", "b", "c", "d", "e", "f"};
   return alphabet;
 }
-
-#endif // TREE_GENERATOR_SIMPLE_TREE_GENERATOR_IMPL_H

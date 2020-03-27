@@ -24,8 +24,7 @@
 /// \details
 /// Contains the implementation of the LabelDictionary class
 
-#ifndef TREE_SIMILARITY_LABEL_LABEL_DICTIONARY_IMPL_H
-#define TREE_SIMILARITY_LABEL_LABEL_DICTIONARY_IMPL_H
+#pragma once
 
 template<class Label>
 LabelDictionary<Label>::LabelDictionary() : labels_count_(0) {}
@@ -43,17 +42,15 @@ int LabelDictionary<Label>::insert(const Label& l) {
   }
   // Return the id of the given label.
   return label_in_dictionary.first->second;
-};
+}
 
 template<class Label>
 void LabelDictionary<Label>::clear() {
   dictionary_.clear();
   labels_count_ = 0;
-};
+}
 
 template<class Label>
 int LabelDictionary<Label>::size() const {
   return dictionary_.size();
-};
-
-#endif // TREE_SIMILARITY_LABEL_LABEL_DICTIONARY_IMPL_H
+}

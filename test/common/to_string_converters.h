@@ -56,7 +56,7 @@ const std::string vector_to_string(const std::vector<T>& v) {
   s.pop_back();
   s += "}";
   return s;
-};
+}
 
 /// Convert vector of double values to its string representation.
 /**
@@ -75,7 +75,7 @@ const std::string vector_to_string(const std::vector<double>& v) {
   s.pop_back();
   s += "}";
   return s;
-};
+}
 
 /// Convert vector of pairs of int values to its string representation.
 /**
@@ -91,7 +91,7 @@ const std::string vector_to_string(const std::vector<std::pair<int, int>>& v) {
   if (s.size() > 1) s.pop_back();
   s += "}";
   return s;
-};
+}
 
 /// Convert vector of vectors of values to its string representation.
 /**
@@ -115,7 +115,7 @@ const std::string vector_to_string(const std::vector<std::vector<T>>& vv) {
   s.pop_back();
   s += "}";
   return s;
-};
+}
 
 /// Convert a matrix of double values to its string representation.
 /**
@@ -139,7 +139,7 @@ const std::string matrix_to_string(const data_structures::Matrix<double>& m) {
   }
   s.pop_back();
   return s;
-};
+}
 
 /// Convert a matrix of double values to its string representation.
 /**
@@ -172,7 +172,7 @@ const std::string format_matrix_to_string(const data_structures::Matrix<double>&
   }
   s.pop_back();
   return s;
-};
+}
 
 /// Convert inverted list of label ids to its string representation.
 /**
@@ -197,6 +197,6 @@ const std::string map_to_string(const std::unordered_map<int, std::vector<int>>&
   }
   s += "}";
   return s;
-};
+}
 
 }

@@ -49,7 +49,7 @@ double ZhangShashaTreeIndex<CostModel, TreeIndex>::ted(
   }
 
   return td_.at(kT1Size, kT2Size);
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 void ZhangShashaTreeIndex<CostModel, TreeIndex>::forest_distance(
@@ -96,4 +96,4 @@ void ZhangShashaTreeIndex<CostModel, TreeIndex>::forest_distance(
     }
   }
   // std::cout << "--- td[" << kr1 << "][" << kr2 << "] = " << td_.at(kr1, kr2) << std::endl;
-};
+}

@@ -60,8 +60,8 @@ public:
   /// \return A vector with the join result.
   void execute_join(
       std::vector<node::Node<Label>>& trees_collection,
-      std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& histogram_collection,
-      std::vector<std::pair<unsigned int, unsigned int>>& candidates,
+      std::vector<std::pair<int, std::unordered_map<int, int>>>& histogram_collection,
+      std::vector<std::pair<int, int>>& candidates,
       std::vector<join::JoinResultElement>& join_result,
       const double distance_threshold);
   /// A given collection of trees is converted into a collection of binary branch historgrams.
@@ -71,7 +71,7 @@ public:
   ///         in trees_collection.
   void convert_trees_to_histograms(
       std::vector<node::Node<Label>>& trees_collection,
-      std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& histogram_collection);
+      std::vector<std::pair<int, std::unordered_map<int, int>>>& histogram_collection);
   /// Uses the BBJoin candidate index to retrieve candidates that are further 
   /// verified.
   ///
@@ -84,8 +84,8 @@ public:
   /// \return A vector containing pairs of trees ids (candidates) that are 
   ///         considered candidates.
   void retrieve_candidates(
-      std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& histogram_collection,
-      std::vector<std::pair<unsigned int, unsigned int>>& candidates,
+      std::vector<std::pair<int, std::unordered_map<int, int>>>& histogram_collection,
+      std::vector<std::pair<int, int>>& candidates,
       const double distance_threshold);
   /// Uses the label guided mapping upper bound (lgm) to send candidates to 
   /// the result set without verification.
@@ -97,32 +97,32 @@ public:
   ///                           differs two trees in the join's result set.
   void verify_candidates(
     std::vector<node::Node<Label>>& trees_collection,
-    std::vector<std::pair<unsigned int, unsigned int>>& candidates,
+    std::vector<std::pair<int, int>>& candidates,
     std::vector<join::JoinResultElement>& join_result, 
     const double distance_threshold);
   /// Returns the number of precandidates.
   ///
   /// \return The number of precandidates.
-  const unsigned long long int get_number_of_pre_candidates() const;
+  long long int get_number_of_pre_candidates() const;
   /// If the TED algorithm has been executed, returns the number of subproblems
   /// encountered during that execution.
   ///
   /// \return The number of subproblems acountered in the last TED computation.
-  const unsigned long long int get_subproblem_count() const;
+  long long int get_subproblem_count() const;
   /// Returns the number of inverted list lookups.
   ///
   /// \return The number of inverted list lookups.
-  const unsigned long long int get_number_of_il_lookups() const;
+  long long int get_number_of_il_lookups() const;
 // Member variables.
 private:
   /// Inverted list size.
-  unsigned long long int il_size_;
+  long long int il_size_;
   /// Number of precandidates.
-  unsigned long long int pre_candidates_;
+  long long int pre_candidates_;
   /// Number of subproblrems encoutered in the verification step.
-  unsigned long long int sum_subproblem_counter_;
+  long long int sum_subproblem_counter_;
   /// Number of precandidates.
-  unsigned long long int il_lookups_;
+  long long int il_lookups_;
 };
 
 // Implementation details.

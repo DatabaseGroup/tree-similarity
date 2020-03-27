@@ -25,8 +25,7 @@
 /// Implements an algorithm that converts a collection of trees into a collection 
 /// of degree histograms. 
 
-#ifndef TREE_SIMILARITY_JOIN_DEGREE_HISTOGRAM_DEGREE_HISTOGRAM_CONVERTER_IMPL_H
-#define TREE_SIMILARITY_JOIN_DEGREE_HISTOGRAM_DEGREE_HISTOGRAM_CONVERTER_IMPL_H
+#pragma once
 
 template<typename Label>
 Converter<Label>::Converter() {}
@@ -34,14 +33,14 @@ Converter<Label>::Converter() {}
 template<typename Label>
 void Converter<Label>::create_histogram(
     const std::vector<node::Node<Label>>& trees_collection,
-    std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& histogram_collection) {
+    std::vector<std::pair<int, std::unordered_map<int, int>>>& histogram_collection) {
 
   // for each tree in the tree collection
   for (const auto& tree: trees_collection) {
     // stores the number of nodes per degree
-    std::unordered_map<unsigned int, unsigned int> degree_histogram;
+    std::unordered_map<int, int> degree_histogram;
     // stores the number of nodes per degree
-    unsigned int tree_size = 0;
+    int tree_size = 0;
     // traverse tree and store number of nodes per degree
     create_degree_histrogram(tree, degree_histogram, tree_size);
     // add degree histogram to collection
@@ -52,11 +51,11 @@ void Converter<Label>::create_histogram(
 template<typename Label>
 void Converter<Label>::create_degree_histrogram(
     const node::Node<Label>& tree_node, 
-    std::unordered_map<unsigned int, unsigned int>& degree_histogram, 
-    unsigned int& tree_size) {
+    std::unordered_map<int, int>& degree_histogram, 
+    int& tree_size) {
 
   // count number of children
-  unsigned int number_of_children = 0;
+  int number_of_children = 0;
   // do recursively for all children
   for (const auto& child: tree_node.get_children()) {
     create_degree_histrogram(child, degree_histogram, tree_size);
@@ -72,8 +71,6 @@ void Converter<Label>::create_degree_histrogram(
 }
 
 template<typename Label>
-const unsigned int Converter<Label>::get_maximum_degree() const {
+int Converter<Label>::get_maximum_degree() const {
   return max_degree_;
 }
-
-#endif // TREE_SIMILARITY_JOIN_DEGREE_HISTOGRAM_DEGREE_HISTOGRAM_CONVERTER_IMPL_H

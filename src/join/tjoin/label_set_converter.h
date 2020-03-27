@@ -28,9 +28,7 @@
 /// The labels in the sets are sorted by the global inverted frequency ordering 
 /// of the input collection. 
 
-
-#ifndef TREE_SIMILARITY_JOIN_TJOIN_LABEL_SET_CONVERTER_H
-#define TREE_SIMILARITY_JOIN_TJOIN_LABEL_SET_CONVERTER_H
+#pragma once
 
 #include <vector>
 #include <unordered_map>
@@ -53,15 +51,15 @@ public:
   } LabelSetElementComparator;
   /// Comparator for pair of integers according to their first value.
   struct paircomparator {
-    bool operator()(const std::pair<unsigned int, unsigned int>& a, 
-                    const std::pair<unsigned int, unsigned int>& b) const { 
+    bool operator()(const std::pair<int, int>& a, 
+                    const std::pair<int, int>& b) const { 
       return a.first < b.first; 
     }
   } pairComparator;
   /// Comparator for vectors of integers according to their size.
   struct vectorcomparator {
-    bool operator()(const std::vector<unsigned int>& a, 
-                    const std::vector<unsigned int>& b) const { 
+    bool operator()(const std::vector<int>& a, 
+                    const std::vector<int>& b) const { 
       return a.size() < b.size(); 
     }
   } vectorComparator;
@@ -89,19 +87,19 @@ public:
   /// \param sets_collection A collection of sets.
   void assignFrequencyIdentifiers(
       std::vector<node::Node<Label>>& trees_collection,
-      std::vector<std::pair<unsigned int, std::vector<label_set_converter::LabelSetElement>>>& sets_collection);
+      std::vector<std::pair<int, std::vector<label_set_converter::LabelSetElement>>>& sets_collection);
   /// Returns the number of different labels in the given tree collection.
   ///
   /// \return The number of different labels in the given tree collection.
-  const unsigned int get_number_of_labels() const;
+  int get_number_of_labels() const;
 // Member variables.
 private:
   /// Counter to give unique IDs to the tokens.
-  unsigned int next_token_id_ = 0;
+  int next_token_id_ = 0;
   /// Counter to give unique IDs to the tokens.
-  unsigned int actual_depth_ = 0;
+  int actual_depth_ = 0;
   /// Counter to give unique IDs to the tokens.
-  unsigned int actual_pre_order_number_ = 0;
+  int actual_pre_order_number_ = 0;
 // Member functions.
 private:
   /// Recursively transforms a tree into a label set. Each label is an integers.
@@ -111,14 +109,12 @@ private:
   /// \param token_map {(token, tokcnt) -> id}.
   /// \param record Set of tokens.
   /// \return subtree size of the actual node
-  int create_record(const node::Node<Label>& tree_node, unsigned int& postorder_id, unsigned int tree_size,
-    std::unordered_map<Label, unsigned int, labelhash>& token_map,
-    std::unordered_map<unsigned int, label_set_converter::LabelSetElement>& record_labels);
+  int create_record(const node::Node<Label>& tree_node, int& postorder_id, int tree_size,
+    std::unordered_map<Label, int, labelhash>& token_map,
+    std::unordered_map<int, label_set_converter::LabelSetElement>& record_labels);
 };
 
 // Implementation details.
 #include "label_set_converter_impl.h"
 
 }
-
-#endif // TREE_SIMILARITY_JOIN_TJOIN_LABEL_SET_CONVERTER_H

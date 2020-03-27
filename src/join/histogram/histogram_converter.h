@@ -25,9 +25,7 @@
 /// Takes a collection of trees and and converts them into a histogram of label, 
 /// leaf distance, and degree values. 
 
-
-#ifndef TREE_SIMILARITY_JOIN_HISTOGRAM_HISTOGRAM_CONVERTER_H
-#define TREE_SIMILARITY_JOIN_HISTOGRAM_HISTOGRAM_CONVERTER_H
+#pragma once
 
 #include <unordered_map>
 #include "node.h"
@@ -56,19 +54,19 @@ public:
   /// \param histogram_collection A collection of histograms.
   void create_histogram(
     const std::vector<node::Node<Label>>& trees_collection,
-    std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& label_histogram_collection,
-    std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& degree_histogram_collection,
-    std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& leaf_distance_histogram_collection);
+    std::vector<std::pair<int, std::unordered_map<int, int>>>& label_histogram_collection,
+    std::vector<std::pair<int, std::unordered_map<int, int>>>& degree_histogram_collection,
+    std::vector<std::pair<int, std::unordered_map<int, int>>>& leaf_distance_histogram_collection);
   /// Returns the number of labels of a node in a tree collection.
   ///
   /// \return The the number of labels of a node in a tree collection.
-  const unsigned int get_number_of_labels() const;
+  int get_number_of_labels() const;
 // Member variables.
 private:
   /// Counter to give unique IDs to labels.
-  unsigned int label_id_ = 0;
+  int label_id_ = 0;
   // Map a label to a unique integer.
-  typename std::unordered_map<Label, unsigned int, labelhash> label_id_map_;
+  typename std::unordered_map<Label, int, labelhash> label_id_map_;
 // Member functions.
 private:
   /// Recursively transforms a tree into three histograms. Each element holds a value 
@@ -78,14 +76,12 @@ private:
   /// \param label_histogram Vector of histogram values.
   int create_histrograms(
     const node::Node<Label>& tree_node, 
-    std::unordered_map<unsigned int, unsigned int>& label_histogram, 
-    std::unordered_map<unsigned int, unsigned int>& degree_histogram, 
-    std::unordered_map<unsigned int, unsigned int>& leaf_dist_histogram, 
-    unsigned int& tree_size);
+    std::unordered_map<int, int>& label_histogram, 
+    std::unordered_map<int, int>& degree_histogram, 
+    std::unordered_map<int, int>& leaf_dist_histogram, 
+    int& tree_size);
 };
 
 // Implementation details.
 #include "histogram_converter_impl.h"
 }
-
-#endif // TREE_SIMILARITY_JOIN_HISTOGRAM_HISTOGRAM_CONVERTER_H

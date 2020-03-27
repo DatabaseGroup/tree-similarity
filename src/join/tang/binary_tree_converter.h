@@ -26,8 +26,7 @@
 /// trees. Knuth's algorithm is applied to create a left child - right ancestor 
 /// (LC-RS) binary tree. 
 
-#ifndef TREE_SIMILARITY_JOIN_TANG_BINARY_TREE_CONVERTER_H
-#define TREE_SIMILARITY_JOIN_TANG_BINARY_TREE_CONVERTER_H
+#pragma once
 
 #include <vector>
 #include <unordered_map>
@@ -65,4 +64,3 @@ private:
 
 }
 
-#endif // TREE_SIMILARITY_JOIN_TANG_BINARY_TREE_CONVERTER_H

@@ -171,4 +171,4 @@ double TouzetDepthPruningTruncatedTreeFixTreeIndex<CostModel, TreeIndex>::tree_d
   } else {
     return candidate_result;
   }
-};
+}

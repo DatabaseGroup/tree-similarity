@@ -24,23 +24,20 @@
 /// \details
 /// Structure of a element in the inverted list.
 
-#ifndef TREE_SIMILARITY_JOIN_TJOIN_INVERTED_LIST_ELEMENT_H
-#define TREE_SIMILARITY_JOIN_TJOIN_INVERTED_LIST_ELEMENT_H
+#pragma once
 
 namespace candidate_index {
 
 /// This is an element of the join's result set.
 struct InvertedListElement {
   /// Tree id of the left-hand tree in the result element.
-  unsigned int offset = 0;
+  int offset = 0;
   /// Tree id of the right-hand tree in the result element.
-  std::vector<std::pair<unsigned int, unsigned int>> element_list;
+  std::vector<std::pair<int, int>> element_list;
   /// Constructor.
   InvertedListElement();
 };
 
-candidate_index::InvertedListElement::InvertedListElement() {};
+candidate_index::InvertedListElement::InvertedListElement() {}
 
 }
-
-#endif // TREE_SIMILARITY_JOIN_TJOIN_INVERTED_LIST_ELEMENT_H

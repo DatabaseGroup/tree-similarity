@@ -25,8 +25,7 @@
 /// Implements a candidate index that efficiently and effectively returns tree 
 /// pairs that satisfy the label histogram lower bound by Kailing et al. 
 
-#ifndef TREE_SIMILARITY_JOIN_LABEL_HISTOGRAM_LDH_CANDIDATE_INDEX_H
-#define TREE_SIMILARITY_JOIN_LABEL_HISTOGRAM_LDH_CANDIDATE_INDEX_H
+#pragma once
 
 #include <cmath>
 #include <climits>
@@ -49,31 +48,29 @@ public:
   /// \param il_size Size of the inverted list.
   /// \param distance_threshold Given similarity threshold.
   void lookup(
-      std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& histogram_collection,
-      std::vector<std::pair<unsigned int, unsigned int>>& join_candidates,
-      const unsigned int il_size,
+      std::vector<std::pair<int, std::unordered_map<int, int>>>& histogram_collection,
+      std::vector<std::pair<int, int>>& join_candidates,
+      const int il_size,
       const double distance_threshold);
   /// Returns the number of precandidates.
   ///
   /// \return The number of precandidates.
-  unsigned long int get_number_of_pre_candidates() const;
+  long int get_number_of_pre_candidates() const;
   /// Sets the number of precandidates.
-  void set_number_of_pre_candidates(const unsigned long int pc);
+  void set_number_of_pre_candidates(const long int pc);
   /// Returns the number of precandidates.
   ///
   /// \return The number of lookups in the inverted list.
-  unsigned long int get_number_of_il_lookups() const;
+  long int get_number_of_il_lookups() const;
 // Member variables.
 private:
   /// Number of precandidates.
-  unsigned long int pre_candidates_;
+  long int pre_candidates_;
   /// Number of lookups in the inverted list.
-  unsigned long int il_lookups_;
+  long int il_lookups_;
 };
 
 // Implementation details.
 #include "lh_candidate_index_impl.h"
 
 }
-
-#endif // TREE_SIMILARITY_JOIN_LABEL_HISTOGRAM_LDH_CANDIDATE_INDEX_H

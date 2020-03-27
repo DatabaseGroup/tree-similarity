@@ -30,7 +30,7 @@ double LGMTreeIndex<CostModel, TreeIndex>::ted(const TreeIndex& t1,
   // NOTE: This makes the algorithm quadratic and inefficient, but it is
   //       correct.
   return ted_k(t1, t2, t1.tree_size_ + t2.tree_size_);
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 double LGMTreeIndex<CostModel, TreeIndex>::ted_k(const TreeIndex& t1,
@@ -44,7 +44,7 @@ double LGMTreeIndex<CostModel, TreeIndex>::ted_k(const TreeIndex& t1,
     return std::numeric_limits<double>::infinity();
   }
   return mapping_cost(t1, t2, lb_mapping_fill_gaps(t1, t2, k));
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 void LGMTreeIndex<CostModel, TreeIndex>::init(const TreeIndex& t2) {
@@ -60,7 +60,7 @@ void LGMTreeIndex<CostModel, TreeIndex>::init(const TreeIndex& t2) {
   for (const auto& pair : t2_label_il_) {
     t2_label_il_start_pos_[pair.first] = 0;
   }
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 double LGMTreeIndex<CostModel, TreeIndex>::mapping_cost(
@@ -73,7 +73,7 @@ double LGMTreeIndex<CostModel, TreeIndex>::mapping_cost(
   result += t1.tree_size_ - mapping.size(); // deletions
   result += t2.tree_size_ - mapping.size(); // insertions
   return result;
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 std::vector<std::pair<int, int>> LGMTreeIndex<CostModel, TreeIndex>::lb_mapping(
@@ -110,7 +110,7 @@ std::vector<std::pair<int, int>> LGMTreeIndex<CostModel, TreeIndex>::lb_mapping(
   }
   mapping = to_ted_mapping(t1, t2, mapping);
   return mapping;
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 std::vector<std::pair<int, int>> LGMTreeIndex<CostModel, TreeIndex>::lb_mapping_fill_gaps(
@@ -118,7 +118,7 @@ std::vector<std::pair<int, int>> LGMTreeIndex<CostModel, TreeIndex>::lb_mapping_
   std::vector<std::pair<int, int>> mapping = lb_mapping(t1, t2, k);
   mapping = fill_gaps_in_mapping(t1, t2, mapping, k);
   return mapping;
-};
+}
 
 
 template <typename CostModel, typename TreeIndex>
@@ -130,7 +130,7 @@ void LGMTreeIndex<CostModel, TreeIndex>::update_desc_when_not_mapped(
                                // do not exist.
     count_mapped_desc[parent[node]] += count_mapped_desc[node];
   }
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 void LGMTreeIndex<CostModel, TreeIndex>::update_desc_when_mapped(
@@ -141,7 +141,7 @@ void LGMTreeIndex<CostModel, TreeIndex>::update_desc_when_mapped(
                                // do not exist.
     count_mapped_desc[parent[node]] += count_mapped_desc[node] + 1;
   }
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 void LGMTreeIndex<CostModel, TreeIndex>::update_prop_desc_when_not_mapped(
@@ -159,7 +159,7 @@ void LGMTreeIndex<CostModel, TreeIndex>::update_prop_desc_when_not_mapped(
     propagate_mapped_desc_count[node] = 0; // This is actually not needed for
                                            // t1 because the node ids are ordered.
   }
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 void LGMTreeIndex<CostModel, TreeIndex>::update_prop_desc_when_mapped(
@@ -173,7 +173,7 @@ void LGMTreeIndex<CostModel, TreeIndex>::update_prop_desc_when_mapped(
     propagate_mapped_desc_count[parent[node]] += 1;
   }
   update_prop_desc_when_not_mapped(node, count_mapped_desc, propagate_mapped_desc_count, parent, input_size);
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 void LGMTreeIndex<CostModel, TreeIndex>::get_mapped_ancestors_counts(
@@ -201,7 +201,7 @@ void LGMTreeIndex<CostModel, TreeIndex>::get_mapped_ancestors_counts(
     t2_count_mapped_anc[i_in_post] = t2_mapped_nodes[t2.postl_to_parent_[i_in_post]];
     t2_mapped_nodes[i_in_post] += t2_mapped_nodes[t2.postl_to_parent_[i_in_post]];
   }
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 bool LGMTreeIndex<CostModel, TreeIndex>::if_in_corresponding_regions(
@@ -295,7 +295,7 @@ bool LGMTreeIndex<CostModel, TreeIndex>::if_in_corresponding_regions(
   // }
   
   return false;
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 std::vector<std::pair<int, int>> LGMTreeIndex<CostModel, TreeIndex>::fill_gaps_in_mapping(
@@ -405,7 +405,7 @@ std::vector<std::pair<int, int>> LGMTreeIndex<CostModel, TreeIndex>::fill_gaps_i
   // Remove the last dummy mapping.
   result_mapping.pop_back();
   return result_mapping;
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 std::vector<std::pair<int, int>> LGMTreeIndex<CostModel, TreeIndex>::to_ted_mapping(
@@ -482,7 +482,7 @@ std::vector<std::pair<int, int>> LGMTreeIndex<CostModel, TreeIndex>::to_ted_mapp
   //       are no pairs to revise left, we can stop. 
     
   return ted_mapping;
-};
+}
 
 template <typename CostModel, typename TreeIndex>
 bool LGMTreeIndex<CostModel, TreeIndex>::k_relevant(const TreeIndex& t1,
@@ -510,4 +510,4 @@ bool LGMTreeIndex<CostModel, TreeIndex>::k_relevant(const TreeIndex& t1,
     return true;
   }
   return false;
-};
+}

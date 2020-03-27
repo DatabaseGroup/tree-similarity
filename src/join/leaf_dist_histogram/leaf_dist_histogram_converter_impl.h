@@ -25,8 +25,7 @@
 /// Implements an algorithm that converts a collection of trees into a collection 
 /// of leaf distance histograms. 
 
-#ifndef TREE_SIMILARITY_JOIN_LEAF_DIST_HISTOGRAM_LEAF_DIST_HISTOGRAM_CONVERTER_IMPL_H
-#define TREE_SIMILARITY_JOIN_LEAF_DIST_HISTOGRAM_LEAF_DIST_HISTOGRAM_CONVERTER_IMPL_H
+#pragma once
 
 template<typename Label>
 Converter<Label>::Converter() {}
@@ -34,14 +33,14 @@ Converter<Label>::Converter() {}
 template<typename Label>
 void Converter<Label>::create_histogram(
     const std::vector<node::Node<Label>>& trees_collection,
-    std::vector<std::pair<unsigned int, std::unordered_map<unsigned int, unsigned int>>>& histogram_collection) {
+    std::vector<std::pair<int, std::unordered_map<int, int>>>& histogram_collection) {
 
   // for each tree in the tree collection
   for (const auto& tree: trees_collection) {
     // stores the number of nodes per leaf distance
-    std::unordered_map<unsigned int, unsigned int> leaf_dist_histogram;
+    std::unordered_map<int, int> leaf_dist_histogram;
     // stores the number of nodes per leaf distance
-    unsigned int tree_size = 0;
+    int tree_size = 0;
     // traverse tree and store number of nodes per leaf distance
     create_leaf_dist_histrogram(tree, leaf_dist_histogram, tree_size);
     // add leaf distance histogram to collection
@@ -52,11 +51,10 @@ void Converter<Label>::create_histogram(
 template<typename Label>
 int Converter<Label>::create_leaf_dist_histrogram(
     const node::Node<Label>& tree_node, 
-    std::unordered_map<unsigned int, unsigned int>& leaf_dist_histogram, 
-    unsigned int& tree_size) {
+    std::unordered_map<int, int>& leaf_dist_histogram, int& tree_size) {
 
   // the leaf distance is the minimum leaf distance of a nodes children + 1
-  unsigned int max_child_leaf_dist = 0;
+  int max_child_leaf_dist = 0;
   // do recursively for all children
   for (const auto& child: tree_node.get_children()) {
     int child_dist = create_leaf_dist_histrogram(child, leaf_dist_histogram, tree_size);
@@ -77,8 +75,6 @@ int Converter<Label>::create_leaf_dist_histrogram(
 }
 
 template<typename Label>
-const unsigned int Converter<Label>::get_maximum_leaf_dist() const {
+int Converter<Label>::get_maximum_leaf_dist() const {
   return max_leaf_distance_;
 }
-
-#endif // TREE_SIMILARITY_JOIN_LEAF_DIST_HISTOGRAM_LEAF_DIST_HISTOGRAM_CONVERTER_IMPL_H

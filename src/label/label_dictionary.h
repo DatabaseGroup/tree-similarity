@@ -27,8 +27,7 @@
 /// strings as labels, one could use this class as a template argument for the
 /// Node class to accomplish this.
 
-#ifndef TREE_SIMILARITY_LABEL_LABEL_DICTIONARY_H
-#define TREE_SIMILARITY_LABEL_LABEL_DICTIONARY_H
+#pragma once
 
 #include <unordered_map>
 
@@ -74,5 +73,3 @@ private:
 #include "label_dictionary_impl.h"
 
 } // namespace label
-
-#endif // TREE_SIMILARITY_LABEL_LABEL_DICTIONARY_H

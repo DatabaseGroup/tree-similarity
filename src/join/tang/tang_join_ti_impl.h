@@ -38,7 +38,7 @@ template <typename Label, typename VerificationAlgorithm>
 void TangJoinTI<Label, VerificationAlgorithm>::execute_join(
     std::vector<node::Node<Label>>& trees_collection,
     std::vector<node::BinaryNode<Label>>& binary_trees_collection,
-    std::unordered_set<std::pair<unsigned int, unsigned int>, hashintegerpair>& candidates,
+    std::unordered_set<std::pair<int, int>, hashintegerpair>& candidates,
     std::vector<join::JoinResultElement>& join_result,
     const double distance_threshold) {
 
@@ -66,17 +66,17 @@ void TangJoinTI<Label, VerificationAlgorithm>::convert_trees_to_binary_trees(
 template <typename Label, typename VerificationAlgorithm>
 void TangJoinTI<Label, VerificationAlgorithm>::retrieve_candidates(
     std::vector<node::BinaryNode<Label>>& binary_trees_collection,
-    std::unordered_set<std::pair<unsigned int, unsigned int>, hashintegerpair>& candidates,
+    std::unordered_set<std::pair<int, int>, hashintegerpair>& candidates,
     const double distance_threshold) {
 
   // initialize inverted list index I of subgraphs
   // -> pointer to root of subtree?
-  std::unordered_map<unsigned int, std::vector<unsigned int>> small_trees;
+  std::unordered_map<int, std::vector<int>> small_trees;
   // number of subgraphs, we want to achieve
-  unsigned int delta = 2 * distance_threshold + 1;
+  int delta = 2 * distance_threshold + 1;
 
   // for all trees in binary_trees_collection
-  for(unsigned int curr_binary_tree_id = 0; curr_binary_tree_id < binary_trees_collection.size(); 
+  for(std::size_t curr_binary_tree_id = 0; curr_binary_tree_id < binary_trees_collection.size(); 
         ++curr_binary_tree_id) {
     int curr_tree_size = binary_trees_collection[curr_binary_tree_id].get_tree_size();
 
@@ -85,23 +85,23 @@ void TangJoinTI<Label, VerificationAlgorithm>::retrieve_candidates(
     binary_trees_collection[curr_binary_tree_id].get_node_postorder_vector(nodes_in_postorder);
 
     // only look at trees with size in the threshold range -> for n in max(|T_i| - tau, 1), |T_i|)
-    for(unsigned int n = std::max(1, curr_tree_size - (int)distance_threshold); n <= curr_tree_size; ++n) {      
+    for(int n = std::max(1, curr_tree_size - (int)distance_threshold); n <= curr_tree_size; ++n) {      
       // traverse actual tree in postorder
-      for(unsigned int curr_node_postorder_id = 0; curr_node_postorder_id < nodes_in_postorder.size(); 
+      for(std::size_t curr_node_postorder_id = 0; curr_node_postorder_id < nodes_in_postorder.size(); 
           ++curr_node_postorder_id) {
         // S contains trees T_j that contain the relevant subgraphs s_j  -> S = getSubgraphs(T_i, N)
-        std::vector<unsigned int> S;
+        std::vector<int> S;
         get_subgraphs(nodes_in_postorder[curr_node_postorder_id], n, curr_node_postorder_id, S);
 
         // for each T_j (T_j .. tree that owns s) in S
-        for(unsigned int T_j: S)
+        for(int T_j: S)
           // add(T_i, T_j) to candidates, join candidates is an unordered set,
           // therefore, no worries about duplicates
           candidates.emplace(curr_binary_tree_id, T_j);
       }
 
       // FIX: add all pairs with small trees
-      for(unsigned int T_j: small_trees[n])
+      for(int T_j: small_trees[n])
         candidates.emplace(curr_binary_tree_id, T_j);
     }
 
@@ -111,14 +111,14 @@ void TangJoinTI<Label, VerificationAlgorithm>::retrieve_candidates(
     else {
       // g = MAXMINSIZE(T_i, 2*tau + 1)
       // maximal number of nodes within a subgraph
-      unsigned int gamma = max_min_size(&binary_trees_collection[curr_binary_tree_id],
+      int gamma = max_min_size(&binary_trees_collection[curr_binary_tree_id],
                                         curr_tree_size, delta);
 
       // S' = PARTITION(T_i, 2*tau + 1, g)
       // for each s in S'
         // insert s into inverted list index I_T_i
-      unsigned int postorder_id = 0;
-      unsigned int subgraph_id = 0;
+      int postorder_id = 0;
+      int subgraph_id = 0;
       update_inverted_list(&binary_trees_collection[curr_binary_tree_id], delta, gamma,
                            curr_tree_size, curr_binary_tree_id, postorder_id, subgraph_id, distance_threshold);
     }
@@ -127,8 +127,8 @@ void TangJoinTI<Label, VerificationAlgorithm>::retrieve_candidates(
 
 template <typename Label, typename VerificationAlgorithm>
 void TangJoinTI<Label, VerificationAlgorithm>::get_subgraphs(
-    node::BinaryNode<Label>* curr_node, unsigned int tree_size, 
-    unsigned int curr_node_postorder_id, std::vector<unsigned int>& S) {
+    node::BinaryNode<Label>* curr_node, int tree_size, 
+    int curr_node_postorder_id, std::vector<int>& S) {
   
   // get string that concatenates the labels of the current node and its children
   // take a look at all combinations of empty children (Paper Section 3.4 label indexing)
@@ -195,15 +195,15 @@ bool TangJoinTI<Label, VerificationAlgorithm>::check_subgraphs(
 }
 
 template <typename Label, typename VerificationAlgorithm>
-unsigned int TangJoinTI<Label, VerificationAlgorithm>::max_min_size(
-    node::BinaryNode<Label>* curr_node, unsigned int tree_size, unsigned int delta) {
+int TangJoinTI<Label, VerificationAlgorithm>::max_min_size(
+    node::BinaryNode<Label>* curr_node, int tree_size, int delta) {
   
-  unsigned int gamma_max = std::floor(tree_size / delta);
-  unsigned int gamma_min = std::floor((tree_size + delta - 1) / (2 * delta - 1));
-  unsigned int c = gamma_max - gamma_min + 1;
+  int gamma_max = std::floor(tree_size / delta);
+  int gamma_min = std::floor((tree_size + delta - 1) / (2 * delta - 1));
+  int c = gamma_max - gamma_min + 1;
 
   while(c > 1) {
-    unsigned int gamma_mid = gamma_min + std::floor(c/2);
+    int gamma_mid = gamma_min + std::floor(c/2);
 
     if(partitionable(curr_node, delta, gamma_mid)) {
       gamma_min = gamma_mid;
@@ -218,16 +218,16 @@ unsigned int TangJoinTI<Label, VerificationAlgorithm>::max_min_size(
 
 template <typename Label, typename VerificationAlgorithm>
 bool TangJoinTI<Label, VerificationAlgorithm>::partitionable(
-    node::BinaryNode<Label>* curr_node, unsigned int delta, unsigned int gamma) {
-  unsigned int nr_of_subgraphs_found = 0;
+    node::BinaryNode<Label>* curr_node, int delta, int gamma) {
+  int nr_of_subgraphs_found = 0;
 
   return recursive_partitionable(curr_node, delta, gamma, nr_of_subgraphs_found);
 }
 
 template <typename Label, typename VerificationAlgorithm>
 bool TangJoinTI<Label, VerificationAlgorithm>::recursive_partitionable(
-    node::BinaryNode<Label>* curr_node, unsigned int delta, unsigned int gamma, 
-    unsigned int& nr_of_subgraphs_found) {
+    node::BinaryNode<Label>* curr_node, int delta, int gamma, 
+    int& nr_of_subgraphs_found) {
   
   curr_node->set_subgraph_size(1);
   curr_node->set_detached(0);
@@ -258,9 +258,9 @@ bool TangJoinTI<Label, VerificationAlgorithm>::recursive_partitionable(
 
 template <typename Label, typename VerificationAlgorithm>
 bool TangJoinTI<Label, VerificationAlgorithm>::update_inverted_list(
-    node::BinaryNode<Label>* curr_node, unsigned int delta, unsigned int gamma, 
-    unsigned int tree_size, unsigned int curr_tree_id, unsigned int& postorder_id,
-    unsigned int& subgraph_id, const double distance_threshold) {
+    node::BinaryNode<Label>* curr_node, int delta, int gamma, 
+    int tree_size, int curr_tree_id, int& postorder_id,
+    int& subgraph_id, const double distance_threshold) {
   
   curr_node->set_subgraph_size(1);
   curr_node->set_detached(0);
@@ -298,7 +298,7 @@ bool TangJoinTI<Label, VerificationAlgorithm>::update_inverted_list(
     int max_index = curr_node->get_postorder_id() + lambda_prim;
 
     // insert the subgraph at all relevant postorder positions with its top twig labels
-    for(unsigned int current_postorder_idx = min_index; current_postorder_idx <= max_index; ++current_postorder_idx)
+    for(int current_postorder_idx = min_index; current_postorder_idx <= max_index; ++current_postorder_idx)
       inverted_list_[tree_size][current_postorder_idx][twig_labels].emplace_back(curr_tree_id, curr_node);
 
     if(subgraph_id >= delta)
@@ -311,7 +311,7 @@ bool TangJoinTI<Label, VerificationAlgorithm>::update_inverted_list(
 template <typename Label, typename VerificationAlgorithm>
 void TangJoinTI<Label, VerificationAlgorithm>::verify_candidates(
     std::vector<node::Node<Label>>& trees_collection,
-    std::unordered_set<std::pair<unsigned int, unsigned int>, hashintegerpair>& candidates,
+    std::unordered_set<std::pair<int, int>, hashintegerpair>& candidates,
     std::vector<join::JoinResultElement>& join_result,
     const double distance_threshold) {
 
@@ -337,18 +337,18 @@ void TangJoinTI<Label, VerificationAlgorithm>::verify_candidates(
 }
 
 template <typename Label, typename VerificationAlgorithm>
-const unsigned long long int
+long long int
     TangJoinTI<Label, VerificationAlgorithm>::get_number_of_pre_candidates() const {
   return pre_candidates_;
 }
 
 template <typename Label, typename VerificationAlgorithm>
-const unsigned long long int TangJoinTI<Label, VerificationAlgorithm>::get_subproblem_count() const {
+long long int TangJoinTI<Label, VerificationAlgorithm>::get_subproblem_count() const {
   return sum_subproblem_counter_;
 }
 
 template <typename Label, typename VerificationAlgorithm>
-const unsigned long long int
+long long int
     TangJoinTI<Label, VerificationAlgorithm>::get_number_of_il_lookups() const {
   return il_lookups_;
 }

@@ -166,7 +166,7 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
     fill_rld(ti.postr_to_rld_, ti.prel_to_size_, ti.postr_to_prel_,
         ti.prel_to_postr_, ti.prel_to_children_);
   }
-};
+}
 
 template <typename TreeIndex, typename Label, typename CostModel>
 int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
@@ -465,7 +465,7 @@ int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   // Return the number of nodes in the subtree rooted at this node.
   return desc_sum + 1;
   
-};
+}
 
 void fill_kr_ancestors(std::vector<int>& postl_to_kr_ancestor,
     const std::vector<int>& postl_to_lch, const std::vector<int>& list_kr) {
@@ -476,7 +476,7 @@ void fill_kr_ancestors(std::vector<int>& postl_to_kr_ancestor,
       l = postl_to_lch[l];
     }
   }
-};
+}
 
 void fill_ln(std::vector<int>& prel_to_ln,
     std::vector<int>& prer_to_ln,
@@ -494,7 +494,7 @@ void fill_ln(std::vector<int>& prel_to_ln,
       current_leaf_prer = i;
     }
   }
-};
+}
 
 void fill_rld(std::vector<int>& postr_to_rld,
     const std::vector<int>& prel_to_size,
