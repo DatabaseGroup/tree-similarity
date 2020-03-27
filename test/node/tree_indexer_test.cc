@@ -10,8 +10,9 @@
 #include "to_string_converters.h"
 #include "tree_indexer.h"
 
+// argc argument name omitted because not used.
 // TODO: Allow one argument which is the index test name.
-int main(int argc, char** argv) {
+int main(int, char** argv) {
   
   // Index test name.
   std::string index_test_name = std::string(argv[1]);
