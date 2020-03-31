@@ -4,3 +4,6 @@
 # Test case 2
 {a{b{c}{d{e}}}{f{g}{h{i{j}{k}}}}{l{m}}}
 13
+# Test case 3
+{{a}{b{c}}}
+4

@@ -41,7 +41,7 @@ void Converter<Label>::convert(
     // convert tree to a binary tree recursively
     create_binary_tree(tree, binary_tree);
     // add binary tree to collection of binary tree
-    binary_trees_collection.push_back(binary_tree);
+    binary_trees_collection.push_back(std::move(binary_tree));
   }
 }
 
@@ -57,15 +57,16 @@ void Converter<Label>::create_binary_tree(
   // handle all children
   for(const auto& child: tree_node.get_children()) {
     // create a copy of the node in the original tree and add it as a child in the binary tree
-    node::BinaryNode<Label>* binary_child = new node::BinaryNode<Label>(child.label());
+    auto binary_child = std::make_unique<node::BinaryNode<Label>>(child.label());
     
+    node::BinaryNode<Label>* binary_child_new_pointer;
     // only the first child is added as a left child, all others are added as right children
     if(first_child)
-      current_binary_node->add_left_child(binary_child);
+      binary_child_new_pointer = current_binary_node->add_left_child(binary_child);
     else
-      current_binary_node->add_right_child(binary_child);
+      binary_child_new_pointer = current_binary_node->add_right_child(binary_child);
     // recursive call with child in the original tree and the child in the binary tree
-    create_binary_tree(child, *binary_child);
+    create_binary_tree(child, *binary_child_new_pointer);
 
     // update current node in the binary tree, where the next node is inserted
     if(first_child) // only the first child is added as a left child

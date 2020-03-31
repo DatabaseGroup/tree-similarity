@@ -218,9 +218,28 @@ bool LGMTreeIndex<CostModel, TreeIndex>::if_in_corresponding_regions(
   int i_pre = t1.postl_to_prel_[i];
   int j_pre = t2.postl_to_prel_[j];
   
-  int t1_end_gap_pre = t1.postl_to_prel_[t1_end_gap];
-  int t2_end_gap_pre = t2.postl_to_prel_[t2_end_gap];
+  // The following two if statements take care of the cases, when a gap is
+  // before the first or after the last node pair in mapping.
+
+  // These four variables can be initialized only if the begin and end gaps
+  // are true notde pairs.
+  int t1_begin_gap_pre = -1;
+  int t2_begin_gap_pre = -1;
+  int t1_end_gap_pre = t1.tree_size_;
+  int t2_end_gap_pre = t2.tree_size_;
+  if (t1_begin_gap > -1) { // also t2_begin_gap > -1
+    t1_begin_gap_pre = t1.postl_to_prel_[t1_begin_gap];
+    t2_begin_gap_pre = t2.postl_to_prel_[t2_begin_gap];
+  }
+  if (t1_end_gap < t1.tree_size_) { // also t2_end_gap < t2.tree_size_
+    t1_end_gap_pre = t1.postl_to_prel_[t1_end_gap];
+    t2_end_gap_pre = t2.postl_to_prel_[t2_end_gap];
+  }
   
+  // Gap is before first node pair in mapping. (i,j) is a pair of nodes with
+  // postorder IDs smaller than nodes in end_gap. Then, if preorder IDs are
+  // greater then end_gap, (i,j) is in descendants of end_gap. If preorder IDs
+  // are smaller, (i,j) is to the left.
   if (t1_begin_gap == -1) { // also t2_begin_gap == -1
     if (i_pre > t1_end_gap_pre && j_pre > t2_end_gap_pre) {
       return true;
@@ -230,10 +249,11 @@ bool LGMTreeIndex<CostModel, TreeIndex>::if_in_corresponding_regions(
     }
   }
   
-  int t1_begin_gap_pre = t1.postl_to_prel_[t1_begin_gap];
-  int t2_begin_gap_pre = t2.postl_to_prel_[t2_begin_gap];
-  
-  if (t1_end_gap == t1.tree_size_) { // also t2_end_gap == t2_input_size_
+  // Gap is after the last node pair in mapping. (i,j) is a pair of nodes with
+  // postorder IDs greater than nodes in begin_gap. Then, if preorder IDs are
+  // greater then begin_gap, (i,j) is to the right of begin_gap. If preorder IDs
+  // are smaller, (i,j) is in ancestors.
+  if (t1_end_gap == t1.tree_size_) { // also t2_end_gap == t2.tree_size_
     if (i_pre > t1_begin_gap_pre && j_pre > t2_begin_gap_pre) {
       return true;
     }
@@ -257,19 +277,6 @@ bool LGMTreeIndex<CostModel, TreeIndex>::if_in_corresponding_regions(
     }
   }
   
-  // // t1_begin_gap is desc of i is desc of t1_end_gap
-  // if (t1_end_gap_pre < i_pre && i_pre < t1_begin_gap_pre &&
-  //     t2_end_gap_pre < j_pre && j_pre < t2_begin_gap_pre) {
-  //   return true;
-  // }
-  // // t1_begin_gap is desc of t1_end_gap, i is to the right of t1_begin_gap
-  // // or
-  // // t1_begin_gap is to the left of t1_end_gap, i is desc of t1_end_gap
-  // if (t1_end_gap_pre < i_pre && t1_begin_gap_pre < i_pre &&
-  //     t2_end_gap_pre < j_pre && t2_begin_gap_pre < j_pre) {
-  //   return true;
-  // }
-  
   if (i_pre < t1_end_gap_pre && j_pre < t2_end_gap_pre) {
     // t1_end_gap is to the right of t1_begin_gap, i is to the right of
     // t1_begin_gap and to the left of t1_end_gap
@@ -281,18 +288,6 @@ bool LGMTreeIndex<CostModel, TreeIndex>::if_in_corresponding_regions(
       return true;
     }
   }
-  
-  // // t1_end_gap is to the right of t1_begin_gap, i is to the right of
-  // // t1_begin_gap and to the left of t1_end_gap
-  // if (t1_begin_gap_pre < i_pre && i_pre < t1_end_gap_pre &&
-  //     t2_begin_gap_pre < j_pre && j_pre < t2_end_gap_pre) {
-  //   return true;
-  // }
-  // // i is anc of t1_begin_gap, t1_end_gap is to the right of t1_begin_gap
-  // if (i_pre < t1_begin_gap_pre && i_pre < t1_end_gap_pre &&
-  //     j_pre < t2_begin_gap_pre && j_pre < t2_end_gap_pre) {
-  //   return true;
-  // }
   
   return false;
 }
