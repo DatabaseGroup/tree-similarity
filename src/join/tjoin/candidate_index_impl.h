@@ -201,8 +201,10 @@ int CandidateIndex::structural_mapping(
       int left_side_k_window = std::max(0.0, left_hand_duplicate.postorder_id - distance_threshold);
 
       // skip duplicates at the beginning that doesn't satisfy the postorder lower bound
-      while(le.get().struct_vect[pid_lower_bound_start].postorder_id < left_side_k_window && pid_lower_bound_start < le.get().struct_vect.size())
+      while(pid_lower_bound_start < le.get().struct_vect.size()
+          && le.get().struct_vect[pid_lower_bound_start].postorder_id < left_side_k_window) {
         ++pid_lower_bound_start;
+      }
 
       if(pid_lower_bound_start == le.get().struct_vect.size())
         break;
