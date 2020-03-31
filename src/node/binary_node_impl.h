@@ -43,13 +43,15 @@ typename BinaryNode<Label>::ConstReference BinaryNode<Label>::label() const {
 }
 
 template<class Label>
-void BinaryNode<Label>::add_left_child(BinaryNode<Label>* node) {
-  left_child_ = node;
+BinaryNode<Label>* BinaryNode<Label>::add_left_child(std::unique_ptr<BinaryNode<Label>>& node) {
+  left_child_ = std::move(node);
+  return left_child_.get();
 }
 
 template<class Label>
-void BinaryNode<Label>::add_right_child(BinaryNode<Label>* node) {
-  right_child_ = node;
+BinaryNode<Label>* BinaryNode<Label>::add_right_child(std::unique_ptr<BinaryNode<Label>>& node) {
+  right_child_ = std::move(node);
+  return right_child_.get();
 }
 
 template<class Label>
@@ -64,12 +66,12 @@ bool BinaryNode<Label>::has_right_child() {
 
 template<class Label>
 BinaryNode<Label>* BinaryNode<Label>::get_left_child() {
-  return left_child_;
+  return left_child_.get();
 }
 
 template<class Label>
 BinaryNode<Label>* BinaryNode<Label>::get_right_child() {
-  return right_child_;
+  return right_child_.get();
 }
 
 template<class Label>

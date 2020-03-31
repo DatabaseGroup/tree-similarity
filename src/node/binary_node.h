@@ -76,12 +76,12 @@ public:
   /// Adds a copy of left_child as left child and returns its reference.
   ///
   /// \return Reference to the left child of this binary node.
-  void add_left_child(BinaryNode<Label>* node);
+  BinaryNode<Label>* add_left_child(std::unique_ptr<BinaryNode<Label>>& node);
 
   /// Adds a copy of right_child as right child and returns its reference.
   ///
   /// \return Reference to the right child of this binary node.
-  void add_right_child(BinaryNode<Label>* node);
+  BinaryNode<Label>* add_right_child(std::unique_ptr<BinaryNode<Label>>& node);
 
   /// Returns true if this binary node has a left child.
   ///
@@ -160,9 +160,9 @@ public:
 // Member variables
 private:
   /// Left child of this node.
-  BinaryNode<Label>* left_child_ = nullptr;
+  std::unique_ptr<BinaryNode<Label>> left_child_ = std::unique_ptr<BinaryNode<Label>>(nullptr);
   /// Right child of this node.
-  BinaryNode<Label>* right_child_ = nullptr;
+  std::unique_ptr<BinaryNode<Label>> right_child_ = std::unique_ptr<BinaryNode<Label>>(nullptr);
   /// Data representing the label of this binary node. Only this 
   /// BinaryNode object owns it.
   Label label_;
