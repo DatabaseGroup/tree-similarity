@@ -33,16 +33,26 @@ target_link_libraries(
 )
 
 # Copy test cases.
+set( data_20 join_test_data_20.txt )
+set( res_20 join_test_results_20.txt )
+set( data_129 join_test_data_129.txt )
+set( res_129 join_test_results_129.txt )
+#set( memcheck_input join_memcheck_data.txt )
 file(
-  COPY        join_test_data.txt
+  COPY        ${data_20} ${res_20} ${data_129} ${res_129}
   DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-# Create tests in a loop. Use the same executable.
+# Create correctness tests in a loop. Use the same executable.
 foreach(loop_var ${ted_test_list})
   add_test(
-    NAME    ted_join_correctness_test_${loop_var} # TEST NAME
-    COMMAND ${test_driver_name}  # EXECUTABLE NAME
-    ${loop_var}                  # ARGUMENTS
+    NAME    ted_join_correctness_test_20_${loop_var} # TEST NAME
+    COMMAND ${test_driver_name}      # EXECUTABLE NAME
+    ${loop_var} ${data_20} ${res_20} # ARGUMENTS
+  )
+  add_test(
+    NAME    ted_join_correctness_test_129_${loop_var} # TEST NAME
+    COMMAND ${test_driver_name}      # EXECUTABLE NAME
+    ${loop_var} ${data_129} ${res_129} # ARGUMENTS
   )
 endforeach(loop_var)
