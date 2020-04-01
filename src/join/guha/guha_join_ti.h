@@ -38,6 +38,7 @@
 #include "apted_tree_index.h"
 #include "sed_tree_index.h"
 #include "cted_tree_index.h"
+#include <iostream>
 
 namespace join {
 
@@ -115,14 +116,12 @@ public:
   /// Retrieves the candidates based on metric lower and upper bounds using
   /// vectors with TED values.
   ///
-  /// \param trees_collection Input dataset to a join.
   /// \param candidates Output vecot to store candidates (pairs of tree IDs).
   /// \param join_result Output vector to stor partial join results (pairs of
   ///        tree IDs that passed an upper bound filter).
   /// \param distance_threshold Join similarity threshold.
   /// \param ted_vectors Vectors with TED values.
   void retrieve_metric_candidates(
-      std::vector<node::Node<Label>>& trees_collection,
       std::vector<std::pair<int, int>>& candidates,
       std::vector<join::JoinResultElement>& join_result,
       const double distance_threshold,
@@ -173,6 +172,9 @@ public:
   );
   /// Computes the reference set if the number of elements is not known.
   /// Implements the original method by Guha.
+  ///
+  /// NOTE: If too few clusters greater than 1 are found (the input may be too
+  ///       small), `get_random_reference_set(trees_collection, 2)` is returned.
   ///
   /// NOTE: For details see comments in the implementation source code.
   ///

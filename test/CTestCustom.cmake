@@ -1,0 +1,13 @@
+list(
+  APPEND CTEST_CUSTOM_MEMCHECK_IGNORE
+  ted_join_correctness_test_naivejoin_129
+  ted_join_correctness_test_tjoin_129
+  ted_join_correctness_test_tangjoin_129
+  ted_join_correctness_test_guhajoin_129
+  ted_join_correctness_test_bbjoin_129
+  ted_join_correctness_test_hjoin_129
+  ted_join_correctness_test_dhjoin_129
+  ted_join_correctness_test_lhjoin_129
+  ted_join_correctness_test_ldhjoin_129
+  ted_correctness_test_touzet_depth_pruning # times out, to deprecate
+)

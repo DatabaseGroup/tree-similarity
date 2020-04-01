@@ -13,3 +13,8 @@ add_subdirectory(cted_ub/)
 add_subdirectory(node/)
 add_subdirectory(ted/)
 add_subdirectory(lgm_ub/)
+
+configure_file(
+  CTestCustom.cmake
+  ${CMAKE_BINARY_DIR}/CTestCustom.cmake
+)

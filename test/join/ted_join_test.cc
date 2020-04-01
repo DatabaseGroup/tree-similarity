@@ -24,6 +24,10 @@ int main(int, char** argv) {
 
   // Index test name.
   std::string ted_join_algorithm_name = std::string(argv[1]);
+  // Input file name.
+  std::string input_file_name = std::string(argv[2]);
+  // Input results file name.
+  std::string results_file_name = std::string(argv[3]);
 
   // Type aliases.
   using Label = label::StringLabel;
@@ -37,21 +41,25 @@ int main(int, char** argv) {
   // Initialise cost model.
   CostModel ucm(ld);
   
-  // Correct results for bolzano dataset (threshold 1 to 15).
-  std::vector<std::size_t> results = {9, 37, 61, 109, 196, 344, 476, 596, 704, 840, 946, 1138, 1356, 1498, 1692};
-  
+  // TODO: Read results from file.
+  std::vector<size_t> results;
+  std::ifstream results_file(results_file_name);
+  std::size_t single_value = 0;
+  for (std::string line; std::getline(results_file, line);) {
+    sscanf(line.c_str(), "%zu", &single_value);
+    results.push_back(single_value);
+  }
+
   // Create the container to store all trees.
   std::vector<node::Node<Label>> trees_collection;
   
   // Parse the dataset.
   parser::BracketNotationParser bnp;
-  bnp.parse_collection(trees_collection, "join_test_data.txt");
-  
-  // join::NaiveJoinTI<Label, ted::TouzetBaselineTreeIndex<CostModel>> ted_join_algorithm;
+  bnp.parse_collection(trees_collection, input_file_name);
 
   int min_thres = 1;
-  int max_thres = 15;
-  int thres_step = 5;
+  int max_thres = (int)results.size() - 1;
+  int thres_step = 1;
   
   // Execute for different thresholds.
   // TODO: Naive should do only some thresholds: thresholds 1-16 take < 20sec each
@@ -100,7 +108,7 @@ int main(int, char** argv) {
   } else if (ted_join_algorithm_name == "guhajoin") {
     // NOTE: Three thresholds (1, 6, and 13) took ca. 270s. Thus, one threshold
     //       is fixed now, threshold 3, and takes ca. 97s.
-    for (int i = 3; i <= 3; i += thres_step) {
+    for (int i = min_thres; i <= max_thres; i += thres_step) {
       std::vector<std::pair<int, int>> candidates;
       std::vector<join::JoinResultElement> join_result;
       join::GuhaJoinTI<Label, ted::TouzetBaselineTreeIndex<CostModel>> ted_join_algorithm;

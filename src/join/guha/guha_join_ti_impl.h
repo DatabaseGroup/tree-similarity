@@ -141,7 +141,6 @@ void GuhaJoinTI<Label, VerificationAlgorithm>::compute_vectors(
 
 template <typename Label, typename VerificationAlgorithm>
 void GuhaJoinTI<Label, VerificationAlgorithm>::retrieve_metric_candidates(
-    std::vector<node::Node<Label>>& trees_collection,
     std::vector<std::pair<int, int>>& candidates,
     std::vector<join::JoinResultElement>& join_result,
     const double distance_threshold,
@@ -322,6 +321,11 @@ std::vector<int> GuhaJoinTI<Label, VerificationAlgorithm>::get_reference_set(
         clusters.push_back(new_cluster);
       }
       remaining_sample = temp_remaining_sample;
+    }
+
+    // FIX for small inputs when too few or to small clusters are found.
+    if (clusters.size() <= 2) {
+      return get_random_reference_set(trees_collection, 2);
     }
     
     // Sort the clusters by size.
