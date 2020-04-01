@@ -323,6 +323,11 @@ std::vector<int> GuhaJoinTI<Label, VerificationAlgorithm>::get_reference_set(
       }
       remaining_sample = temp_remaining_sample;
     }
+
+    // FIX for small inputs when too few or to small clusters are found.
+    if (clusters.size() <= 2) {
+      return get_random_reference_set(trees_collection, 2);
+    }
     
     // Sort the clusters by size.
     std::sort(clusters.begin(), clusters.end(), [](const std::vector<int>& a, const std::vector<int>& b){ return a.size() > b.size(); });

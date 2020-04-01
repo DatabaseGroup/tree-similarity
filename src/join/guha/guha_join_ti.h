@@ -38,6 +38,7 @@
 #include "apted_tree_index.h"
 #include "sed_tree_index.h"
 #include "cted_tree_index.h"
+#include <iostream>
 
 namespace join {
 
@@ -173,6 +174,9 @@ public:
   );
   /// Computes the reference set if the number of elements is not known.
   /// Implements the original method by Guha.
+  ///
+  /// NOTE: If too few clusters greater than 1 are found (the input may be too
+  ///       small), `get_random_reference_set(trees_collection, 2)` is returned.
   ///
   /// NOTE: For details see comments in the implementation source code.
   ///
