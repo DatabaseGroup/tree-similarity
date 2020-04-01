@@ -44,7 +44,6 @@ std::vector<join::JoinResultElement> NaiveJoinTI<Label, VerificationAlgorithm>::
   int i = 0;
   int j = 0;
   for (auto it_i = trees_collection.begin(); it_i != trees_collection.end(); ++it_i) {
-    std::cout << i << std::endl;
     ++i;
     // Not to do symmetric comparisons.
     j = i;
