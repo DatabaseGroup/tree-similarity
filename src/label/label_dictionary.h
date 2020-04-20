@@ -1,5 +1,5 @@
 // The MIT License (MIT)
-// Copyright (c) 2017 Mateusz Pawlik.
+// Copyright (c) 2017 Mateusz Pawlik, Thomas Huetter.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,10 +22,9 @@
 /// \file label/label_dictionary.h
 ///
 /// \details
-/// Contains the declaration of the StringLabel class (represents string data
-/// which is associated with a Node). For example, if one wants a tree with
-/// strings as labels, one could use this class as a template argument for the
-/// Node class to accomplish this.
+/// This is an implementation of a dictionary for labels. The purpose is to use
+/// it to assign complex labels uniqe integer ids. This makes it more efficient
+/// for equality comparison, indexing, and hashing. 
 
 #pragma once
 
@@ -55,15 +54,22 @@ public:
   /// \param l A label to insert.
   /// \return The id of the given label.
   int insert(const Label& l);
+  /// Returns the label that is mapped to a certain 
+  ///
+  /// \param id A label identifier to lookup.
+  /// \return The according label to a given label identifier.
+  const Label& get(const int id) const;
   /// Removes all elements from the dictionary.
   /// Resets labels_count_ to 0;
   void clear();
   
   int size() const;
 private:
-  /// A hash map storing the labels.
+  /// A hash map that maps labels to unique integer identifiers.
   /// TODO: Write requirements for Label and update them in string_label.
-  std::unordered_map<Label, int> dictionary_;
+  std::unordered_map<Label, int> label_to_id_dictionary_;
+  /// Maps a unique interger identifier to the according label.
+  std::vector<Label> id_to_label_dictionary_;
   /// The number of labels in dictionary. It is also used to assign ids to new
   /// inserted labels.
   int labels_count_;

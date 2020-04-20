@@ -1,5 +1,6 @@
 // The MIT License (MIT)
-// Copyright (c) 2017 Mateusz Pawlik, Nikolaus Augsten, and Daniel Kocher.
+// Copyright (c) 2017 Mateusz Pawlik, Nikolaus Augsten, Daniel Kocher, and 
+// Thomas Huetter.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -40,6 +41,7 @@ int UnitCostModel<Label>::ins(const node::Node<Label>& node) const {
   return 1;
 }
 
+
 template <class Label>
 UnitCostModelLD<Label>::UnitCostModelLD(label::LabelDictionary<Label>& ld) :
     ld_(ld) {}
@@ -62,5 +64,45 @@ double UnitCostModelLD<Label>::del(const int) const {
 // Argument's name deleted because not used.
 template <typename Label>
 double UnitCostModelLD<Label>::ins(const int) const {
+  return 1.0;
+}
+
+
+template <class Label>
+UnitCostModelJSON<Label>::UnitCostModelJSON(label::LabelDictionary<Label>& ld) :
+    ld_(ld) {}
+
+template <typename Label>
+double UnitCostModelJSON<Label>::ren(const int label_id_1,
+    const int label_id_2) const {
+  if (ld_.get(label_id_1).to_string().compare("[]") == 0)
+    if (ld_.get(label_id_2).to_string().compare("[]") == 0)
+      return 0;
+    else
+      return std::numeric_limits<double>::max();
+  else if (ld_.get(label_id_1).to_string().compare("\\{\\}") == 0)
+    if (ld_.get(label_id_2).to_string().compare("\\{\\}") == 0)
+      return 0;
+    else
+      return std::numeric_limits<double>::max();
+  else
+    if (ld_.get(label_id_2).to_string().compare("[]") == 0 && 
+        ld_.get(label_id_2).to_string().compare("\\{\\}") == 0)
+      return std::numeric_limits<double>::max();
+    else if (label_id_1 == label_id_2)
+      return 0.0;
+    else
+      return 1.0;
+}
+
+// Argument's name deleted because not used.
+template <typename Label>
+double UnitCostModelJSON<Label>::del(const int) const {
+  return 1.0;
+}
+
+// Argument's name deleted because not used.
+template <typename Label>
+double UnitCostModelJSON<Label>::ins(const int) const {
   return 1.0;
 }

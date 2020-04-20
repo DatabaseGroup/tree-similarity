@@ -8,6 +8,7 @@ target_include_directories(TestCommon INTERFACE
 add_subdirectory(parser/)
 add_subdirectory(touzet/)
 add_subdirectory(join/)
+add_subdirectory(li_lb/)
 add_subdirectory(sed_lb/)
 add_subdirectory(cted_ub/)
 add_subdirectory(node/)

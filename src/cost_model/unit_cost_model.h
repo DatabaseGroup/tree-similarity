@@ -1,5 +1,6 @@
 // The MIT License (MIT)
-// Copyright (c) 2017 Mateusz Pawlik, Nikolaus Augsten, and Daniel Kocher.
+// Copyright (c) 2017 Mateusz Pawlik, Nikolaus Augsten, Daniel Kocher, and 
+// Thomas Huetter.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +24,7 @@
 
 #pragma once
 
+#include <limits>
 #include "node.h"
 #include "label_dictionary.h"
 
@@ -51,8 +53,50 @@ struct UnitCostModelLD {
   /// Label dictionary in case the labels are needed for cost calculations.
   const label::LabelDictionary<Label>& ld_;
   
-  /// Constructor. Takes LabelDictionary.
+  /// Constructor. Takes a LabelDictionary.
   UnitCostModelLD(label::LabelDictionary<Label>& ld);
+  
+  /// Basic rename cost function (unit cost model).
+  /**
+   * \param label_id_1 Source label id.
+   * \param label_id_2 Destination label id.
+   * \return Double cost of renaming label_id_1 to label_id_1.
+   */
+  double ren(const int label_id_1, const int label_id_2) const;
+  
+  /// Basic delete cost function.
+  /**
+   * \param label_id Label id to be deleted.
+   * \return Double cost of deleting a node with label_id.
+   */
+  double del(const int label_id) const;
+  
+  /// Basic insert cost function.
+  /**
+   * \param label_id Label id to be inserted.
+   * \return Double cost of inserting a node with label_id.
+   */
+  double ins(const int label_id) const;
+};
+
+/// Represents the unit cost model to be used for the distance computation.
+/**
+ * Costs are generic for different node classes. A cost model has to provide
+ * three cost functions:
+ * - ren(label_id_1, label_id_2): cost of renaming label with label_id_1 to
+ *   label with label_id_2.
+ * - del(label_id): cost of deleting node with label_id.
+ * - ins(label_id): cost of inserting node with label_id.
+ * All three cost functions must return a double.
+ */
+template <typename Label>
+struct UnitCostModelJSON {
+  /// Label dictionary in case the labels are needed for cost calculations for
+  /// JSON documents.
+  const label::LabelDictionary<Label>& ld_;
+  
+  /// Constructor. Takes a LabelDictionary.
+  UnitCostModelJSON(label::LabelDictionary<Label>& ld);
   
   /// Basic rename cost function (unit cost model).
   /**
