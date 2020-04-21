@@ -150,7 +150,7 @@ int main(int, char** argv) {
       std::getline(test_data_file, line);
       std::string correct_result = line;
       
-      parser::BracketNotationParser bnp;
+      parser::BracketNotationParser<Label> bnp;
       
       // Validate test tree.
       if (!bnp.validate_input(input_tree)) {

@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
   // std::cout << "Source tree: " << argv[1] << std::endl;
   // std::cout << "Destination tree: " << argv[2] << std::endl;
 
-  parser::BracketNotationParser bnp;
+  parser::BracketNotationParser<Label> bnp;
   // Verify the input format before parsing.
   
 

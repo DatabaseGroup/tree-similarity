@@ -4,7 +4,7 @@
 #include <fstream>
 #include <unordered_map>
 #include "unit_cost_model.h"
-#include "string_label.h"
+#include "json_label.h"
 #include "node.h"
 #include "label_histogram_converter.h"
 #include "label_intersection.h"
@@ -21,8 +21,8 @@ int main(int, char** argv) {
   std::string results_file_name = std::string(argv[2]);
 
   // Type aliases.
-  using Label = label::StringLabel;
-  using CostModel = cost_model::UnitCostModelLD<Label>;
+  using Label = label::JSONLabel;
+  using CostModel = cost_model::UnitCostModelJSON<Label>;
   using LabelDictionary = label::LabelDictionary<Label>;
   using LabelInt = ted_lb::LabelIntersection;
   using ZhangSTI = ted::ZhangShashaTreeIndex<CostModel, node::TreeIndexAll>;

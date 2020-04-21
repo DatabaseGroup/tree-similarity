@@ -55,10 +55,8 @@
 
 namespace parser {
 
+template <class Label>
 class BracketNotationParser {
-// Types and type aliases
-public:
-  using Label = label::StringLabel;
 
 // Member functions
 public:

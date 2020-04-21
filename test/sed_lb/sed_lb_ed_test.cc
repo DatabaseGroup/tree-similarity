@@ -48,7 +48,7 @@ int main() {
       std::getline(test_cases_file, line);
       double correct_result = std::stod(line);
 
-      parser::BracketNotationParser bnp;
+      parser::BracketNotationParser<Label> bnp;
 
       // Validate test trees.
       if (!bnp.validate_input(input_tree_1_string)) {

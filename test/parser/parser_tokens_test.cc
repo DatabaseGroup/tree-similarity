@@ -21,6 +21,8 @@ const std::string vector_to_string(const std::vector<std::string>& v) {
 
 int main() {
 
+  using Label = label::StringLabel;
+  
   std::cout << "Tokens test." << std::endl;
 
   // Parse test cases from file.
@@ -37,7 +39,7 @@ int main() {
       std::getline(test_cases_file, line);
       std::string correct_result = line;
 
-      parser::BracketNotationParser bnp;
+      parser::BracketNotationParser<Label> bnp;
 
       // Validate test tree.
       if (!bnp.validate_input(input_tree)) {

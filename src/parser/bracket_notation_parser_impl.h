@@ -28,7 +28,8 @@
 
 /// This is currently a copy of the previous version but with the efficient
 /// tokanization.
-node::Node<BracketNotationParser::Label> BracketNotationParser::parse_single(
+template<class Label>
+node::Node<Label> BracketNotationParser<Label>::parse_single(
     const std::string& tree_string) {
 
   std::vector<std::string> tokens = get_tokens(tree_string);
@@ -83,8 +84,9 @@ node::Node<BracketNotationParser::Label> BracketNotationParser::parse_single(
   return root;
 }
 
-void BracketNotationParser::parse_collection(
-    std::vector<node::Node<BracketNotationParser::Label>>& trees_collection,
+template<class Label>
+void BracketNotationParser<Label>::parse_collection(
+    std::vector<node::Node<Label>>& trees_collection,
     const std::string& file_path) {
   std::ifstream trees_file(file_path);
   if (!trees_file) {
@@ -99,7 +101,8 @@ void BracketNotationParser::parse_collection(
 }
 
 /// This is only a tokanizer that returns a vector with correct tokens.
-std::vector<std::string> BracketNotationParser::get_tokens(
+template<class Label>
+std::vector<std::string> BracketNotationParser<Label>::get_tokens(
     const std::string& tree_string) {
   std::vector<std::string> tokens;
 
@@ -134,7 +137,8 @@ std::vector<std::string> BracketNotationParser::get_tokens(
   return tokens;
 }
 
-bool BracketNotationParser::validate_input(const std::string& tree_string) const {
+template<class Label>
+bool BracketNotationParser<Label>::validate_input(const std::string& tree_string) const {
   int bracket_diff_counter = 0; // Counts difference between the numbers of left and right brackets.
   int bracket_pair_counter = 0; // Counts number of bracket pairs - number of nodes assuming correct nesting.
   // Loop over all characters.

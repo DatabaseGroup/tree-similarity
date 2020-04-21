@@ -54,7 +54,7 @@ int main(int, char** argv) {
   std::vector<node::Node<Label>> trees_collection;
   
   // Parse the dataset.
-  parser::BracketNotationParser bnp;
+  parser::BracketNotationParser<Label> bnp;
   bnp.parse_collection(trees_collection, input_file_name);
 
   int min_thres = 1;

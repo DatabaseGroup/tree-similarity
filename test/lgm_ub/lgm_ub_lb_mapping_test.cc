@@ -38,7 +38,7 @@ int main() {
   node::TreeIndexLGM ti1;
   node::TreeIndexLGM ti2;
 
-  parser::BracketNotationParser bnp;
+  parser::BracketNotationParser<Label> bnp;
 
   // Fixed test cases.
   std::cout << "--- FIXED TEST ---" << std::endl;

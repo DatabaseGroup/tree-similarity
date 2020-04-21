@@ -76,7 +76,7 @@ int main() {
         correct_result.pop_back();
       }
 
-      parser::BracketNotationParser bnp;
+      parser::BracketNotationParser<Label> bnp;
 
       // Validate test tree.
       if (!bnp.validate_input(source_tree)) {

@@ -75,24 +75,14 @@ UnitCostModelJSON<Label>::UnitCostModelJSON(label::LabelDictionary<Label>& ld) :
 template <typename Label>
 double UnitCostModelJSON<Label>::ren(const int label_id_1,
     const int label_id_2) const {
-  if (ld_.get(label_id_1).to_string().compare("[]") == 0)
-    if (ld_.get(label_id_2).to_string().compare("[]") == 0)
-      return 0;
-    else
-      return std::numeric_limits<double>::max();
-  else if (ld_.get(label_id_1).to_string().compare("\\{\\}") == 0)
-    if (ld_.get(label_id_2).to_string().compare("\\{\\}") == 0)
-      return 0;
-    else
-      return std::numeric_limits<double>::max();
+  if (ld_.get(label_id_1).get_type() != ld_.get(label_id_2).get_type())
+    return std::numeric_limits<double>::max();
+
+  if (ld_.get(label_id_1).get_label().compare(ld_.get(label_id_2).get_label()) 
+      == 0)
+    return 0.0;
   else
-    if (ld_.get(label_id_2).to_string().compare("[]") == 0 && 
-        ld_.get(label_id_2).to_string().compare("\\{\\}") == 0)
-      return std::numeric_limits<double>::max();
-    else if (label_id_1 == label_id_2)
-      return 0.0;
-    else
-      return 1.0;
+    return 1.0;
 }
 
 // Argument's name deleted because not used.
