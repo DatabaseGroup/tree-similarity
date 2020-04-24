@@ -23,21 +23,27 @@
 
 #include <vector>
 #include <cmath>
+#include "node.h"
+#include "label_dictionary.h"
+#include "tree_indexer.h"
+#include "ted_algorithm.h"
 
 namespace ted_lb {
 
 /**
- * Implements the label intersection lower bound for trees. The parameters are
- * passed as label histograms as produced by 
- * label_histogram_converter::Converter<Label>.
+ * Implements the label intersection lower bound for trees.
  */
-class LabelIntersection{
+template <typename CostModel, typename TreeIndex>
+class LabelIntersection : public ted::TEDAlgorithm<CostModel, TreeIndex>{
+
+  // Base class members made visible for this class.
+  using ted::TEDAlgorithm<CostModel, TreeIndex>::TEDAlgorithm;
+  using ted::TEDAlgorithm<CostModel, TreeIndex>::subproblem_counter_;
+  using ted::TEDAlgorithm<CostModel, TreeIndex>::ted;
 
 public:
-  /// Given two label histograms, this function computes the label intersection.
-  unsigned long int compute(
-  	const std::pair<int, std::unordered_map<int, int>>& histo1, 
-  	const std::pair<int, std::unordered_map<int, int>>& histo2);
+  /// This function computes the label intersection.
+  double ted(const TreeIndex& t1, const TreeIndex& t2);
 };
 
 // Implementation details.

@@ -19,28 +19,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/// Contains the implementation of the label intersection algorithm.
+/// Contains the implementation of the Label Intersection algorithm.
 
 #pragma once
 
-unsigned long int LabelIntersection::compute(
-    const std::pair<int, std::unordered_map<int, int>>& histo1, 
-    const std::pair<int, std::unordered_map<int, int>>& histo2) {
+template <typename CostModel, typename TreeIndex>
+double LabelIntersection<CostModel, TreeIndex>::ted(
+    const TreeIndex& t1, const TreeIndex& t2) {
   
-  // Get the histogram out of the histogram object that contains the tree size.
-  auto h2 = histo2.second;
+  // Count the number of overlaping labels.
   unsigned long int label_int = 0;
 
-  // Verify for each element of one histogram, whether it exists in the other.
-  for (auto& element: histo1.second) {
-    std::unordered_map<int,int>::iterator it = h2.find(element.first);
-    // If the element of the first histogram exists in the second one
-    if (it != h2.end()) {
-      label_int += std::min(element.second, h2[element.first]);
+  // Verify for each node of the first tree, whether it appears in the second.
+  for (auto& element: t1.inverted_list_label_id_to_postl_) {
+    auto tree2 = t2.inverted_list_label_id_to_postl_;
+    std::unordered_map<int,std::vector<int>>::iterator it =
+      tree2.find(element.first);
+    // If the node with a certain label exists in both trees, the smaller
+    // number is the intersection for the specific label.
+    if (it != tree2.end()) {
+      label_int += std::min(element.second.size(), tree2[element.first].size());
     }
   }
 
   // Return the label intersection which is the size of the larger tree minus
   // the number of nodes in common.
-  return std::max(histo1.first, histo2.first) - label_int;
+  return std::max(t1.tree_size_, t2.tree_size_) - label_int;
 }

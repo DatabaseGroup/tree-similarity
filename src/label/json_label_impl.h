@@ -27,24 +27,27 @@
 #pragma once
 
 JSONLabel::JSONLabel(const std::string& label) {
-  set_label(label);
+  label_ = label;
 
+  // Set type to 0 in case of an object. An object is indicated by opening
+  // and closing curly braces.
   if (label.compare("\\{\\}") == 0) {
-    type_ = 0; // Set value to 0 in case of an object.
+    type_ = 0;
   }
-  if (label.compare("[]") == 0) {
-    type_ = 1; // Set value to 1 in case of an array.
+  // Set type to 1 in case of an array. An array is indicated by opening
+  // and closing brackets.
+  else if (label.compare("[]") == 0) {
+    type_ = 1;
   }
-  // Set keys and values to 3. Keys must be set to 2 later.
-  type_ = 3;
-}
-
-void JSONLabel::set_type(const unsigned int type) {
-  type_ = type;
-}
-
-void JSONLabel::set_label(const std::string& label) {
-  label_.assign(label);
+  // Set type to 2 in case of an key. A key is indicated by a colon after
+  // the key itself.
+  else if (label.back() == ':') {
+    type_ = 2;
+  }
+  // Otherwise, set type to 3 in case of a value.
+  else {
+    type_ = 3;
+  }
 }
 
 unsigned int JSONLabel::get_type() const {

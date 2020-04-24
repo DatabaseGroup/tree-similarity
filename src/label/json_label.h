@@ -49,12 +49,6 @@ public:
   bool operator==(const JSONLabel& other) const;
   /// @}
 
-  /// Sets the type field of the label.
-  void set_type(const unsigned int type);
-
-  /// Sets the label field of the label.
-  void set_label(const std::string& label);
-
   /// Return the type field of the label.
   unsigned int get_type() const;
 

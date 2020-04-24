@@ -395,6 +395,12 @@ class TreeIndexSED :
   public PostLToLabelId
 {};
 
+/// Tree index for String Edit Distance algorithm.
+class TreeIndexLI :
+  public Constants,
+  public InvertedListLabelIdToPostL
+{};
+
 /// Tree index for Constrained Tree Edit Distance agorithm.
 class TreeIndexCTED :
   public Constants,
