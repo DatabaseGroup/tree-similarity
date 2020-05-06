@@ -368,7 +368,7 @@ class TreeIndexTouzetDepthPruning :
 
 /// Tree index for Touzet Depth Pruning with truncated tree fix algorithm.
 class TreeIndexTouzetDepthPruningTruncatedTreeFix :
-  public TreeIndexTouzetBaseline,
+  virtual public TreeIndexTouzetBaseline,
   public PostLToSubtreeMaxDepth
 {};
 
@@ -381,7 +381,7 @@ class TreeIndexTouzetKRLoop :
 
 /// Tree index for Touzet KR Set algorithm.
 class TreeIndexTouzetKRSet :
-  public TreeIndexTouzetBaseline,
+  virtual public TreeIndexTouzetBaseline,
   public PostLToLCh,
   public PostLToKRAncestor,
   // missing dependency for PostLToKRAncestor
