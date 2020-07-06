@@ -409,6 +409,14 @@ class TreeIndexCTED :
   public PostLToParent
 {};
 
+/// Tree index for Constrained Tree Edit Distance agorithm.
+class TreeIndexDPJED :
+  public Constants,
+  public PostLToLabelId,
+  public PostLToChildren,
+  public PostLToParent
+{};
+
 /// Tree index for SED and CTED agorithms.
 class TreeIndexSCTED :
   public Constants,
