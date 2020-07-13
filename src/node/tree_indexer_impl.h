@@ -76,6 +76,9 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   if constexpr (std::is_base_of<PostLToLabelId, TreeIndex>::value) {
     ti.postl_to_label_id_.resize(tree_size);
   }
+  if constexpr (std::is_base_of<PostLToType, TreeIndex>::value) {
+    ti.postl_to_type_.resize(tree_size);
+  }
   if constexpr (std::is_base_of<PostRToLabelId, TreeIndex>::value) {
     ti.postr_to_label_id_.resize(tree_size);
   }
@@ -181,6 +184,9 @@ int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
 
   // Stores the current node's label id.
   int label_id = ld.insert(n.label());
+
+  // Stores the current node's type.
+  int type = n.label().get_type();
 
   // Here, start_preorder holds this node's preorder id.
   
@@ -335,6 +341,11 @@ int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   // PostLToLabelId index
   if constexpr (std::is_base_of<PostLToLabelId, TreeIndex>::value) {
     ti.postl_to_label_id_[start_postorder] = label_id;
+  }
+  
+  // PostLToType index
+  if constexpr (std::is_base_of<PostLToType, TreeIndex>::value) {
+    ti.postl_to_type_[start_postorder] = type;
   }
   
   // InvertedListLabelIdToPostL index

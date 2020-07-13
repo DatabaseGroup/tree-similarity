@@ -57,6 +57,14 @@ class PostLToLabelId {
   public: std::vector<int> postl_to_label_id_;
 };
 
+/// Stores the type of each node in a tree.
+/**
+ * Indexed in left-to-right postorder.
+ */
+class PostLToType {
+  public: std::vector<int> postl_to_type_;
+};
+
 /// Stores label id of each node in a tree.
 /**
  * Labels are inserted into a dictionary in their left-to-right preorder
@@ -412,6 +420,7 @@ class TreeIndexCTED :
 /// Tree index for Constrained Tree Edit Distance agorithm.
 class TreeIndexDPJED :
   public Constants,
+  public PostLToType,
   public PostLToLabelId,
   public PostLToChildren,
   public PostLToParent
@@ -442,6 +451,7 @@ class TreeIndexLGM :
 class TreeIndexAll :
   public Constants,
   public PreLToLabelId,
+  public PostLToType,
   public PostLToLabelId,
   public PostRToLabelId,
   public PostLToSize,

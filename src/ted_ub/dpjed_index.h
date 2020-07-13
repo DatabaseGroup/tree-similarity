@@ -69,7 +69,7 @@ private:
   /// Print a given cost matrix.
   ///
   /// \param cost_matrix Cost matrix.
-  void print_matrix(std::vector<std::vector<long long int> >& cost_matrix);
+  void print_matrix(std::vector<std::vector<double> >& cost_matrix);
 
   /// Given a cost matrix with zeros in n many lines/rows it finds the minimal 
   /// mapping among the elements in the matrix.
@@ -81,87 +81,87 @@ private:
   /// \param assignment Mapping of a row to a column.
   /// \param assigned_cols Remember all columns that are already assigned.
   /// \return True in case there is a minimal mapping, Flase otherwise.
-  bool find_mapping(std::vector<std::vector<long long int> >& cost_matrix, 
-      long long int r, long long int rows, long long int cols, 
-      std::unordered_map<long long int, long long int>& assignment, 
+  bool find_mapping(std::vector<std::vector<double> >& cost_matrix, 
+      double r, double rows, double cols, 
+      std::unordered_map<double, double>& assignment, 
       std::vector<bool>& assigned_cols);
 
   /// Compute the minimum mapping for a given cost matrix.
   ///
   /// \param cost_matrix Cost matrix.
   /// \return Returns the cost of the minimal mapping.
-  long long int hungarian_algorithm(
-      std::vector<std::vector<long long int> > cost_matrix);
+  double hungarian_algorithm(
+      std::vector<std::vector<double> > cost_matrix);
 
 
   /// For each row of the cost matrix, find the smallest element and subtract
   /// it from every element in its row.  When finished, Go to Step 2.
-  long long int execute_hungarian(
-      std::vector<std::vector<long long int> >& cost_matrix);
+  double execute_hungarian(
+      std::vector<std::vector<double> >& cost_matrix);
 
   /// For each row of the cost matrix, find the smallest element and subtract
   /// it from every element in its row.  When finished, Go to Step 2.
-  void step_one(std::vector<std::vector<long long int> >& cost_matrix, 
-      long long int& step);
+  void step_one(std::vector<std::vector<double> >& cost_matrix, 
+      int& step);
 
   /// Find a zero (Z) in the resulting matrix.  If there is no starred 
   /// zero in its row or column, star Z. Repeat for each element in the 
   /// matrix. Go to Step 3.
-  void step_two(std::vector<std::vector<long long int> >& cost_matrix,
-      std::vector<std::vector<long long int> >& mask_matrix,
-      std::vector<long long int>& row_cover,
-      std::vector<long long int>& col_cover, long long int& step);
+  void step_two(std::vector<std::vector<double> >& cost_matrix,
+      std::vector<std::vector<double> >& mask_matrix,
+      std::vector<double>& row_cover,
+      std::vector<double>& col_cover, int& step);
 
   /// Cover each column containing a starred zero.  If K columns are covered, 
   /// the starred zeros describe a complete set of unique assignments.  In this 
   /// case, Go to DONE, otherwise, Go to Step 4.
-  void step_three(std::vector<std::vector<long long int> >& cost_matrix,
-      std::vector<std::vector<long long int> >& mask_matrix,
-      std::vector<long long int>& col_cover, long long int& step);
+  void step_three(std::vector<std::vector<double> >& cost_matrix,
+      std::vector<std::vector<double> >& mask_matrix,
+      std::vector<double>& col_cover, int& step);
 
   /// Methods to support step 4
-  void find_a_zero(std::vector<std::vector<long long int> >& cost_matrix,
-      std::vector<long long int>& row_cover,
-      std::vector<long long int>& col_cover,
-      long long int& row, long long int& col);
+  void find_a_zero(std::vector<std::vector<double> >& cost_matrix,
+      std::vector<double>& row_cover,
+      std::vector<double>& col_cover,
+      double& row, double& col);
 
-  bool star_in_row(std::vector<std::vector<long long int> >& cost_matrix,
-      std::vector<std::vector<long long int> >& mask_matrix, long long int row);
+  bool star_in_row(std::vector<std::vector<double> >& cost_matrix,
+      std::vector<std::vector<double> >& mask_matrix, double row);
 
-  void find_star_in_row(std::vector<std::vector<long long int> >& cost_matrix,
-      std::vector<std::vector<long long int> >& mask_matrix,
-      long long int row, long long int& col);
+  void find_star_in_row(std::vector<std::vector<double> >& cost_matrix,
+      std::vector<std::vector<double> >& mask_matrix,
+      double row, double& col);
 
   /// Find a noncovered zero and prime it.  If there is no starred zero 
   /// in the row containing this primed zero, Go to Step 5.  Otherwise, 
   /// cover this row and uncover the column containing the starred zero. 
   /// Continue in this manner until there are no uncovered zeros left. 
   /// Save the smallest uncovered value and Go to Step 6.
-  void step_four(std::vector<std::vector<long long int> >& cost_matrix,
-    std::vector<std::vector<long long int> >& mask_matrix,
-      std::vector<long long int>& row_cover,
-      std::vector<long long int>& col_cover,
-      long long int& path_row_0, long long int& path_col_0, 
-      long long int& step);
+  void step_four(std::vector<std::vector<double> >& cost_matrix,
+    std::vector<std::vector<double> >& mask_matrix,
+      std::vector<double>& row_cover,
+      std::vector<double>& col_cover,
+      double& path_row_0, double& path_col_0, 
+      int& step);
 
   /// Methods to support step 5.
-  void find_star_in_col(std::vector<std::vector<long long int> >& cost_matrix,
-      std::vector<std::vector<long long int> >& mask_matrix,
-      long long int& row, long long int col);
+  void find_star_in_col(std::vector<std::vector<double> >& cost_matrix,
+      std::vector<std::vector<double> >& mask_matrix,
+      double& row, double col);
 
-  void find_prime_in_row(std::vector<std::vector<long long int> >& cost_matrix,
-      std::vector<std::vector<long long int> >& mask_matrix,
-      long long int row, long long int& col);
+  void find_prime_in_row(std::vector<std::vector<double> >& cost_matrix,
+      std::vector<std::vector<double> >& mask_matrix,
+      double row, double& col);
 
-  void augment_path(std::vector<std::vector<long long int> >& mask_matrix, 
-      std::vector<std::vector<long long int> >& path);
+  void augment_path(std::vector<std::vector<double> >& mask_matrix, 
+      std::vector<std::vector<double> >& path);
 
-  void clear_covers(std::vector<std::vector<long long int> >& cost_matrix,
-      std::vector<long long int>& row_cover,
-      std::vector<long long int>& col_cover);
+  void clear_covers(std::vector<std::vector<double> >& cost_matrix,
+      std::vector<double>& row_cover,
+      std::vector<double>& col_cover);
 
-  void erase_primes(std::vector<std::vector<long long int> >& cost_matrix,
-      std::vector<std::vector<long long int> >& mask_matrix);
+  void erase_primes(std::vector<std::vector<double> >& cost_matrix,
+      std::vector<std::vector<double> >& mask_matrix);
 
   /// Construct a series of alternating primed and starred zeros as follows.  
   /// Let Z0 represent the uncovered primed zero found in Step 4.  Let Z1 denote 
@@ -171,29 +171,29 @@ private:
   /// Unstar each starred zero of the series, star each primed zero of the ,
   /// series erase all primes and uncover every line in the matrix.  Return to 
   /// Step 3.
-  void step_five(std::vector<std::vector<long long int> >& cost_matrix,
-      std::vector<std::vector<long long int> >& mask_matrix,
-      std::vector<long long int>& row_cover,
-      std::vector<long long int>& col_cover, 
-      long long int& path_row_0, long long int& path_col_0,
-      long long int& step);
+  void step_five(std::vector<std::vector<double> >& cost_matrix,
+      std::vector<std::vector<double> >& mask_matrix,
+      std::vector<double>& row_cover,
+      std::vector<double>& col_cover, 
+      double& path_row_0, double& path_col_0,
+      int& step);
 
   //methods to support step 6
-  void find_smallest(std::vector<std::vector<long long int> >& cost_matrix,
-      std::vector<long long int>& row_cover,
-      std::vector<long long int>& col_cover, long long int& min_val);
+  void find_smallest(std::vector<std::vector<double> >& cost_matrix,
+      std::vector<double>& row_cover,
+      std::vector<double>& col_cover, double& min_val);
 
   /// Add the value found in Step 4 to every element of each covered row, and 
   /// subtract it from every element of each uncovered column.  Return to Step 4  
   /// without altering any stars, primes, or covered lines.
-  void step_six(std::vector<std::vector<long long int> >& cost_matrix,
-      std::vector<long long int>& row_cover,
-      std::vector<long long int>& col_cover, long long int& step);
+  void step_six(std::vector<std::vector<double> >& cost_matrix,
+      std::vector<double>& row_cover,
+      std::vector<double>& col_cover, int& step);
 
   /// Compute the cost of the calculated mapping.
-  void step_seven(std::vector<std::vector<long long int> >& cost_matrix,
-      std::vector<std::vector<long long int> >& mask_matrix,
-      long long int& costs);
+  void step_seven(std::vector<std::vector<double> >& cost_matrix,
+      std::vector<std::vector<double> >& mask_matrix,
+      double& costs);
 
 };
 
