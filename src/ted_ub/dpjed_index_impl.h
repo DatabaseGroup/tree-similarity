@@ -44,6 +44,8 @@ double DPJEDTreeIndex<CostModel, TreeIndex>::ted(
   dt_ = data_structures::Matrix<double>(t1_input_size+1, t2_input_size+1);
   df_ = data_structures::Matrix<double>(t1_input_size+1, t2_input_size+1);
   e_ = data_structures::Matrix<double>(t1_input_size+1, t2_input_size+1);
+  std::vector<std::vector<double> > hungarian_cm
+      (2*t1_input_size, std::vector<double> (2*t2_input_size, 0));
   
   // Fill the matrices with inf.
   dt_.fill_with(std::numeric_limits<double>::infinity());
@@ -150,10 +152,8 @@ double DPJEDTreeIndex<CostModel, TreeIndex>::ted(
         {  
           // Build a cost matrix such that each subtree can be mapped to another 
           // subtree or to an empty tree.
-          double matrix_size = t1.postl_to_children_[i-1].size() + 
+          unsigned long matrix_size = t1.postl_to_children_[i-1].size() + 
               t2.postl_to_children_[j-1].size();
-          std::vector<std::vector<double> > cost_matrix
-              (matrix_size, std::vector<double> (matrix_size, 0));
 
           // TODO: but we already went over each pair of children
           for (unsigned int s = 1; s <= matrix_size; ++s)
@@ -164,25 +164,25 @@ double DPJEDTreeIndex<CostModel, TreeIndex>::ted(
               {
                 if (t <= t2.postl_to_children_[j-1].size())
                 {
-                  cost_matrix[s-1][t-1] = dt_.at(
+                  hungarian_cm[s-1][t-1] = dt_.at(
                       t1.postl_to_children_[i-1][s-1] + 1, 
                       t2.postl_to_children_[j-1][t-1] + 1);
                 }
                 else
                 {
-                  cost_matrix[s-1][t-1] = 
+                  hungarian_cm[s-1][t-1] = 
                       t1.postl_to_size_[t1.postl_to_children_[i-1][s-1]];
                 }
               } else if (t <= t2.postl_to_children_[j-1].size())
               {
-                cost_matrix[s-1][t-1] = 
+                hungarian_cm[s-1][t-1] = 
                     t2.postl_to_size_[t2.postl_to_children_[j-1][t-1]];
               }
             }
           }
 
           // Compute Hungarian Algorithm for minimal tree mapping.
-          min_for_ren = execute_hungarian(cost_matrix);
+          min_for_ren = execute_hungarian(hungarian_cm, matrix_size);
         }
       }
 
@@ -241,22 +241,23 @@ void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::print_matrix(
 
 template <typename cost_matrixModel, typename TreeIndex>
 double DPJEDTreeIndex<cost_matrixModel, TreeIndex>::execute_hungarian(
-    std::vector<std::vector<double> >& cost_matrix)
+    std::vector<std::vector<double> >& cost_matrix,
+    unsigned long& matrix_size)
 {
   std::vector<std::vector<double> > mask_matrix(
-    cost_matrix.size(), std::vector<double> (cost_matrix[0].size(), 0));
-  std::vector<double> row_cover (cost_matrix.size(), 0);
-  std::vector<double> col_cover (cost_matrix[0].size(), 0);
+    matrix_size, std::vector<double> (matrix_size, 0));
+  std::vector<double> row_cover (matrix_size, 0);
+  std::vector<double> col_cover (matrix_size, 0);
   double path_row_0 = -1;
   double path_col_0 = -1;
   double costs = 0;
 
   // Copy the original cost matrix to look up the costs later.
   std::vector<std::vector<double> > orig_matrix(
-    cost_matrix.size(), std::vector<double> (cost_matrix[0].size()));
-  for (unsigned long r = 0; r < cost_matrix.size(); r++)
+    matrix_size, std::vector<double> (matrix_size));
+  for (unsigned long r = 0; r < matrix_size; r++)
   {
-    for (unsigned long c = 0; c < cost_matrix[0].size(); c++)
+    for (unsigned long c = 0; c < matrix_size; c++)
     {
       orig_matrix[r][c] = cost_matrix[r][c];
     }
@@ -269,27 +270,28 @@ double DPJEDTreeIndex<cost_matrixModel, TreeIndex>::execute_hungarian(
     switch (step)
     {
       case 1:
-        step_one(cost_matrix, step);
+        step_one(cost_matrix, matrix_size, step);
         break;
       case 2:
-        step_two(cost_matrix, mask_matrix, row_cover, col_cover, step);
+        step_two(cost_matrix, mask_matrix, matrix_size, 
+                  row_cover, col_cover, step);
         break;
       case 3:
-        step_three(cost_matrix, mask_matrix, col_cover, step);
+        step_three(mask_matrix, matrix_size, col_cover, step);
         break;
       case 4:
-        step_four(cost_matrix, mask_matrix, row_cover, col_cover,
+        step_four(cost_matrix, mask_matrix, matrix_size, row_cover, col_cover,
                   path_row_0, path_col_0, step);
         break;
       case 5:
-        step_five(cost_matrix, mask_matrix, row_cover, col_cover, 
+        step_five(mask_matrix, matrix_size, row_cover, col_cover, 
                   path_row_0, path_col_0, step);
         break;
       case 6:
-        step_six(cost_matrix, row_cover, col_cover, step);
+        step_six(cost_matrix, matrix_size, row_cover, col_cover, step);
         break;
       case 7:
-        step_seven(orig_matrix, mask_matrix, costs);
+        step_seven(orig_matrix, mask_matrix, matrix_size, costs);
         done = true;
         break;
     }
@@ -300,23 +302,22 @@ double DPJEDTreeIndex<cost_matrixModel, TreeIndex>::execute_hungarian(
 
 template <typename cost_matrixModel, typename TreeIndex>
 void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_one(
-    std::vector<std::vector<double> >& cost_matrix, 
+    std::vector<std::vector<double> >& cost_matrix,
+    unsigned long& matrix_size,
     int& step)
 {
-  double rows = cost_matrix.size();
-  double cols = cost_matrix[0].size();
   double min_in_row;
-  for (unsigned long r = 0; r < rows; r++)
+  for (unsigned long r = 0; r < matrix_size; r++)
   {
     min_in_row = cost_matrix[r][0];
-    for (unsigned long c = 0; c < cols; c++)
+    for (unsigned long c = 0; c < matrix_size; c++)
     {
       if (cost_matrix[r][c] < min_in_row)
       {
         min_in_row = cost_matrix[r][c];
       }
     }
-    for (unsigned long c = 0; c < cols; c++)
+    for (unsigned long c = 0; c < matrix_size; c++)
     {
       cost_matrix[r][c] -= min_in_row;
     }
@@ -328,15 +329,14 @@ template <typename cost_matrixModel, typename TreeIndex>
 void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_two(
     std::vector<std::vector<double> >& cost_matrix,
     std::vector<std::vector<double> >& mask_matrix,
+    unsigned long& matrix_size,
     std::vector<double>& row_cover,
     std::vector<double>& col_cover,
     int& step)
 {
-  double rows = cost_matrix.size();
-  double cols = cost_matrix[0].size();
-  for (unsigned long r = 0; r < rows; r++)
+  for (unsigned long r = 0; r < matrix_size; r++)
   {
-    for (unsigned long c = 0; c < cols; c++)
+    for (unsigned long c = 0; c < matrix_size; c++)
     {
       if (cost_matrix[r][c] == 0 && row_cover[r] == 0 && col_cover[c] == 0)
       {
@@ -346,11 +346,11 @@ void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_two(
       }
     }
   }
-  for (unsigned long r = 0; r < rows; r++)
+  for (unsigned long r = 0; r < matrix_size; r++)
   {
     row_cover[r] = 0;
   }
-  for (unsigned long c = 0; c < cols; c++)
+  for (unsigned long c = 0; c < matrix_size; c++)
   {
     col_cover[c] = 0;
   }
@@ -359,17 +359,15 @@ void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_two(
 
 template <typename cost_matrixModel, typename TreeIndex>
 void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_three(
-    std::vector<std::vector<double> >& cost_matrix,
     std::vector<std::vector<double> >& mask_matrix,
+    unsigned long& matrix_size,
     std::vector<double>& col_cover,
     int& step)
 {
-  double rows = cost_matrix.size();
-  double cols = cost_matrix[0].size();
   double col_count = 0;
-  for (unsigned long r = 0; r < rows; r++)
+  for (unsigned long r = 0; r < matrix_size; r++)
   {
-    for (unsigned long c = 0; c < cols; c++)
+    for (unsigned long c = 0; c < matrix_size; c++)
     {
       if (mask_matrix[r][c] == 1)
       {
@@ -379,14 +377,14 @@ void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_three(
   }
 
   col_count = 0;
-  for (unsigned long c = 0; c < cols; c++)
+  for (unsigned long c = 0; c < matrix_size; c++)
   {
     if (col_cover[c] == 1)
     {
         col_count += 1;
     }
   }
-  if (col_count >= cols || col_count >= rows)
+  if (col_count >= matrix_size)
   {
     step = 7;
   }
@@ -399,18 +397,16 @@ void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_three(
 template <typename cost_matrixModel, typename TreeIndex>
 void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::find_a_zero(
     std::vector<std::vector<double> >& cost_matrix,
+    unsigned long& matrix_size,
     std::vector<double>& row_cover,
     std::vector<double>& col_cover,
-    double& row, double& col)
+    int& row, int& col)
 {
-  double rows = cost_matrix.size();
-  double cols = cost_matrix[0].size();
-
   row = -1;
   col = -1;
-  for (unsigned long r = 0; r < rows; r++)
+  for (unsigned long r = 0; r < matrix_size; r++)
   {
-    for (unsigned long c = 0; c < cols; c++)
+    for (unsigned long c = 0; c < matrix_size; c++)
     {
       if (cost_matrix[r][c] == 0 && row_cover[r] == 0 && col_cover[c] == 0)
       {
@@ -424,13 +420,11 @@ void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::find_a_zero(
 
 template <typename cost_matrixModel, typename TreeIndex>
 bool DPJEDTreeIndex<cost_matrixModel, TreeIndex>::star_in_row(
-    std::vector<std::vector<double> >& cost_matrix,
     std::vector<std::vector<double> >& mask_matrix,
-    double row)
+    unsigned long& matrix_size, int row)
 {
-  double cols = cost_matrix[0].size();
   bool found_star = false;
-  for (unsigned long c = 0; c < cols; c++)
+  for (unsigned long c = 0; c < matrix_size; c++)
   {
     if (mask_matrix[row][c] == 1)
     {
@@ -443,14 +437,11 @@ bool DPJEDTreeIndex<cost_matrixModel, TreeIndex>::star_in_row(
 
 template <typename cost_matrixModel, typename TreeIndex>
 void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::find_star_in_row(
-    std::vector<std::vector<double> >& cost_matrix,
     std::vector<std::vector<double> >& mask_matrix,
-    double row, double& col)
+    unsigned long& matrix_size, int row, int& col)
 {
-  double cols = cost_matrix[0].size();
-
   col = -1;
-  for (unsigned long c = 0; c < cols; c++)
+  for (unsigned long c = 0; c < matrix_size; c++)
   {
     if (mask_matrix[row][c] == 1)
     {
@@ -463,17 +454,18 @@ template <typename cost_matrixModel, typename TreeIndex>
 void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_four(
     std::vector<std::vector<double> >& cost_matrix,
     std::vector<std::vector<double> >& mask_matrix,
+    unsigned long& matrix_size,
     std::vector<double>& row_cover,
     std::vector<double>& col_cover,
     double& path_row_0, double& path_col_0,
     int& step)
 {
-  double row = -1;
-  double col = -1;
+  int row = -1;
+  int col = -1;
 
   while (1)
   {
-    find_a_zero(cost_matrix, row_cover, col_cover, row, col);
+    find_a_zero(cost_matrix, matrix_size, row_cover, col_cover, row, col);
     if (row == -1)
     {
       step = 6;
@@ -482,9 +474,9 @@ void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_four(
     else
     {
       mask_matrix[row][col] = 2;
-      if (star_in_row(cost_matrix, mask_matrix, row))
+      if (star_in_row(mask_matrix, matrix_size, row))
       {
-        find_star_in_row(cost_matrix, mask_matrix, row, col);
+        find_star_in_row(mask_matrix, matrix_size, row, col);
         row_cover[row] = 1;
         col_cover[col] = 0;
       }
@@ -501,14 +493,12 @@ void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_four(
 
 template <typename cost_matrixModel, typename TreeIndex>
 void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::find_star_in_col(
-    std::vector<std::vector<double> >& cost_matrix,
     std::vector<std::vector<double> >& mask_matrix,
-    double& row, double col)
+    unsigned long& matrix_size,
+    int& row, int col)
 {
-  double rows = cost_matrix.size();
-
   row = -1;
-  for (unsigned long r = 0; r < rows; r++)
+  for (unsigned long r = 0; r < matrix_size; r++)
   {
     if (mask_matrix[r][col] == 1)
     {
@@ -519,14 +509,12 @@ void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::find_star_in_col(
 
 template <typename cost_matrixModel, typename TreeIndex>
 void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::find_prime_in_row(
-    std::vector<std::vector<double> >& cost_matrix,
     std::vector<std::vector<double> >& mask_matrix,
-    double row, double& col)
+    unsigned long& matrix_size,
+    int row, int& col)
 {
-  double cols = cost_matrix[0].size();
-
   col = -1;
-  for (unsigned long c = 0; c < cols; c++)
+  for (unsigned long c = 0; c < matrix_size; c++)
   {
     if (mask_matrix[row][c] == 2)
     {
@@ -555,18 +543,15 @@ void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::augment_path(
 
 template <typename cost_matrixModel, typename TreeIndex>
 void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::clear_covers(
-    std::vector<std::vector<double> >& cost_matrix,
+    unsigned long& matrix_size,
     std::vector<double>& row_cover,
     std::vector<double>& col_cover)
 {
-  double rows = cost_matrix.size();
-  double cols = cost_matrix[0].size();
-
-  for (unsigned long r = 0; r < rows; r++)
+  for (unsigned long r = 0; r < matrix_size; r++)
   {
     row_cover[r] = 0;
   }
-  for (unsigned long c = 0; c < cols; c++)
+  for (unsigned long c = 0; c < matrix_size; c++)
   {
     col_cover[c] = 0;
   }
@@ -574,15 +559,12 @@ void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::clear_covers(
 
 template <typename cost_matrixModel, typename TreeIndex>
 void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::erase_primes(
-    std::vector<std::vector<double> >& cost_matrix,
-    std::vector<std::vector<double> >& mask_matrix)
+    std::vector<std::vector<double> >& mask_matrix,
+    unsigned long& matrix_size)
 {
-  double rows = cost_matrix.size();
-  double cols = cost_matrix[0].size();
-
-  for (unsigned long r = 0; r < rows; r++)
+  for (unsigned long r = 0; r < matrix_size; r++)
   {
-    for (unsigned long c = 0; c < cols; c++)
+    for (unsigned long c = 0; c < matrix_size; c++)
     {
       if (mask_matrix[r][c] == 2)
       {
@@ -594,15 +576,15 @@ void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::erase_primes(
 
 template <typename cost_matrixModel, typename TreeIndex>
 void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_five(
-    std::vector<std::vector<double> >& cost_matrix,
     std::vector<std::vector<double> >& mask_matrix,
+    unsigned long& matrix_size,
     std::vector<double>& row_cover,
     std::vector<double>& col_cover,
     double& path_row_0, double& path_col_0,
     int& step)
 {
-  double r = -1;
-  double c = -1;
+  int r = -1;
+  int c = -1;
 
   std::vector<std::vector<double> > path;
   path.push_back(std::vector<double>());
@@ -611,7 +593,7 @@ void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_five(
 
   while (1)
   {
-    find_star_in_col(cost_matrix, mask_matrix, r, path[path.size() - 1][1]);
+    find_star_in_col(mask_matrix, matrix_size, r, path[path.size() - 1][1]);
     if (r > -1)
     {
       path.push_back(std::vector<double>());
@@ -622,30 +604,28 @@ void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_five(
     {
       break;
     }
-    find_prime_in_row(cost_matrix, mask_matrix, path[path.size() - 1][0], c);
+    find_prime_in_row(mask_matrix, matrix_size, path[path.size() - 1][0], c);
     path.push_back(std::vector<double>());
     path[path.size() - 1].push_back(path[path.size() - 2][0]);
     path[path.size() - 1].push_back(c);
   }
   augment_path(mask_matrix, path);
-  clear_covers(cost_matrix, row_cover, col_cover);
-  erase_primes(cost_matrix, mask_matrix);
+  clear_covers(matrix_size, row_cover, col_cover);
+  erase_primes(mask_matrix, matrix_size);
   step = 3;
 }
 
 template <typename cost_matrixModel, typename TreeIndex>
 void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::find_smallest(
     std::vector<std::vector<double> >& cost_matrix,
+    unsigned long& matrix_size,
     std::vector<double>& row_cover,
     std::vector<double>& col_cover,
     double& min_val)
 {
-  double rows = cost_matrix.size();
-  double cols = cost_matrix[0].size();
-
-  for (unsigned long r = 0; r < rows; r++)
+  for (unsigned long r = 0; r < matrix_size; r++)
   {
-    for (unsigned long c = 0; c < cols; c++)
+    for (unsigned long c = 0; c < matrix_size; c++)
     {
       if (row_cover[r] == 0 && col_cover[c] == 0)
       {
@@ -661,18 +641,17 @@ void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::find_smallest(
 template <typename cost_matrixModel, typename TreeIndex>
 void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_six(
     std::vector<std::vector<double> >& cost_matrix,
+    unsigned long& matrix_size,
     std::vector<double>& row_cover,
     std::vector<double>& col_cover,
     int& step)
 {
-  double rows = cost_matrix.size();
-  double cols = cost_matrix[0].size();
-
   double min_val = std::numeric_limits<double>::max();
-  find_smallest(cost_matrix, row_cover, col_cover, min_val);
-  for (unsigned long r = 0; r < rows; r++)
+  find_smallest(cost_matrix, matrix_size, row_cover, col_cover, min_val);
+
+  for (unsigned long r = 0; r < matrix_size; r++)
   {
-    for (unsigned long c = 0; c < cols; c++)
+    for (unsigned long c = 0; c < matrix_size; c++)
     {
       if (row_cover[r] == 1)
       {
@@ -692,15 +671,13 @@ template <typename cost_matrixModel, typename TreeIndex>
 void DPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_seven(
     std::vector<std::vector<double> >& cost_matrix,
     std::vector<std::vector<double> >& mask_matrix,
+    unsigned long& matrix_size,
     double& costs)
 {
-  double rows = cost_matrix.size();
-  double cols = cost_matrix[0].size();
-
   costs = 0;
-  for (unsigned long r = 0; r < rows; r++)
+  for (unsigned long r = 0; r < matrix_size; r++)
   {
-    for (unsigned long c = 0; c < cols; c++)
+    for (unsigned long c = 0; c < matrix_size; c++)
     {
       if (mask_matrix[r][c] == 1)
       {
