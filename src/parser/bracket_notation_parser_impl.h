@@ -95,6 +95,9 @@ void BracketNotationParser<Label>::parse_collection(
   // Read the trees line by line, parse, and move into the container.
   std::string tree_string;
   while (std::getline(trees_file, tree_string)) {
+    if (!validate_input(tree_string)) {
+      continue;
+    }
     trees_collection.push_back(parse_single(tree_string)); // -> This invokes a move constructor (due to push_back(<rvalue>)).
   }
   trees_file.close();
