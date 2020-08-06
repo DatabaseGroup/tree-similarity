@@ -76,7 +76,7 @@ template <typename Label>
 double UnitCostModelJSON<Label>::ren(const int label_id_1,
     const int label_id_2) const {
   if (ld_.get(label_id_1).get_type() != ld_.get(label_id_2).get_type())
-    return std::numeric_limits<double>::max();
+    return std::numeric_limits<double>::infinity();
 
   if (ld_.get(label_id_1).get_label().compare(ld_.get(label_id_2).get_label()) 
       == 0)
