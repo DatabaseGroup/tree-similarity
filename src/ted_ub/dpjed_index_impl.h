@@ -37,6 +37,7 @@ double DPJEDTreeIndex<CostModel, TreeIndex>::ted(
   
   int t1_input_size = t1.tree_size_;
   int t2_input_size = t2.tree_size_;
+  int larger_tree_size = std::max(t1_input_size, t2_input_size);
   
   // Initialise distance matrices.
   
@@ -45,7 +46,7 @@ double DPJEDTreeIndex<CostModel, TreeIndex>::ted(
   df_ = data_structures::Matrix<double>(t1_input_size+1, t2_input_size+1);
   e_ = data_structures::Matrix<double>(t1_input_size+1, t2_input_size+1);
   std::vector<std::vector<double> > hungarian_cm
-      (2*t1_input_size, std::vector<double> (2*t2_input_size, 0));
+      (2*larger_tree_size, std::vector<double> (2*larger_tree_size, 0));
   
   // Fill the matrices with inf.
   dt_.fill_with(std::numeric_limits<double>::infinity());
