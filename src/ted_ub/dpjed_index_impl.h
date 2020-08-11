@@ -116,84 +116,93 @@ double DPJEDTreeIndex<CostModel, TreeIndex>::ted(
       // If we compare two array nodes, we need to consider the order amoung 
       // the children subtrees. Therefore, the string edit distance is used 
       // instead of the Hungarian Algorithm.
-      if (t1.postl_to_type_[i - 1] == 1 && t2.postl_to_type_[j - 1] == 1)
+      if (t1.postl_to_type_[i - 1] == t2.postl_to_type_[j - 1])
       {
-        // Compute string edit distance for array children.
-        e_.at(0, 0) = 0;
-        for (unsigned int s = 1; s <= t1.postl_to_children_[i-1].size(); ++s) {
-          e_.at(s, 0) = e_.at(s-1, 0) + dt_.at(t1.postl_to_children_[i-1][s-1] + 1, 0); // here we access d for subtree rooted in the s'th child of node i AND s starts with 1 but the postorder of the first child of node i is children1[i][s-1]
-        }
-        for (unsigned int t = 1; t <= t2.postl_to_children_[j-1].size(); ++t) {
-          e_.at(0, t) = e_.at(0, t-1) + dt_.at(0, t2.postl_to_children_[j-1][t-1] + 1);
-        }
-        
-        double a = -1;
-        double b = -1;
-        double c = -1;
-        // TODO: but we already went over each pair of children
-        for (unsigned int s = 1; s <= t1.postl_to_children_[i-1].size(); ++s) {
-          for (unsigned int t = 1; t <= t2.postl_to_children_[j-1].size(); ++t) {
-            ++subproblem_counter_;
-            a = e_.at(s, t-1) + dt_.at(0, t2.postl_to_children_[j-1][t-1] + 1);
-            b = e_.at(s-1, t) + dt_.at(t1.postl_to_children_[i-1][s-1] + 1, 0);
-            c = e_.at(s-1, t-1) + dt_.at(t1.postl_to_children_[i-1][s-1] + 1, t2.postl_to_children_[j-1][t-1] + 1); // TODO: This is a problematic part to reduce the memory. This requires to store distance for each pair of children of i and j.
-            e_.at(s, t) = a >= b ? b >= c ? c : b : a >= c ? c : a;
-          }
-        }
-        // Assign string edit distance costs for subtree mapping cost.
-        min_for_ren = e_.at(t1.postl_to_children_[i-1].size(), t2.postl_to_children_[j-1].size()); 
-      }
-      // In case of two keys, take the costs of mapping their child to one another.
-      // else if ((t1.postl_to_type_[i - 1] == 2 && t2.postl_to_type_[j - 1] == 2))
-      // {
-      //   // Keys have exactly one child, therefore, [0] always works.
-      //   min_for_ren = dt_.at(t1.postl_to_children_[i-1][0] + 1, 
-      //       t2.postl_to_children_[j-1][0] + 1);
-      // }
-      // If the nodes types are of type other than array, compute the 
-      // Hungarian Algorithm.
-      else //if (t1.postl_to_type_[i - 1] == 0 && t2.postl_to_type_[j - 1] == 0)
-      {
-        // Build a cost matrix such that each subtree can be mapped to another 
-        // subtree or to an empty tree.
-        unsigned long matrix_size = t1.postl_to_children_[i-1].size() + 
-            t2.postl_to_children_[j-1].size();
-
-        // TODO: but we already went over each pair of children
-        for (unsigned int s = 1; s <= matrix_size; ++s)
+        if (t1.postl_to_type_[i - 1] == 1 && t2.postl_to_type_[j - 1] == 1)
         {
-          for (unsigned int t = 1; t <= matrix_size; ++t)
+          // Compute string edit distance for array children.
+          e_.at(0, 0) = 0;
+          for (unsigned int s = 1; s <= t1.postl_to_children_[i-1].size(); ++s) {
+            e_.at(s, 0) = e_.at(s-1, 0) + dt_.at(t1.postl_to_children_[i-1][s-1] + 1, 0); // here we access d for subtree rooted in the s'th child of node i AND s starts with 1 but the postorder of the first child of node i is children1[i][s-1]
+          }
+          for (unsigned int t = 1; t <= t2.postl_to_children_[j-1].size(); ++t) {
+            e_.at(0, t) = e_.at(0, t-1) + dt_.at(0, t2.postl_to_children_[j-1][t-1] + 1);
+          }
+          
+          double a = -1;
+          double b = -1;
+          double c = -1;
+          // TODO: but we already went over each pair of children
+          for (unsigned int s = 1; s <= t1.postl_to_children_[i-1].size(); ++s) {
+            for (unsigned int t = 1; t <= t2.postl_to_children_[j-1].size(); ++t) {
+              ++subproblem_counter_;
+              a = e_.at(s, t-1) + dt_.at(0, t2.postl_to_children_[j-1][t-1] + 1);
+              b = e_.at(s-1, t) + dt_.at(t1.postl_to_children_[i-1][s-1] + 1, 0);
+              c = e_.at(s-1, t-1) + dt_.at(t1.postl_to_children_[i-1][s-1] + 1, t2.postl_to_children_[j-1][t-1] + 1); // TODO: This is a problematic part to reduce the memory. This requires to store distance for each pair of children of i and j.
+              e_.at(s, t) = a >= b ? b >= c ? c : b : a >= c ? c : a;
+            }
+          }
+          // Assign string edit distance costs for subtree mapping cost.
+          min_for_ren = e_.at(t1.postl_to_children_[i-1].size(), t2.postl_to_children_[j-1].size()); 
+        }
+        // In case of two keys, take the costs of mapping their child to one another.
+        else if ((t1.postl_to_type_[i - 1] == 2 && t2.postl_to_type_[j - 1] == 2))
+        {
+          // Keys have exactly one child, therefore, [0] always works.
+          min_for_ren = dt_.at(t1.postl_to_children_[i-1][0] + 1, 
+              t2.postl_to_children_[j-1][0] + 1);
+        }
+        // Values are leaves, mapping there subforests has cost 0.
+        else if ((t1.postl_to_type_[i - 1] == 3 && t2.postl_to_type_[j - 1] == 3))
+        {
+          // Keys have exactly one child, therefore, [0] always works.
+          min_for_ren = 0;
+        }
+        // If the nodes types are of type other than array, compute the 
+        // Hungarian Algorithm.
+        else //if (t1.postl_to_type_[i - 1] == 0 && t2.postl_to_type_[j - 1] == 0)
+        {
+          // Build a cost matrix such that each subtree can be mapped to another 
+          // subtree or to an empty tree.
+          unsigned long matrix_size = t1.postl_to_children_[i-1].size() + 
+              t2.postl_to_children_[j-1].size();
+
+          // TODO: but we already went over each pair of children
+          for (unsigned int s = 1; s <= matrix_size; ++s)
           {
-            if (s <= t1.postl_to_children_[i-1].size())
+            for (unsigned int t = 1; t <= matrix_size; ++t)
             {
-              if (t <= t2.postl_to_children_[j-1].size())
+              if (s <= t1.postl_to_children_[i-1].size())
               {
-                hungarian_cm[s-1][t-1] = dt_.at(
-                    t1.postl_to_children_[i-1][s-1] + 1, 
-                    t2.postl_to_children_[j-1][t-1] + 1);
-              }
-              else
+                if (t <= t2.postl_to_children_[j-1].size())
+                {
+                  hungarian_cm[s-1][t-1] = dt_.at(
+                      t1.postl_to_children_[i-1][s-1] + 1, 
+                      t2.postl_to_children_[j-1][t-1] + 1);
+                }
+                else
+                {
+                  hungarian_cm[s-1][t-1] = 
+                      t1.postl_to_size_[t1.postl_to_children_[i-1][s-1]];
+                }
+              } else
               {
-                hungarian_cm[s-1][t-1] = 
-                    t1.postl_to_size_[t1.postl_to_children_[i-1][s-1]];
-              }
-            } else
-            {
-              if (t <= t2.postl_to_children_[j-1].size())
-              {
-                hungarian_cm[s-1][t-1] = 
-                    t2.postl_to_size_[t2.postl_to_children_[j-1][t-1]];
-              }
-              else
-              {
-                hungarian_cm[s-1][t-1] = 0;
+                if (t <= t2.postl_to_children_[j-1].size())
+                {
+                  hungarian_cm[s-1][t-1] = 
+                      t2.postl_to_size_[t2.postl_to_children_[j-1][t-1]];
+                }
+                else
+                {
+                  hungarian_cm[s-1][t-1] = 0;
+                }
               }
             }
           }
-        }
 
-        // Compute Hungarian Algorithm for minimal tree mapping.
-        min_for_ren = execute_hungarian(hungarian_cm, matrix_size);
+          // Compute Hungarian Algorithm for minimal tree mapping.
+          min_for_ren = execute_hungarian(hungarian_cm, matrix_size);
+        }
       }
 
       // Compute minimal forest mapping costs.
