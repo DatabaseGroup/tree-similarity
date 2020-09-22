@@ -96,7 +96,11 @@ double DODPJEDIndex<CostModel, TreeIndex>::ted2(const TreeIndex& t1,
       
       // TODO: but we already went over each pair of children
       for (unsigned int s = 1; s <= t1.postl_to_children_[i-1].size(); ++s) {
-        for (unsigned int t = 1; t <= t2.postl_to_children_[j-1].size(); ++t) {
+        int sed_s = s - threshold;
+        if (sed_s < 1) sed_s = 1;
+        int sed_e = s + threshold;
+        if (sed_e > t2.postl_to_children_[j-1].size()) sed_e = t2.postl_to_children_[j-1].size();
+        for (unsigned int t = sed_s; t <= sed_e; ++t) {
           ++subproblem_counter_;
           a = e_.at(s, t-1) + dt_.at(0, t2.postl_to_children_[j-1][t-1] + 1);
           b = e_.at(s-1, t) + dt_.at(t1.postl_to_children_[i-1][s-1] + 1, 0);
