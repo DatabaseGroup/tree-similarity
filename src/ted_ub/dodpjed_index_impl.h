@@ -75,9 +75,12 @@ double DODPJEDIndex<CostModel, TreeIndex>::ted2(const TreeIndex& t1,
     dt_.at(0, j) = df_.at(0, j) + c_.ins(t2.postl_to_label_id_[j - 1]);
   }
   
+  double min_for_ins = std::numeric_limits<double>::infinity();
+  double min_tree_ins = std::numeric_limits<double>::infinity();
+  double min_for_del = std::numeric_limits<double>::infinity();
+  double min_tree_del = std::numeric_limits<double>::infinity();
+
   for (int i = 1; i <= t1_input_size; ++i) {
-    std::fill(dt2.begin(), dt2.end(), std::numeric_limits<double>::infinity());
-    std::fill(df2.begin(), df2.end(), std::numeric_limits<double>::infinity());
     int s = i - threshold;
     if (s < 1) s = 1;
     int e = i + threshold;
@@ -101,35 +104,47 @@ double DODPJEDIndex<CostModel, TreeIndex>::ted2(const TreeIndex& t1,
           e_.at(s, t) = a >= b ? b >= c ? c : b : a >= c ? c : a;
         }
       }
+
+      // Cost for deletion in forest.
+      min_for_del = std::numeric_limits<double>::infinity();
+      min_tree_del = std::numeric_limits<double>::infinity();
+      for (unsigned int t = 1; t <= t2.postl_to_children_[j-1].size(); ++t) {
+        min_for_del = std::min(min_for_del,
+            (df_.at(i, t2.postl_to_children_[j-1][t-1] + 1) - 
+             df_.at(0, t2.postl_to_children_[j-1][t-1] + 1)));
+        min_tree_del = std::min(min_tree_del,
+            (dt_.at(i, t2.postl_to_children_[j-1][t-1] + 1) - 
+             dt_.at(0, t2.postl_to_children_[j-1][t-1] + 1)));
+      }
+      min_for_del += df_.at(0, j);
+      min_tree_del += dt_.at(0, j);
+
+      // Cost for insertion in forest.
+      min_for_ins = std::numeric_limits<double>::infinity();
+      min_tree_ins = std::numeric_limits<double>::infinity();
+      for (unsigned int s = 1; s <= t1.postl_to_children_[i-1].size(); ++s) {
+        min_for_ins = std::min(min_for_ins, 
+            (df_.at(t1.postl_to_children_[i-1][s-1] + 1, j) - 
+             df_.at(t1.postl_to_children_[i-1][s-1] + 1, 0)));
+        min_tree_ins = std::min(min_tree_ins, 
+            (dt_.at(t1.postl_to_children_[i-1][s-1] + 1, j) - 
+             dt_.at(t1.postl_to_children_[i-1][s-1] + 1, 0)));
+      }
+      min_for_ins += df_.at(i, 0);
+      min_tree_ins += dt_.at(i, 0);
       
-      a = df_.at(0, j) + df2[j];
-      b = df_.at(i, 0) + df_.at(i, j);
+      a = min_for_del;
+      b = min_for_ins;
       c = e_.at(t1.postl_to_children_[i-1].size(), t2.postl_to_children_[j-1].size());
       
       df_.at(i, j) = a >= b ? b >= c ? c : b : a >= c ? c : a;
       
-      a = dt_.at(0, j) + dt2[j];
-      b = dt_.at(i, 0) + dt_.at(i, j);
+      a = min_tree_del;
+      b = min_tree_ins;
       c = df_.at(i, j) + c_.ren(t1.postl_to_label_id_[i - 1], t2.postl_to_label_id_[j - 1]);
       
       dt_.at(i, j) = a >= b ? b >= c ? c : b : a >= c ? c : a;
       
-      // if (t2.postl_to_parent_[j-1] > -1) {
-      //   if (df_.at(i, j) - df_.at(0, j) < df2[t2.postl_to_parent_[j-1]+1]) {
-      //     df2[t2.postl_to_parent_[j-1]+1] = df_.at(i, j) - df_.at(0, j);
-      //   }
-      //   if (dt_.at(i, j) - dt_.at(0, j) < dt2[t2.postl_to_parent_[j-1]+1]) {
-      //     dt2[t2.postl_to_parent_[j-1]+1] = dt_.at(i, j) - dt_.at(0, j);
-      //   }
-      // }
-      // if (t1.postl_to_parent_[i-1] > -1) {
-      //   if (df_.at(i, j) - df_.at(i, 0) < df_.at(t1.postl_to_parent_[i-1]+1, j)) {
-      //     df_.at(t1.postl_to_parent_[i-1]+1, j) = df_.at(i, j) - df_.at(i, 0);
-      //   }
-      //   if (dt_.at(i, j) - dt_.at(i, 0) < dt_.at(t1.postl_to_parent_[i-1]+1, j)) {
-      //     dt_.at(t1.postl_to_parent_[i-1]+1, j) = dt_.at(i, j) - dt_.at(i, 0);
-      //   }
-      // }
     }
   }
   
