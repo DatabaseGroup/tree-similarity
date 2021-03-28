@@ -141,7 +141,10 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   if constexpr (std::is_base_of<InvertedListLabelIdToPostL, TreeIndex>::value) {
     ti.inverted_list_label_id_to_postl_.clear();
   }
-  
+  if constexpr (std::is_base_of<PostLToFavChild, TreeIndex>::value) {
+    ti.postl_to_fav_child_.resize(tree_size);
+  }
+
   // Orders start with '0'. Are modified by the recursive traversal.
   int start_preorder = 0;
   int start_postorder = 0;
@@ -247,7 +250,7 @@ int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
         start_preorder, start_postorder, start_depth + 1,
         this_subtree_max_depth, this_nodes_preorder, is_current_child_rightmost);
     
-    // Add the postoder of the current child to children_postorders.
+    // Add the postorder of the current child to children_postorders.
     children_postorders.push_back(start_postorder-1);
     
     // Treat the first child separately.

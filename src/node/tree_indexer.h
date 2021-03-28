@@ -35,6 +35,7 @@ namespace node {
 /// Stores the size of the indexed tree.
 class Constants {
   public: int tree_size_;
+  public: int tree_degree_;
 };
 
 /// Stores label id of each node in a tree.
@@ -323,6 +324,14 @@ class InvertedListDepthToPostL {
  */
 class InvertedListLabelIdToPostL {
   public: std::unordered_map<int, std::vector<int>> inverted_list_label_id_to_postl_;
+};
+
+/// Stores postorder id of the favorable child of each node in a tree.
+/**
+ * Indexed in left-to-right postorder.
+ */
+class PostLToFavChild {
+  public: std::vector<int> postl_to_fav_child_;
 };
 
 /// Tree index for Zhangh and Shasha algorithm.
