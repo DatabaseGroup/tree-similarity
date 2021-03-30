@@ -36,6 +36,7 @@ namespace node {
 class Constants {
   public: int tree_size_;
   public: int tree_degree_;
+  public: int tree_height_;
 };
 
 /// Stores label id of each node in a tree.
@@ -334,6 +335,14 @@ class PostLToFavChild {
   public: std::vector<int> postl_to_fav_child_;
 };
 
+/// Stores the height of each node in a tree.
+/**
+ * Indexed in left-to-right postorder.
+ */
+class PostLToHeight {
+  public: std::vector<int> postl_to_height_;
+};
+
 /// Tree index for Zhangh and Shasha algorithm.
 class TreeIndexZhangShasha :
   public Constants,
@@ -490,7 +499,9 @@ class TreeIndexAll :
   public PreLToSubtreeCost,
   public ListKR,
   public InvertedListDepthToPostL,
-  public InvertedListLabelIdToPostL
+  public InvertedListLabelIdToPostL,
+  public PostLToFavChild,
+  public PostLToHeight
 {};
 
 /// Main method to index a tree.
@@ -527,6 +538,7 @@ int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
     label::LabelDictionary<Label>& ld, const CostModel& cm,
     int& start_preorder, int& start_postorder,
     int start_depth, int& subtree_max_depth,
+    int start_height, int& height,
     int parent_preorder, bool is_rightmost_child);
 
 // TODO: Combine fill_kr_ancestors, fill_ln, and fill_rld into a single

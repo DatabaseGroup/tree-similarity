@@ -144,16 +144,22 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   if constexpr (std::is_base_of<PostLToFavChild, TreeIndex>::value) {
     ti.postl_to_fav_child_.resize(tree_size);
   }
+  if constexpr (std::is_base_of<PostLToHeight, TreeIndex>::value) {
+    ti.postl_to_height_.resize(tree_size);
+  }
 
   // Orders start with '0'. Are modified by the recursive traversal.
   int start_preorder = 0;
   int start_postorder = 0;
   int start_depth = 0;
+  int start_height = 0;
   
   // Maximum input tree depth - the first reference passed to recursion.
   int subtree_max_depth = 0;
+  // Initial height.
+  int height = 0;
   index_tree_recursion(ti, n, ld, cm, start_preorder, start_postorder,
-      start_depth, subtree_max_depth, -1, false);
+      start_depth, subtree_max_depth, start_height, height, -1, false);
   
   if constexpr (std::is_base_of<ListKR, TreeIndex>::value) {
     // Add root to kr - not added in the recursion.
@@ -179,6 +185,7 @@ int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
     label::LabelDictionary<Label>& ld, const CostModel& cm,
     int& start_preorder, int& start_postorder,
     int start_depth, int& subtree_max_depth,
+    int start_height, int& height,
     int parent_preorder, bool is_rightmost_child) {
   
   // Stores number of descendants of this node. Incrementally computed while
@@ -198,6 +205,8 @@ int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
 
   // This node's preorder id.
   int this_nodes_preorder = start_preorder;
+  // This node's postorder id.
+  int this_nodes_postorder = start_postorder;
 
   // Increment start_preorder to hold the correct id of the consecutive node
   // in preorder.
@@ -219,19 +228,28 @@ int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
     }
   }
   
-  // This node subtree's max depth.
+  // This node's subtree max depth.
   int this_subtree_max_depth = 0;
+  // This node's height.
+  int this_height = 0;
 
   // To store if the current child in the loop is rightmost.
   bool is_current_child_rightmost = false;
 
   // Treat the first child separately (non-key-root, updates parent's lld).
   int first_child_postorder = -1;
+  // Number of nodes of children subtrees.
+  int subtree_size_child = -1;
+  // Number of nodes of the child with the largest subtree.
+  int largest_subtree_size_child = -1;
+  // Postorder number of the favorable child.
+  int favorable_child = -1;
   // Count number of children.
   int num_children = 0;
   // Recursions to childen nodes.
   auto children_start_it = std::begin(n.get_children());
   auto children_end_it = std::end(n.get_children());
+
   while (children_start_it != children_end_it) {
     // Add the preoder of the current child to children_preorders.
     children_preorders.push_back(start_preorder);
@@ -246,13 +264,30 @@ int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
       ti.prel_to_parent_[start_preorder] = this_nodes_preorder;
     }
     
-    desc_sum += index_tree_recursion(ti, *children_start_it, ld, cm,
+    subtree_size_child = index_tree_recursion(ti, *children_start_it, ld, cm,
         start_preorder, start_postorder, start_depth + 1,
-        this_subtree_max_depth, this_nodes_preorder, is_current_child_rightmost);
+        this_subtree_max_depth, start_height, height,
+        this_nodes_preorder, is_current_child_rightmost);
+    desc_sum += subtree_size_child;
     
     // Add the postorder of the current child to children_postorders.
     children_postorders.push_back(start_postorder-1);
     
+    // PostLToFavChild index
+    if constexpr (std::is_base_of<PostLToFavChild, TreeIndex>::value) {
+      if (subtree_size_child > largest_subtree_size_child) {
+        largest_subtree_size_child = subtree_size_child;
+        favorable_child = start_postorder-1;
+      }
+    }
+
+    // PostLToHeight index
+    if constexpr (std::is_base_of<PostLToHeight, TreeIndex>::value) {
+      if (height > this_height) {
+        this_height = height;
+      }
+    }
+
     // Treat the first child separately.
     if (children_start_it == n.get_children().begin()) {
       // Here, start_postorder-1 is the postorder of the current child.
@@ -279,6 +314,17 @@ int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   // Calculate right-to-left postorder.
   postorder_r = ti.tree_size_ - 1 - this_nodes_preorder;
   
+  // PostLToFavChild index
+  if constexpr (std::is_base_of<PostLToFavChild, TreeIndex>::value) {
+    ti.postl_to_fav_child_[start_postorder] = favorable_child;
+  }
+
+  // PostLToHeight index
+  if constexpr (std::is_base_of<PostLToHeight, TreeIndex>::value) {
+    height = this_height + 1;
+    ti.postl_to_height_[start_postorder] = height;
+  }
+
   // PostLToSize index
   if constexpr (std::is_base_of<PostLToSize, TreeIndex>::value) {
     ti.postl_to_size_[start_postorder] = desc_sum + 1;
@@ -380,6 +426,17 @@ int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
     ti.postl_to_subtree_max_depth_[start_postorder] = this_subtree_max_depth;
     // Update parent subtree's max depth.
     subtree_max_depth = std::max(subtree_max_depth, this_subtree_max_depth);
+  }
+  
+  // PostLToHeight index
+  if constexpr (std::is_base_of<PostLToHeight, TreeIndex>::value) {
+    if (n.is_leaf()) {
+      // If this node has no children, set the max depth to this node's depth.
+      this_height = start_height;
+    }
+    ti.postl_to_height_[start_postorder] = this_height;
+    // Update parent subtree's max depth.
+    height = std::max(height, this_height);
   }
   
   // PostLToLCh index

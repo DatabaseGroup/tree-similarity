@@ -56,12 +56,26 @@ public:
   double ted2(const TreeIndex& t1, const TreeIndex& t2, const double threshold);
 
 private:
-  /// Matrix storing subtree distances.
+  // Costs to delete T1[i].
+  std::vector<double> del_t1_subtree_;
+  // Costs to delete F1[i].
+  std::vector<double> del_f1_subtree_;
+  // Costs to insert T2[j].
+  std::vector<double> ins_t2_subtree_;
+  // Costs to insert F2[j].
+  std::vector<double> ins_f2_subtree_;
+  // Tree distance matrix, initialized to infinity.
   data_structures::Matrix<double> dt_;
-  /// Matrix storing subforest distances.
+  // Forest distance matrix, initialized to infinity.
   data_structures::Matrix<double> df_;
-  /// TODO
+  // Holds line c(s-1)(t) for the edit distance computation.
+  data_structures::Matrix<double> e0_;
+  // Holds line c(s)(t) for the edit distance computation.
   data_structures::Matrix<double> e_;
+  // Iteratively compute forest deletion.
+  data_structures::Matrix<double> del_forest_;
+  // Holds line c(s)(t) for the edit distance computation.
+  data_structures::Matrix<double> del_tree_;
 };
 
 // Implementation details.
