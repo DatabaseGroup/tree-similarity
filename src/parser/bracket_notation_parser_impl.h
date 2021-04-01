@@ -88,7 +88,6 @@ node::Node<Label> BracketNotationParser<Label>::parse_single(
 
     // Skip incorrect token.
     if (consumed_token == false) {
-      std::cout << "SKIP: " << match_str << std::endl;
       ++tokens_begin; // Advance tokens.
     }
   }
