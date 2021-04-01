@@ -205,8 +205,6 @@ int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
 
   // This node's preorder id.
   int this_nodes_preorder = start_preorder;
-  // This node's postorder id.
-  int this_nodes_postorder = start_postorder;
 
   // Increment start_preorder to hold the correct id of the consecutive node
   // in preorder.

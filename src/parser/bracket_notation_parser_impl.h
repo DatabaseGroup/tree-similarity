@@ -51,11 +51,15 @@ node::Node<Label> BracketNotationParser<Label>::parse_single(
   node::Node<Label> root(root_label);
   node_stack.push_back(std::ref(root));
 
+  bool consumed_token = false;
+
   // Iterate all remaining tokens.
   while (tokens_begin != tokens_end) {
     match_str = *tokens_begin;
+    consumed_token = false;
 
     if (match_str == kLeftBracket) { // Enter node.
+      consumed_token = true;
       ++tokens_begin; // Advance tokens to label.
       match_str = *tokens_begin;
 
@@ -77,7 +81,14 @@ node::Node<Label> BracketNotationParser<Label>::parse_single(
     }
 
     if (match_str == kRightBracket) { // Exit node.
+      consumed_token = true;
       node_stack.pop_back();
+      ++tokens_begin; // Advance tokens.
+    }
+
+    // Skip incorrect token.
+    if (consumed_token == false) {
+      std::cout << "SKIP: " << match_str << std::endl;
       ++tokens_begin; // Advance tokens.
     }
   }
