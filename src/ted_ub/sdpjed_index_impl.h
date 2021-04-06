@@ -86,6 +86,7 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
   double ed_ins = -1;
   double ed_del = -1;
   double ed_ren = -1;
+  double for_int_del_ub;
 
   for (int i = 1; i <= t1_input_size; ++i) {
     for (int j = 1; j <= t2_input_size; ++j) {
@@ -118,6 +119,9 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
       min_for_ins += df_.at(i, 0);
       min_tree_ins += dt_.at(i, 0);
 
+      // The minimum between insertion and deletion costs is an upper bound.
+      for_int_del_ub = std::min(min_for_del, min_for_ins);
+
       // Cost for minimal mapping between trees in forest.
       min_for_ren = std::numeric_limits<double>::infinity();
       min_tree_ren = std::numeric_limits<double>::infinity();
@@ -128,32 +132,40 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
       {
         if (t1.postl_to_type_[i - 1] == 1 && t2.postl_to_type_[j - 1] == 1)
         {
-          // Compute string edit distance for array children.
-          e_.at(0, 0) = 0;
-          for (unsigned int s = 1; s <= t1.postl_to_children_[i-1].size(); ++s) {
-            e_.at(s, 0) = e_.at(s-1, 0) + dt_.at(t1.postl_to_children_[i-1][s-1] + 1, 0); // here we access d for subtree rooted in the s'th child of node i AND s starts with 1 but the postorder of the first child of node i is children1[i][s-1]
-          }
-          for (unsigned int t = 1; t <= t2.postl_to_children_[j-1].size(); ++t) {
-            e_.at(0, t) = e_.at(0, t-1) + dt_.at(0, t2.postl_to_children_[j-1][t-1] + 1);
-          }
-          
-          ed_ins = -1;
-          ed_del = -1;
-          ed_ren = -1;
-          // TODO: but we already went over each pair of children
-          for (unsigned int s = 1; s <= t1.postl_to_children_[i-1].size(); ++s) {
-            for (unsigned int t = 1; t <= t2.postl_to_children_[j-1].size(); ++t) {
-              ++subproblem_counter_;
-              ed_ins = e_.at(s, t-1) + dt_.at(0, t2.postl_to_children_[j-1][t-1] + 1);
-              ed_del = e_.at(s-1, t) + dt_.at(t1.postl_to_children_[i-1][s-1] + 1, 0);
-              ed_ren = e_.at(s-1, t-1) + dt_.at(t1.postl_to_children_[i-1][s-1] + 1, 
-                                                t2.postl_to_children_[j-1][t-1] + 1);
-              e_.at(s, t) = ed_ins >= ed_del ? ed_del >= ed_ren ? ed_ren : ed_del : 
-                            ed_ins >= ed_ren ? ed_ren : ed_ins;
+          // Compute the edit distance only if the size difference lower bound 
+          // is less than the insertion/deletion upper bound.
+          if (for_int_del_ub > abs(int(t1.postl_to_children_[i-1].size() - t2.postl_to_children_[j-1].size())))
+          {
+            // Compute string edit distance for array children.
+            e_.at(0, 0) = 0;
+            for (unsigned int s = 1; s <= t1.postl_to_children_[i-1].size(); ++s) {
+              e_.at(s, 0) = e_.at(s-1, 0) + dt_.at(t1.postl_to_children_[i-1][s-1] + 1, 0); // here we access d for subtree rooted in the s'th child of node i AND s starts with 1 but the postorder of the first child of node i is children1[i][s-1]
             }
+            for (unsigned int t = 1; t <= t2.postl_to_children_[j-1].size(); ++t) {
+              e_.at(0, t) = e_.at(0, t-1) + dt_.at(0, t2.postl_to_children_[j-1][t-1] + 1);
+            }
+            
+            ed_ins = -1;
+            ed_del = -1;
+            ed_ren = -1;
+            // TODO: but we already went over each pair of children
+            for (unsigned int s = 1; s <= t1.postl_to_children_[i-1].size(); ++s) {
+              unsigned int sed_s = s > for_int_del_ub ? s - for_int_del_ub : 1;
+              unsigned int sed_e = s + for_int_del_ub;
+              if (sed_e > t2.postl_to_children_[j-1].size()) sed_e = t2.postl_to_children_[j-1].size();
+              for (unsigned int t = sed_s; t <= sed_e; ++t) {
+                ++subproblem_counter_;
+                ed_ins = e_.at(s, t-1) + dt_.at(0, t2.postl_to_children_[j-1][t-1] + 1);
+                ed_del = e_.at(s-1, t) + dt_.at(t1.postl_to_children_[i-1][s-1] + 1, 0);
+                ed_ren = e_.at(s-1, t-1) + dt_.at(t1.postl_to_children_[i-1][s-1] + 1, 
+                                                  t2.postl_to_children_[j-1][t-1] + 1);
+                e_.at(s, t) = ed_ins >= ed_del ? ed_del >= ed_ren ? ed_ren : ed_del : 
+                              ed_ins >= ed_ren ? ed_ren : ed_ins;
+              }
+            }
+            // Assign string edit distance costs for subtree mapping cost.
+            min_for_ren = e_.at(t1.postl_to_children_[i-1].size(), t2.postl_to_children_[j-1].size());
           }
-          // Assign string edit distance costs for subtree mapping cost.
-          min_for_ren = e_.at(t1.postl_to_children_[i-1].size(), t2.postl_to_children_[j-1].size()); 
         }
         // In case of two keys, take the costs of mapping their child to one another.
         else if ((t1.postl_to_type_[i - 1] == 2 && t2.postl_to_type_[j - 1] == 2))
@@ -236,7 +248,7 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
           }
 
           // std::cout << "row_lb=" << row_lb << "col_lb=" << col_lb << " vs. " << std::min(min_for_del, min_for_ins);
-          if (std::max(row_lb, col_lb) >= std::min(min_for_del, min_for_ins)) {
+          if (std::max(row_lb, col_lb) >= for_int_del_ub) {
             // The lower bound exceeds the upper bound, hence deletion or insertion 
             // is cheaper.
             // std::cout << " -> SKIP ";
