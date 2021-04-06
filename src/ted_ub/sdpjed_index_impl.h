@@ -139,7 +139,7 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
             // Compute string edit distance for array children.
             e_.at(0, 0) = 0;
             for (unsigned int s = 1; s <= t1.postl_to_children_[i-1].size(); ++s) {
-              e_.at(s, 0) = e_.at(s-1, 0) + dt_.at(t1.postl_to_children_[i-1][s-1] + 1, 0); // here we access d for subtree rooted in the s'th child of node i AND s starts with 1 but the postorder of the first child of node i is children1[i][s-1]
+              e_.at(s, 0) = e_.at(s-1, 0) + dt_.at(t1.postl_to_children_[i-1][s-1] + 1, 0);
             }
             for (unsigned int t = 1; t <= t2.postl_to_children_[j-1].size(); ++t) {
               e_.at(0, t) = e_.at(0, t-1) + dt_.at(0, t2.postl_to_children_[j-1][t-1] + 1);
@@ -148,11 +148,12 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
             ed_ins = -1;
             ed_del = -1;
             ed_ren = -1;
-            // TODO: but we already went over each pair of children
             for (unsigned int s = 1; s <= t1.postl_to_children_[i-1].size(); ++s) {
+              // Use an upper bound to compute only the band of the matrix.
               unsigned int sed_s = s > for_int_del_ub ? s - for_int_del_ub : 1;
               unsigned int sed_e = s + for_int_del_ub;
               if (sed_e > t2.postl_to_children_[j-1].size()) sed_e = t2.postl_to_children_[j-1].size();
+
               for (unsigned int t = sed_s; t <= sed_e; ++t) {
                 ++subproblem_counter_;
                 ed_ins = e_.at(s, t-1) + dt_.at(0, t2.postl_to_children_[j-1][t-1] + 1);
