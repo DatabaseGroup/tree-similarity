@@ -37,6 +37,8 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
   // Reset skips and matching counter.
   nr_of_skips_ = 0;
   nr_of_matchings_ = 0;
+  nr_of_edit_skips_ = 0;
+  nr_of_edits_ = 0;
   
   int t1_input_size = t1.tree_size_;
   int t2_input_size = t2.tree_size_;
@@ -136,6 +138,7 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
           // is less than the insertion/deletion upper bound.
           if (for_int_del_ub > abs(int(t1.postl_to_children_[i-1].size() - t2.postl_to_children_[j-1].size())))
           {
+            nr_of_edits_++;
             // Compute string edit distance for array children.
             e_.at(0, 0) = 0;
             for (unsigned int s = 1; s <= t1.postl_to_children_[i-1].size(); ++s) {
@@ -166,6 +169,10 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
             }
             // Assign string edit distance costs for subtree mapping cost.
             min_for_ren = e_.at(t1.postl_to_children_[i-1].size(), t2.postl_to_children_[j-1].size());
+          }
+          else
+          {
+            nr_of_edit_skips_++;
           }
         }
         // In case of two keys, take the costs of mapping their child to one another.

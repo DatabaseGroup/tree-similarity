@@ -61,6 +61,10 @@ public:
   unsigned long nr_of_skips_;
   /// Number of bipartite matchings.
   unsigned long nr_of_matchings_;
+  /// Number of skipped edit distance computations.
+  unsigned long nr_of_edit_skips_;
+  /// Number of edit distance computations.
+  unsigned long nr_of_edits_;
 
 // Member variables.
 private:
