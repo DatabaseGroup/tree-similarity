@@ -159,16 +159,25 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted(const TreeIndex& t1,
 
       // Case 1: i is favorable child of parent.
       if (t1.postl_to_fav_child_[t1.postl_to_parent_[i-1]] == i-1) {
+        std::cout << " --- CASE 1: " << std::endl;
         del_forest_.at(t1.postl_to_height_[i-1]+1, t2.postl_to_parent_[j-1]) = del_f1_subtree_.at(t1.postl_to_parent_[i-1]) + df_.at(t1.postl_to_height_[i-1], j) - del_f1_subtree_.at(i-1);
-        del_tree_.at(t1.postl_to_height_[i-1]+1, t2.postl_to_height_[j-1]+1) = del_t1_subtree_.at(t1.postl_to_parent_[i-1]) + dt_.at(t1.postl_to_height_[i-1], j) - del_t1_subtree_.at(i-1);
+        std::cout << " --- CASE 1.1: " << std::endl;
+        del_tree_.at(t1.postl_to_height_[i-1]+1, t2.postl_to_parent_[j-1]) = del_t1_subtree_.at(t1.postl_to_parent_[i-1]) + dt_.at(t1.postl_to_height_[i-1], j) - del_t1_subtree_.at(i-1);
+        std::cout << " --- CASE 1.2: " << std::endl;
         e_.at(t1.postl_to_height_[i-1]+1, 0) = 0;
+        std::cout << " --- CASE 1.3: " << std::endl;
         for (unsigned int t = 1; t < t2.postl_to_children_[j-1].size(); ++t) {
           e_.at(t1.postl_to_height_[i-1]+1, t) = e_.at(t1.postl_to_height_[i-1]+1, t-1) + ins_f2_subtree_.at(t2.postl_to_children_[j-1][t-1] + 1);
         }
       }
+      // std::cout << " --- AH: " << t2.postl_to_children_[t1.postl_to_parent_[i-1]][0] << ", " << i - 1 << std::endl;
+      // std::cout << " --- AH: " << t2.postl_to_children_[t1.postl_to_parent_[i-1]][0] << ", " << i - 1 << std::endl;
+      // ", " << i-1 << ", " << t1.postl_to_fav_child_[t1.postl_to_parent_[i-1]] << ", " << i-1 << std::endl;
       // Case 2: i is either leftmost child (and favorable) OR not favorable child.
-      if (t2.postl_to_children_[t1.postl_to_parent_[i-1]][0] == i-1 ||
+      if ((t2.postl_to_children_[t1.postl_to_parent_[i-1]].size() > 0 && 
+          t2.postl_to_children_[t1.postl_to_parent_[i-1]][0] == i-1) ||
           t1.postl_to_fav_child_[t1.postl_to_parent_[i-1]] != i-1) {
+        std::cout << " --- CASE 2: " << std::endl;
         del_forest_.at(t1.postl_to_height_[i-1]+1, 0) = del_f1_subtree_.at(t1.postl_to_parent_[i-1]) + df_.at(t1.postl_to_height_[i-1], j) - del_f1_subtree_.at(i-1);
         del_tree_.at(t1.postl_to_height_[i-1]+1, 0) = del_t1_subtree_.at(t1.postl_to_parent_[i-1]) + dt_.at(t1.postl_to_height_[i-1], j) - del_t1_subtree_.at(i-1);
         // Copy e into e0.
@@ -187,6 +196,7 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted(const TreeIndex& t1,
           );
         }
       }
+      std::cout << " --- DONE: " << std::endl;
       // Case 3: t[i] is the left sibling of the favorable child.
       // TODO: Mark leftsibling
       // if () {
