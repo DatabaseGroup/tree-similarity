@@ -89,6 +89,7 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
   double ed_del = -1;
   double ed_ren = -1;
   double for_int_del_ub;
+  double ed_lb;
 
   for (int i = 1; i <= t1_input_size; ++i) {
     for (int j = 1; j <= t2_input_size; ++j) {
@@ -134,9 +135,31 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
       {
         if (t1.postl_to_type_[i - 1] == 1 && t2.postl_to_type_[j - 1] == 1)
         {
-          // Compute the edit distance only if the size difference lower bound 
-          // is less than the insertion/deletion upper bound.
-          if (for_int_del_ub > abs(int(t1.postl_to_children_[i-1].size() - t2.postl_to_children_[j-1].size())))
+          // Compute the edit distance only if the subtree size difference 
+          // (or children edit distance size) lower bound is less than the 
+          // insertion/deletion upper bound. 
+          // Comute the children edit distance size lower bound.
+          ed_lb = 0;
+          if (t1.postl_to_children_[i-1].size() > 
+              t2.postl_to_children_[j-1].size())
+          {
+            ed_lb = t1.postl_to_ordered_child_size_[i-1][t1.postl_to_children_[i-1].size() - t2.postl_to_children_[j-1].size() - 1];
+          }
+          else if (t1.postl_to_children_[i-1].size() < t2.postl_to_children_[j-1].size())
+          {
+            ed_lb = t2.postl_to_ordered_child_size_[j-1][t2.postl_to_children_[j-1].size() - t1.postl_to_children_[i-1].size() - 1];
+          }
+          else
+          {
+            ed_lb = 0;
+          }
+
+          // Compute the subtree size difference lower bound and take max lower 
+          // bound.
+          ed_lb = std::max(ed_lb, 
+              1.0 * abs(int(t1.postl_to_size_[i - 1] - t2.postl_to_size_[j-1])));
+
+          if (for_int_del_ub > ed_lb)
           {
             nr_of_edits_++;
             // Compute string edit distance for array children.

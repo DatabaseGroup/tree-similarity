@@ -147,6 +147,9 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   if constexpr (std::is_base_of<PostLToHeight, TreeIndex>::value) {
     ti.postl_to_height_.resize(tree_size);
   }
+  if constexpr (std::is_base_of<PostLToOrderedChildSize, TreeIndex>::value) {
+    ti.postl_to_ordered_child_size_.resize(tree_size);
+  }
 
   // Orders start with '0'. Are modified by the recursive traversal.
   int start_preorder = 0;
@@ -214,6 +217,8 @@ int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   std::vector<int> children_postorders;
   // To store preorder ids of this node's children.
   std::vector<int> children_preorders;
+  // Store the height of all children.
+  std::vector<int> children_sorted_subtree_size;
 
   // InvertedListDepthToPostL index
   if constexpr (std::is_base_of<InvertedListDepthToPostL, TreeIndex>::value) {
@@ -286,6 +291,10 @@ int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
       }
     }
 
+    if constexpr (std::is_base_of<PostLToHeight, TreeIndex>::value) {
+      children_sorted_subtree_size.push_back(subtree_size_child);
+    }
+
     // Treat the first child separately.
     if (children_start_it == n.get_children().begin()) {
       // Here, start_postorder-1 is the postorder of the current child.
@@ -315,6 +324,26 @@ int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   // PostLToFavChild index
   if constexpr (std::is_base_of<PostLToFavChild, TreeIndex>::value) {
     ti.postl_to_fav_child_[start_postorder] = favorable_child;
+  }
+
+  // PostLToOrderedChildSize
+  if constexpr (std::is_base_of<PostLToOrderedChildSize, TreeIndex>::value) {
+    // Sort all children by subtree size.
+    std::sort (children_sorted_subtree_size.begin(), children_sorted_subtree_size.end());
+
+    // Removing subtree costs sorted ascending.
+    std::vector<int> children_subtree_deletion_costs;
+    // Iterate over all children and sum up the costs.
+    int current_child = 0;
+    for (std::vector<int>::iterator it=children_sorted_subtree_size.begin(); it!=children_sorted_subtree_size.end(); ++it) {
+      current_child = children_subtree_deletion_costs.size();
+      if (current_child == 0) {
+        children_subtree_deletion_costs.push_back(*it);
+      } else {
+        children_subtree_deletion_costs.push_back(children_subtree_deletion_costs[current_child-1] + *it);
+      }
+    }
+    ti.postl_to_ordered_child_size_[start_postorder] = children_subtree_deletion_costs;
   }
 
   // PostLToHeight index

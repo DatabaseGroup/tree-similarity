@@ -343,6 +343,14 @@ class PostLToHeight {
   public: std::vector<int> postl_to_height_;
 };
 
+/// Stores the subtree sizes of all children in ascending order.
+/**
+ * Indexed in left-to-right postorder.
+ */
+class PostLToOrderedChildSize {
+  public: std::vector<std::vector<int>> postl_to_ordered_child_size_;
+};
+
 /// Tree index for Zhangh and Shasha algorithm.
 class TreeIndexZhangShasha :
   public Constants,
@@ -501,7 +509,8 @@ class TreeIndexAll :
   public InvertedListDepthToPostL,
   public InvertedListLabelIdToPostL,
   public PostLToFavChild,
-  public PostLToHeight
+  public PostLToHeight,
+  public PostLToOrderedChildSize
 {};
 
 /// Main method to index a tree.
