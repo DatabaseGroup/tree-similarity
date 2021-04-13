@@ -32,7 +32,6 @@
 #include <memory>
 #include <cmath>
 #include <cstdlib>
-#include <algorithm>
 #include "node.h"
 #include "matrix.h"
 #include "label_dictionary.h"
