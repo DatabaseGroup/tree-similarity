@@ -328,12 +328,13 @@ class InvertedListLabelIdToPostL {
   public: std::unordered_map<int, std::vector<int>> inverted_list_label_id_to_postl_;
 };
 
-/// Stores postorder id of the favorable child of each node in a tree.
+/// Stores postorder id of the favorable child and its left sibling of each node in a tree.
 /**
  * Indexed in left-to-right postorder.
  */
 class PostLToFavChild {
   public: std::vector<int> postl_to_fav_child_;
+  public: std::vector<int> postl_to_left_child_;
 };
 
 /// Stores the height of each node in a tree.
