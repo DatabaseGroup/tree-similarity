@@ -76,6 +76,8 @@ private:
   data_structures::Matrix<double> del_forest_;
   // Holds line c(s)(t) for the edit distance computation.
   data_structures::Matrix<double> del_tree_;
+  // Holds the distance matrix line of the favourable child.
+  data_structures::Matrix<double> fav_child_dt_;
 };
 
 // Implementation details.

@@ -153,13 +153,16 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   if constexpr (std::is_base_of<PostLToOrderedChildSize, TreeIndex>::value) {
     ti.postl_to_ordered_child_size_.resize(tree_size);
   }
+  if constexpr (std::is_base_of<PostLToFavorableChildOrder, TreeIndex>::value) {
+    ti.postl_to_favorder_.resize(tree_size);
+  }
 
   // Orders start with '0'. Are modified by the recursive traversal.
   int start_preorder = 0;
   int start_postorder = 0;
   int start_depth = 0;
   int start_height = 0;
-  
+
   // Maximum input tree depth - the first reference passed to recursion.
   int subtree_max_depth = 0;
   // Initial height.
@@ -167,6 +170,13 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   index_tree_recursion(ti, n, ld, cm, start_preorder, start_postorder,
       start_depth, subtree_max_depth, start_height, height, -1, false);
   
+  if constexpr (std::is_base_of<PostLToFavorableChildOrder, TreeIndex>::value) {
+    // Compute favorable child order.
+    int ts = tree_size - 1;
+    int fid = 0;
+    fav_child_processing_order(ti, ts, fid);
+  }
+
   if constexpr (std::is_base_of<ListKR, TreeIndex>::value) {
     // Add root to kr - not added in the recursion.
     ti.list_kr_.push_back(start_postorder-1);
@@ -620,4 +630,24 @@ void fill_rld(std::vector<int>& postr_to_rld,
       postr_to_rld[i] = postr_to_rld[prel_to_postr[prel_to_children[preorder][prel_to_children[preorder].size()-1]]];
     }
   }
+}
+
+template <typename TreeIndex>
+void fav_child_processing_order(TreeIndex& ti, int& postorder, int& favorder) {
+  // Perform recursively for children.
+  if (ti.postl_to_children_[postorder].size() != 0) {
+    // First process the favorable child.
+    fav_child_processing_order(ti, ti.postl_to_fav_child_[postorder], favorder);
+    // Next, process all other children.
+    for (unsigned int t = 0; t < ti.postl_to_children_[postorder].size(); ++t) {
+      // Favorable child was processed before.
+      if (ti.postl_to_children_[postorder][t] == ti.postl_to_fav_child_[postorder]) {
+        continue;
+      }
+      // Process other children in left to right order.
+      fav_child_processing_order(ti, ti.postl_to_children_[postorder][t], favorder);
+    }
+  }
+  // Assign favorder to postorder.
+  ti.postl_to_favorder_[favorder++] = postorder;
 }

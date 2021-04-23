@@ -353,6 +353,14 @@ class PostLToOrderedChildSize {
   public: std::vector<std::vector<int>> postl_to_ordered_child_size_;
 };
 
+/// Stores postorder to favorable child order.
+/**
+ * Indexed in left-to-right postorder.
+ */
+class PostLToFavorableChildOrder {
+  public: std::vector<int> postl_to_favorder_;
+};
+
 /// Tree index for Zhangh and Shasha algorithm.
 class TreeIndexZhangShasha :
   public Constants,
@@ -512,7 +520,8 @@ class TreeIndexAll :
   public InvertedListLabelIdToPostL,
   public PostLToFavChild,
   public PostLToHeight,
-  public PostLToOrderedChildSize
+  public PostLToOrderedChildSize,
+  public PostLToFavorableChildOrder
 {};
 
 /// Main method to index a tree.
@@ -580,6 +589,10 @@ void fill_rld(std::vector<int>& postr_to_rld,
     const std::vector<int>& postr_to_prel,
     const std::vector<int>& prel_to_postr,
     const std::vector<std::vector<int>>& prel_to_children);
+
+template <typename TreeIndex>
+void fav_child_processing_order(TreeIndex& ti, int& postorder, 
+    int& favorder);
 
 // Implementation details
 #include "tree_indexer_impl.h"
