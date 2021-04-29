@@ -122,14 +122,6 @@ double CTEDTreeIndex<CostModel, TreeIndex>::ted(const TreeIndex& t1, const TreeI
       }
     }
   }
-  
-  for (int i = 1; i <= t1_input_size; ++i) {
-    for (int j = 1; j <= t2_input_size; ++j) {
-      std::cout << dt_.at(i, j) << "\t";
-    }
-    std::cout << std::endl;
-  }
-
 
   return dt_.at(t1_input_size, t2_input_size);
 }
