@@ -96,7 +96,6 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted(const TreeIndex& t1,
     // Get postorder number from favorable child order number.
     i = t1.postl_to_favorder_[x-1] + 1;
     for (int j = 1; j <= t2_input_size; ++j) {
-      // std::cout << "i: " << i << ", j: " << j << std::endl;
       // Cost for deletion.
       if (t1.postl_to_children_[i-1].size() == 0) {
         // t1[i] is a leaf node. Therefore, all nodes of F2 have to be inserted.
@@ -140,10 +139,11 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted(const TreeIndex& t1,
       } else {
         min_for_ren = e_.at(t1.postl_to_height_[i-1], t2.postl_to_children_[j-1][t2.postl_to_children_[j-1].size()-1]+1);
       }
-      min_tree_ren = min_for_ren + c_.ren(t1.postl_to_label_id_[i-1], t2.postl_to_label_id_[j-1]);
-
       // Fill forest distance matrix.
       df_.at(t1.postl_to_height_[i-1], j) = min_for_del >= min_for_ins ? min_for_ins >= min_for_ren ? min_for_ren : min_for_ins : min_for_del >= min_for_ren ? min_for_ren : min_for_del;
+      // Compute tree rename based on forest cost matrix.
+      min_tree_ren = df_.at(t1.postl_to_height_[i-1], j) + c_.ren(t1.postl_to_label_id_[i-1], t2.postl_to_label_id_[j-1]);
+
       // Fill tree distance matrix.
       dt_.at(t1.postl_to_height_[i-1], j) = min_tree_del >= min_tree_ins ? min_tree_ins >= min_tree_ren ? min_tree_ren : min_tree_ins : min_tree_del >= min_tree_ren ? min_tree_ren : min_tree_del;
 
@@ -234,30 +234,7 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted(const TreeIndex& t1,
         }
       }
     }
-    // for (int u = 1; u < t2_input_size + 1; u++) {
-    //   std::cout << dt_.at(t1.postl_to_height_[i-1], u) << "\t";
-    // }
-    // std::cout << std::endl;
-    // for (int u = 0; u < t2_input_size + 1; u++) {
-    //   std::cout << e0_.at(t1.postl_to_height_[t1.postl_to_parent_[i-1]], u) << "\t";
-    // }
-    // std::cout << std::endl;
-    // if (i == 17) {
-    //   for (int u = 0; u < t2_input_size + 1; u++) {
-    //     std::cout << e_.at(t1.postl_to_height_[t1.postl_to_parent_[i-1]], u) << "\t";
-    //   }
-    //   std::cout << std::endl;
-    // }
   }
-  
-
-  // for (int i = 0; i <= t1_height; ++i) {
-  //   for (int j = 0; j <= t2_input_size; ++j) {
-  //     std::cout << dt_.at(i, j) << "\t";
-  //   }
-  //   std::cout << std::endl;
-  // }
-
 
   return dt_.at(t1_height, t2_input_size);
 }
