@@ -95,12 +95,15 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted(const TreeIndex& t1,
   for (int x = 1; x <= t1_input_size; ++x) {
     // Get postorder number from favorable child order number.
     i = t1.postl_to_favorder_[x-1] + 1;
+    // std::cout << "i: " << i << "\t";
     for (int j = 1; j <= t2_input_size; ++j) {
+      // std::cout << "i: " << i << ", j: " << j << std::endl;
       // Cost for deletion.
       if (t1.postl_to_children_[i-1].size() == 0) {
         // t1[i] is a leaf node. Therefore, all nodes of F2 have to be inserted.
-        min_for_del = ins_f2_subtree_.at(j);
-        min_tree_del = ins_t2_subtree_.at(j);
+        // Must be set to infinity, since we allow infinity costs for different node types.
+        min_for_del = std::numeric_limits<double>::infinity(); //ins_f2_subtree_.at(j);
+        min_tree_del = std::numeric_limits<double>::infinity(); //ins_t2_subtree_.at(j);
       } else {
         // t1[i] is no leaf node. Therefore, read the previously computed value.
         min_for_del = del_forest_.at(t1.postl_to_height_[i-1], j-1);
@@ -110,8 +113,9 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted(const TreeIndex& t1,
       // Cost for insertion.
       if (t2.postl_to_children_[j-1].size() == 0) {
         // t2[j] is a leaf node. Therefore, all nodes of F1 have to be inserted.
-        min_for_ins = del_f1_subtree_.at(i);
-        min_tree_ins = del_t1_subtree_.at(i);
+        // Must be set to infinity, since we allow infinity costs for different node types.
+        min_for_ins = std::numeric_limits<double>::infinity(); //del_f1_subtree_.at(i);
+        min_tree_ins = std::numeric_limits<double>::infinity(); //del_t1_subtree_.at(i);
       } else {
         // t2[j] is no leaf node. Therefore, computed the value.
         min_for_ins = std::numeric_limits<double>::infinity();
