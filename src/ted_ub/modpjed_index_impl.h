@@ -278,8 +278,8 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted2(const TreeIndex& t1,
   // Fill the matrices with inf.
   dt_.fill_with(std::numeric_limits<double>::infinity());
   df_.fill_with(std::numeric_limits<double>::infinity());
-  e0_.fill_with(0);
-  e_.fill_with(0);
+  e0_.fill_with(std::numeric_limits<double>::infinity());
+  e_.fill_with(std::numeric_limits<double>::infinity());
   del_forest_.fill_with(std::numeric_limits<double>::infinity());
   del_tree_.fill_with(std::numeric_limits<double>::infinity());
   fav_child_dt_.fill_with(std::numeric_limits<double>::infinity());
@@ -319,7 +319,7 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted2(const TreeIndex& t1,
     if (s < 1) s = 1;
     int e = i + threshold;
     if (e > t2_input_size) e = t2_input_size;
-    std::cout << "i: " << i << "\t" << std::endl;
+    std::cout << "i: " << i << std::endl;
     // std::cout << "e[" << t1.postl_to_height_[t1.postl_to_parent_[i-1]] << "][0]: " << e_.at(t1.postl_to_height_[t1.postl_to_parent_[i-1]], 0) << std::endl;
     // if (t1.postl_to_fav_child_[t1.postl_to_parent_[i-1]] == i-1) {
     //   for (int u = 1; u < t2_input_size + 1; u++) {
@@ -373,12 +373,12 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted2(const TreeIndex& t1,
       // Compute tree rename based on forest cost matrix.
       min_tree_ren = df_.at(t1.postl_to_height_[i-1], j) + c_.ren(t1.postl_to_label_id_[i-1], t2.postl_to_label_id_[j-1]);
 
-      if (i == 16 && j == 16) {
-        std::cout << "i: " << i << ", j: " << j << "; t: " << threshold << ", diff: " << std::abs(i - j) << std::endl;
-        std::cout << "min_for_del: " << min_for_del << ", min_tree_del: " << min_tree_del << std::endl;
-        std::cout << "min_for_ins: " << min_for_ins << ", min_tree_ins: " << min_tree_ins << std::endl;
-        std::cout << "min_for_ren: " << min_for_ren << ", min_tree_ren: " << min_tree_ren << std::endl;
-      }
+      // if (i == 18 && j == 18) {
+      //   std::cout << "i: " << i << ", j: " << j << "; t: " << threshold << ", diff: " << std::abs(i - j) << std::endl;
+      //   std::cout << "min_for_del: " << min_for_del << ", min_tree_del: " << min_tree_del << std::endl;
+      //   std::cout << "min_for_ins: " << min_for_ins << ", min_tree_ins: " << min_tree_ins << std::endl;
+      //   std::cout << "min_for_ren: " << min_for_ren << ", min_tree_ren: " << min_tree_ren << std::endl;
+      // }
 
       // Fill tree distance matrix.
       dt_.at(t1.postl_to_height_[i-1], j) = min_tree_del >= min_tree_ins ? min_tree_ins >= min_tree_ren ? min_tree_ren : min_tree_ins : min_tree_del >= min_tree_ren ? min_tree_ren : min_tree_del;
@@ -386,138 +386,177 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted2(const TreeIndex& t1,
       // Do not compute for the parent of the root node in T1.
       if (i != t1_input_size)
       {
+        // Row number of parent.
         int p_i = t1.postl_to_height_[t1.postl_to_parent_[i-1]];
         // Case 1: i is favorable child of parent.
         if (t1.postl_to_fav_child_[t1.postl_to_parent_[i-1]] == i-1) {
+          // Store distances for favorable child used to fill the edit distance matrix later on.
           fav_child_dt_.at(p_i, j) = dt_.at(t1.postl_to_height_[i-1], j);
-          // if (std::abs(t1.postl_to_parent_[i-1]+1-j) > threshold) {
-          //   // std::cout << "TEST 1" << std::endl;
-          //   del_forest_.at(p_i, j-1) = std::numeric_limits<double>::infinity();
-          //   del_tree_.at  (p_i, j-1) = std::numeric_limits<double>::infinity();
-          // } else {
-            del_forest_.at(p_i, j-1) = del_f1_subtree_.at(t1.postl_to_parent_[i-1]+1) + df_.at(t1.postl_to_height_[i-1], j) - del_f1_subtree_.at(i);
-            del_tree_.at  (p_i, j-1) = del_t1_subtree_.at(t1.postl_to_parent_[i-1]+1) + dt_.at(t1.postl_to_height_[i-1], j) - del_t1_subtree_.at(i);
-          // }
-          e_.at(p_i, 0) = 0;
-          for (unsigned int t = 0; t < t2.postl_to_children_[j-1].size(); ++t) {
-            // if (std::abs(i-t2.postl_to_children_[j-1][t]+1) > threshold) {
-            //   e_.at(p_i, t2.postl_to_children_[j-1][t]+1) = std::numeric_limits<double>::infinity();
-            // } else {
+          // Keep track of the deletion costs for parent.
+          del_forest_.at(p_i, j-1) = del_f1_subtree_.at(t1.postl_to_parent_[i-1]+1) + df_.at(t1.postl_to_height_[i-1], j) - del_f1_subtree_.at(i);
+          del_tree_.at  (p_i, j-1) = del_t1_subtree_.at(t1.postl_to_parent_[i-1]+1) + dt_.at(t1.postl_to_height_[i-1], j) - del_t1_subtree_.at(i);
+          // Start first line of the edit distance matrix. Column 0 is shared among all nodes.
+          e0_.at(p_i, 0) = 0;
+          // If the current node j in tree t2 is the root node or the first child start from empty column (0).
+          if (j != t2_input_size) {
+            for (unsigned int t = 0; t < t2.postl_to_children_[t2.postl_to_parent_[j-1]].size(); ++t) {
               if (t == 0) {
-                e_.at(p_i, t2.postl_to_children_[j-1][t]+1) = e_.at(p_i, 0) + ins_t2_subtree_.at(t2.postl_to_children_[j-1][t]+1);
+                e0_.at(p_i, t2.postl_to_children_[t2.postl_to_parent_[j-1]][t]+1) = e0_.at(p_i, 0) + ins_t2_subtree_.at(t2.postl_to_children_[t2.postl_to_parent_[j-1]][t]+1);
               } else {
-                e_.at(p_i, t2.postl_to_children_[j-1][t]+1) = e_.at(p_i, t2.postl_to_children_[j-1][t-1]+1) + ins_t2_subtree_.at(t2.postl_to_children_[j-1][t]+1);
+                e0_.at(p_i, t2.postl_to_children_[t2.postl_to_parent_[j-1]][t]+1) = e0_.at(p_i, t2.postl_to_children_[t2.postl_to_parent_[j-1]][t-1]+1) + ins_t2_subtree_.at(t2.postl_to_children_[t2.postl_to_parent_[j-1]][t]+1);
               }
-            // }
-            if (t1.postl_to_parent_[i-1] == 15) {
-              std::cout << t2.postl_to_children_[j-1][t]+1 << ":" << e_.at(p_i, t2.postl_to_children_[j-1][t]+1) << "\t";
+              if (t1.postl_to_parent_[i-1] == 17 && t2.postl_to_parent_[j-1] == 17) {
+                std::cout << e0_.at(p_i, t2.postl_to_children_[t2.postl_to_parent_[j-1]][t]+1) << "\t";
+              }
             }
           }
+          if (t1.postl_to_parent_[i-1] == 17 && t2.postl_to_parent_[j-1] == 17) {
+            std::cout << std::endl;
+          }
+          // if (t2.postl_to_parent_[j-1] == -1 || j == t2.postl_to_children_[t2.postl_to_parent_[j-1]][0]+1) {
+          //   e0_.at(p_i, j) = e_.at(p_i, 0) + ins_t2_subtree_.at(j);
+          // } else {
+          //   // TODO: Get the postorder id of the left sibling of j.
+          //   int postid_previous_sibling = 0;
+          //   for (unsigned int t = 1; t < t2.postl_to_children_[t2.postl_to_parent_[j-1]].size(); ++t) {
+          //     if (t2.postl_to_children_[t2.postl_to_parent_[j-1]][t]+1 == j) {
+          //       postid_previous_sibling = t2.postl_to_children_[t2.postl_to_parent_[j-1]][t-1]+1;
+          //     }
+          //   }
+          //   if (t1.postl_to_parent_[i-1] == 17 && t2.postl_to_parent_[j-1] == 17) {
+          //     for (int u = 0; u <= t2_input_size; u++) {
+          //       std::cout << e_.at(p_i, u) << "\t";
+          //     }
+          //     std::cout << std::endl;
+          //     std::cout << "Prev sibling: " << postid_previous_sibling << std::endl;
+          //     std::cout << e0_.at(p_i, postid_previous_sibling) << " + " << ins_t2_subtree_.at(j) << std::endl;
+          //   }
+          //   e0_.at(p_i, j) = e0_.at(p_i, postid_previous_sibling) + ins_t2_subtree_.at(j);
+          // }
+          // std::cout << j << " with parent " << t2.postl_to_parent_[j-1] + 1 << std::endl;
+          // if (t1.postl_to_parent_[i-1] == 17 && t2.postl_to_parent_[j-1] == 17) {
+          //   std::cout << "CASE 1 (j=" << j << "): ";
+          //   std::cout << e0_.at(p_i, 0) << " " << e0_.at(p_i, 2) << " " << e0_.at(p_i, 5) << " " << e0_.at(p_i, 17) << std::endl;
+          // }
         }
         // Case 2: i is either leftmost child (and favorable) OR not favorable child.
         if ((t1.postl_to_children_[t1.postl_to_parent_[i-1]].size() > 0 && 
             t1.postl_to_children_[t1.postl_to_parent_[i-1]][0] == i-1) ||
             t1.postl_to_fav_child_[t1.postl_to_parent_[i-1]] != i-1) {
-          // if (std::abs(t1.postl_to_parent_[i-1]+1-j) > threshold) {
-          //   // std::cout << "TEST 2" << std::endl;
-          //   del_forest_.at(p_i, j-1) = std::numeric_limits<double>::infinity();
-          //   del_tree_.at  (p_i, j-1) = std::numeric_limits<double>::infinity();
-          // } else {
-            del_forest_.at(p_i, j-1) = std::min(del_forest_.at(p_i, j-1), del_f1_subtree_.at(t1.postl_to_parent_[i-1]+1) + df_.at(t1.postl_to_height_[i-1], j) - del_f1_subtree_.at(i));
-            del_tree_.at(p_i, j-1) = std::min(del_tree_.at(p_i, j-1), del_t1_subtree_.at(t1.postl_to_parent_[i-1]+1) + dt_.at(t1.postl_to_height_[i-1], j) - del_t1_subtree_.at(i));
-          // }
-          // Copy e into e0.
-          e0_.at(p_i, 0) = e_.at(p_i, 0);
-          for (unsigned int t = 0; t < t2.postl_to_children_[j-1].size(); ++t) {
-            e0_.at(p_i, t2.postl_to_children_[j-1][t] + 1) = e_.at(p_i, t2.postl_to_children_[j-1][t] + 1);
-          }
+          // Keep track of the deletion costs for parent.
+          del_forest_.at(p_i, j-1) = std::min(del_forest_.at(p_i, j-1), del_f1_subtree_.at(t1.postl_to_parent_[i-1]+1) + df_.at(t1.postl_to_height_[i-1], j) - del_f1_subtree_.at(i));
+          del_tree_.at(p_i, j-1) = std::min(del_tree_.at(p_i, j-1), del_t1_subtree_.at(t1.postl_to_parent_[i-1]+1) + dt_.at(t1.postl_to_height_[i-1], j) - del_t1_subtree_.at(i));
           // Fill next line.
           e_.at(p_i, 0) = e0_.at(p_i, 0) + del_t1_subtree_.at(i);
-          for (unsigned int t = 0; t < t2.postl_to_children_[j-1].size(); ++t) {
-            // if (std::abs(i-t2.postl_to_children_[j-1][t]+1) > threshold) {
-            //   e_.at(p_i, t2.postl_to_children_[j-1][t]+1) = std::numeric_limits<double>::infinity();
-            // } else {
-              if (t == 0) {
-                e_.at(p_i, t2.postl_to_children_[j-1][t]+1) = std::min(
-                   e_.at(p_i, 0)                                 + ins_t2_subtree_.at(t2.postl_to_children_[j-1][t]+1), std::min(
-                  e0_.at(p_i, t2.postl_to_children_[j-1][t]  +1) + del_t1_subtree_.at(i),
-                  e0_.at(p_i, 0)                                 + dt_.at(t1.postl_to_height_[i-1], t2.postl_to_children_[j-1][t]+1))
-                );
-              } else {
-                e_.at(p_i, t2.postl_to_children_[j-1][t]+1) = std::min(
-                   e_.at(p_i, t2.postl_to_children_[j-1][t-1]+1) + ins_t2_subtree_.at(t2.postl_to_children_[j-1][t]+1), std::min(
-                  e0_.at(p_i, t2.postl_to_children_[j-1][t]  +1) + del_t1_subtree_.at(i),
-                  e0_.at(p_i, t2.postl_to_children_[j-1][t-1]+1) + dt_.at(t1.postl_to_height_[i-1], t2.postl_to_children_[j-1][t]+1))
-                );
-              }
-            // }
-            if (t1.postl_to_parent_[i-1] == 15) {
-              std::cout << t2.postl_to_children_[j-1][t]+1 << ":" << e_.at(p_i, t2.postl_to_children_[j-1][t]+1) << "\t";
-            }
+          if (t1.postl_to_parent_[i-1] == 17 && t2.postl_to_parent_[j-1] == 17) {
+            std::cout << "e0(0)= " << e0_.at(p_i, 0) << std::endl;
+            std::cout << "e(0)= " << e_.at(p_i, 0) << std::endl;
           }
-          if (j != e) {
-            e_.at(p_i, 0) = e0_.at(p_i, 0);
+          if (t2.postl_to_parent_[j-1] == -1 || j == t2.postl_to_children_[t2.postl_to_parent_[j-1]][0]+1) {
+            if (t1.postl_to_parent_[i-1] == 17 && t2.postl_to_parent_[j-1] == 17) {
+              std::cout << e_.at(p_i, 0) + ins_t2_subtree_.at(j)
+               << " vs " << e0_.at(p_i, j) + del_t1_subtree_.at(i) 
+               << " vs " << e0_.at(p_i, 0) + dt_.at(t1.postl_to_height_[i-1], j) << std::endl;
+            }
+            e_.at(p_i, j) = std::min(
+               e_.at(p_i, 0) + ins_t2_subtree_.at(j), std::min(
+              e0_.at(p_i, j) + del_t1_subtree_.at(i),
+              e0_.at(p_i, 0) + dt_.at(t1.postl_to_height_[i-1], j))
+            );
           } else {
-            // std::cout << "CHANGE: " << e_.at(p_i, 0) << std::endl;
+            // TODO: Get the postorder id of the left sibling of j.
+            int postid_previous_sibling = 0;
+            for (unsigned int t = 1; t < t2.postl_to_children_[t2.postl_to_parent_[j-1]].size(); ++t) {
+              if (t2.postl_to_children_[t2.postl_to_parent_[j-1]][t]+1 == j) {
+                postid_previous_sibling = t2.postl_to_children_[t2.postl_to_parent_[j-1]][t-1]+1;
+              }
+            }
+            if (t1.postl_to_parent_[i-1] == 17 && t2.postl_to_parent_[j-1] == 17) {
+              std::cout << e_.at(p_i, postid_previous_sibling) + ins_t2_subtree_.at(j)
+               << " vs " << e0_.at(p_i, j) + del_t1_subtree_.at(i) 
+               << " vs " << e0_.at(p_i, postid_previous_sibling) + dt_.at(t1.postl_to_height_[i-1], j) << std::endl;
+            }
+            e_.at(p_i, j) = std::min(
+               e_.at(p_i, postid_previous_sibling) + ins_t2_subtree_.at(j), std::min(
+              e0_.at(p_i, j) + del_t1_subtree_.at(i),
+              e0_.at(p_i, postid_previous_sibling) + dt_.at(t1.postl_to_height_[i-1], j))
+            );
+          }
+          if (t1.postl_to_parent_[i-1] == 17 && t2.postl_to_parent_[j-1] == 17) {
+            std::cout << "CASE 2 (j=" << j << "): ";
+            std::cout << e_.at(p_i, j) << std::endl;
           }
         }
         // Case 3: t[i] is the left sibling of the favorable child.
         if (t1.postl_to_left_child_[t1.postl_to_parent_[i-1]] == i-1) {
           int fav_child_postid = t1.postl_to_fav_child_[t1.postl_to_parent_[i-1]]+1;
-          // Store initial value of first column in edit distance cost matrix.
-          // It is needed for the next j. Therefore rewrite at the end.
           int old_val = e_.at(p_i, 0);
-          // Copy e into e0.
-          e0_.at(p_i, 0) = e_.at(p_i, 0);
-          if (j != e) {
-            e0_.at(p_i, 0) += del_t1_subtree_.at(i);
-          }
-          for (unsigned int t = 0; t < t2.postl_to_children_[j-1].size(); ++t) {
-            e0_.at(p_i, t2.postl_to_children_[j-1][t] + 1) = e_.at(p_i, t2.postl_to_children_[j-1][t] + 1);
+          if (t1.postl_to_parent_[i-1] == 17 && t2.postl_to_parent_[j-1] == 17) {
+            std::cout << "e0(0)= " << e0_.at(p_i, 0) << std::endl;
+            std::cout << "e(0)= " << e_.at(p_i, 0) << std::endl;
+            std::cout << "en(0)= " << e_.at(p_i, 0) + del_t1_subtree_.at(fav_child_postid) << std::endl;
           }
           // Fill next line.
-          e_.at(p_i, 0) = e0_.at(p_i, 0) + del_t1_subtree_.at(fav_child_postid);
-          for (unsigned int t = 0; t < t2.postl_to_children_[j-1].size(); ++t) {
-            // if (std::abs(i-t2.postl_to_children_[j-1][t]+1) > threshold) {
-            //   e_.at(p_i, t2.postl_to_children_[j-1][t]+1) = std::numeric_limits<double>::infinity();
-            // } else {
-              if (t == 0) {
-                e_.at(p_i, t2.postl_to_children_[j-1][t]+1) = std::min(
-                   e_.at(p_i, 0)                                 + ins_t2_subtree_.at(t2.postl_to_children_[j-1][t]+1), std::min(
-                  e0_.at(p_i, t2.postl_to_children_[j-1][t]  +1) + del_t1_subtree_.at(fav_child_postid),
-                  e0_.at(p_i, 0)                                 + fav_child_dt_.at(p_i, t2.postl_to_children_[j-1][t]+1))
-                );
-              } else {
-                e_.at(p_i, t2.postl_to_children_[j-1][t]+1) = std::min(
-                   e_.at(p_i, t2.postl_to_children_[j-1][t-1]+1) + ins_t2_subtree_.at(t2.postl_to_children_[j-1][t]+1), std::min(
-                  e0_.at(p_i, t2.postl_to_children_[j-1][t]  +1) + del_t1_subtree_.at(fav_child_postid),
-                  e0_.at(p_i, t2.postl_to_children_[j-1][t-1]+1) + fav_child_dt_.at(p_i, t2.postl_to_children_[j-1][t]+1))
-                );
-              }
-            // }
-            if (t1.postl_to_parent_[i-1] == 15) {
-              std::cout << t2.postl_to_children_[j-1][t]+1 << ":" << e_.at(p_i, t2.postl_to_children_[j-1][t]+1) << "\t";
+          e_.at(p_i, 0) = e_.at(p_i, 0) + del_t1_subtree_.at(fav_child_postid);
+          if (t2.postl_to_parent_[j-1] == -1 || j == t2.postl_to_children_[t2.postl_to_parent_[j-1]][0]+1) {
+            if (t1.postl_to_parent_[i-1] == 17 && t2.postl_to_parent_[j-1] == 17) {
+              std::cout << e_.at(p_i, 0) + del_t1_subtree_.at(fav_child_postid) + ins_t2_subtree_.at(j)
+               << " vs " << e_.at(p_i, j) + del_t1_subtree_.at(fav_child_postid) 
+               << " vs " << e_.at(p_i, 0) + fav_child_dt_.at(p_i, j) << std::endl;
             }
+            // Note that e holds here the values e0. Only the current subtree size must be added in the first row.
+            e_.at(p_i, j) = std::min(
+               e_.at(p_i, 0) + del_t1_subtree_.at(fav_child_postid) + ins_t2_subtree_.at(j), std::min(
+              e_.at(p_i, j) + del_t1_subtree_.at(fav_child_postid),
+              e_.at(p_i, 0) + fav_child_dt_.at(p_i, j))
+            );
+          } else {
+            // TODO: Get the postorder id of the left sibling of j.
+            int postid_previous_sibling = 0;
+            for (unsigned int t = 1; t < t2.postl_to_children_[t2.postl_to_parent_[j-1]].size(); ++t) {
+              if (t2.postl_to_children_[t2.postl_to_parent_[j-1]][t]+1 == j) {
+                postid_previous_sibling = t2.postl_to_children_[t2.postl_to_parent_[j-1]][t-1]+1;
+              }
+            }
+            if (t1.postl_to_parent_[i-1] == 17 && t2.postl_to_parent_[j-1] == 17) {
+              std::cout << e_.at(p_i, postid_previous_sibling) + ins_t2_subtree_.at(j)
+               << " vs " << e_.at(p_i, j) + del_t1_subtree_.at(fav_child_postid) 
+               << " vs " << e_.at(p_i, postid_previous_sibling) + fav_child_dt_.at(p_i, j) << std::endl;
+              std::cout << " FAV " << fav_child_dt_.at(p_i, j) << std::endl;
+            }
+            e_.at(p_i, j) = std::min(
+               e_.at(p_i, postid_previous_sibling) + ins_t2_subtree_.at(j), std::min(
+              e_.at(p_i, j) + del_t1_subtree_.at(fav_child_postid),
+              e_.at(p_i, postid_previous_sibling) + fav_child_dt_.at(p_i, j))
+            );
           }
           if (j != e) {
             e_.at(p_i, 0) = old_val;
-          } else {
-            // std::cout << "CHANGE: " << e_.at(p_i, 0) << std::endl;
+          } 
+          if (t1.postl_to_parent_[i-1] == 17 && t2.postl_to_parent_[j-1] == 17) {
+            std::cout << "CASE 3 (j=" << j << "): ";
+            std::cout << e_.at(p_i, j) << std::endl;
           }
         }
       }
     }
+    // SWAP VECTORS OF PARENT
+    // v1.swap(v2);
 
-    if (t1.postl_to_parent_[i-1] == 15) {
-      std::cout << std::endl;
-    }
-    // if (t1.postl_to_parent_[i-1] == 15) {
-    //   std::cout << i << ": ";
-    //   for (int u = 1; u < t2_input_size + 1; u++) {
-    //     std::cout << e_.at(t1.postl_to_height_[t1.postl_to_parent_[i-1]], u) << "\t";
-    //   }
-    //   std::cout << std::endl;
+    // for (int u = 0; u <= t2_input_size; u++) {
+    //   std::cout << e0_.at(t1.postl_to_height_[t1.postl_to_parent_[i-1]], u) << "\t";
     // }
+    // std::cout << std::endl;
+
+    if (t1.postl_to_fav_child_[t1.postl_to_parent_[i-1]] != i-1 && 
+      (t1.postl_to_children_[t1.postl_to_parent_[i-1]].size() > 0 && 
+            t1.postl_to_children_[t1.postl_to_parent_[i-1]][0] == i-1)) {
+      std::cout << "RESTORE" << std::endl;
+      for (int u = 0; u <= t2_input_size; u++) {
+        e0_.at(t1.postl_to_height_[t1.postl_to_parent_[i-1]], u) = e_.at(t1.postl_to_height_[t1.postl_to_parent_[i-1]], u);
+      }
+    }
+
 
     // for (int u = 1; u < t2_input_size + 1; u++) {
     //   std::cout << dt_.at(t1.postl_to_height_[i-1], u) << "\t";
