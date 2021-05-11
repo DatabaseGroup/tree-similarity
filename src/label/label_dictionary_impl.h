@@ -47,6 +47,11 @@ int LabelDictionary<Label>::insert(const Label& l) {
 }
 
 template<class Label>
+int LabelDictionary<Label>::get_number_of_labels() {
+  return labels_count_;
+}
+
+template<class Label>
 const Label& LabelDictionary<Label>::get(const int id) const{
   // Return the label of the given id.
   return id_to_label_dictionary_[id];

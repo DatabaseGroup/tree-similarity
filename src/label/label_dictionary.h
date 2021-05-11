@@ -54,6 +54,10 @@ public:
   /// \param l A label to insert.
   /// \return The id of the given label.
   int insert(const Label& l);
+  /// Returns the number of labels.
+  ///
+  /// \return The number of labels.
+  int get_number_of_labels();
   /// Returns the label that is mapped to a certain 
   ///
   /// \param id A label identifier to lookup.

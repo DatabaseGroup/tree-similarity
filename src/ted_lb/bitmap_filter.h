@@ -46,12 +46,28 @@ public:
   double ted(const TreeIndex& t1, const TreeIndex& t2);
 
   /// Implements ted2 function from the TEDAlgorithm<CostModel, TreeIndex> class.
-  /// Computes the bitmap filter for any tree.
+  /// Computes the bitmap filter with bit set generation for any tree.
   double ted2(const TreeIndex& t1, const TreeIndex& t2, const unsigned int size);
 
   /// Implements ted2 function from the TEDAlgorithm<CostModel, TreeIndex> class.
-  /// Computes the bitmap filter with optimizations for JSON trees.
+  /// Computes the bitmap filter with bit set generation and optimizations for JSON trees.
   double ted3(const TreeIndex& t1, const TreeIndex& t2, const unsigned int size);
+
+  /// Implements ted2 function from the TEDAlgorithm<CostModel, TreeIndex> class.
+  /// Computes the bitmap filter with bit xor generation for any tree.
+  double ted4(const TreeIndex& t1, const TreeIndex& t2, const unsigned int size);
+
+  /// Implements ted2 function from the TEDAlgorithm<CostModel, TreeIndex> class.
+  /// Computes the bitmap filter with bit xor generation and optimizations for JSON trees.
+  double ted5(const TreeIndex& t1, const TreeIndex& t2, const unsigned int size);
+
+  /// Implements ted2 function from the TEDAlgorithm<CostModel, TreeIndex> class.
+  /// Computes the bitmap filter with bit next generation for any tree.
+  double ted6(const TreeIndex& t1, const TreeIndex& t2, const unsigned int size);
+
+  /// Implements ted2 function from the TEDAlgorithm<CostModel, TreeIndex> class.
+  /// Computes the bitmap filter with bit next generation and optimizations for JSON trees.
+  double ted7(const TreeIndex& t1, const TreeIndex& t2, const unsigned int size);
 };
 
 // Implementation details.
