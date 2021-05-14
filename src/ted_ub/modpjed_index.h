@@ -72,6 +72,9 @@ private:
   data_structures::Matrix<double> e0_;
   // Holds line c(s)(t) for the edit distance computation.
   data_structures::Matrix<double> e_;
+  // Holds line c(s+1)(t) for the edit distance computation 
+  // in case of adding the favorable child.
+  data_structures::Matrix<double> epf_;
   // Iteratively compute forest deletion.
   data_structures::Matrix<double> del_forest_;
   // Holds line c(s)(t) for the edit distance computation.
