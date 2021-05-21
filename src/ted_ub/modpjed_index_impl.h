@@ -406,7 +406,7 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted2(const TreeIndex& t1,
             // Fill next line.
             e_.at(p_i, 0) = e0_.at(p_i, 0) + del_t1_subtree_.at(i);
             // If the current node j in tree t2 is (the root node or) the first child start from empty column (0).
-            if (j == t2.postl_to_children_[t2.postl_to_parent_[j-1]][0]+1) {
+            if (t2.postl_to_left_sibling_[j-1] == -1) {
               e_.at(p_i, j) = std::min(
                  e_.at(p_i, 0) + ins_t2_subtree_.at(j), std::min(
                 e0_.at(p_i, j) + del_t1_subtree_.at(i),
@@ -414,9 +414,9 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted2(const TreeIndex& t1,
               );
             } else {
               e_.at(p_i, j) = std::min(
-                 e_.at(p_i, t2.postl_to_left_sibling_[j-1] + 1) + ins_t2_subtree_.at(j), std::min(
+                 e_.at(p_i, t2.postl_to_left_sibling_[j-1]+1) + ins_t2_subtree_.at(j), std::min(
                 e0_.at(p_i, j) + del_t1_subtree_.at(i),
-                e0_.at(p_i, t2.postl_to_left_sibling_[j-1] + 1) + dt_.at(t1.postl_to_height_[i-1], j))
+                e0_.at(p_i, t2.postl_to_left_sibling_[j-1]+1) + dt_.at(t1.postl_to_height_[i-1], j))
               );
             }
           }
