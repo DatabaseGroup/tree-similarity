@@ -202,7 +202,7 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted(const TreeIndex& t1,
           }
         }
         // Case 3: t[i] is the left sibling of the favorable child.
-        if (t1.postl_to_left_child_[t1.postl_to_parent_[i-1]] == i-1) {
+        if (t1.postl_to_left_fav_child_[t1.postl_to_parent_[i-1]] == i-1) {
           int fav_child_postid = t1.postl_to_fav_child_[t1.postl_to_parent_[i-1]]+1;
           // Store initial value of first column in edit distance cost matrix.
           // It is needed for the next j. Therefore rewrite at the end.
@@ -413,23 +413,16 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted2(const TreeIndex& t1,
                 e0_.at(p_i, 0) + dt_.at(t1.postl_to_height_[i-1], j))
               );
             } else {
-              // TODO: Get the postorder id of the left sibling of j.
-              int postid_previous_sibling = 0;
-              for (unsigned int t = 1; t < t2.postl_to_children_[t2.postl_to_parent_[j-1]].size(); ++t) {
-                if (t2.postl_to_children_[t2.postl_to_parent_[j-1]][t]+1 == j) {
-                  postid_previous_sibling = t2.postl_to_children_[t2.postl_to_parent_[j-1]][t-1]+1;
-                }
-              }
               e_.at(p_i, j) = std::min(
-                 e_.at(p_i, postid_previous_sibling) + ins_t2_subtree_.at(j), std::min(
+                 e_.at(p_i, t2.postl_to_left_sibling_[j-1] + 1) + ins_t2_subtree_.at(j), std::min(
                 e0_.at(p_i, j) + del_t1_subtree_.at(i),
-                e0_.at(p_i, postid_previous_sibling) + dt_.at(t1.postl_to_height_[i-1], j))
+                e0_.at(p_i, t2.postl_to_left_sibling_[j-1] + 1) + dt_.at(t1.postl_to_height_[i-1], j))
               );
             }
           }
         }
         // Case 3: t[i] is the left sibling of the favorable child.
-        if (t1.postl_to_left_child_[t1.postl_to_parent_[i-1]] == i-1) {
+        if (t1.postl_to_left_fav_child_[t1.postl_to_parent_[i-1]] == i-1) {
           if (j != t2_input_size) {
             fav_child_postid = t1.postl_to_fav_child_[t1.postl_to_parent_[i-1]]+1;
 
@@ -455,7 +448,7 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted2(const TreeIndex& t1,
     }
     // Reset e0, e, and epf execpt the root node of T1.
     if (i != t1_input_size) {
-      if (t1.postl_to_left_child_[t1.postl_to_parent_[i-1]] == i-1) {
+      if (t1.postl_to_left_fav_child_[t1.postl_to_parent_[i-1]] == i-1) {
         // If t[i] is the left sibling of the favorable child (case 3) store epf_ in e0.
         for (int p = 0; p <= t2_input_size; p++) {
           e0_.at(p_i, p) = epf_.at(p_i, p);

@@ -334,7 +334,7 @@ class InvertedListLabelIdToPostL {
  */
 class PostLToFavChild {
   public: std::vector<int> postl_to_fav_child_;
-  public: std::vector<int> postl_to_left_child_;
+  public: std::vector<int> postl_to_left_fav_child_;
 };
 
 /// Stores the height of each node in a tree.
@@ -359,6 +359,14 @@ class PostLToOrderedChildSize {
  */
 class PostLToFavorableChildOrder {
   public: std::vector<int> postl_to_favorder_;
+};
+
+/// Stores postorder to left sibling.
+/**
+ * Indexed in left-to-right postorder.
+ */
+class PostLToLeftSibling {
+  public: std::vector<int> postl_to_left_sibling_;
 };
 
 /// Tree index for Zhangh and Shasha algorithm.
@@ -521,7 +529,8 @@ class TreeIndexAll :
   public PostLToFavChild,
   public PostLToHeight,
   public PostLToOrderedChildSize,
-  public PostLToFavorableChildOrder
+  public PostLToFavorableChildOrder,
+  public PostLToLeftSibling
 {};
 
 /// Main method to index a tree.

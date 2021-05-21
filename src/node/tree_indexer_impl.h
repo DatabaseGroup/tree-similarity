@@ -145,7 +145,7 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
     ti.postl_to_fav_child_.resize(tree_size);
   }
   if constexpr (std::is_base_of<PostLToFavChild, TreeIndex>::value) {
-    ti.postl_to_left_child_.resize(tree_size);
+    ti.postl_to_left_fav_child_.resize(tree_size);
   }
   if constexpr (std::is_base_of<PostLToHeight, TreeIndex>::value) {
     ti.postl_to_height_.resize(tree_size);
@@ -155,6 +155,9 @@ void index_tree(TreeIndex& ti, const node::Node<Label>& n,
   }
   if constexpr (std::is_base_of<PostLToFavorableChildOrder, TreeIndex>::value) {
     ti.postl_to_favorder_.resize(tree_size);
+  }
+  if constexpr (std::is_base_of<PostLToLeftSibling, TreeIndex>::value) {
+    ti.postl_to_left_sibling_.resize(tree_size);
   }
 
   // Orders start with '0'. Are modified by the recursive traversal.
@@ -261,7 +264,7 @@ int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   // Postorder number of the favorable child.
   int favorable_child = -1;
   // Postorder number of the left sibling of the favorable child.
-  int left_child = -1;
+  int left_fav_child = -1;
   // Postorder number of the previous child.
   int previous_child_po = -1;
   // Count number of children.
@@ -297,7 +300,7 @@ int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
     if constexpr (std::is_base_of<PostLToFavChild, TreeIndex>::value) {
       if (subtree_size_child > largest_subtree_size_child) {
         largest_subtree_size_child = subtree_size_child;
-        left_child = previous_child_po;
+        left_fav_child = previous_child_po;
         favorable_child = start_postorder-1;
       }
     }
@@ -309,6 +312,11 @@ int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
       }
     }
 
+    // PostLToLeftSibling index
+    if constexpr (std::is_base_of<PostLToLeftSibling, TreeIndex>::value) {
+      ti.postl_to_left_sibling_[start_postorder-1] = previous_child_po;
+    }
+    
     if constexpr (std::is_base_of<PostLToHeight, TreeIndex>::value) {
       children_sorted_subtree_size.push_back(subtree_size_child);
     }
@@ -344,7 +352,7 @@ int index_tree_recursion(TreeIndex& ti, const node::Node<Label>& n,
   // PostLToFavChild index
   if constexpr (std::is_base_of<PostLToFavChild, TreeIndex>::value) {
     ti.postl_to_fav_child_[start_postorder] = favorable_child;
-    ti.postl_to_left_child_[start_postorder] = left_child;
+    ti.postl_to_left_fav_child_[start_postorder] = left_fav_child;
   }
 
   // PostLToOrderedChildSize
