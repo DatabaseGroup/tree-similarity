@@ -74,6 +74,10 @@ private:
   data_structures::Matrix<double> df_;
   /// Matrix storing string edit distance costs.
   data_structures::Matrix<double> e_;
+  /// Row minima of edit distance matrix e.
+  std::vector<double> e_row_minima_;
+  /// Column minima of edit distance matrix e.
+  std::vector<double> e_col_minima_;
 
 // Member functions.
 private:

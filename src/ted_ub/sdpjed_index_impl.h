@@ -52,6 +52,8 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
   e_ = data_structures::Matrix<double>(t1_input_size+1, t2_input_size+1);
   std::vector<std::vector<double> > hungarian_cm
       (2*larger_tree_size, std::vector<double> (2*larger_tree_size, 0));
+  e_row_minima_.resize(2*larger_tree_size);
+  e_col_minima_.resize(2*larger_tree_size);
   
   // Fill the matrices with inf.
   dt_.fill_with(std::numeric_limits<double>::infinity());
@@ -90,6 +92,7 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
   double ed_ren = -1;
   double for_int_del_ub;
   double ed_lb;
+  unsigned long matrix_size;
 
   for (int i = 1; i <= t1_input_size; ++i) {
     for (int j = 1; j <= t2_input_size; ++j) {
@@ -125,9 +128,10 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
       // The minimum between insertion and deletion costs is an upper bound.
       for_int_del_ub = std::min(min_for_del, min_for_ins);
 
-      // Cost for minimal mapping between trees in forest.
-      min_for_ren = std::numeric_limits<double>::infinity();
-      min_tree_ren = std::numeric_limits<double>::infinity();
+      // Cost for minimal mapping between trees in forest. Worst case is the 
+      // upper bound given by insertion and deletion.
+      min_for_ren = for_int_del_ub;
+      min_tree_ren = for_int_del_ub;
       // Compute rename cost only in case that i and j have the same type.
       if (t1.postl_to_type_[i - 1] == t2.postl_to_type_[j - 1]) {
         // In case of two keys, take the costs of mapping their child to one another.
@@ -196,21 +200,18 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
             else {
               // Build a cost matrix such that each subtree can be mapped to another 
               // subtree or to an empty tree.
-              unsigned long matrix_size = t1.postl_to_children_[i-1].size() + t2.postl_to_children_[j-1].size();
+              matrix_size = t1.postl_to_children_[i-1].size() + t2.postl_to_children_[j-1].size();
+
+              for (unsigned long x = 0; x < matrix_size; x++) {
+                e_row_minima_[x] = std::numeric_limits<double>::infinity();
+                e_col_minima_[x] = std::numeric_limits<double>::infinity();
+              }
 
               // Sum up the row and column minima of the cost matrix of the Hungarian 
               // Algorithm. Each provide a lower bound on the result of the bipartite 
               // matching.
-              std::vector<double> row_minima;
-              std::vector<double> col_minima;
-              for (int x = 0; x < matrix_size; x++) {
-                row_minima.push_back(std::numeric_limits<double>::infinity());
-                col_minima.push_back(std::numeric_limits<double>::infinity());
-              }
-
-              // TODO: but we already went over each pair of children
-              for (unsigned int s = 1; s <= matrix_size; ++s) {
-                for (unsigned int t = 1; t <= matrix_size; ++t) {
+              for (unsigned long s = 1; s <= matrix_size; ++s) {
+                for (unsigned long t = 1; t <= matrix_size; ++t) {
                   if (s <= t1.postl_to_children_[i-1].size()) {
                     if (t <= t2.postl_to_children_[j-1].size()) {
                       hungarian_cm[s-1][t-1] = dt_.at(
@@ -228,8 +229,8 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
                       hungarian_cm[s-1][t-1] = 0;
                     }
                   }
-                  row_minima[s-1] = std::min(row_minima[s-1], hungarian_cm[s-1][t-1]);
-                  col_minima[t-1] = std::min(col_minima[t-1], hungarian_cm[s-1][t-1]);
+                  e_row_minima_[s-1] = std::min(e_row_minima_[s-1], hungarian_cm[s-1][t-1]);
+                  e_col_minima_[t-1] = std::min(e_col_minima_[t-1], hungarian_cm[s-1][t-1]);
                 }
               }
 
@@ -237,21 +238,20 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
               // Hungarian Algorithm.
               row_lb = 0;
               col_lb = 0;
-              for (int x = 0; x < matrix_size; x++) {
-                row_lb += row_minima[x];
-                col_lb += col_minima[x];
+              for (unsigned long x = 0; x < matrix_size; x++) {
+                row_lb += e_row_minima_[x];
+                col_lb += e_col_minima_[x];
               }
 
-              if (std::max(row_lb, col_lb) > for_int_del_ub) {
-                // The lower bound exceeds the upper bound, hence deletion or insertion 
-                // is cheaper.
-                nr_of_skips_++;
-                min_for_ren = std::numeric_limits<double>::infinity();
-              } else {
+              if (for_int_del_ub > std::max(row_lb, col_lb)) {
                 // Filter did not apply, compute Hungarian Algorithm for minimal forest 
                 // mapping.
                 nr_of_matchings_++;
                 min_for_ren = execute_hungarian(hungarian_cm, matrix_size);
+              } else {
+                // The lower bound exceeds the upper bound, hence deletion or insertion 
+                // is cheaper.
+                nr_of_skips_++;
               }
             }
           } else {
