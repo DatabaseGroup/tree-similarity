@@ -451,6 +451,9 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted2(const TreeIndex& t1,
       for (int p = 0; p <= t2_input_size; p++) {
         e_.at(p_i, p) = std::numeric_limits<double>::infinity();
       }
+      for (int u = 1; u < t2_input_size + 1; u++) {
+        dt_.at(t1.postl_to_height_[i-1], u) = std::numeric_limits<double>::infinity();
+      }
     }
   }
 
