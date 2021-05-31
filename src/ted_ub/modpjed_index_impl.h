@@ -260,7 +260,6 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted2(const TreeIndex& t1,
     return t1_input_size;
   }
   int t1_height = t1.postl_to_height_[t1_input_size-1];
-  // std::cout << "t1_input_size: " << t1_input_size << ", t2_input_size: " << t2_input_size << ", t1_height: " << t1_height << ", threshold: " << threshold << std::endl;
 
   // Create cost matrices.
   del_t1_subtree_.resize(t1_input_size+1);
