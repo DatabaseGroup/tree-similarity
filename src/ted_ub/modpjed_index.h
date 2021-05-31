@@ -64,6 +64,8 @@ private:
   std::vector<double> ins_t2_subtree_;
   // Costs to insert F2[j].
   std::vector<double> ins_f2_subtree_;
+  // Holds deletion line for the edit distance computation.
+  std::vector<double> e_init_;
   // Tree distance matrix, initialized to infinity.
   data_structures::Matrix<double> dt_;
   // Forest distance matrix, initialized to infinity.
@@ -72,9 +74,6 @@ private:
   data_structures::Matrix<double> e0_;
   // Holds line c(s)(t) for the edit distance computation.
   data_structures::Matrix<double> e_;
-  // Holds line c(s+1)(t) for the edit distance computation 
-  // in case of adding the favorable child.
-  data_structures::Matrix<double> epf_;
   // Iteratively compute forest deletion.
   data_structures::Matrix<double> del_forest_;
   // Holds line c(s)(t) for the edit distance computation.

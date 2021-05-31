@@ -267,11 +267,11 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted2(const TreeIndex& t1,
   del_f1_subtree_.resize(t1_input_size+1);
   ins_t2_subtree_.resize(t2_input_size+1);
   ins_f2_subtree_.resize(t2_input_size+1);
+  e_init_.resize(t2_input_size+1);
   dt_ = data_structures::Matrix<double>(t1_height+1, t2_input_size+1);
   df_ = data_structures::Matrix<double>(t1_height+1, t2_input_size+1);
   e0_ = data_structures::Matrix<double>(t1_height+1, t2_input_size+1);
   e_ = data_structures::Matrix<double>(t1_height+1, t2_input_size+1);
-  epf_ = data_structures::Matrix<double>(t1_height+1, t2_input_size+1);
   del_forest_ = data_structures::Matrix<double>(t1_height+1, t2_input_size+1);
   del_tree_ = data_structures::Matrix<double>(t1_height+1, t2_input_size+1);
   fav_child_dt_ = data_structures::Matrix<double>(t1_height+1, t2_input_size+1);
@@ -281,7 +281,6 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted2(const TreeIndex& t1,
   df_.fill_with(std::numeric_limits<double>::infinity());
   e0_.fill_with(std::numeric_limits<double>::infinity());
   e_.fill_with(std::numeric_limits<double>::infinity());
-  epf_.fill_with(std::numeric_limits<double>::infinity());
   del_forest_.fill_with(std::numeric_limits<double>::infinity());
   del_tree_.fill_with(std::numeric_limits<double>::infinity());
   fav_child_dt_.fill_with(std::numeric_limits<double>::infinity());
@@ -297,22 +296,30 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted2(const TreeIndex& t1,
     del_t1_subtree_.at(i) = del_f1_subtree_.at(i) + c_.del(t1.postl_to_label_id_[i - 1]);
   }
 
-  ins_t2_subtree_[0] = 0;
-  ins_f2_subtree_[0] = 0;
+  ins_t2_subtree_.at(0) = 0;
+  ins_f2_subtree_.at(0) = 0;
+  e_init_.at(0) = 0;
   for (int j = 1; j <= t2_input_size; ++j) {
     ins_f2_subtree_.at(j) = 0;
     for (unsigned int k = 1; k <= t2.postl_to_children_[j-1].size(); ++k) {
       ins_f2_subtree_.at(j) += ins_t2_subtree_.at(t2.postl_to_children_[j-1][k-1] + 1);
+      if (k == 1) {
+        e_init_.at(t2.postl_to_children_[j-1][k-1] + 1) = e_init_.at(0) + ins_t2_subtree_.at(t2.postl_to_children_[j-1][k-1] + 1);
+      } else {
+        e_init_.at(t2.postl_to_children_[j-1][k-1] + 1) = e_init_.at(t2.postl_to_children_[j-1][k-2] + 1) + ins_t2_subtree_.at(t2.postl_to_children_[j-1][k-1] + 1);
+      }
     }
     ins_t2_subtree_.at(j) = ins_f2_subtree_.at(j) + c_.ins(t2.postl_to_label_id_[j - 1]);
   }
+  e_init_.at(t2_input_size) = t2_input_size;
+
+  // Store minimum costs for each operation.
   double min_for_ins = std::numeric_limits<double>::infinity();
   double min_tree_ins = std::numeric_limits<double>::infinity();
   double min_for_del = std::numeric_limits<double>::infinity();
   double min_tree_del = std::numeric_limits<double>::infinity();
   double min_for_ren = std::numeric_limits<double>::infinity();
   double min_tree_ren = std::numeric_limits<double>::infinity();
-  
   int i; // Postorder number of currently processed node.
   int p_i; // Line in the matrix for parent of node i.
   int j_start; // Start of threshold range for node j.
@@ -322,6 +329,8 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted2(const TreeIndex& t1,
     // Get postorder number from favorable child order number.
     i = t1.postl_to_favorder_[x-1] + 1;
     p_i = t1.postl_to_height_[t1.postl_to_parent_[i-1]];
+    
+    // Iterate for all j in the threshold range of i.
     j_start = i - threshold;
     if (j_start < 1) j_start = 1;
     j_end = i + threshold;
@@ -341,9 +350,9 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted2(const TreeIndex& t1,
       min_for_ins = std::numeric_limits<double>::infinity();
       min_tree_ins = std::numeric_limits<double>::infinity();
       for (unsigned int t = 0; t < t2.postl_to_children_[j-1].size(); ++t) {
-        if (std::abs(i-t2.postl_to_children_[j-1][t]+1) > threshold) {
-          continue;
-        }
+        // if (std::abs(i-t2.postl_to_children_[j-1][t]+1) > threshold) {
+        //   continue;
+        // }
         min_for_ins = std::min(min_for_ins,
             (df_.at(t1.postl_to_height_[i-1], t2.postl_to_children_[j-1][t] + 1) - 
              ins_f2_subtree_.at(t2.postl_to_children_[j-1][t] + 1)));
@@ -368,7 +377,7 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted2(const TreeIndex& t1,
       df_.at(t1.postl_to_height_[i-1], j) = min_for_del >= min_for_ins ? min_for_ins >= min_for_ren ? min_for_ren : min_for_ins : min_for_del >= min_for_ren ? min_for_ren : min_for_del;
       // Compute tree rename based on forest cost matrix.
       min_tree_ren = df_.at(t1.postl_to_height_[i-1], j) + c_.ren(t1.postl_to_label_id_[i-1], t2.postl_to_label_id_[j-1]);
-
+      
       // Fill tree distance matrix.
       dt_.at(t1.postl_to_height_[i-1], j) = min_tree_del >= min_tree_ins ? min_tree_ins >= min_tree_ren ? min_tree_ren : min_tree_ins : min_tree_del >= min_tree_ren ? min_tree_ren : min_tree_del;
 
@@ -381,91 +390,67 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted2(const TreeIndex& t1,
           // Keep track of the deletion costs for parent.
           del_forest_.at(p_i, j-1) = del_f1_subtree_.at(t1.postl_to_parent_[i-1]+1) + df_.at(t1.postl_to_height_[i-1], j) - del_f1_subtree_.at(i);
           del_tree_.at  (p_i, j-1) = del_t1_subtree_.at(t1.postl_to_parent_[i-1]+1) + dt_.at(t1.postl_to_height_[i-1], j) - del_t1_subtree_.at(i);
-          // Do not store the edit matrix for the parent of the root node.
-          if (j != t2_input_size) {
-            // Start first line of the edit distance matrix. Column 0 is shared among all nodes.
-            e0_.at(p_i, 0) = 0;
-            for (unsigned int t = 0; t < t2.postl_to_children_[t2.postl_to_parent_[j-1]].size(); ++t) {
-              if (t == 0) {
-                e0_.at(p_i, t2.postl_to_children_[t2.postl_to_parent_[j-1]][t]+1) = e0_.at(p_i, 0) + ins_t2_subtree_.at(t2.postl_to_children_[t2.postl_to_parent_[j-1]][t]+1);
-              } else {
-                e0_.at(p_i, t2.postl_to_children_[t2.postl_to_parent_[j-1]][t]+1) = e0_.at(p_i, t2.postl_to_children_[t2.postl_to_parent_[j-1]][t-1]+1) + ins_t2_subtree_.at(t2.postl_to_children_[t2.postl_to_parent_[j-1]][t]+1);
-              }
-            }
-          }
-        }
-        // Case 2: i is either leftmost child (and favorable) OR not favorable child.
-        if ((t1.postl_to_children_[t1.postl_to_parent_[i-1]].size() > 0 && 
-            t1.postl_to_children_[t1.postl_to_parent_[i-1]][0] == i-1) ||
-            t1.postl_to_fav_child_[t1.postl_to_parent_[i-1]] != i-1) {
+        } else {
           // Keep track of the deletion costs for parent.
           del_forest_.at(p_i, j-1) = std::min(del_forest_.at(p_i, j-1), del_f1_subtree_.at(t1.postl_to_parent_[i-1]+1) + df_.at(t1.postl_to_height_[i-1], j) - del_f1_subtree_.at(i));
-          del_tree_.at(p_i, j-1) = std::min(del_tree_.at(p_i, j-1), del_t1_subtree_.at(t1.postl_to_parent_[i-1]+1) + dt_.at(t1.postl_to_height_[i-1], j) - del_t1_subtree_.at(i));
-          // Do not store the edit matrix for the parent of the root node.
-          if (j != t2_input_size) {
+          del_tree_.at  (p_i, j-1) = std::min(del_tree_.at(p_i, j-1),   del_t1_subtree_.at(t1.postl_to_parent_[i-1]+1) + dt_.at(t1.postl_to_height_[i-1], j) - del_t1_subtree_.at(i));
+        }
+
+        // Do not store the edit matrix for the parent of the root node.
+        if (j != t2_input_size) {
+          // Case 2.1: i is the leftmost child, hence take init line.
+          if (t1.postl_to_children_[t1.postl_to_parent_[i-1]].size() > 0 && 
+            t1.postl_to_children_[t1.postl_to_parent_[i-1]][0] == i-1) {
+            // Fill next line.
+            e_.at(p_i, 0) = e_init_.at(0) + del_t1_subtree_.at(i);
+            // If the current node j in tree t2 is (the root node or) the first child start from empty column (0).
+            e_.at(p_i, j) = std::min(
+              e_.at(p_i, t2.postl_to_left_sibling_[j-1]+1) + ins_t2_subtree_.at(j), std::min(
+              e_init_.at(j)                                + del_t1_subtree_.at(i),
+              e_init_.at(t2.postl_to_left_sibling_[j-1]+1) + dt_.at(t1.postl_to_height_[i-1], j))
+            );
+          // Case 2.2: i is not the leftmost child, hence take previous line.
+          } else if (t1.postl_to_fav_child_[t1.postl_to_parent_[i-1]] != i-1) {
             // Fill next line.
             e_.at(p_i, 0) = e0_.at(p_i, 0) + del_t1_subtree_.at(i);
             // If the current node j in tree t2 is (the root node or) the first child start from empty column (0).
-            if (t2.postl_to_left_sibling_[j-1] == -1) {
-              e_.at(p_i, j) = std::min(
-                 e_.at(p_i, 0) + ins_t2_subtree_.at(j), std::min(
-                e0_.at(p_i, j) + del_t1_subtree_.at(i),
-                e0_.at(p_i, 0) + dt_.at(t1.postl_to_height_[i-1], j))
-              );
-            } else {
-              e_.at(p_i, j) = std::min(
-                 e_.at(p_i, t2.postl_to_left_sibling_[j-1]+1) + ins_t2_subtree_.at(j), std::min(
-                e0_.at(p_i, j) + del_t1_subtree_.at(i),
-                e0_.at(p_i, t2.postl_to_left_sibling_[j-1]+1) + dt_.at(t1.postl_to_height_[i-1], j))
-              );
-            }
-          }
-        }
-        // Case 3: t[i] is the left sibling of the favorable child.
-        if (t1.postl_to_left_fav_child_[t1.postl_to_parent_[i-1]] == i-1) {
-          if (j != t2_input_size) {
-            fav_child_postid = t1.postl_to_fav_child_[t1.postl_to_parent_[i-1]]+1;
-
-            epf_.at(p_i, 0) = e_.at(p_i, 0) + del_t1_subtree_.at(fav_child_postid);
-            for (unsigned int t = 0; t < t2.postl_to_children_[t2.postl_to_parent_[j-1]].size(); ++t) {
-              if (t == 0) {
-                epf_.at(p_i, t2.postl_to_children_[t2.postl_to_parent_[j-1]][t]+1) = std::min(
-                  epf_.at(p_i, 0)                             + ins_t2_subtree_.at(t2.postl_to_children_[t2.postl_to_parent_[j-1]][t]+1), std::min(
-                  e_.at(p_i, t2.postl_to_children_[t2.postl_to_parent_[j-1]][t]+1) + del_t1_subtree_.at(fav_child_postid),
-                  e_.at(p_i, 0)                               + fav_child_dt_.at(p_i, t2.postl_to_children_[t2.postl_to_parent_[j-1]][t]+1))
-                );
-              } else {
-                epf_.at(p_i, t2.postl_to_children_[t2.postl_to_parent_[j-1]][t]+1) = std::min(
-                  epf_.at(p_i, t2.postl_to_children_[t2.postl_to_parent_[j-1]][t-1]+1) + ins_t2_subtree_.at(t2.postl_to_children_[t2.postl_to_parent_[j-1]][t]+1), std::min(
-                  e_.at(p_i, t2.postl_to_children_[t2.postl_to_parent_[j-1]][t]+1)     + del_t1_subtree_.at(fav_child_postid),
-                  e_.at(p_i, t2.postl_to_children_[t2.postl_to_parent_[j-1]][t-1]+1)   + fav_child_dt_.at(p_i, t2.postl_to_children_[t2.postl_to_parent_[j-1]][t]+1))
-                );
-              }
-            }
+            e_.at(p_i, j) = std::min(
+               e_.at(p_i, t2.postl_to_left_sibling_[j-1]+1) + ins_t2_subtree_.at(j), std::min(
+              e0_.at(p_i, j)                                + del_t1_subtree_.at(i),
+              e0_.at(p_i, t2.postl_to_left_sibling_[j-1]+1) + dt_.at(t1.postl_to_height_[i-1], j))
+            );
           }
         }
       }
     }
-    // Reset e0, e, and epf execpt the root node of T1.
+    // Case 3: t[i] is the left sibling of the favorable child.
     if (i != t1_input_size) {
       if (t1.postl_to_left_fav_child_[t1.postl_to_parent_[i-1]] == i-1) {
-        // If t[i] is the left sibling of the favorable child (case 3) store epf_ in e0.
+        fav_child_postid = t1.postl_to_fav_child_[t1.postl_to_parent_[i-1]]+1;
+        
         for (int p = 0; p <= t2_input_size; p++) {
-          e0_.at(p_i, p) = epf_.at(p_i, p);
-          e_.at(p_i, p) = std::numeric_limits<double>::infinity();
-          epf_.at(p_i, p) = std::numeric_limits<double>::infinity();
+          e0_.at(p_i, p) = std::numeric_limits<double>::infinity();
+        }
+        e0_.at(p_i, 0) = e_.at(p_i, 0) + del_t1_subtree_.at(fav_child_postid);
+
+        j_start = fav_child_postid - threshold;
+        if (j_start < 1) j_start = 1;
+        j_end = fav_child_postid + threshold;
+        if (j_end > t2_input_size) j_end = t2_input_size;
+        for (int j = j_start; j <= j_end; ++j) {
+          e0_.at(p_i, j) = std::min(
+            e0_.at(p_i, t2.postl_to_left_sibling_[j-1]+1) + ins_t2_subtree_.at(j), std::min(
+            e_.at(p_i, j)                                 + del_t1_subtree_.at(fav_child_postid),
+            e_.at(p_i, t2.postl_to_left_sibling_[j-1]+1)  + fav_child_dt_.at(p_i, j))
+          );
         }
       } else {
-        // In case 2 store e_ in e0.
-        if ((t1.postl_to_children_[t1.postl_to_parent_[i-1]].size() > 0 && 
-            t1.postl_to_children_[t1.postl_to_parent_[i-1]][0] == i-1) ||
-            t1.postl_to_fav_child_[t1.postl_to_parent_[i-1]] != i-1) {
-          for (int p = 0; p <= t2_input_size; p++) {
-            e0_.at(p_i, p) = e_.at(p_i, p);
-            e_.at(p_i, p) = std::numeric_limits<double>::infinity();
-            epf_.at(p_i, p) = std::numeric_limits<double>::infinity();
-          }
+        for (int p = 0; p <= t2_input_size; p++) {
+          e0_.at(p_i, p) = e_.at(p_i, p);
         }
+      }
+      for (int p = 0; p <= t2_input_size; p++) {
+        e_.at(p_i, p) = std::numeric_limits<double>::infinity();
       }
     }
   }
