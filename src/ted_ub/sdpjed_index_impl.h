@@ -129,18 +129,15 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
       min_for_ren = std::numeric_limits<double>::infinity();
       min_tree_ren = std::numeric_limits<double>::infinity();
       // Compute rename cost only in case that i and j have the same type.
-      if (t1.postl_to_type_[i - 1] == t2.postl_to_type_[j - 1])
-      {
+      if (t1.postl_to_type_[i - 1] == t2.postl_to_type_[j - 1]) {
         // In case of two keys, take the costs of mapping their child to one another.
-        if ((t1.postl_to_type_[i - 1] == 2 && t2.postl_to_type_[j - 1] == 2))
-        {
+        if ((t1.postl_to_type_[i - 1] == 2 && t2.postl_to_type_[j - 1] == 2)) {
           // Keys have exactly one child, therefore, [0] always works.
           min_for_ren = dt_.at(t1.postl_to_children_[i-1][0] + 1, 
               t2.postl_to_children_[j-1][0] + 1);
         }
         // Values are leaves, mapping there subforests has cost 0.
-        else if ((t1.postl_to_type_[i - 1] == 3 && t2.postl_to_type_[j - 1] == 3))
-        {
+        else if ((t1.postl_to_type_[i - 1] == 3 && t2.postl_to_type_[j - 1] == 3)) {
           // Keys have exactly one child, therefore, [0] always works.
           min_for_ren = 0;
         } else {
@@ -159,11 +156,11 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
 
           if (for_int_del_ub > ed_lb) {
             // If we compare two array nodes, we need to consider the order amoung 
-            // the children subtrees. Therefore, the string edit distance is used 
+            // the children subtrees. Therefore, the edit distance is used 
             // instead of the Hungarian Algorithm.
             if (t1.postl_to_type_[i - 1] == 1 && t2.postl_to_type_[j - 1] == 1) {
               nr_of_edits_++;
-              // Compute string edit distance for array children.
+              // Compute edit distance for array children.
               e_.at(0, 0) = 0;
               for (unsigned int s = 1; s <= t1.postl_to_children_[i-1].size(); ++s) {
                 e_.at(s, 0) = e_.at(s-1, 0) + dt_.at(t1.postl_to_children_[i-1][s-1] + 1, 0);
@@ -212,32 +209,22 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
               }
 
               // TODO: but we already went over each pair of children
-              for (unsigned int s = 1; s <= matrix_size; ++s)
-              {
-                for (unsigned int t = 1; t <= matrix_size; ++t)
-                {
-                  if (s <= t1.postl_to_children_[i-1].size())
-                  {
-                    if (t <= t2.postl_to_children_[j-1].size())
-                    {
+              for (unsigned int s = 1; s <= matrix_size; ++s) {
+                for (unsigned int t = 1; t <= matrix_size; ++t) {
+                  if (s <= t1.postl_to_children_[i-1].size()) {
+                    if (t <= t2.postl_to_children_[j-1].size()) {
                       hungarian_cm[s-1][t-1] = dt_.at(
                           t1.postl_to_children_[i-1][s-1] + 1, 
                           t2.postl_to_children_[j-1][t-1] + 1);
-                    }
-                    else
-                    {
+                    } else {
                       hungarian_cm[s-1][t-1] = 
                           t1.postl_to_size_[t1.postl_to_children_[i-1][s-1]];
                     }
-                  } else
-                  {
-                    if (t <= t2.postl_to_children_[j-1].size())
-                    {
+                  } else {
+                    if (t <= t2.postl_to_children_[j-1].size()) {
                       hungarian_cm[s-1][t-1] = 
                           t2.postl_to_size_[t2.postl_to_children_[j-1][t-1]];
-                    }
-                    else
-                    {
+                    } else {
                       hungarian_cm[s-1][t-1] = 0;
                     }
                   }
@@ -255,7 +242,7 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
                 col_lb += col_minima[x];
               }
 
-              if (std::max(row_lb, col_lb) >= for_int_del_ub) {
+              if (std::max(row_lb, col_lb) > for_int_del_ub) {
                 // The lower bound exceeds the upper bound, hence deletion or insertion 
                 // is cheaper.
                 nr_of_skips_++;
@@ -287,33 +274,8 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
       dt_.at(i, j) = min_tree_del >= min_tree_ins ? 
           min_tree_ins >= min_tree_ren ? min_tree_ren : min_tree_ins : 
           min_tree_del >= min_tree_ren ? min_tree_ren : min_tree_del;
-      
-      // std::cout << "i: " << i << ", j: " << j << ", df_.at(i, j): " << df_.at(i, j) << ", dt_.at(i, j): " << dt_.at(i, j) << std::endl;
-      // std::cout << "min_for_ins: " << min_for_ins << ", min_for_del: " << min_for_del << ", min_for_ren: " << min_for_ren << std::endl;
-      // std::cout << "min_tree_ins: " << min_tree_ins << ", min_tree_del: " << min_tree_del << ", min_tree_ren: " << min_tree_ren << std::endl;
     }
   }
-
-  // std::cout << std::endl;
-  // std::cout << "--- DF" << std::endl;
-  // for(int x = 0; x < t1_input_size+1; x++)
-  // {
-  //   for(int y = 0; y < t2_input_size+1; y++)
-  //   {
-  //       std::cout << df_.at(x,y) << "\t";
-  //   }
-  //   std::cout << std::endl;
-  // }
-  // std::cout << std::endl;
-  // std::cout << "--- DT" << std::endl;
-  // for(int x = 0; x < t1_input_size+1; x++)
-  // {
-  //   for(int y = 0; y < t2_input_size+1; y++)
-  //   {
-  //       std::cout << dt_.at(x,y) << "\t";
-  //   }
-  //   std::cout << std::endl;
-  // }
 
   return dt_.at(t1_input_size, t2_input_size);
 }

@@ -168,32 +168,22 @@ double DPJEDTreeIndex<CostModel, TreeIndex>::ted(
               t2.postl_to_children_[j-1].size();
 
           // TODO: but we already went over each pair of children
-          for (unsigned int s = 1; s <= matrix_size; ++s)
-          {
-            for (unsigned int t = 1; t <= matrix_size; ++t)
-            {
-              if (s <= t1.postl_to_children_[i-1].size())
-              {
-                if (t <= t2.postl_to_children_[j-1].size())
-                {
+          for (unsigned int s = 1; s <= matrix_size; ++s) {
+            for (unsigned int t = 1; t <= matrix_size; ++t) {
+              if (s <= t1.postl_to_children_[i-1].size()) {
+                if (t <= t2.postl_to_children_[j-1].size()) {
                   hungarian_cm[s-1][t-1] = dt_.at(
                       t1.postl_to_children_[i-1][s-1] + 1, 
                       t2.postl_to_children_[j-1][t-1] + 1);
-                }
-                else
-                {
+                } else {
                   hungarian_cm[s-1][t-1] = 
                       t1.postl_to_size_[t1.postl_to_children_[i-1][s-1]];
                 }
-              } else
-              {
-                if (t <= t2.postl_to_children_[j-1].size())
-                {
+              } else {
+                if (t <= t2.postl_to_children_[j-1].size()) {
                   hungarian_cm[s-1][t-1] = 
                       t2.postl_to_size_[t2.postl_to_children_[j-1][t-1]];
-                }
-                else
-                {
+                } else {
                   hungarian_cm[s-1][t-1] = 0;
                 }
               }
@@ -203,42 +193,21 @@ double DPJEDTreeIndex<CostModel, TreeIndex>::ted(
           // Compute Hungarian Algorithm for minimal tree mapping.
           min_for_ren = execute_hungarian(hungarian_cm, matrix_size);
         }
-
-        // Compute minimal forest mapping costs.
-        df_.at(i, j) = min_for_del >= min_for_ins ? 
-            min_for_ins >= min_for_ren ? min_for_ren : min_for_ins : 
-            min_for_del >= min_for_ren ? min_for_ren : min_for_del;
-        // Compute rename costs for trees i and j.
-        min_tree_ren = df_.at(i, j) + c_.ren(t1.postl_to_label_id_[i - 1], 
-            t2.postl_to_label_id_[j - 1]);
-        // Compute minimal tree mapping costs.
-        dt_.at(i, j) = min_tree_del >= min_tree_ins ? 
-            min_tree_ins >= min_tree_ren ? min_tree_ren : min_tree_ins : 
-            min_tree_del >= min_tree_ren ? min_tree_ren : min_tree_del;
       }
+
+      // Compute minimal forest mapping costs.
+      df_.at(i, j) = min_for_del >= min_for_ins ?
+          min_for_ins >= min_for_ren ? min_for_ren : min_for_ins : 
+          min_for_del >= min_for_ren ? min_for_ren : min_for_del;
+      // Compute rename costs for trees i and j.
+      min_tree_ren = df_.at(i, j) + c_.ren(t1.postl_to_label_id_[i - 1],
+          t2.postl_to_label_id_[j - 1]);
+      // Compute minimal tree mapping costs.
+      dt_.at(i, j) = min_tree_del >= min_tree_ins ?
+          min_tree_ins >= min_tree_ren ? min_tree_ren : min_tree_ins :
+          min_tree_del >= min_tree_ren ? min_tree_ren : min_tree_del;
     }
   }
-
-  // std::cout << std::endl;
-  // std::cout << "--- DF" << std::endl;
-  // for(int x = 0; x < t1_input_size+1; x++)
-  // {
-  //   for(int y = 0; y < t2_input_size+1; y++)
-  //   {
-  //       std::cout << df_.at(x,y) << "\t";
-  //   }
-  //   std::cout << std::endl;
-  // }
-  // std::cout << std::endl;
-  // std::cout << "--- DT" << std::endl;
-  // for(int x = 0; x < t1_input_size+1; x++)
-  // {
-  //   for(int y = 0; y < t2_input_size+1; y++)
-  //   {
-  //       std::cout << dt_.at(x,y) << "\t";
-  //   }
-  //   std::cout << std::endl;
-  // }
 
   return dt_.at(t1_input_size, t2_input_size);
 }
