@@ -173,9 +173,6 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
                 e_.at(0, t) = e_.at(0, t-1) + dt_.at(0, t2.postl_to_children_[j-1][t-1] + 1);
               }
               
-              ed_ins = -1;
-              ed_del = -1;
-              ed_ren = -1;
               for (unsigned int s = 1; s <= t1.postl_to_children_[i-1].size(); ++s) {
                 // Use an upper bound to compute only the band of the matrix.
                 unsigned int sed_s = s > for_int_del_ub ? s - for_int_del_ub : 1;
