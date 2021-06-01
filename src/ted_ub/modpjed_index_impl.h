@@ -260,6 +260,7 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted2(const TreeIndex& t1,
     return t1_input_size;
   }
   int t1_height = t1.postl_to_height_[t1_input_size-1];
+  // std::cout << "t1_input_size: " << t1_input_size << ", t2_input_size: " << t2_input_size << ", t1_height: " << t1_height << ", threshold: " << threshold << std::endl;
 
   // Create cost matrices.
   del_t1_subtree_.resize(t1_input_size+1);
@@ -328,7 +329,8 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted2(const TreeIndex& t1,
     // Get postorder number from favorable child order number.
     i = t1.postl_to_favorder_[x-1] + 1;
     p_i = t1.postl_to_height_[t1.postl_to_parent_[i-1]];
-    
+    // std::cout << "i: " << i << std::endl;
+
     // Iterate for all j in the threshold range of i.
     j_start = i - threshold;
     if (j_start < 1) j_start = 1;
@@ -448,11 +450,11 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted2(const TreeIndex& t1,
           e0_.at(p_i, p) = e_.at(p_i, p);
         }
       }
+      // Reset data structures to infinity.
       for (int p = 0; p <= t2_input_size; p++) {
         e_.at(p_i, p) = std::numeric_limits<double>::infinity();
-      }
-      for (int u = 1; u < t2_input_size + 1; u++) {
-        dt_.at(t1.postl_to_height_[i-1], u) = std::numeric_limits<double>::infinity();
+        dt_.at(t1.postl_to_height_[i-1], p) = std::numeric_limits<double>::infinity();
+        df_.at(t1.postl_to_height_[i-1], p) = std::numeric_limits<double>::infinity();
       }
     }
   }
