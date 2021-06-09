@@ -49,7 +49,12 @@ class CTEDTreeIndex : public ted::TEDAlgorithm<CostModel, TreeIndex> {
 
 public:
   /// Implements ted function from the TEDAlgorithm<CostModel, TreeIndex> class.
+  /// Complexity: O(n^2) time and space.
   double ted(const TreeIndex& t1, const TreeIndex& t2);
+
+  /// Implements ted function from the TEDAlgorithm<CostModel, TreeIndex> class.
+  /// Complexity: O(n*tau) time and space.
+  double ted_k(const TreeIndex& t1, const TreeIndex& t2, const double threshold);
 
 private:
   /// Matrix storing subtree distances.

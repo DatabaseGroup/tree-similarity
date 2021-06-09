@@ -53,7 +53,7 @@ public:
   double ted(const TreeIndex& t1, const TreeIndex& t2);
 
   /// Implements ted function from the TEDAlgorithm<CostModel, TreeIndex> class.
-  double ted2(const TreeIndex& t1, const TreeIndex& t2, const double threshold);
+  double ted_k(const TreeIndex& t1, const TreeIndex& t2, const double threshold);
 
 private:
   // Costs to delete T1[i].

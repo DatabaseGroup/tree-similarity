@@ -245,7 +245,7 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted(const TreeIndex& t1,
 
 
 template <typename CostModel, typename TreeIndex>
-double MODPJEDIndex<CostModel, TreeIndex>::ted2(const TreeIndex& t1, 
+double MODPJEDIndex<CostModel, TreeIndex>::ted_k(const TreeIndex& t1, 
     const TreeIndex& t2, const double threshold) {
 
   // Reset subproblem counter.
