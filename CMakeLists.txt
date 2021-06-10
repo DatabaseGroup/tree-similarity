@@ -47,6 +47,7 @@ target_include_directories(TreeSimilarity INTERFACE
   src/parser
   src/lookup
   src/lookup/scan
+  src/lookup/index
   src/join
   src/join/naive
   src/join/tjoin
