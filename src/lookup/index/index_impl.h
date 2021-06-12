@@ -50,6 +50,7 @@ std::vector<lookup::LookupResultElement>
   std::vector<lookup::LookupResultElement> result_set;
   // Used to store the computed distance value.
   double distance = std::numeric_limits<double>::infinity();
+  double lower_bound = std::numeric_limits<double>::infinity();
   double upper_bound = std::numeric_limits<double>::infinity();
 
   // Index query tree.
@@ -81,23 +82,65 @@ std::vector<lookup::LookupResultElement>
     // Index candidate tree.
     node::index_tree(tc, trees_collection[candidate_tree_id], ld, cm);
 
-    // Compute the upper bound between the query and candidate tree.
-    upper_bound = upper_bound_algorithm.ted_k(tq, tc, distance_threshold);
-    if (upper_bound <= distance_threshold) {
-      result_set.emplace_back(query_tree_id, candidate_tree_id, upper_bound);
+    // Compute the lower bound between the query and candidate tree.
+    // If the lower bound exceeds the threshold, put the pair immediately
+    // to the result set without verification.
+    lower_bound = node_lower_bound(sets_collection[query_tree_id].second, 
+    sets_collection[candidate_tree_id].second, 
+    std::max(sets_collection[query_tree_id].second.size(), 
+    sets_collection[candidate_tree_id].second.size()) - distance_threshold, 
+    0, 0, 0, sets_collection[query_tree_id].second.size(), 
+    sets_collection[candidate_tree_id].second.size());
+    if (lower_bound >= distance_threshold) {
+      result_set.emplace_back(query_tree_id, candidate_tree_id, distance);
+      candidates_--;
     } else {
-      verfications_++;
-      // Compute the distance between the query and candidate tree.
-      distance = verification_algorithm.ted(tq, tc);
-      if (distance <= distance_threshold) {
-        result_set.emplace_back(query_tree_id, candidate_tree_id, distance);
+      // Compute the upper bound between the query and candidate tree.
+      // If the upper bound is already less than the threshold, the pair is 
+      // certainly in the result set.
+      upper_bound = upper_bound_algorithm.ted_k(tq, tc, distance_threshold);
+      if (upper_bound <= distance_threshold) {
+        result_set.emplace_back(query_tree_id, candidate_tree_id, upper_bound);
+      } else {
+        verfications_++;
+        // Verify the candidate pair in case that the bounds do not apply.
+        distance = verification_algorithm.ted(tq, tc);
+        if (distance <= distance_threshold) {
+          result_set.emplace_back(query_tree_id, candidate_tree_id, distance);
+        }
       }
+      // Sum up all number of subproblems
+      sum_subproblem_counter_ += verification_algorithm.get_subproblem_count();
     }
-    // Sum up all number of subproblems
-    sum_subproblem_counter_ += verification_algorithm.get_subproblem_count();
   }
 
   return result_set;
+}
+
+template <typename Label, typename VerificationAlgorithm, typename UpperBound>
+bool VerificationUBkIndex<Label, VerificationAlgorithm, UpperBound>::node_lower_bound(
+    std::vector<label_set_converter_index::LabelSetElement>& r, 
+    std::vector<label_set_converter_index::LabelSetElement>& s, 
+    const double t, int olap, int pr, int ps, int maxr, int maxs) {
+
+  // starting from pr and ps, check if the overlap exceeds the threshold
+  // stop if the threshold is reached or cannot be reached anymore
+  while (maxr >= t && maxs >= t && olap < t) {
+    if (r[pr].id == s[ps].id) {
+      olap += 1;
+      maxr -= 1;
+      maxs -= 1;
+      ++pr; ++ps;
+    } else if (r[pr].id < s[ps].id) {
+      maxr -= 1;
+      ++pr;
+    } else {
+      maxs -= 1;
+      ++ps;
+    }
+  }
+
+  return olap >= t;
 }
 
 template <typename Label, typename VerificationAlgorithm, typename UpperBound>

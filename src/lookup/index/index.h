@@ -55,6 +55,10 @@ public:
       std::vector<std::pair<int, int>>& size_setid_map, lookup::TwoStageInvertedList& index,
       unsigned int query_tree_id, const double distance_threshold);
   
+  bool node_lower_bound(std::vector<label_set_converter_index::LabelSetElement>& r, 
+      std::vector<label_set_converter_index::LabelSetElement>& s, const double t, 
+      int olap, int pr, int ps, int maxr, int maxs);
+
   /// Returns the summed subproblem count of TED algorithm executions.
   /**
    * \return sum_subproblem_counter_
