@@ -351,9 +351,9 @@ double MODPJEDIndex<CostModel, TreeIndex>::ted_k(const TreeIndex& t1,
       min_for_ins = std::numeric_limits<double>::infinity();
       min_tree_ins = std::numeric_limits<double>::infinity();
       for (unsigned int t = 0; t < t2.postl_to_children_[j-1].size(); ++t) {
-        // if (std::abs(i-t2.postl_to_children_[j-1][t]+1) > threshold) {
-        //   continue;
-        // }
+        if (std::abs(i-(t2.postl_to_children_[j-1][t]+1)) > threshold) {
+          continue;
+        }
         min_for_ins = std::min(min_for_ins,
             (df_.at(t1.postl_to_height_[i-1], t2.postl_to_children_[j-1][t] + 1) - 
              ins_f2_subtree_.at(t2.postl_to_children_[j-1][t] + 1)));
