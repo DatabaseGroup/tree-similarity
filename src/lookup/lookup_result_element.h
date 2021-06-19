@@ -35,14 +35,18 @@ struct LookupResultElement {
   int tree_id_1;
   /// Tree id of the result tree.
   int tree_id_2;
+  /// Lower bound between tree_id_1 and tree_id_2.
+  double lower_bound;
+  /// Upper bound between tree_id_1 and tree_id_2.
+  double upper_bound;
   /// Tree edit distance between tree_id_1 and tree_id_2.
   double ted_value;
   /// Constructor.
-  LookupResultElement(int tree_id_1, int tree_id_2, double ted_value);
+  LookupResultElement(int tree_id_1, int tree_id_2, double lower_bound, double upper_bound, double ted_value);
 };
 
-lookup::LookupResultElement::LookupResultElement(int tree_id_1, int tree_id_2, double ted_value)
-    : tree_id_1(tree_id_1), tree_id_2(tree_id_2), ted_value(ted_value) {};
+lookup::LookupResultElement::LookupResultElement(int tree_id_1, int tree_id_2, double lower_bound, double upper_bound, double ted_value)
+    : tree_id_1(tree_id_1), tree_id_2(tree_id_2), lower_bound(lower_bound), upper_bound(upper_bound), ted_value(ted_value) {};
 
 }
 

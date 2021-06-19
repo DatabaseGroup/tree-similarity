@@ -60,13 +60,13 @@ std::vector<lookup::LookupResultElement>
     // Compute the upper bound between the query and candidate tree.
     upper_bound = upper_bound_algorithm.ted_k(tq, tc, distance_threshold);
     if (upper_bound <= distance_threshold) {
-      result_set.emplace_back(query_tree_id, candidate_tree_id, upper_bound);
+      result_set.emplace_back(query_tree_id, candidate_tree_id, -1, upper_bound, -1);
     } else {
       verfications_++;
       // Compute the distance between the query and candidate tree.
       distance = verification_algorithm.ted(tq, tc);
       if (distance <= distance_threshold) {
-        result_set.emplace_back(query_tree_id, candidate_tree_id, distance);
+        result_set.emplace_back(query_tree_id, candidate_tree_id, -1, upper_bound, distance);
       }
     }
     // Sum up all number of subproblems
@@ -127,13 +127,13 @@ std::vector<lookup::LookupResultElement>
     // Compute the upper bound between the query and candidate tree.
     upper_bound = upper_bound_algorithm.ted(tq, tc);
     if (upper_bound <= distance_threshold) {
-      result_set.emplace_back(query_tree_id, candidate_tree_id, upper_bound);
+      result_set.emplace_back(query_tree_id, candidate_tree_id, -1, upper_bound, -1);
     } else {
       verfications_++;
       // Compute the distance between the query and candidate tree.
       distance = verification_algorithm.ted(tq, tc);
       if (distance <= distance_threshold) {
-        result_set.emplace_back(query_tree_id, candidate_tree_id, distance);
+        result_set.emplace_back(query_tree_id, candidate_tree_id, -1, upper_bound, distance);
       }
     }
     // Sum up all number of subproblems
@@ -193,7 +193,7 @@ std::vector<lookup::LookupResultElement>
     verfications_++;
     distance = verification_algorithm.ted(tq, tc);
     if (distance <= distance_threshold) {
-      result_set.emplace_back(query_tree_id, candidate_tree_id, distance);
+      result_set.emplace_back(query_tree_id, candidate_tree_id, -1, -1, distance);
     }
     // Sum up all number of subproblems
     sum_subproblem_counter_ += verification_algorithm.get_subproblem_count();
