@@ -112,7 +112,7 @@ private:
   /// \return subtree size of the actual node
   int create_record(const node::Node<Label>& tree_node, int& postorder_id, int tree_size,
     std::unordered_map<Label, int, labelhash>& token_map,
-    std::unordered_map<int, label_set_converter_index::LabelSetElement>& record_labels);
+    std::unordered_multimap<int, label_set_converter_index::LabelSetElement>& record_labels);
 };
 
 // Implementation details.

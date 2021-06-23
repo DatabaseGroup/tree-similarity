@@ -67,6 +67,8 @@ label_set_converter_index::StructuralVector::StructuralVector(
 struct LabelSetElement {
   /// Token ID.
   long int id = 0;
+  /// Postorder ID of the label in the according tree.
+  long int postorder_id = 0;
   /// Weight of a token.
   int weight = 0;
   /// Weight of a token.
@@ -78,6 +80,8 @@ struct LabelSetElement {
   /// Constructor.
   LabelSetElement(long int id, int weight);
   /// Constructor.
+  LabelSetElement(long int id, long int postorder_id, int weight);
+  /// Constructor.
   LabelSetElement(long int id, int weight, 
       std::vector<label_set_converter_index::StructuralVector> &&struct_vect);
 };
@@ -86,6 +90,9 @@ label_set_converter_index::LabelSetElement::LabelSetElement() {}
 
 label_set_converter_index::LabelSetElement::LabelSetElement(long int id, int weight)
     : id(id), weight(weight) {}
+
+label_set_converter_index::LabelSetElement::LabelSetElement(long int id, long int postorder_id, int weight)
+    : id(id), postorder_id(postorder_id), weight(weight) {}
 
 label_set_converter_index::LabelSetElement::LabelSetElement(long int id, int weight, 
       std::vector<label_set_converter_index::StructuralVector> &&struct_vect)

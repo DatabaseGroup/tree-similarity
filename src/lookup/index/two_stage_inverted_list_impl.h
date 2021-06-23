@@ -34,6 +34,7 @@ void TwoStageInvertedList::build(std::vector<std::pair<int,
     std::vector<label_set_converter_index::LabelSetElement>>>& sets_collection) {
   int set_size;
   long int label_id;
+  long int postorder_id;
 
   // Iterate through all sets in a given collection.
   for (unsigned int s = 0; s < sets_collection.size(); s++) {
@@ -41,14 +42,16 @@ void TwoStageInvertedList::build(std::vector<std::pair<int,
     // Iterate through elements of a given set.
     for (unsigned int e = 0; e < sets_collection[s].second.size(); e++) {
       label_id = sets_collection[s].second[e].id;
-      // Create a new entry for element e in case it is not yet in the map.
-      if (il_index_[label_id].element_list.find(e) == 
+      postorder_id = sets_collection[s].second[e].postorder_id;
+      // Create a new entry for element postorder_id in case it is not yet in the map.
+      if (il_index_[label_id].element_list.find(postorder_id) == 
           il_index_[label_id].element_list.end()) {
         il_index_[label_id].element_list.insert(
           std::pair<int, std::vector<std::pair<int, int>>> 
-          (e, std::vector<std::pair<int, int>>()));
+          (postorder_id, std::vector<std::pair<int, int>>()));
       }
-      il_index_[label_id].element_list[e].push_back(
+      // std::cout << label_id << " -> " << postorder_id << " -> (" << set_size << ", " << s << ")" << std::endl;
+      il_index_[label_id].element_list[postorder_id].push_back(
         std::make_pair(set_size, s));
     }
   }
@@ -63,16 +66,30 @@ void TwoStageInvertedList::build(std::vector<std::pair<int,
 }
 
 void TwoStageInvertedList::lookup(long int& label_id,
+    long int& postorder_id, int& size, 
     std::unordered_set<long int>& candidates,
     const double distance_threshold) {
+  long int start_pid_range = postorder_id - distance_threshold;
+  long int end_pid_range = postorder_id + distance_threshold;
+  // long int start_size_range = size + distance_threshold;
+  long int end_size_range = size + distance_threshold;
   // Iterate over the first distance_threshold + 1 positions.
-  for (unsigned int pos = 0; pos < distance_threshold + 1; pos++) {
+  auto iter = il_index_[label_id].element_list.lower_bound(start_pid_range);
+  while (iter != il_index_[label_id].element_list.end()) {
+    // pos = postorder_id - distance_threshold; 
+    //   pos <= postorder_id + distance_threshold
+    if (iter->first > end_pid_range) {
+      break;
+    }
     // Go through sets in index until the size is too large.
     // TODO: Size filter from the beginning (binary search).
-    for (unsigned int set = 0; 
-        set < il_index_[label_id].element_list[pos].size(); set++) {
-      candidates.insert(il_index_[label_id].element_list[pos][set].second);
+    for (auto const& y : iter->second) {
+      if (y.first > end_size_range) {
+        break;
+      }
+      candidates.insert(y.second);
     }
+    ++iter;
   }
 }
 

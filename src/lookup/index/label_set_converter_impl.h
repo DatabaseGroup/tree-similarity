@@ -48,7 +48,7 @@ void Converter<Label>::assignFrequencyIdentifiers(
     // record = [tokid]
     std::vector<label_set_converter_index::LabelSetElement> record;
     // {tokid -> 1}
-    std::unordered_map<int, label_set_converter_index::LabelSetElement> record_labels;
+    std::unordered_multimap<int, label_set_converter_index::LabelSetElement> record_labels;
     // number of nodes of the tree
     int tree_size = tree.get_tree_size();
 
@@ -62,8 +62,9 @@ void Converter<Label>::assignFrequencyIdentifiers(
     actual_pre_order_number_ = 0;
     actual_depth_ = 0;
 
-    for (const auto& it : record_labels) 
+    for (const auto& it : record_labels) {
       record.emplace_back(it.second);
+    }
 
     // size to id mapping in ascending size
     size_setid_map.emplace_back(tree_size, set_id);
@@ -76,9 +77,11 @@ void Converter<Label>::assignFrequencyIdentifiers(
   // token_count_list = [tokenfrequency, tokenid]
   for(int i = 0; i < next_token_id_; ++i)
     token_count_list.emplace_back(0, i);
-  for(const auto& record: sets_collection)
-    for(const auto& token: record.second)
+  for(const auto& record: sets_collection) {
+    for(const auto& token: record.second) {
       token_count_list[token.id].first += token.weight;
+    }
+  }
 
   // sort token_count_list by tokenfrequency
   std::sort(token_count_list.begin(), token_count_list.end(), pairComparator);
@@ -90,8 +93,9 @@ void Converter<Label>::assignFrequencyIdentifiers(
 
   // substitute the tokenIDs with frequencyIDs
   for(auto& record: sets_collection) {
-    for(std::size_t i = 0; i < record.second.size(); ++i)
+    for(std::size_t i = 0; i < record.second.size(); ++i) {
       record.second[i].id = tokenmaplist[record.second[i].id];
+    }
 
     // sort integers of a record ascending
     std::sort(record.second.begin(), record.second.end(), LabelSetElementComparator);
@@ -114,7 +118,7 @@ template<typename Label>
 int Converter<Label>::create_record(
     const node::Node<Label>& tree_node, int& postorder_id, int tree_size,
     std::unordered_map<Label, int, labelhash>& token_map, 
-    std::unordered_map<int, label_set_converter_index::LabelSetElement>& record_labels) {
+    std::unordered_multimap<int, label_set_converter_index::LabelSetElement>& record_labels) {
 
   // number of children = subtree_size - 1
   // subtree_size = 1 -> actual node + sum of children
@@ -148,7 +152,7 @@ int Converter<Label>::create_record(
     // store tokenid in global tokenmap
     token_map.emplace(key, next_token_id_);
     // create new set element
-    label_set_converter_index::LabelSetElement se = {next_token_id_, 1};
+    label_set_converter_index::LabelSetElement se = {next_token_id_, postorder_id, 1};
     // add positional information
     se.struct_vect.emplace_back(postorder_id, actual_pre_order_number_ - subtree_size, 
       tree_size - (actual_pre_order_number_ + actual_depth_), actual_depth_, subtree_size - 1);
@@ -157,21 +161,21 @@ int Converter<Label>::create_record(
     // update next_token_id_
     next_token_id_ += 1;
   } else {
-    if(record_labels.find(token_map[key]) == record_labels.end()) {
-      label_set_converter_index::LabelSetElement se = {token_map[key], 1};
+    // if(record_labels.find(token_map[key]) == record_labels.end()) {
+      label_set_converter_index::LabelSetElement se = {token_map[key], postorder_id, 1};
       // add positional information
       se.struct_vect.emplace_back(postorder_id, actual_pre_order_number_ - subtree_size, 
         tree_size - (actual_pre_order_number_ + actual_depth_), actual_depth_, subtree_size - 1);
       // append to record (id, weight, left, right, ancestor, descendant)
       record_labels.emplace(token_map[key], se);
-    } else {
-      // increase weight
-      ++record_labels[token_map[key]].weight;
-      // push position information to its duplicates
-      record_labels[token_map[key]].struct_vect.emplace_back(postorder_id, actual_pre_order_number_ - subtree_size, 
-          tree_size - (actual_pre_order_number_ + actual_depth_), actual_depth_, subtree_size - 1);
+    // } else {
+    //   // increase weight
+    //   ++record_labels[token_map[key]].weight;
+    //   // push position information to its duplicates
+    //   record_labels[token_map[key]].struct_vect.emplace_back(postorder_id, actual_pre_order_number_ - subtree_size, 
+    //       tree_size - (actual_pre_order_number_ + actual_depth_), actual_depth_, subtree_size - 1);
 
-    }
+    // }
   }
 
   return subtree_size;

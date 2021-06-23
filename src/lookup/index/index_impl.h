@@ -74,7 +74,10 @@ std::vector<lookup::LookupResultElement>
   // Lookup the index for each element in the prefix of the query tree.
   long int prefix = std::min((int) sets_collection[query_tree_id].second.size() - 1, (int) distance_threshold + 1);
   for (long int pos = 0; pos <= prefix; pos++) {
-    index.lookup(sets_collection[query_tree_id].second[pos].id, candidates, distance_threshold);
+    index.lookup(sets_collection[query_tree_id].second[pos].id, 
+        sets_collection[query_tree_id].second[pos].postorder_id, 
+        sets_collection[query_tree_id].first,
+        candidates, distance_threshold);
   }
   candidates_ = candidates.size();
 
@@ -89,9 +92,9 @@ std::vector<lookup::LookupResultElement>
     intersection = node_lower_bound(sets_collection[query_tree_id].second, 
         sets_collection[candidate_tree_id].second, 0, 0, 0);
     // Node intersection LB: DPJED >= max(T1, T2) - T1 intersection T2.
-    lower_bound = std::max(sets_collection[query_tree_id].second.size(), 
-        sets_collection[candidate_tree_id].second.size()) - intersection;
-    if (lower_bound >= distance_threshold) {
+    lower_bound = std::max(sets_collection[query_tree_id].first, 
+        sets_collection[candidate_tree_id].first) - intersection;
+    if (lower_bound > distance_threshold) {
       candidates_--;
     } else {
       // Compute the upper bound between the query and candidate tree.
@@ -208,7 +211,10 @@ std::vector<lookup::LookupResultElement>
   // Lookup the index for each element in the prefix of the query tree.
   long int prefix = std::min((int) sets_collection[query_tree_id].second.size() - 1, (int) distance_threshold + 1);
   for (long int pos = 0; pos <= prefix; pos++) {
-    index.lookup(sets_collection[query_tree_id].second[pos].id, candidates, distance_threshold);
+    index.lookup(sets_collection[query_tree_id].second[pos].id, 
+        sets_collection[query_tree_id].second[pos].postorder_id, 
+        sets_collection[query_tree_id].first,
+        candidates, distance_threshold);
   }
   candidates_ = candidates.size();
 
@@ -223,9 +229,9 @@ std::vector<lookup::LookupResultElement>
     intersection = node_lower_bound(sets_collection[query_tree_id].second, 
         sets_collection[candidate_tree_id].second, 0, 0, 0);
     // Node intersection LB: DPJED >= max(T1, T2) - T1 intersection T2.
-    lower_bound = std::max(sets_collection[query_tree_id].second.size(), 
-        sets_collection[candidate_tree_id].second.size()) - intersection;
-    if (lower_bound >= distance_threshold) {
+    lower_bound = std::max(sets_collection[query_tree_id].first, 
+        sets_collection[candidate_tree_id].first) - intersection;
+    if (lower_bound > distance_threshold) {
       candidates_--;
     } else {
       // Compute the upper bound between the query and candidate tree.
@@ -337,7 +343,10 @@ std::vector<lookup::LookupResultElement>
   // Lookup the index for each element in the prefix of the query tree.
   long int prefix = std::min((int) sets_collection[query_tree_id].second.size() - 1, (int) distance_threshold + 1);
   for (long int pos = 0; pos <= prefix; pos++) {
-    index.lookup(sets_collection[query_tree_id].second[pos].id, candidates, distance_threshold);
+    index.lookup(sets_collection[query_tree_id].second[pos].id, 
+        sets_collection[query_tree_id].second[pos].postorder_id, 
+        sets_collection[query_tree_id].first,
+        candidates, distance_threshold);
   }
   candidates_ = candidates.size();
 
@@ -352,9 +361,9 @@ std::vector<lookup::LookupResultElement>
     intersection = node_lower_bound(sets_collection[query_tree_id].second, 
         sets_collection[candidate_tree_id].second, 0, 0, 0);
     // Node intersection LB: DPJED >= max(T1, T2) - T1 intersection T2.
-    lower_bound = std::max(sets_collection[query_tree_id].second.size(), 
-        sets_collection[candidate_tree_id].second.size()) - intersection;
-    if (lower_bound >= distance_threshold) {
+    lower_bound = std::max(sets_collection[query_tree_id].first, 
+        sets_collection[candidate_tree_id].first) - intersection;
+    if (lower_bound > distance_threshold) {
       candidates_--;
     } else {
       verfications_++;
