@@ -76,7 +76,8 @@ std::vector<lookup::LookupResultElement>
   long int prefix = std::min((int) sets_collection[query_tree_id].second.size() - 1, (int) distance_threshold + 1);
   for (long int pos = 0; pos <= prefix; pos++) {
     index.lookup(sets_collection[query_tree_id].second[pos].id, 
-        sets_collection[query_tree_id].second[pos].descendants+1, 
+        sets_collection[query_tree_id].second[pos].descendants, 
+        sets_collection[query_tree_id].second[pos].ancestors, 
         sets_collection[query_tree_id].first,
         candidates, distance_threshold);
   }
@@ -222,7 +223,8 @@ std::vector<lookup::LookupResultElement>
   long int prefix = std::min((int) sets_collection[query_tree_id].second.size() - 1, (int) distance_threshold + 1);
   for (long int pos = 0; pos <= prefix; pos++) {
     index.lookup(sets_collection[query_tree_id].second[pos].id, 
-        sets_collection[query_tree_id].second[pos].descendants+1, 
+        sets_collection[query_tree_id].second[pos].descendants, 
+        sets_collection[query_tree_id].second[pos].ancestors, 
         sets_collection[query_tree_id].first,
         candidates, distance_threshold);
   }
@@ -363,7 +365,8 @@ std::vector<lookup::LookupResultElement>
   long int prefix = std::min((int) sets_collection[query_tree_id].second.size() - 1, (int) distance_threshold + 1);
   for (long int pos = 0; pos <= prefix; pos++) {
     index.lookup(sets_collection[query_tree_id].second[pos].id, 
-        sets_collection[query_tree_id].second[pos].descendants+1, 
+        sets_collection[query_tree_id].second[pos].descendants, 
+        sets_collection[query_tree_id].second[pos].ancestors, 
         sets_collection[query_tree_id].first,
         candidates, distance_threshold);
   }

@@ -60,8 +60,9 @@ public:
   /// \param label_id ID of the current node.
   /// \param postorder_id Postorder ID of the current node.
   /// \param distance_threshold Given similarity threshold.
-  void lookup(long int& label_id, long int subtree_size, int& size,
-      std::unordered_set<long int>& candidates, const double distance_threshold);
+  void lookup(long int& q_label_id, long int descendants, long int ancestors, 
+    int& q_tree_size, std::unordered_set<long int>& candidates, 
+    const double distance_threshold);
   long int get_number_of_pre_candidates() const;
   /// Sets the number of precandidates.
   void set_number_of_pre_candidates(const long int pc);
