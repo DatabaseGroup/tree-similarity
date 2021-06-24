@@ -28,6 +28,7 @@ VerificationUBkIndex<Label, VerificationAlgorithm,
     UpperBound>::VerificationUBkIndex() {
   verfications_ = 0;
   candidates_ = 0;
+  pre_candidates_ = 0;
 }
 
 template <typename Label, typename VerificationAlgorithm, typename UpperBound>
@@ -75,11 +76,12 @@ std::vector<lookup::LookupResultElement>
   long int prefix = std::min((int) sets_collection[query_tree_id].second.size() - 1, (int) distance_threshold + 1);
   for (long int pos = 0; pos <= prefix; pos++) {
     index.lookup(sets_collection[query_tree_id].second[pos].id, 
-        sets_collection[query_tree_id].second[pos].postorder_id, 
+        sets_collection[query_tree_id].second[pos].descendants+1, 
         sets_collection[query_tree_id].first,
         candidates, distance_threshold);
   }
-  candidates_ = candidates.size();
+  pre_candidates_ = candidates.size();
+  candidates_ = pre_candidates_;
 
   // Verify which candidate trees are part of the result set.
   for (long int const& candidate_tree_id: candidates) {
@@ -94,6 +96,7 @@ std::vector<lookup::LookupResultElement>
     // Node intersection LB: DPJED >= max(T1, T2) - T1 intersection T2.
     lower_bound = std::max(sets_collection[query_tree_id].first, 
         sets_collection[candidate_tree_id].first) - intersection;
+    // Prune candidate if the lower bound exceeds the threshold.
     if (lower_bound > distance_threshold) {
       candidates_--;
     } else {
@@ -158,6 +161,12 @@ long long int VerificationUBkIndex<Label,
   return candidates_;
 }
 
+template <typename Label, typename VerificationAlgorithm, typename UpperBound>
+long long int VerificationUBkIndex<Label,
+    VerificationAlgorithm, UpperBound>::get_pre_candidates_count() const {
+  return pre_candidates_;
+}
+
 // ****** Upper bound without leveraging the threshold.
 
 template <typename Label, typename VerificationAlgorithm, typename UpperBound>
@@ -165,6 +174,7 @@ VerificationUBIndex<Label, VerificationAlgorithm,
     UpperBound>::VerificationUBIndex() {
   verfications_ = 0;
   candidates_ = 0;
+  pre_candidates_ = 0;
 }
 
 template <typename Label, typename VerificationAlgorithm, typename UpperBound>
@@ -212,11 +222,12 @@ std::vector<lookup::LookupResultElement>
   long int prefix = std::min((int) sets_collection[query_tree_id].second.size() - 1, (int) distance_threshold + 1);
   for (long int pos = 0; pos <= prefix; pos++) {
     index.lookup(sets_collection[query_tree_id].second[pos].id, 
-        sets_collection[query_tree_id].second[pos].postorder_id, 
+        sets_collection[query_tree_id].second[pos].descendants+1, 
         sets_collection[query_tree_id].first,
         candidates, distance_threshold);
   }
-  candidates_ = candidates.size();
+  pre_candidates_ = candidates.size();
+  candidates_ = pre_candidates_;
 
   // Verify which candidate trees are part of the result set.
   for (long int const& candidate_tree_id: candidates) {
@@ -231,6 +242,7 @@ std::vector<lookup::LookupResultElement>
     // Node intersection LB: DPJED >= max(T1, T2) - T1 intersection T2.
     lower_bound = std::max(sets_collection[query_tree_id].first, 
         sets_collection[candidate_tree_id].first) - intersection;
+    // Prune candidate if the lower bound exceeds the threshold.
     if (lower_bound > distance_threshold) {
       candidates_--;
     } else {
@@ -293,12 +305,19 @@ long long int VerificationUBIndex<Label,
   return candidates_;
 }
 
+template <typename Label, typename VerificationAlgorithm, typename UpperBound>
+long long int VerificationUBIndex<Label,
+    VerificationAlgorithm, UpperBound>::get_pre_candidates_count() const {
+  return pre_candidates_;
+}
+
 // ****** Without given upper bound.
 
 template <typename Label, typename VerificationAlgorithm>
 VerificationIndex<Label, VerificationAlgorithm>::VerificationIndex() {
   verfications_ = 0;
   candidates_ = 0;
+  pre_candidates_ = 0;
 }
 
 template <typename Label, typename VerificationAlgorithm>
@@ -344,11 +363,12 @@ std::vector<lookup::LookupResultElement>
   long int prefix = std::min((int) sets_collection[query_tree_id].second.size() - 1, (int) distance_threshold + 1);
   for (long int pos = 0; pos <= prefix; pos++) {
     index.lookup(sets_collection[query_tree_id].second[pos].id, 
-        sets_collection[query_tree_id].second[pos].postorder_id, 
+        sets_collection[query_tree_id].second[pos].descendants+1, 
         sets_collection[query_tree_id].first,
         candidates, distance_threshold);
   }
-  candidates_ = candidates.size();
+  pre_candidates_ = candidates.size();
+  candidates_ = pre_candidates_;
 
   // Verify which candidate trees are part of the result set.
   for (long int const& candidate_tree_id: candidates) {
@@ -363,6 +383,7 @@ std::vector<lookup::LookupResultElement>
     // Node intersection LB: DPJED >= max(T1, T2) - T1 intersection T2.
     lower_bound = std::max(sets_collection[query_tree_id].first, 
         sets_collection[candidate_tree_id].first) - intersection;
+    // Prune candidate if the lower bound exceeds the threshold.
     if (lower_bound > distance_threshold) {
       candidates_--;
     } else {
@@ -417,4 +438,10 @@ template <typename Label, typename VerificationAlgorithm>
 long long int VerificationIndex<Label,
     VerificationAlgorithm>::get_candidates_count() const {
   return candidates_;
+}
+
+template <typename Label, typename VerificationAlgorithm>
+long long int VerificationIndex<Label,
+    VerificationAlgorithm>::get_pre_candidates_count() const {
+  return pre_candidates_;
 }

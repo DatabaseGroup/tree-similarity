@@ -492,6 +492,26 @@ class TreeIndexLGM :
 {};
 
 /// All tree indexes. Used for correctness tests and prototyping.
+class TreeIndexJSON :
+  public Constants,
+  public ListKR,
+  public PostLToType,
+  public PostLToLabelId,
+  public PostLToSize,
+  public PostLToChildren,
+  public PostLToParent,
+  public PostLToDepth,
+  public PostLToLCh,
+  public PostLToSubtreeMaxDepth,
+  public PostLToKRAncestor,
+  public PostLToFavChild,
+  public PostLToHeight,
+  public PostLToOrderedChildSize,
+  public PostLToFavorableChildOrder,
+  public PostLToLeftSibling
+{};
+
+/// All tree indexes. Used for correctness tests and prototyping.
 class TreeIndexAll :
   public Constants,
   public PreLToLabelId,

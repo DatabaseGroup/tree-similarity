@@ -76,12 +76,20 @@ public:
    * \return candidates_
    */
   long long int get_candidates_count() const;
+  
+  /// Returns the number of pre_candidates.
+  /**
+   * \return pre_candidates_
+   */
+  long long int get_pre_candidates_count() const;
 
 private:
   /// Number of subproblrems encoutered in the verification step.
   long long int sum_subproblem_counter_;
   /// Number of verification computations.
   long long int verfications_;
+  /// Number of pre_candidates.
+  long long int pre_candidates_;
   /// Number of candidates.
   long long int candidates_;
 };
@@ -130,12 +138,20 @@ public:
    * \return candidates_
    */
   long long int get_candidates_count() const;
+  
+  /// Returns the number of pre_candidates.
+  /**
+   * \return pre_candidates_
+   */
+  long long int get_pre_candidates_count() const;
 
 private:
   /// Number of subproblrems encoutered in the verification step.
   long long int sum_subproblem_counter_;
   /// Number of verification computations.
   long long int verfications_;
+  /// Number of pre_candidates.
+  long long int pre_candidates_;
   /// Number of candidates.
   long long int candidates_;
 };
@@ -183,12 +199,20 @@ public:
    * \return candidates_
    */
   long long int get_candidates_count() const;
+  
+  /// Returns the number of pre_candidates.
+  /**
+   * \return pre_candidates_
+   */
+  long long int get_pre_candidates_count() const;
 
 private:
   /// Number of subproblrems encoutered in the verification step.
   long long int sum_subproblem_counter_;
   /// Number of verification computations.
   long long int verfications_;
+  /// Number of pre_candidates.
+  long long int pre_candidates_;
   /// Number of candidates.
   long long int candidates_;
 };

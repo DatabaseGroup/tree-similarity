@@ -30,8 +30,8 @@ namespace lookup {
 
 /// This is an element of the join's result set.
 struct InvertedListElement {
-  /// Tree id of the right-hand tree in the result element.
-  std::map<int, std::vector<std::pair<int, int>>> element_list;
+  /// Map from subtree size to a multimap from tree size to (treeID, #ancestors).
+  std::map<int, std::multimap<int, std::pair<int, int>>> element_list;
   /// Constructor.
   InvertedListElement();
 };

@@ -152,30 +152,16 @@ int Converter<Label>::create_record(
     // store tokenid in global tokenmap
     token_map.emplace(key, next_token_id_);
     // create new set element
-    label_set_converter_index::LabelSetElement se = {next_token_id_, postorder_id, 1};
-    // add positional information
-    se.struct_vect.emplace_back(postorder_id, actual_pre_order_number_ - subtree_size, 
-      tree_size - (actual_pre_order_number_ + actual_depth_), actual_depth_, subtree_size - 1);
+    label_set_converter_index::LabelSetElement se = {next_token_id_, postorder_id, 1, actual_depth_, subtree_size - 1};
     // append to record (id, weight, left, right, ancestor, descendant)
     record_labels.emplace(next_token_id_, se);
     // update next_token_id_
     next_token_id_ += 1;
   } else {
     // if(record_labels.find(token_map[key]) == record_labels.end()) {
-      label_set_converter_index::LabelSetElement se = {token_map[key], postorder_id, 1};
-      // add positional information
-      se.struct_vect.emplace_back(postorder_id, actual_pre_order_number_ - subtree_size, 
-        tree_size - (actual_pre_order_number_ + actual_depth_), actual_depth_, subtree_size - 1);
-      // append to record (id, weight, left, right, ancestor, descendant)
-      record_labels.emplace(token_map[key], se);
-    // } else {
-    //   // increase weight
-    //   ++record_labels[token_map[key]].weight;
-    //   // push position information to its duplicates
-    //   record_labels[token_map[key]].struct_vect.emplace_back(postorder_id, actual_pre_order_number_ - subtree_size, 
-    //       tree_size - (actual_pre_order_number_ + actual_depth_), actual_depth_, subtree_size - 1);
-
-    // }
+    label_set_converter_index::LabelSetElement se = {token_map[key], postorder_id, 1, actual_depth_, subtree_size - 1};
+    // append to record (id, weight, left, right, ancestor, descendant)
+    record_labels.emplace(token_map[key], se);
   }
 
   return subtree_size;
