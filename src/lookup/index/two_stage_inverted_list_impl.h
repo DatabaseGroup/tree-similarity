@@ -34,6 +34,8 @@ void TwoStageInvertedList::build(std::vector<std::pair<int,
     std::vector<label_set_converter_index::LabelSetElement>>>& sets_collection) {
   long int label_id;
   long int descendants;
+  long int ancestors;
+  long int right_left;
 
   // Iterate through all sets in a given collection.
   for (unsigned int s = 0; s < sets_collection.size(); s++) {
@@ -41,19 +43,23 @@ void TwoStageInvertedList::build(std::vector<std::pair<int,
     for (unsigned int e = 0; e < sets_collection[s].second.size(); e++) {
       label_id = sets_collection[s].second[e].id;
       descendants = sets_collection[s].second[e].descendants;
+      ancestors = sets_collection[s].second[e].ancestors;
+      right_left = sets_collection[s].first - descendants - ancestors - 1;
       // Create a new entry for element descendants in case it is not yet in the 
       // map.
-      if (il_index_[label_id].element_list.find(descendants) == 
-          il_index_[label_id].element_list.end()) {
-        il_index_[label_id].element_list.insert(
-          std::pair<int, std::multimap<int, std::pair<int, int>>> 
-          (descendants, std::multimap<int, std::pair<int, int>>()));
-      }
+      // if (il_index_[label_id].element_list.find(descendants) == 
+      //     il_index_[label_id].element_list.end()) {
+      //   il_index_[label_id].element_list.insert(
+      //     std::pair<int, std::map<int, std::map<int, std::vector<int>>>> 
+      //     (descendants, std::map<int, std::map<int, std::vector<int>>>()));
+      // }
       // Insert new index element.
-      il_index_[label_id].element_list[descendants].insert(
-          std::multimap<int, std::pair<int, int>>::value_type(
-            sets_collection[s].first - descendants, 
-            std::make_pair(s, sets_collection[s].second[e].ancestors)));
+      // il_index_[label_id].element_list[descendants].insert(
+      //     std::multimap<int, std::pair<int, int>>::value_type(
+      //       sets_collection[s].first - descendants, 
+      //       std::make_pair(s, sets_collection[s].second[e].ancestors)));
+      // std::cout << label_id << " -> " << descendants << " -> " << ancestors << " -> " << right_left << " -> " << s << std::endl;
+      il_index_[label_id].element_list[descendants][ancestors][right_left].push_back(s);
     }
   }
 }
@@ -62,43 +68,64 @@ void TwoStageInvertedList::lookup(long int& q_label_id,
     long int descendants, long int ancestors, int& q_tree_size, 
     std::unordered_set<long int>& candidates,
     const double distance_threshold) {
-  // All nodes except for the current node and its descendants.
-  long int rest_anc = q_tree_size - 1 - descendants;
-  long int start_subtree_range = descendants - distance_threshold;
-  if (start_subtree_range < 0) start_subtree_range = 0;
-  // long int end_subtree_range = descendants + distance_threshold;
-  long int start_size_range = 0;
-  // long int end_size_range = rest_anc + distance_threshold;
+  // All nodes except the current node, its descendants, and ancestors.
+  long int right_left = q_tree_size - descendants - ancestors - 1;
+  // Range for descendants stage.
+  long int start_desc_range = descendants - distance_threshold;
+  if (start_desc_range < 0) start_desc_range = 0;
+  // Range for ancestor stage.
+  long int start_anc_range = 0;
+  // Range for right-left stage.
+  long int start_rl_range = 0;
+  // Hold the adaptive thresholds for the different stages of the index.
   long int threshold_stage1;
   long int threshold_stage2;
+  long int threshold_stage3;
   // Binary search to first relevant element (threshold range) in 
-  // the subtree size index layer.
-  auto iter = il_index_[q_label_id].element_list.lower_bound(start_subtree_range);
-  while (iter != il_index_[q_label_id].element_list.end()) {
+  // the descandants index layer.
+  auto iter_desc = il_index_[q_label_id].element_list.lower_bound(start_desc_range);
+  while (iter_desc != il_index_[q_label_id].element_list.end()) {
     // Incrementally improving the threshold.
-    threshold_stage1 = distance_threshold - std::abs(descendants - iter->first);
-    // Compare subtree size lower bound.
+    threshold_stage1 = distance_threshold - std::abs(descendants - iter_desc->first);
+    // Descendants lower bound exceeds the threshold.
     if (threshold_stage1 < 0) {
-      break;
+      ++iter_desc;
+      continue;
     }
     // Binary search to first relevant element (threshold range) in 
-    // the tree size index layer.
-    start_size_range = rest_anc - threshold_stage1;
-    if (start_size_range < 0) start_size_range = 0;
-    auto iter2 = iter->second.lower_bound(start_size_range);
-    while (iter2 != iter->second.end()) {
-      threshold_stage2 = threshold_stage1 - std::abs(rest_anc - iter2->first);
-      // Compare tree size lower bound with remaining threshold.
+    // the ancestor index layer.
+    start_anc_range = ancestors - threshold_stage1;
+    if (start_anc_range < 0) start_anc_range = 0;
+    auto iter_anc = iter_desc->second.lower_bound(start_anc_range);
+    while (iter_anc != iter_desc->second.end()) {
+      threshold_stage2 = threshold_stage1 - std::abs(ancestors - iter_anc->first);
+      // Descendants and ancestor lower bound exceeds the threshold.
       if (threshold_stage2 < 0) {
-        break;
+        ++iter_anc;
+        continue;
       }
-      // Compare ancestor lower bound with remaining threshold.
-      if (threshold_stage2 >= std::abs(ancestors - iter2->second.second)) {
-        candidates.insert(iter2->second.first);
+      // Binary search to first relevant element (threshold range) in 
+      // the right-left index layer.
+      start_rl_range = right_left - threshold_stage2;
+      if (start_rl_range < 0) start_rl_range = 0;
+      auto iter_rl = iter_anc->second.lower_bound(start_rl_range);
+      while (iter_rl != iter_anc->second.end()) {
+        threshold_stage3 = threshold_stage2 - std::abs(right_left - iter_rl->first);
+        // Descendants, ancestor, and right-left lower bound exceeds the threshold.
+        if (threshold_stage3 < 0) {
+          ++iter_rl;
+          continue;
+        }
+        // Add all to candidates.
+        // candidates.insert(iter_rl->second);
+        for (auto& tree_id : iter_rl->second) {
+          candidates.insert(tree_id);
+        }
+        ++iter_rl;
       }
-      ++iter2;
+      ++iter_anc;
     }
-    ++iter;
+    ++iter_desc;
   }
 }
 
