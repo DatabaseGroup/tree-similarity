@@ -56,6 +56,12 @@ public:
     bool operator==(const StringLabel& other) const;
     /// @}
 
+    /// Return the type field of the label.
+    unsigned int get_type() const;
+
+    /// Return the label field of the label.
+    const std::string& get_label() const;
+
     /// Generates a string representation of the label.
     ///
     /// \return String representation of the label.
