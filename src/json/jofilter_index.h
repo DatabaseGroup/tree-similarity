@@ -1,5 +1,5 @@
 // The MIT License (MIT)
-// Copyright (c) 2020 Thomas Huetter.
+// Copyright (c) 2021 Thomas Huetter.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -19,6 +19,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+/// \file json/jofilter_index.h
+///
+/// \details
+/// Contains the declaration of the JEDI-Order class. Computes our JOFilter. 
+/// Complexity: O(|T1|*tau) time and O(log(|T1|)*tau + |T2|) memory.
+
 #pragma once
 
 #include <vector>
@@ -29,31 +35,28 @@
 #include "matrix.h"
 #include "label_dictionary.h"
 #include "tree_indexer.h"
-#include "ted_algorithm.h"
+#include "jedi_algorithm.h"
 
-namespace ted_ub {
+namespace json {
 
-/**
- * Implements Constrained Tree Edit Distance based on Wang 2008.
- * Runtime: O(|T1||T2|), Memory: O(log(|T1|)|T2|).
- *
- * NOTE: only node::TreeIndexCTED or its superset can be used with CTEDTreeIndex.
- */
-template <typename CostModel, typename TreeIndex = node::TreeIndexCTED>
-class MODPJEDIndex : public ted::TEDAlgorithm<CostModel, TreeIndex> {
+template <typename CostModel, typename TreeIndex = node::TreeIndexJSON>
+class JOFilterTreeIndex : public json::JEDIAlgorithm<CostModel, TreeIndex> {
 
   // Base class members made visible for this class.
-  using ted::TEDAlgorithm<CostModel, TreeIndex>::TEDAlgorithm;
-  using ted::TEDAlgorithm<CostModel, TreeIndex>::subproblem_counter_;
-  using ted::TEDAlgorithm<CostModel, TreeIndex>::ted;
-  using ted::TEDAlgorithm<CostModel, TreeIndex>::c_;
+  using json::JEDIAlgorithm<CostModel, TreeIndex>::JEDIAlgorithm;
+  using json::JEDIAlgorithm<CostModel, TreeIndex>::subproblem_counter_;
+  using json::JEDIAlgorithm<CostModel, TreeIndex>::jedi;
+  using json::JEDIAlgorithm<CostModel, TreeIndex>::jedi_k;
+  using json::JEDIAlgorithm<CostModel, TreeIndex>::c_;
 
 public:
-  /// Implements ted function from the TEDAlgorithm<CostModel, TreeIndex> class.
-  double ted(const TreeIndex& t1, const TreeIndex& t2);
+  /// Implements jedi function from the JEDIAlgorithm<CostModel, TreeIndex> 
+  /// class.
+  double jedi(const TreeIndex& t1, const TreeIndex& t2);
 
-  /// Implements ted function from the TEDAlgorithm<CostModel, TreeIndex> class.
-  double ted_k(const TreeIndex& t1, const TreeIndex& t2, const double threshold);
+  /// Implements ted function from the JEDIAlgorithm<CostModel, TreeIndex> class 
+  /// leveraging a given threshold.
+  double jedi_k(const TreeIndex& t1, const TreeIndex& t2, const double threshold);
 
 private:
   // Costs to delete T1[i].
@@ -83,6 +86,6 @@ private:
 };
 
 // Implementation details.
-#include "modpjed_index_impl.h"
+#include "jofilter_index_impl.h"
 
 }

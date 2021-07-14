@@ -508,7 +508,8 @@ class TreeIndexJSON :
   public PostLToHeight,
   public PostLToOrderedChildSize,
   public PostLToFavorableChildOrder,
-  public PostLToLeftSibling
+  public PostLToLeftSibling,
+  public InvertedListLabelIdToPostL
 {};
 
 /// All tree indexes. Used for correctness tests and prototyping.

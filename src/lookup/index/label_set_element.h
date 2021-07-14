@@ -19,7 +19,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/// \file join/tjoin/label_set_element.h
+/// \file lookup/index/label_set_element.h
 ///
 /// \details
 /// Structure a label set element. Containing the id, number of nodes per label, 

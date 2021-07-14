@@ -1,5 +1,5 @@
 // The MIT License (MIT)
-// Copyright (c) 2020 Thomas Huetter
+// Copyright (c) 2021 Thomas Huetter
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -19,11 +19,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/// \file ted_ub/dpjed_index.h
+/// \file json/jedi_baseline_index.h
 ///
 /// \details
-/// Contains the declaration of the document preservering JSON edit distance 
-/// class.
+/// Contains the declaration of the JSON edit distance class. Based on a 
+/// combination of Kaizhong Zhang. “Algorithms for the constrained editing 
+/// distance between ordered labeled trees and related problems”. In: Pattern 
+/// Recognition (1995) and Kaizhong Zhang. “A constrained edit distance between 
+/// unordered labeled trees”. In: Algorithmica 15.3 (1996). Baseline algorithm 
+/// to QuickJEDI.
 
 #pragma once
 
@@ -35,25 +39,30 @@
 #include "matrix.h"
 #include "label_dictionary.h"
 #include "tree_indexer.h"
-#include "ted_algorithm.h"
+#include "jedi_algorithm.h"
 
-namespace dpjed_ub {
+namespace json {
 
 /**
- * Implements Document Preserving JSON Edit Distance (DPJED).
+ * Implements the JSON Edit Distance (JEDI).
  */
-template <typename CostModel, typename TreeIndex = node::TreeIndexDPJED>
-class DPJEDTreeIndex : public ted::TEDAlgorithm<CostModel, TreeIndex> {
+template <typename CostModel, typename TreeIndex = node::TreeIndexJSON>
+class JEDIBaselineTreeIndex : public json::JEDIAlgorithm<CostModel, TreeIndex> {
 
   // Base class members made visible for this class.
-  using ted::TEDAlgorithm<CostModel, TreeIndex>::TEDAlgorithm;
-  using ted::TEDAlgorithm<CostModel, TreeIndex>::subproblem_counter_;
-  using ted::TEDAlgorithm<CostModel, TreeIndex>::ted;
-  using ted::TEDAlgorithm<CostModel, TreeIndex>::c_;
+  using json::JEDIAlgorithm<CostModel, TreeIndex>::JEDIAlgorithm;
+  using json::JEDIAlgorithm<CostModel, TreeIndex>::subproblem_counter_;
+  using json::JEDIAlgorithm<CostModel, TreeIndex>::jedi;
+  using json::JEDIAlgorithm<CostModel, TreeIndex>::jedi_k;
+  using json::JEDIAlgorithm<CostModel, TreeIndex>::c_;
 
 public:
-  /// Implements ted function from the DPJEDAlgorithm<CostModel, TreeIndex> class.
-  double ted(const TreeIndex& t1, const TreeIndex& t2);
+  /// Implements ted function from the JEDIAlgorithm<CostModel, TreeIndex> class.
+  double jedi(const TreeIndex& t1, const TreeIndex& t2);
+
+  /// Implements ted function from the JEDIAlgorithm<CostModel, TreeIndex> class 
+  /// leveraging a given threshold.
+  double jedi_k(const TreeIndex& t1, const TreeIndex& t2, const double threshold);
 
 // Member variables.
 private:
@@ -200,6 +209,6 @@ private:
 };
 
 // Implementation details.
-#include "dpjed_index_impl.h"
+#include "jedi_baseline_index_impl.h"
 
 }

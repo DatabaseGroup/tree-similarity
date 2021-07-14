@@ -50,47 +50,7 @@ public:
       std::vector<node::Node<Label>>& trees_collection,
       unsigned int query_tree_id, const double distance_threshold);
   
-  /// Returns the summed subproblem count of TED algorithm executions.
-  /**
-   * \return sum_subproblem_counter_
-   */
-  long long int get_subproblem_count() const;
-  
-  /// Returns the number of verifications.
-  /**
-   * \return verfications_
-   */
-  long long int get_verification_count() const;
-
-private:
-  /// Number of subproblrems encoutered in the verification step.
-  long long int sum_subproblem_counter_;
-  /// Number of verification computations.
-  long long int verfications_;
-};
-
-/**
- * Implements a scan lookup algorithm for a given verification and upper bound 
- * algorithm.
- */
-template <typename Label, typename VerificationAlgorithm, typename UpperBound>
-class VerificationUBScan {
-
-public:
-  VerificationUBScan();
-  
-  /// Executes the lookup algorithm.
-  /**
-   * \param trees_collection A vector holding an input collection of trees.
-   * \param distance_threshold The maximum number of edit operations that
-   *                           differs two trees in the lookup's result set.
-   * \return A vector with the lookup result.
-   */
-  std::vector<lookup::LookupResultElement> execute_lookup(
-      std::vector<node::Node<Label>>& trees_collection,
-      unsigned int query_tree_id, const double distance_threshold);
-  
-  /// Returns the summed subproblem count of TED algorithm executions.
+  /// Returns the summed subproblem count of JEDI algorithm executions.
   /**
    * \return sum_subproblem_counter_
    */
@@ -129,7 +89,7 @@ public:
       std::vector<node::Node<Label>>& trees_collection,
       unsigned int query_tree_id, const double distance_threshold);
   
-  /// Returns the summed subproblem count of TED algorithm executions.
+  /// Returns the summed subproblem count of JEDI algorithm executions.
   /**
    * \return sum_subproblem_counter_
    */

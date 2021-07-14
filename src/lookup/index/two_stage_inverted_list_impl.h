@@ -45,20 +45,6 @@ void TwoStageInvertedList::build(std::vector<std::pair<int,
       descendants = sets_collection[s].second[e].descendants;
       ancestors = sets_collection[s].second[e].ancestors;
       right_left = sets_collection[s].first - descendants - ancestors - 1;
-      // Create a new entry for element descendants in case it is not yet in the 
-      // map.
-      // if (il_index_[label_id].element_list.find(descendants) == 
-      //     il_index_[label_id].element_list.end()) {
-      //   il_index_[label_id].element_list.insert(
-      //     std::pair<int, std::map<int, std::map<int, std::vector<int>>>> 
-      //     (descendants, std::map<int, std::map<int, std::vector<int>>>()));
-      // }
-      // Insert new index element.
-      // il_index_[label_id].element_list[descendants].insert(
-      //     std::multimap<int, std::pair<int, int>>::value_type(
-      //       sets_collection[s].first - descendants, 
-      //       std::make_pair(s, sets_collection[s].second[e].ancestors)));
-      // std::cout << label_id << " -> " << descendants << " -> " << ancestors << " -> " << right_left << " -> " << s << std::endl;
       il_index_[label_id].element_list[descendants][ancestors][right_left].push_back(s);
     }
   }
@@ -117,7 +103,6 @@ void TwoStageInvertedList::lookup(long int& q_label_id,
           continue;
         }
         // Add all to candidates.
-        // candidates.insert(iter_rl->second);
         for (auto& tree_id : iter_rl->second) {
           candidates.insert(tree_id);
         }

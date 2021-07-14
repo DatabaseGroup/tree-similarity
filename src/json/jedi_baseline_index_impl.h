@@ -1,5 +1,5 @@
 // The MIT License (MIT)
-// Copyright (c) 2020 Thomas Huetter
+// Copyright (c) 2021 Thomas Huetter
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -19,41 +19,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/// \file ted_ub/dpjed_index_impl.h
+/// \file json/jedi_baseline_index_impl.h
 ///
 /// \details
-/// Contains the implementation of the document preservering JSON edit distance 
-/// class.
+/// Contains the implementation of the JSON edit distance class. Based on a 
+/// combination of Kaizhong Zhang. “Algorithms for the constrained editing 
+/// distance between ordered labeled trees and related problems”. In: Pattern 
+/// Recognition (1995) and Kaizhong Zhang. “A constrained edit distance between 
+/// unordered labeled trees”. In: Algorithmica 15.3 (1996). Baseline algorithm 
+/// to QuickJEDI.
 
 
 #pragma once
 
 template <typename CostModel, typename TreeIndex>
-double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
+double JEDIBaselineTreeIndex<CostModel, TreeIndex>::jedi(
     const TreeIndex& t1, const TreeIndex& t2) {
 
   // Reset subproblem counter.
   subproblem_counter_ = 0;
-  // Reset skips and matching counter.
-  nr_of_skips_ = 0;
-  nr_of_matchings_ = 0;
-  nr_of_edit_skips_ = 0;
-  nr_of_edits_ = 0;
   
   int t1_input_size = t1.tree_size_;
   int t2_input_size = t2.tree_size_;
   int larger_tree_size = std::max(t1_input_size, t2_input_size);
   
   // Initialise distance matrices.
-  
-  // TODO: Verify if a move assignment operator is used here.
   dt_ = data_structures::Matrix<double>(t1_input_size+1, t2_input_size+1);
   df_ = data_structures::Matrix<double>(t1_input_size+1, t2_input_size+1);
   e_ = data_structures::Matrix<double>(t1_input_size+1, t2_input_size+1);
   std::vector<std::vector<double> > hungarian_cm
       (2*larger_tree_size, std::vector<double> (2*larger_tree_size, 0));
-  e_row_minima_.resize(2*larger_tree_size);
-  e_col_minima_.resize(2*larger_tree_size);
   
   // Fill the matrices with inf.
   dt_.fill_with(std::numeric_limits<double>::infinity());
@@ -85,14 +80,6 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
   double min_tree_del = std::numeric_limits<double>::infinity();
   double min_for_ren = std::numeric_limits<double>::infinity();
   double min_tree_ren = std::numeric_limits<double>::infinity();
-  unsigned long row_lb = 0;
-  unsigned long col_lb = 0;
-  double ed_ins = -1;
-  double ed_del = -1;
-  double ed_ren = -1;
-  double for_int_del_ub;
-  double ed_lb;
-  unsigned long matrix_size;
 
   for (int i = 1; i <= t1_input_size; ++i) {
     for (int j = 1; j <= t2_input_size; ++j) {
@@ -125,141 +112,87 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
       min_for_ins += df_.at(i, 0);
       min_tree_ins += dt_.at(i, 0);
 
-      // The minimum between insertion and deletion costs is an upper bound.
-      for_int_del_ub = std::min(min_for_del, min_for_ins);
-
-      // Cost for minimal mapping between trees in forest. Worst case is the 
-      // upper bound given by insertion and deletion.
-      min_for_ren = for_int_del_ub;
-      min_tree_ren = for_int_del_ub;
+      // Cost for minimal mapping between trees in forest.
+      min_for_ren = std::numeric_limits<double>::infinity();
+      min_tree_ren = std::numeric_limits<double>::infinity();
+      // If we compare two array nodes, we need to consider the order amoung 
+      // the children subtrees. Therefore, the string edit distance is used 
+      // instead of the Hungarian Algorithm.
+      if (t1.postl_to_type_[i - 1] == 1 && t2.postl_to_type_[j - 1] == 1)
+      {
+        // Compute string edit distance for array children.
+        e_.at(0, 0) = 0;
+        for (unsigned int s = 1; s <= t1.postl_to_children_[i-1].size(); ++s) {
+          e_.at(s, 0) = e_.at(s-1, 0) + dt_.at(t1.postl_to_children_[i-1][s-1] + 1, 0);
+        }
+        for (unsigned int t = 1; t <= t2.postl_to_children_[j-1].size(); ++t) {
+          e_.at(0, t) = e_.at(0, t-1) + dt_.at(0, t2.postl_to_children_[j-1][t-1] + 1);
+        }
+        
+        double a = -1;
+        double b = -1;
+        double c = -1;
+        for (unsigned int s = 1; s <= t1.postl_to_children_[i-1].size(); ++s) {
+          for (unsigned int t = 1; t <= t2.postl_to_children_[j-1].size(); ++t) {
+            ++subproblem_counter_;
+            a = e_.at(s, t-1) + dt_.at(0, t2.postl_to_children_[j-1][t-1] + 1);
+            b = e_.at(s-1, t) + dt_.at(t1.postl_to_children_[i-1][s-1] + 1, 0);
+            c = e_.at(s-1, t-1) + dt_.at(t1.postl_to_children_[i-1][s-1] + 1, t2.postl_to_children_[j-1][t-1] + 1);
+            e_.at(s, t) = a >= b ? b >= c ? c : b : a >= c ? c : a;
+          }
+        }
+        // Assign string edit distance costs for subtree mapping cost.
+        min_for_ren = e_.at(t1.postl_to_children_[i-1].size(), t2.postl_to_children_[j-1].size()); 
+      }
       // In case of two keys, take the costs of mapping their child to one another.
-      if ((t1.postl_to_type_[i - 1] == 2 && t2.postl_to_type_[j - 1] == 2)) {
+      else if (t1.postl_to_type_[i - 1] == 2 && t2.postl_to_type_[j - 1] == 2)
+      {
         // Keys have exactly one child, therefore, [0] always works.
         min_for_ren = dt_.at(t1.postl_to_children_[i-1][0] + 1, 
             t2.postl_to_children_[j-1][0] + 1);
       }
       // Values are leaves, mapping there subforests has cost 0.
-      else if ((t1.postl_to_type_[i - 1] == 3 && t2.postl_to_type_[j - 1] == 3)) {
-        // Keys have exactly one child, therefore, [0] always works.
+      else if (t1.postl_to_type_[i - 1] == 3 && t2.postl_to_type_[j - 1] == 3)
+      {
         min_for_ren = 0;
-      } else {
-        // Comute the unmapped children edit size lower bound.
-        ed_lb = 0;
-        if (t1.postl_to_children_[i-1].size() > t2.postl_to_children_[j-1].size()) {
-          ed_lb = t1.postl_to_ordered_child_size_[i-1][t1.postl_to_children_[i-1].size() - t2.postl_to_children_[j-1].size() - 1];
-        }
-        else if (t1.postl_to_children_[i-1].size() < t2.postl_to_children_[j-1].size()) {
-          ed_lb = t2.postl_to_ordered_child_size_[j-1][t2.postl_to_children_[j-1].size() - t1.postl_to_children_[i-1].size() - 1];
-        }
+      }
+      // If the nodes types are of type other than array, compute the 
+      // Hungarian Algorithm.
+      else
+      {
+        // Build a cost matrix such that each subtree can be mapped to another 
+        // subtree or to an empty tree.
+        unsigned long matrix_size = t1.postl_to_children_[i-1].size() + 
+            t2.postl_to_children_[j-1].size();
 
-        // Compute the subtree size difference lower bound and take max lower 
-        // bound.
-        ed_lb = std::max(ed_lb, 1.0 * abs(int(t1.postl_to_size_[i - 1] - t2.postl_to_size_[j-1])));
-
-        if (for_int_del_ub > ed_lb) {
-          // If we compare two array nodes, we need to consider the order amoung 
-          // the children subtrees. Therefore, the edit distance is used 
-          // instead of the Hungarian Algorithm.
-          if (t1.postl_to_type_[i - 1] == 1 && t2.postl_to_type_[j - 1] == 1) {
-            nr_of_edits_++;
-            // Compute edit distance for array children.
-            e_.at(0, 0) = 0;
-            for (unsigned int s = 1; s <= t1.postl_to_children_[i-1].size(); ++s) {
-              e_.at(s, 0) = e_.at(s-1, 0) + dt_.at(t1.postl_to_children_[i-1][s-1] + 1, 0);
-            }
-            for (unsigned int t = 1; t <= t2.postl_to_children_[j-1].size(); ++t) {
-              e_.at(0, t) = e_.at(0, t-1) + dt_.at(0, t2.postl_to_children_[j-1][t-1] + 1);
-            }
-            
-            for (unsigned int s = 1; s <= t1.postl_to_children_[i-1].size(); ++s) {
-              // Use an upper bound to compute only the band of the matrix.
-              unsigned int sed_s = s > for_int_del_ub ? s - for_int_del_ub : 1;
-              unsigned int sed_e = s + for_int_del_ub;
-              if (sed_e > t2.postl_to_children_[j-1].size()) sed_e = t2.postl_to_children_[j-1].size();
-
-              for (unsigned int t = sed_s; t <= sed_e; ++t) {
-                ++subproblem_counter_;
-                ed_ins = e_.at(s, t-1) + dt_.at(0, t2.postl_to_children_[j-1][t-1] + 1);
-                ed_del = e_.at(s-1, t) + dt_.at(t1.postl_to_children_[i-1][s-1] + 1, 0);
-                ed_ren = e_.at(s-1, t-1) + dt_.at(t1.postl_to_children_[i-1][s-1] + 1, 
-                                                  t2.postl_to_children_[j-1][t-1] + 1);
-                e_.at(s, t) = ed_ins >= ed_del ? ed_del >= ed_ren ? ed_ren : ed_del : 
-                              ed_ins >= ed_ren ? ed_ren : ed_ins;
+        for (unsigned int s = 1; s <= matrix_size; ++s) {
+          for (unsigned int t = 1; t <= matrix_size; ++t) {
+            if (s <= t1.postl_to_children_[i-1].size()) {
+              if (t <= t2.postl_to_children_[j-1].size()) {
+                hungarian_cm[s-1][t-1] = dt_.at(
+                    t1.postl_to_children_[i-1][s-1] + 1, 
+                    t2.postl_to_children_[j-1][t-1] + 1);
+              } else {
+                hungarian_cm[s-1][t-1] = 
+                    t1.postl_to_size_[t1.postl_to_children_[i-1][s-1]];
               }
-            }
-            // Assign string edit distance costs for subtree mapping cost.
-            min_for_ren = e_.at(t1.postl_to_children_[i-1].size(), t2.postl_to_children_[j-1].size());
-          }
-          // If the nodes types are of type other than array, compute the 
-          // Hungarian Algorithm.
-          else {
-            // Build a cost matrix such that each subtree can be mapped to another 
-            // subtree or to an empty tree.
-            matrix_size = t1.postl_to_children_[i-1].size() + t2.postl_to_children_[j-1].size();
-
-            for (unsigned long x = 0; x < matrix_size; x++) {
-              e_row_minima_[x] = std::numeric_limits<double>::infinity();
-              e_col_minima_[x] = std::numeric_limits<double>::infinity();
-            }
-
-            // Sum up the row and column minima of the cost matrix of the Hungarian 
-            // Algorithm. Each provide a lower bound on the result of the bipartite 
-            // matching.
-            for (unsigned long s = 1; s <= matrix_size; ++s) {
-              for (unsigned long t = 1; t <= matrix_size; ++t) {
-                if (s <= t1.postl_to_children_[i-1].size()) {
-                  if (t <= t2.postl_to_children_[j-1].size()) {
-                    hungarian_cm[s-1][t-1] = dt_.at(
-                        t1.postl_to_children_[i-1][s-1] + 1, 
-                        t2.postl_to_children_[j-1][t-1] + 1);
-                  } else {
-                    hungarian_cm[s-1][t-1] = 
-                        t1.postl_to_size_[t1.postl_to_children_[i-1][s-1]];
-                  }
-                } else {
-                  if (t <= t2.postl_to_children_[j-1].size()) {
-                    hungarian_cm[s-1][t-1] = 
-                        t2.postl_to_size_[t2.postl_to_children_[j-1][t-1]];
-                  } else {
-                    hungarian_cm[s-1][t-1] = 0;
-                  }
-                }
-                e_row_minima_[s-1] = std::min(e_row_minima_[s-1], hungarian_cm[s-1][t-1]);
-                e_col_minima_[t-1] = std::min(e_col_minima_[t-1], hungarian_cm[s-1][t-1]);
-              }
-            }
-
-            // Compute lower bounds for rows and columns of the cost matrix of the 
-            // Hungarian Algorithm.
-            row_lb = 0;
-            col_lb = 0;
-            for (unsigned long x = 0; x < matrix_size; x++) {
-              row_lb += e_row_minima_[x];
-              col_lb += e_col_minima_[x];
-            }
-
-            if (for_int_del_ub > std::max(row_lb, col_lb)) {
-              // Filter did not apply, compute Hungarian Algorithm for minimal forest 
-              // mapping.
-              nr_of_matchings_++;
-              min_for_ren = execute_hungarian(hungarian_cm, matrix_size);
             } else {
-              // The lower bound exceeds the upper bound, hence deletion or insertion 
-              // is cheaper.
-              nr_of_skips_++;
+              if (t <= t2.postl_to_children_[j-1].size()) {
+                hungarian_cm[s-1][t-1] = 
+                    t2.postl_to_size_[t2.postl_to_children_[j-1][t-1]];
+              } else {
+                hungarian_cm[s-1][t-1] = 0;
+              }
             }
           }
-        } else {
-          if (t1.postl_to_type_[i - 1] == 1 && t2.postl_to_type_[j - 1] == 1) {
-            nr_of_edit_skips_++;
-          } else {
-            nr_of_skips_++;
-          }
         }
+
+        // Compute Hungarian Algorithm for minimal tree mapping.
+        min_for_ren = execute_hungarian(hungarian_cm, matrix_size);
       }
 
       // Compute minimal forest mapping costs.
-      df_.at(i, j) = min_for_del >= min_for_ins ? 
+      df_.at(i, j) = min_for_del >= min_for_ins ?
           min_for_ins >= min_for_ren ? min_for_ren : min_for_ins : 
           min_for_del >= min_for_ren ? min_for_ren : min_for_del;
       // Compute rename costs for trees i and j.
@@ -272,8 +205,8 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
             t2.postl_to_label_id_[j - 1]);
       }
       // Compute minimal tree mapping costs.
-      dt_.at(i, j) = min_tree_del >= min_tree_ins ? 
-          min_tree_ins >= min_tree_ren ? min_tree_ren : min_tree_ins : 
+      dt_.at(i, j) = min_tree_del >= min_tree_ins ?
+          min_tree_ins >= min_tree_ren ? min_tree_ren : min_tree_ins :
           min_tree_del >= min_tree_ren ? min_tree_ren : min_tree_del;
     }
   }
@@ -281,8 +214,15 @@ double SDPJEDTreeIndex<CostModel, TreeIndex>::ted(
   return dt_.at(t1_input_size, t2_input_size);
 }
 
+template <typename CostModel, typename TreeIndex>
+double JEDIBaselineTreeIndex<CostModel, TreeIndex>::jedi_k(
+    const TreeIndex& t1, const TreeIndex& t2, const double threshold) {
+  // JEDI-Baseline cannot leverage a threshold, therefore discard.
+  return jedi(t1, t2);
+}
+
 template <typename cost_matrixModel, typename TreeIndex>
-void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::print_matrix(
+void JEDIBaselineTreeIndex<cost_matrixModel, TreeIndex>::print_matrix(
     std::vector<std::vector<double> >& cost_matrix)
 {
   double rows = cost_matrix.size();
@@ -300,7 +240,7 @@ void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::print_matrix(
 }
 
 template <typename cost_matrixModel, typename TreeIndex>
-double SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::execute_hungarian(
+double JEDIBaselineTreeIndex<cost_matrixModel, TreeIndex>::execute_hungarian(
     std::vector<std::vector<double> >& cost_matrix,
     unsigned long& matrix_size)
 {
@@ -361,7 +301,7 @@ double SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::execute_hungarian(
 }
 
 template <typename cost_matrixModel, typename TreeIndex>
-void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_one(
+void JEDIBaselineTreeIndex<cost_matrixModel, TreeIndex>::step_one(
     std::vector<std::vector<double> >& cost_matrix,
     unsigned long& matrix_size,
     int& step)
@@ -386,7 +326,7 @@ void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_one(
 }
 
 template <typename cost_matrixModel, typename TreeIndex>
-void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_two(
+void JEDIBaselineTreeIndex<cost_matrixModel, TreeIndex>::step_two(
     std::vector<std::vector<double> >& cost_matrix,
     std::vector<std::vector<double> >& mask_matrix,
     unsigned long& matrix_size,
@@ -418,7 +358,7 @@ void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_two(
 }
 
 template <typename cost_matrixModel, typename TreeIndex>
-void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_three(
+void JEDIBaselineTreeIndex<cost_matrixModel, TreeIndex>::step_three(
     std::vector<std::vector<double> >& mask_matrix,
     unsigned long& matrix_size,
     std::vector<double>& col_cover,
@@ -455,7 +395,7 @@ void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_three(
 }
 
 template <typename cost_matrixModel, typename TreeIndex>
-void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::find_a_zero(
+void JEDIBaselineTreeIndex<cost_matrixModel, TreeIndex>::find_a_zero(
     std::vector<std::vector<double> >& cost_matrix,
     unsigned long& matrix_size,
     std::vector<double>& row_cover,
@@ -479,7 +419,7 @@ void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::find_a_zero(
 }
 
 template <typename cost_matrixModel, typename TreeIndex>
-bool SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::star_in_row(
+bool JEDIBaselineTreeIndex<cost_matrixModel, TreeIndex>::star_in_row(
     std::vector<std::vector<double> >& mask_matrix,
     unsigned long& matrix_size, int row)
 {
@@ -496,7 +436,7 @@ bool SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::star_in_row(
 }
 
 template <typename cost_matrixModel, typename TreeIndex>
-void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::find_star_in_row(
+void JEDIBaselineTreeIndex<cost_matrixModel, TreeIndex>::find_star_in_row(
     std::vector<std::vector<double> >& mask_matrix,
     unsigned long& matrix_size, int row, int& col)
 {
@@ -511,7 +451,7 @@ void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::find_star_in_row(
 }
 
 template <typename cost_matrixModel, typename TreeIndex>
-void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_four(
+void JEDIBaselineTreeIndex<cost_matrixModel, TreeIndex>::step_four(
     std::vector<std::vector<double> >& cost_matrix,
     std::vector<std::vector<double> >& mask_matrix,
     unsigned long& matrix_size,
@@ -552,7 +492,7 @@ void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_four(
 }
 
 template <typename cost_matrixModel, typename TreeIndex>
-void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::find_star_in_col(
+void JEDIBaselineTreeIndex<cost_matrixModel, TreeIndex>::find_star_in_col(
     std::vector<std::vector<double> >& mask_matrix,
     unsigned long& matrix_size,
     int& row, int col)
@@ -568,7 +508,7 @@ void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::find_star_in_col(
 }
 
 template <typename cost_matrixModel, typename TreeIndex>
-void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::find_prime_in_row(
+void JEDIBaselineTreeIndex<cost_matrixModel, TreeIndex>::find_prime_in_row(
     std::vector<std::vector<double> >& mask_matrix,
     unsigned long& matrix_size,
     int row, int& col)
@@ -584,7 +524,7 @@ void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::find_prime_in_row(
 }
 
 template <typename cost_matrixModel, typename TreeIndex>
-void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::augment_path(
+void JEDIBaselineTreeIndex<cost_matrixModel, TreeIndex>::augment_path(
     std::vector<std::vector<double> >& mask_matrix, 
     std::vector<std::vector<double> >& path)
 {
@@ -602,7 +542,7 @@ void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::augment_path(
 }
 
 template <typename cost_matrixModel, typename TreeIndex>
-void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::clear_covers(
+void JEDIBaselineTreeIndex<cost_matrixModel, TreeIndex>::clear_covers(
     unsigned long& matrix_size,
     std::vector<double>& row_cover,
     std::vector<double>& col_cover)
@@ -618,7 +558,7 @@ void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::clear_covers(
 }
 
 template <typename cost_matrixModel, typename TreeIndex>
-void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::erase_primes(
+void JEDIBaselineTreeIndex<cost_matrixModel, TreeIndex>::erase_primes(
     std::vector<std::vector<double> >& mask_matrix,
     unsigned long& matrix_size)
 {
@@ -635,7 +575,7 @@ void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::erase_primes(
 }
 
 template <typename cost_matrixModel, typename TreeIndex>
-void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_five(
+void JEDIBaselineTreeIndex<cost_matrixModel, TreeIndex>::step_five(
     std::vector<std::vector<double> >& mask_matrix,
     unsigned long& matrix_size,
     std::vector<double>& row_cover,
@@ -676,7 +616,7 @@ void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_five(
 }
 
 template <typename cost_matrixModel, typename TreeIndex>
-void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::find_smallest(
+void JEDIBaselineTreeIndex<cost_matrixModel, TreeIndex>::find_smallest(
     std::vector<std::vector<double> >& cost_matrix,
     unsigned long& matrix_size,
     std::vector<double>& row_cover,
@@ -699,7 +639,7 @@ void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::find_smallest(
 }
 
 template <typename cost_matrixModel, typename TreeIndex>
-void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_six(
+void JEDIBaselineTreeIndex<cost_matrixModel, TreeIndex>::step_six(
     std::vector<std::vector<double> >& cost_matrix,
     unsigned long& matrix_size,
     std::vector<double>& row_cover,
@@ -728,7 +668,7 @@ void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_six(
 }
 
 template <typename cost_matrixModel, typename TreeIndex>
-void SDPJEDTreeIndex<cost_matrixModel, TreeIndex>::step_seven(
+void JEDIBaselineTreeIndex<cost_matrixModel, TreeIndex>::step_seven(
     std::vector<std::vector<double> >& cost_matrix,
     std::vector<std::vector<double> >& mask_matrix,
     unsigned long& matrix_size,

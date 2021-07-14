@@ -58,13 +58,13 @@ std::vector<lookup::LookupResultElement>
     node::index_tree(tc, trees_collection[candidate_tree_id], ld, cm);
 
     // Compute the upper bound between the query and candidate tree.
-    upper_bound = upper_bound_algorithm.ted_k(tq, tc, distance_threshold);
+    upper_bound = upper_bound_algorithm.jedi_k(tq, tc, distance_threshold);
     if (upper_bound <= distance_threshold) {
       result_set.emplace_back(query_tree_id, candidate_tree_id, -1, upper_bound, -1);
     } else {
       verfications_++;
       // Compute the distance between the query and candidate tree.
-      distance = verification_algorithm.ted(tq, tc);
+      distance = verification_algorithm.jedi(tq, tc);
       if (distance <= distance_threshold) {
         result_set.emplace_back(query_tree_id, candidate_tree_id, -1, upper_bound, distance);
       }
@@ -84,73 +84,6 @@ long long int VerificationUBkScan<Label,
 
 template <typename Label, typename VerificationAlgorithm, typename UpperBound>
 long long int VerificationUBkScan<Label,
-    VerificationAlgorithm, UpperBound>::get_verification_count() const {
-  return verfications_;
-}
-
-// ****** Upper bound without leveraging the threshold.
-
-template <typename Label, typename VerificationAlgorithm, typename UpperBound>
-VerificationUBScan<Label, VerificationAlgorithm, 
-    UpperBound>::VerificationUBScan() {
-  verfications_ = 0;}
-
-template <typename Label, typename VerificationAlgorithm, typename UpperBound>
-std::vector<lookup::LookupResultElement> 
-    VerificationUBScan<Label, VerificationAlgorithm, UpperBound>::execute_lookup(
-    std::vector<node::Node<Label>>& trees_collection, 
-    unsigned int query_tree_id, const double distance_threshold) {
-
-  label::LabelDictionary<Label> ld;
-  typename VerificationAlgorithm::AlgsCostModel cm(ld);
-
-  VerificationAlgorithm verification_algorithm(cm);
-  UpperBound upper_bound_algorithm(cm);
-  typename VerificationAlgorithm::AlgsTreeIndex tq;
-  typename VerificationAlgorithm::AlgsTreeIndex tc;
-
-  // Stores the result set.
-  std::vector<lookup::LookupResultElement> result_set;
-  // Used to store the computed distance value.
-  double distance = std::numeric_limits<double>::infinity();
-  double upper_bound = std::numeric_limits<double>::infinity();
-
-  // Index query tree.
-  node::index_tree(tq, trees_collection[query_tree_id], ld, cm);
-
-  // Verify which candidate trees are part of the result set.
-  for (unsigned int candidate_tree_id = 0; 
-      candidate_tree_id < trees_collection.size(); candidate_tree_id++) {
-    // Index candidate tree.
-    node::index_tree(tc, trees_collection[candidate_tree_id], ld, cm);
-
-    // Compute the upper bound between the query and candidate tree.
-    upper_bound = upper_bound_algorithm.ted(tq, tc);
-    if (upper_bound <= distance_threshold) {
-      result_set.emplace_back(query_tree_id, candidate_tree_id, -1, upper_bound, -1);
-    } else {
-      verfications_++;
-      // Compute the distance between the query and candidate tree.
-      distance = verification_algorithm.ted(tq, tc);
-      if (distance <= distance_threshold) {
-        result_set.emplace_back(query_tree_id, candidate_tree_id, -1, upper_bound, distance);
-      }
-    }
-    // Sum up all number of subproblems
-    sum_subproblem_counter_ += verification_algorithm.get_subproblem_count();
-  }
-
-  return result_set;
-}
-
-template <typename Label, typename VerificationAlgorithm, typename UpperBound>
-long long int VerificationUBScan<Label,
-    VerificationAlgorithm, UpperBound>::get_subproblem_count() const {
-  return sum_subproblem_counter_;
-}
-
-template <typename Label, typename VerificationAlgorithm, typename UpperBound>
-long long int VerificationUBScan<Label,
     VerificationAlgorithm, UpperBound>::get_verification_count() const {
   return verfications_;
 }
@@ -191,7 +124,7 @@ std::vector<lookup::LookupResultElement>
 
     // Compute the distance between the query and candidate tree.
     verfications_++;
-    distance = verification_algorithm.ted(tq, tc);
+    distance = verification_algorithm.jedi(tq, tc);
     if (distance <= distance_threshold) {
       result_set.emplace_back(query_tree_id, candidate_tree_id, -1, -1, distance);
     }

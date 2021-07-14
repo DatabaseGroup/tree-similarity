@@ -1,5 +1,5 @@
 // The MIT License (MIT)
-// Copyright (c) 2020 Thomas Huetter
+// Copyright (c) 2021 Thomas Huetter
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -19,11 +19,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/// \file ted_ub/dpjed_index.h
+/// \file json/quickjedi_index.h
 ///
 /// \details
-/// Contains the declaration of the document preservering JSON edit distance 
-/// class.
+/// Contains the declaration of our fast JSON edit distance class.
 
 #pragma once
 
@@ -36,25 +35,30 @@
 #include "matrix.h"
 #include "label_dictionary.h"
 #include "tree_indexer.h"
-#include "ted_algorithm.h"
+#include "jedi_algorithm.h"
 
-namespace sdpjed_ub {
+namespace json {
 
 /**
- * Implements Document Preserving JSON Edit Distance (DPJED).
+ * Implements our fast JSON Edit Distance (JED) algorithm.
  */
-template <typename CostModel, typename TreeIndex = node::TreeIndexDPJED>
-class SDPJEDTreeIndex : public ted::TEDAlgorithm<CostModel, TreeIndex> {
+template <typename CostModel, typename TreeIndex = node::TreeIndexJSON>
+class QuickJEDITreeIndex : public json::JEDIAlgorithm<CostModel, TreeIndex> {
 
   // Base class members made visible for this class.
-  using ted::TEDAlgorithm<CostModel, TreeIndex>::TEDAlgorithm;
-  using ted::TEDAlgorithm<CostModel, TreeIndex>::subproblem_counter_;
-  using ted::TEDAlgorithm<CostModel, TreeIndex>::ted;
-  using ted::TEDAlgorithm<CostModel, TreeIndex>::c_;
+  using json::JEDIAlgorithm<CostModel, TreeIndex>::JEDIAlgorithm;
+  using json::JEDIAlgorithm<CostModel, TreeIndex>::subproblem_counter_;
+  using json::JEDIAlgorithm<CostModel, TreeIndex>::jedi;
+  using json::JEDIAlgorithm<CostModel, TreeIndex>::jedi_k;
+  using json::JEDIAlgorithm<CostModel, TreeIndex>::c_;
 
 public:
-  /// Implements ted function from the DPJEDAlgorithm<CostModel, TreeIndex> class.
-  double ted(const TreeIndex& t1, const TreeIndex& t2);
+  /// Implements ted function from the JEDIAlgorithm<CostModel, TreeIndex> class.
+  double jedi(const TreeIndex& t1, const TreeIndex& t2);
+
+  /// Implements ted function from the JEDIAlgorithm<CostModel, TreeIndex> class 
+  /// leveraging a given threshold.
+  double jedi_k(const TreeIndex& t1, const TreeIndex& t2, const double threshold);
 
 public:
   /// Number of skipped bipartite matchings.
@@ -215,6 +219,6 @@ private:
 };
 
 // Implementation details.
-#include "sdpjed_index_impl.h"
+#include "quickjedi_index_impl.h"
 
 }
