@@ -41,7 +41,7 @@ JSONLabel::JSONLabel(const std::string& label) {
   }
   // Set type to 2 in case of an key. A key is indicated by a colon after
   // the key itself.
-  else if (label.back() == ':') {
+  else if (label.length() >= 2 && label[label.length() - 2] == ':') {
     type_ = 2;
   }
   // Otherwise, set type to 3 in case of a value.
