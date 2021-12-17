@@ -1,0 +1,515 @@
+# Test case 1
+{f{a}{e{c{b}}{d}}}
+{f{a}{c{e{b}{d}}}}
+2
+2.0
+# Test case 1a; k=1<TED
+{f{a}{e{c{b}}{d}}}
+{f{a}{c{e{b}{d}}}}
+1
+INF
+# Test case 2
+{a{b}{c{e}{f}}{d}}
+{a{b}{c{e}}{d}}
+1
+1.0
+# Test case 2a; k=0<TED
+{a{b}{c{e}{f}}{d}}
+{a{b}{c{e}}{d}}
+0
+INF
+# Test case 3
+{a{b}{c{e}{f}}{d}}
+{a{b}{c}{d}}
+2
+2.0
+# Test case 3a; k=1<TED
+{a{b}{c{e}{f}}{d}}
+{a{b}{c}{d}}
+1
+INF
+# Test case 4
+{a{x}{c{e}{f}}{d}}
+{a{b}{c}{d}}
+3
+3.0
+# Test case 4a; k=2<TED
+{a{x}{c{e}{f}}{d}}
+{a{b}{c}{d}}
+2
+INF
+# Test case 5
+{a{b}{c{e}{f}}{d}}
+{a{b}{c}}
+3
+3.0
+# Test case 5a; k=2<TED
+{a{b}{c{e}{f}}{d}}
+{a{b}{c}}
+2
+INF
+# Test case 6
+{a{b{i}{j{u}}}{c{d}{e{q{n}{m}}}}{f{w}}}
+{a}
+12
+12.0
+# Test case 7
+{a{b{i}{j{u}}}{c{d}{e{q{n}{m}}}}{f{w}}}
+{x}
+13
+13.0
+# Test case 8
+{a{b{i}{j{u}}}{c{d}{e}}{f{w}}}
+{x}
+10
+10.0
+# Test case 9
+{a{b}{c{e}{f}}{d}}
+{a{b}{c{e}{f}}{d}}
+0
+0.0
+# Test case 9a; k=1>TED
+{a{b}{c{e}{f}}{d}}
+{a{b}{c{e}{f}}{d}}
+1
+0.0
+# Test case 10
+{a{b{i}{j}}{c{d}{e}}{f{w}}}
+{x}
+9
+9.0
+# Test case 11
+{a{b{i}}{c{d}{e}}{f{w}}}
+{x}
+8
+8.0
+# Test case 12
+{a{b}{c{d}{e}}{f{w}}}
+{x}
+7
+7.0
+# Test case 13
+{a{b}{c{d}{e}}{f}}
+{x}
+6
+6.0
+# Test case 14
+{a{m}{r}{d}{e{z}{i}{l}{t{o}{k}{g}{h}}}}
+{x}
+13
+13.0
+# Test case 15
+{a{m{z{o}{k}{g}{h}}{i}{l}{t}}{r}{d}{e}}
+{x}
+13
+13.0
+# Test case 16
+{a{r}{d}{e{i}{l}{t{k}{g}{h}}}}
+{x}
+10
+10.0
+# Test case 17
+{x}
+{a{r}{d}{e{i}{l}{t{k}{g}{h}}}}
+10
+10.0
+# Test case 18
+{a{r}{d}{e{s}{t}}}
+{x}
+6
+6.0
+# Test case 19
+{x}
+{a{d}{e{l}{t{g}{h}}}}
+7
+7.0
+# Test case 20
+{a{d}{e{l}{t{g}{h}}}}
+{x}
+7
+7.0
+# Test case 21
+{a{d}{e}{f}{l}{t}}
+{f}
+5
+5.0
+# Test case 22
+{a{d}{e}{f}{l}{t}}
+{a}
+5
+5.0
+# Test case 23
+{a{d}{e}{f}{l}{t}}
+{x}
+6
+6.0
+# Test case 24
+{a{d}{e}{f}}
+{x}
+4
+4.0
+# Test case 25
+{x}
+{a{d}{e}{f}}
+4
+4.0
+# Test case 26
+{a{b{c}{d{e{f}{g}}{h}}}{i}}
+{e{f}{g}}
+6
+6.0
+# Test case 27
+{a{b}{c{d}{e{f}{g{h}{i}}}}}
+{g{h}{i}}
+6
+6.0
+# Test case 28
+{a{b{d{f{h}{i}}{g}}{e}}{c}}
+{f{h}{i}}
+6
+6.0
+# Test case 29
+{a{b}{c{d{f}{g{h}{i}}}{e}}}
+{g{h}{i}}
+6
+6.0
+# Test case 30
+{b{d}{e}}
+{g{h}{i}}
+3
+3.0
+# Test case 30a; k=1<TED
+{b{d}{e}}
+{g{h}{i}}
+1
+INF
+# Test case 31
+{a{b{d}{e}}{c}}
+{f{g{h}{i}}{k}}
+5
+5.0
+# Test case 31a; k=3<TED
+{a{b{d}{e}}{c}}
+{f{g{h}{i}}{k}}
+3
+INF
+# Test case 32
+{f{d{a}{c{b}}}{e}}
+{f{c{d{a}{b}}{e}}}
+2
+2.0
+# Test case 32a; k=1<TED
+{f{d{a}{c{b}}}{e}}
+{f{c{d{a}{b}}{e}}}
+1
+INF
+# Test case 33
+{f{d{a}{c{b}}}{e}}
+{f{c{d{a}{b}}}{x}}
+3
+3.0
+# Test case 33a; k=2<TED
+{f{d{a}{c{b}}}{e}}
+{f{c{d{a}{b}}}{x}}
+2
+INF
+# Test case 34
+{f{d{a}{c{b}}}{e}}
+{f{c{d{a}{b}}}{e}}
+2
+2.0
+# Test case 34a; k=1<TED
+{f{d{a}{c{b}}}{e}}
+{f{c{d{a}{b}}}{e}}
+1
+INF
+# Test case 35
+{a{a{a}{a}}}
+{a{a{a}}}
+1
+1.0
+# Test case 36
+{a{b}{c{d}{e}}}
+{a{b{c}}{d}{e}}
+2
+2.0
+# Test case 36a; k=1<TED
+{a{b}{c{d}{e}}}
+{a{b{c}}{d}{e}}
+1
+INF
+# Test case 37
+{a{b{c}{d{e}{f}}}{x}}
+{b{c}{d{e}{f}}}
+2
+2.0
+# Test case 38
+{a{b{c}{d{e}{f}}}}
+{b{c}{d{e}{f}}}
+1
+1.0
+# Test case 39
+{a{b{c}{d{e}{f}}}}
+{a{c}{e}{f}}
+2
+2.0
+# Test case 40
+{a{b{c}{d}}}
+{a{c}{d}}
+1
+1.0
+# Test case 41
+{a{b{c}}{d}}
+{b{c}{a{d}}}
+3
+3.0
+# Test case 41a; k=2<TED
+{a{b{c}}{d}}
+{b{c}{a{d}}}
+2
+INF
+# Test case 42
+{a{b}{c}}
+{b{c}}
+2
+2.0
+# Test case 43
+{a{b}{c}}
+{b}
+2
+2.0
+# Test case 44
+{a{b}}
+{b}
+1
+1.0
+# Test case 45
+{a{b}{c}}
+{x}
+3
+3.0
+# Test case 46
+{a{b}{c}}
+{a}
+2
+2.0
+# Test case 47
+{a{b}}
+{x{z}}
+2
+2.0
+# Test case 48
+{a{b}}
+{a{b}}
+0
+0.0
+# Test case 49
+{a{b}}
+{x}
+2
+2.0
+# Test case 50
+{a{b}}
+{a}
+1
+1.0
+# Test case 51
+{a}
+{x}
+1
+1.0
+# Test case 52
+{a}
+{a}
+0
+0.0
+# Test case 53
+{a}
+{b}
+1
+1.0
+# Test case 54
+{a{b}}
+{b}
+1
+1.0
+# Test case 55
+{a{b}{c}}
+{b}
+2
+2.0
+# Test case 56
+{a{b}{c}}
+{b{c}}
+2
+2.0
+# Test case 57
+{a{b{c}}{d}}
+{b{c}{a{d}}}
+3
+3.0
+# Test case 57a; k=2<TED
+{a{b{c}}{d}}
+{b{c}{a{d}}}
+2
+INF
+# Test case 57b; k=1<TED
+{a{b{c}}{d}}
+{b{c}{a{d}}}
+1
+INF
+# Test case 58
+{a{b{c}{d}}}
+{a{c}{d}}
+1
+1.0
+# Test case 59
+{a{b{c}{d{e}{f}}}}
+{a{c}{e}{f}}
+2
+2.0
+# Test case 60
+{a{b{c}{d{e}{f}}}}
+{b{c}{d{e}{f}}}
+1
+1.0
+# Test case 61
+{a{b{c}{d{e}{f}}}{x}}
+{b{c}{d{e}{f}}}
+2
+2.0
+# Test case 62
+{a{b}{c{d}{e}}}
+{a{b{c}}{d}{e}}
+2
+2.0
+# Test case 63
+{a{a{a}{a}}}
+{a{a{a}}}
+1
+1.0
+# Test case 64
+{a{a{a}{a{a}{a}}}{a{a}{a{a}}{a}}}
+{a{a{a}{a}{a}}{a{a{a}{a}{a}}}}
+3
+3.0
+# Test case 64a; k=2<TED
+{a{a{a}{a{a}{a}}}{a{a}{a{a}}{a}}}
+{a{a{a}{a}{a}}{a{a{a}{a}{a}}}}
+2
+INF
+# Test case 65
+{a{b{d}{e}}{c}}
+{f{g{h}{i}}{k}}
+5
+5.0
+# Test case 65a; k=4<TED
+{a{b{d}{e}}{c}}
+{f{g{h}{i}}{k}}
+4
+INF
+# Test case 65b; k=3<TED
+{a{b{d}{e}}{c}}
+{f{g{h}{i}}{k}}
+3
+INF
+# Test case 65c; k=2<TED
+{a{b{d}{e}}{c}}
+{f{g{h}{i}}{k}}
+2
+INF
+# Test case 66
+{a{b{c}{d{e}{f}}}}
+{b{c}{e}{f}}
+2
+2.0
+# Test case 67
+{f{d{a}{c{b}}}{e}}
+{f{c{d{a}{b}}}{e}}
+2
+2.0
+# Test case 68
+{f{d{a}{c{b}}}{e}}
+{f{c{d{a}{b}}}{x}}
+3
+3.0
+# Test case 68a; k=2<TED
+{f{d{a}{c{b}}}{e}}
+{f{c{d{a}{b}}}{x}}
+2
+INF
+# Test case 68b; k=1<TED
+{f{d{a}{c{b}}}{e}}
+{f{c{d{a}{b}}}{x}}
+1
+INF
+# Test case 69
+{f{d{a}{c{b}}}{e}}
+{f{c{d{a}{b}}{e}}}
+2
+2.0
+# Test case 70
+{2{6}{8{5{3{6}{3}{2}}}}{6}}
+{1{2}{0}}
+8
+8.0
+# Test case 71
+{8{9{8{5}{9{6}{9}{7}}{0{6}}}{0}}}
+{1{8}{4{4}{0{3{3{3}{0}}}}}}
+14
+14.0
+# Test case 72
+{1{1}}
+{c{a{b{4{b}{0{3}}{0{c}{9}}}}{1}{a}}{7}{d}}
+13
+13.0
+# Test case 73
+{1{2{2{5}{7{6{7}}}}}{0}}
+{0{2}{1}{1}}
+8
+8.0
+# Test case 74
+{7{1{3{c{j{c}{j}}{2{d}}{8{5}{a}{3}}}}}{m{2{c{e}{4}{b{h}{f}{k}}}}}{d}}
+{1{1}}
+22
+22.0
+# Test case 75
+{1{1}{2}}
+{3{8{4{3}{9{0}{4}{7}}}}{7}{8}}
+10
+10.0
+# Test case 77
+{1{3}{5{2{6}{5}{5}}}{5}}
+{0{3}{2}{1}}
+6
+6.0
+# Test case 78
+{3{8{n{q}{3{i{r}}}}{p{n{4}{n{s}{l}}}}}{n{3{e{h}{g}{m{j}{6}}}}{a}{r}}{2{p{j{n{f}}}}{n}}}
+{0{1}}
+29
+29.0
+# Swissprot case; TED=74; k=65; result<k; should be inf
+{entry{created{2009-05-05}}{dataset{Swiss-Prot}}{modified{2017-06-07}}{version{36}}{accession{Q88420}}{name{ORF14_SPV1C}}{protein{recommendedName{fullName{Uncharacterized protein ORF14}}}}{gene{name{type{ORF}}{ORF14}}}{organism{name{type{scientific}}{Spiroplasma virus SpV1-C74}}{name{type{common}}{SpV1}}{dbReference{id{185959}}{type{NCBI Taxonomy}}}{lineage{taxon{Viruses}}{taxon{ssDNA viruses}}{taxon{Inoviridae}}{taxon{Vespertiliovirus}}}}{organismHost{name{type{scientific}}{Spiroplasma melliferum}}{dbReference{id{2134}}{type{NCBI Taxonomy}}}}{reference{key{1}}{citation{date{1996}}{first{134}}{last{140}}{name{Curr. Microbiol.}}{type{journal article}}{volume{32}}{title{Spiroplasma citri Virus SpV1: Characterization of viral sequences present in the spiroplasmal host chromosome.}}{authorList{person{name{Bebear C.M.}}}{person{name{Aullo P.}}}{person{name{Bove J.}}}{person{name{Renaudin J.}}}}}{scope{NUCLEOTIDE SEQUENCE [GENOMIC DNA]}}}{dbReference{id{U28974}}{type{EMBL}}{property{type{protein sequence ID}}{value{AAA85013.1}}}{property{type{molecule type}}{value{Genomic_DNA}}}}{dbReference{id{NP_620627.1}}{type{RefSeq}}{property{type{nucleotide sequence ID}}{value{NC_003793.1}}}}{dbReference{id{944358}}{type{GeneID}}}{dbReference{id{vg:944358}}{type{KEGG}}}{dbReference{id{UP000001764}}{type{Proteomes}}{property{type{component}}{value{Genome}}}}{proteinExistence{type{predicted}}}{keyword{id{KW-0181}}{Complete proteome}}{keyword{id{KW-1185}}{Reference proteome}}{feature{description{Uncharacterized protein ORF14}}{id{PRO_0000372074}}{type{chain}}{location{begin{position{1}}}{end{position{36}}}}}{sequence{checksum{075702B9C9A0FEA0}}{length{36}}{mass{4269}}{modified{1996-11-01}}{version{1}}{MQTKQYFILRSLVKKYGKDNVINTVNKIAKDIEIKK}}}
+{entry{created{2005-09-13}}{dataset{Swiss-Prot}}{modified{2017-04-12}}{version{26}}{accession{Q5UQP6}}{name{YL456_MIMIV}}{protein{recommendedName{fullName{Uncharacterized protein L456}}}}{gene{name{type{ordered locus}}{MIMI_L456}}}{organism{name{type{scientific}}{Acanthamoeba polyphaga mimivirus}}{name{type{common}}{APMV}}{dbReference{id{212035}}{type{NCBI Taxonomy}}}{lineage{taxon{Viruses}}{taxon{dsDNA viruses, no RNA stage}}{taxon{Mimiviridae}}{taxon{Mimivirus}}}}{organismHost{name{type{scientific}}{Acanthamoeba polyphaga}}{name{type{common}}{Amoeba}}{dbReference{id{5757}}{type{NCBI Taxonomy}}}}{reference{key{1}}{citation{date{2004}}{first{1344}}{last{1350}}{name{Science}}{type{journal article}}{volume{306}}{title{The 1.2-megabase genome sequence of Mimivirus.}}{authorList{person{name{Raoult D.}}}{person{name{Audic S.}}}{person{name{Robert C.}}}{person{name{Abergel C.}}}{person{name{Renesto P.}}}{person{name{Ogata H.}}}{person{name{La Scola B.}}}{person{name{Susan M.}}}{person{name{Claverie J.-M.}}}}{dbReference{id{15486256}}{type{PubMed}}}{dbReference{id{10.1126/science.1101485}}{type{DOI}}}}{scope{NUCLEOTIDE SEQUENCE [LARGE SCALE GENOMIC DNA]}}{source{strain{Rowbotham-Bradford}}}}{dbReference{id{AY653733}}{type{EMBL}}{property{type{protein sequence ID}}{value{AAV50722.1}}}{property{type{molecule type}}{value{Genomic_DNA}}}}{dbReference{id{YP_003986963.1}}{type{RefSeq}}{property{type{nucleotide sequence ID}}{value{NC_014649.1}}}}{dbReference{id{9925081}}{type{GeneID}}}{dbReference{id{vg:9925081}}{type{KEGG}}}{dbReference{id{UP000001134}}{type{Proteomes}}{property{type{component}}{value{Genome}}}}{proteinExistence{type{predicted}}}{keyword{id{KW-0181}}{Complete proteome}}{keyword{id{KW-1185}}{Reference proteome}}{feature{description{Uncharacterized protein L456}}{id{PRO_0000071284}}{type{chain}}{location{begin{position{1}}}{end{position{175}}}}}{sequence{checksum{A41629040A3CF092}}{length{175}}{mass{20972}}{modified{2004-12-07}}{version{1}}{MSVLVKRKMIETPISLSKFRYKRFCLPKIHPDILFETNDLPFFVKKLVYLLRKKYDMVNIDDNKLNTIYISTTINGDNFEVLLSFQKKLYINPDINFMAIDVTIKTKESMEFCIKKQCYDHIITIIEKITDKKVYANLPNFFYPKFNQLIEHIIDLNICKTFNNVEKWYFSKLVN}}}
+65
+INF
+# Random case; TED=30; k=30
+{e{a{f{f{a{f{f{b{d}}}}{b}{a}{d{b}{b}}{d}}{f{f{f{f{f}}}}{a{e}{f}}}{f}{f{a}{c}}}{e{e{b}{a}}{a}}}{c}{a}}{f{d{e{f{f{d}{d}}}{e{a{c}}{f}}{b}{f{e}}{e{c{e{e{e{c}{c{c}}{d}}{b}}}{b}{b{e{e{a{b}}}{b}{f}{a}}{a}{a}{f}}{e}{e}}{e{a{b}{e}}}}}{f{c{a}{d{c{a}}}{c{b{e{a}}{e}}{a{b}}}{c{c}{c}}{c{c}}}{d}{e{e}}{f{e}}{e{b}}{e{e{a}}}{d{e{a}}}}{d{a}{c{c{e}}{f{d}{c}}{f{d}}}{e{b}{a}}{e}{e{b{e}{d}}}}}}{f{e{c{f}}{c}{f}}{d{d}}{a{a{e{a{b{b{e}}}{f}{f}}{b{b}}}}}}{e{b{b}}}{a}{f{b}{c{f{b{f{b}}}}{f{d{e}}{c{f{c}}{a}}{e{e}{d}}{d}}{d{e}}{f}}{e}}{b{e{e}}{c{e}{d}}{c{b{d{d}}}}}{a{c{a{c{d}}}{d{e}}{c}}}{f{f{a{a}}}{d}{c}}{c{c{a}}}{e{c}{c}}}
+{c{a{f{f{a{f{b{d}}}{b}{a}{d{b}{b}}{d}}{f{f{f{f{f}}}}{a{c}{f}}}{f}{f{a}{c}}}{f{e{b}{a}}{a}}}{c}{a}}{e{d{f{d}{d}}}{e{f{c}}{d}}{b}{f{e}}{e{c{e{e{e{c}{c{c}}{d}}{b}}}{b}{a{e{a{b}}{b}{f}{a}}{a}{a}{f}}{e}{e}}{f{a{b}{e}}}}}{f{c{a}{e{c{a}}}{c{b{d{a}}{e}}{a{b}}}{c{c}{c}}{c{c}}}{c}{e{e}}{f{e}}{e{d}}{e{e{a}}}{d{e{a}}}}{d{a}{b{c{e}}{f{d}{c}}{f{d}}}{e{b}{a}}{e}{e{b{e}{d}}}}{f{e{e{f}}{c}{f}}{d{d}}{a{a{e{e{b{b{e}}}{f}{f}}{b}}}}}{e{f{b}}}{a}{e{b}{c{f{b{f{b}}}}{f{d{e}}{c{a}{a}}{e{e}{d}}{d}}{d{a}}{f}}{e}}{b{e{e}}{c{e}{f}}{c{b{d{d}}}}}{a{c{a{c{d}}}{d{e}}{c}}}{f{f{a{a}}}{d}{a}}{c{c{f}}}{e{f}{f}}}
+30
+30.0
+# Sentiment >	308 155; k=8 -> returns 7
+{0{0{2 Run}{2{2 for}{2{2 your}{2 lives}}}}{2 !}}
+{0{2{2 is}{0{2 a}{1 mess}}}{2 .}}
+8
+7.0
+# Sentiment >	308 155; k=7 -> return inf
+{0{0{2 Run}{2{2 for}{2{2 your}{2 lives}}}}{2 !}}
+{0{2{2 is}{0{2 a}{1 mess}}}{2 .}}
+7
+7.0
+# Sentiment (1545,924); TED=16
+{3{3{2 Hugely}{3 accomplished}}{3{2{2 slice}{2{2 of}{3{3 Hitchcockian}{2 suspense}}}}{2 .}}}
+{4{4{3{2 The}{4{2 most}{3{3 compelling}{4{2 Wiseman}{3 epic}}}}}{2{2 of}{2{2 recent}{2 years}}}}{2 .}}
+15
+INF

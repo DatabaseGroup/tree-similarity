@@ -27,8 +27,7 @@
 /// strings as labels, one could use this class as a template argument for the
 /// Node class to accomplish this.
 
-#ifndef TREE_SIMILARITY_LABEL_STRING_LABEL_H
-#define TREE_SIMILARITY_LABEL_STRING_LABEL_H
+#pragma once
 
 #include <string>
 
@@ -57,6 +56,12 @@ public:
     bool operator==(const StringLabel& other) const;
     /// @}
 
+    /// Return the type field of the label.
+    unsigned int get_type() const;
+
+    /// Return the label field of the label.
+    const std::string& get_label() const;
+
     /// Generates a string representation of the label.
     ///
     /// \return String representation of the label.
@@ -72,4 +77,16 @@ private:
 
 } // namespace label
 
-#endif // TREE_SIMILARITY_LABEL_STRING_LABEL_H
+// Custom specialization of std::hash - injected in namespace std.
+// This is needed for LabelDictionary.
+namespace std
+{
+  template<> struct hash<label::StringLabel> {
+    typedef label::StringLabel argument_type;
+    typedef std::size_t result_type;
+    result_type operator()(argument_type const& s) const noexcept {
+        result_type const h ( std::hash<std::string>{}(s.to_string()) );
+        return h;
+    }
+  };
+}

@@ -1,0 +1,308 @@
+# CTED Test case 1
+{a{b{d}{e}}{c{f}{g}}}
+{a{d}{h{e}{i{f}{g}}}}
+5.0
+# CTED Test case 36
+{a{b}{c{d}{e}}}
+{a{b{c}}{d}{e}}
+4.0
+# CTED Test case 39
+{a{b{c}{d{e}{f}}}}
+{a{c}{e}{f}}
+4.0
+# CTED Test case 64
+{a{a{a}{a{a}{a}}}{a{a}{a{a}}{a}}}
+{a{a{a}{a}{a}}{a{a{a}{a}{a}}}}
+5.0
+# CTED Test case 66
+{a{b{c}{d{e}{f}}}}
+{b{c}{e}{f}}
+4.0
+# Test case 1
+{f{a}{e{c{b}}{d}}}
+{f{a}{c{e{b}{d}}}}
+2.0
+# Test case 2
+{a{b}{c{e}{f}}{d}}
+{a{b}{c{e}}{d}}
+1.0
+# Test case 3
+{a{b}{c{e}{f}}{d}}
+{a{b}{c}{d}}
+2.0
+# Test case 4
+{a{x}{c{e}{f}}{d}}
+{a{b}{c}{d}}
+3.0
+# Test case 5
+{a{b}{c{e}{f}}{d}}
+{a{b}{c}}
+3.0
+# Test case 6
+{a{b{i}{j{u}}}{c{d}{e{q{n}{m}}}}{f{w}}}
+{a}
+12.0
+# Test case 7
+{a{b{i}{j{u}}}{c{d}{e{q{n}{m}}}}{f{w}}}
+{x}
+13.0
+# Test case 8
+{a{b{i}{j{u}}}{c{d}{e}}{f{w}}}
+{x}
+10.0
+# Test case 9
+{a{b}{c{e}{f}}{d}}
+{a{b}{c{e}{f}}{d}}
+0.0
+# Test case 10
+{a{b{i}{j}}{c{d}{e}}{f{w}}}
+{x}
+9.0
+# Test case 11
+{a{b{i}}{c{d}{e}}{f{w}}}
+{x}
+8.0
+# Test case 12
+{a{b}{c{d}{e}}{f{w}}}
+{x}
+7.0
+# Test case 13
+{a{b}{c{d}{e}}{f}}
+{x}
+6.0
+# Test case 14
+{a{m}{r}{d}{e{z}{i}{l}{t{o}{k}{g}{h}}}}
+{x}
+13.0
+# Test case 15
+{a{m{z{o}{k}{g}{h}}{i}{l}{t}}{r}{d}{e}}
+{x}
+13.0
+# Test case 16
+{a{r}{d}{e{i}{l}{t{k}{g}{h}}}}
+{x}
+10.0
+# Test case 17
+{x}
+{a{r}{d}{e{i}{l}{t{k}{g}{h}}}}
+10.0
+# Test case 18
+{a{r}{d}{e{s}{t}}}
+{x}
+6.0
+# Test case 19
+{x}
+{a{d}{e{l}{t{g}{h}}}}
+7.0
+# Test case 20
+{a{d}{e{l}{t{g}{h}}}}
+{x}
+7.0
+# Test case 21
+{a{d}{e}{f}{l}{t}}
+{f}
+5.0
+# Test case 22
+{a{d}{e}{f}{l}{t}}
+{a}
+5.0
+# Test case 23
+{a{d}{e}{f}{l}{t}}
+{x}
+6.0
+# Test case 24
+{a{d}{e}{f}}
+{x}
+4.0
+# Test case 25
+{x}
+{a{d}{e}{f}}
+4.0
+# Test case 26
+{a{b{c}{d{e{f}{g}}{h}}}{i}}
+{e{f}{g}}
+6.0
+# Test case 27
+{a{b}{c{d}{e{f}{g{h}{i}}}}}
+{g{h}{i}}
+6.0
+# Test case 28
+{a{b{d{f{h}{i}}{g}}{e}}{c}}
+{f{h}{i}}
+6.0
+# Test case 29
+{a{b}{c{d{f}{g{h}{i}}}{e}}}
+{g{h}{i}}
+6.0
+# Test case 30
+{b{d}{e}}
+{g{h}{i}}
+3.0
+# Test case 31
+{a{b{d}{e}}{c}}
+{f{g{h}{i}}{k}}
+5.0
+# Test case 32
+{f{d{a}{c{b}}}{e}}
+{f{c{d{a}{b}}{e}}}
+2.0
+# Test case 33
+{f{d{a}{c{b}}}{e}}
+{f{c{d{a}{b}}}{x}}
+3.0
+# Test case 34
+{f{d{a}{c{b}}}{e}}
+{f{c{d{a}{b}}}{e}}
+2.0
+# Test case 35
+{a{a{a}{a}}}
+{a{a{a}}}
+1.0
+# Test case 37
+{a{b{c}{d{e}{f}}}{x}}
+{b{c}{d{e}{f}}}
+2.0
+# Test case 38
+{a{b{c}{d{e}{f}}}}
+{b{c}{d{e}{f}}}
+1.0
+# Test case 40
+{a{b{c}{d}}}
+{a{c}{d}}
+1.0
+# Test case 41
+{a{b{c}}{d}}
+{b{c}{a{d}}}
+3.0
+# Test case 42
+{a{b}{c}}
+{b{c}}
+2.0
+# Test case 43
+{a{b}{c}}
+{b}
+2.0
+# Test case 44
+{a{b}}
+{b}
+1.0
+# Test case 45
+{a{b}{c}}
+{x}
+3.0
+# Test case 46
+{a{b}{c}}
+{a}
+2.0
+# Test case 47
+{a{b}}
+{x{z}}
+2.0
+# Test case 48
+{a{b}}
+{a{b}}
+0.0
+# Test case 49
+{a{b}}
+{x}
+2.0
+# Test case 50
+{a{b}}
+{a}
+1.0
+# Test case 51
+{a}
+{x}
+1.0
+# Test case 52
+{a}
+{a}
+0.0
+# Test case 53
+{a}
+{b}
+1.0
+# Test case 54
+{a{b}}
+{b}
+1.0
+# Test case 55
+{a{b}{c}}
+{b}
+2.0
+# Test case 56
+{a{b}{c}}
+{b{c}}
+2.0
+# Test case 57
+{a{b{c}}{d}}
+{b{c}{a{d}}}
+3.0
+# Test case 58
+{a{b{c}{d}}}
+{a{c}{d}}
+1.0
+# Test case 60
+{a{b{c}{d{e}{f}}}}
+{b{c}{d{e}{f}}}
+1.0
+# Test case 61
+{a{b{c}{d{e}{f}}}{x}}
+{b{c}{d{e}{f}}}
+2.0
+# Test case 63
+{a{a{a}{a}}}
+{a{a{a}}}
+1.0
+# Test case 65
+{a{b{d}{e}}{c}}
+{f{g{h}{i}}{k}}
+5.0
+# Test case 67
+{f{d{a}{c{b}}}{e}}
+{f{c{d{a}{b}}}{e}}
+2.0
+# Test case 68
+{f{d{a}{c{b}}}{e}}
+{f{c{d{a}{b}}}{x}}
+3.0
+# Test case 69
+{f{d{a}{c{b}}}{e}}
+{f{c{d{a}{b}}{e}}}
+2.0
+# Test case 70
+{2{6}{8{5{3{6}{3}{2}}}}{6}}
+{1{2}{0}}
+8.0
+# Test case 71
+{8{9{8{5}{9{6}{9}{7}}{0{6}}}{0}}}
+{1{8}{4{4}{0{3{3{3}{0}}}}}}
+14.0
+# Test case 72
+{1{1}}
+{c{a{b{4{b}{0{3}}{0{c}{9}}}}{1}{a}}{7}{d}}
+13.0
+# Test case 73
+{1{2{2{5}{7{6{7}}}}}{0}}
+{0{2}{1}{1}}
+8.0
+# Test case 74
+{7{1{3{c{j{c}{j}}{2{d}}{8{5}{a}{3}}}}}{m{2{c{e}{4}{b{h}{f}{k}}}}}{d}}
+{1{1}}
+22.0
+# Test case 75
+{1{1}{2}}
+{3{8{4{3}{9{0}{4}{7}}}}{7}{8}}
+10.0
+# Test case 77
+{1{3}{5{2{6}{5}{5}}}{5}}
+{0{3}{2}{1}}
+6.0
+# Test case 78
+{3{8{n{q}{3{i{r}}}}{p{n{4}{n{s}{l}}}}}{n{3{e{h}{g}{m{j}{6}}}}{a}{r}}{2{p{j{n{f}}}}{n}}}
+{0{1}}
+29.0
+# Sentiment >	308 155
+{0{0{2 Run}{2{2 for}{2{2 your}{2 lives}}}}{2 !}}
+{0{2{2 is}{0{2 a}{1 mess}}}{2 .}}
+7.0

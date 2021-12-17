@@ -1,6 +1,0 @@
-# Test case 1
-{"a"}
-{a}
-# Test case 2
-{"a"{"b"{"c"}{"d"{"e"}}}{"f"{"g"}{"h"{"i"{"j"}{"k"}}}}{"l"{"m"}}}
-{a,b,c,d,e,f,g,h,i,j,k,l,m}

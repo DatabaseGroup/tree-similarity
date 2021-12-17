@@ -24,56 +24,75 @@
 /// \details
 /// Implements the parser for bracket notation of the form:
 ///
-/// TODO: Decide on the format. It this ok, or we need something simpler.
+/// {LABEL{LABEL}{LABEL}}
 ///
-/// {"LABEL"{"LABEL"}{"LABEL"}}
-///
-/// where LABEL allows any character between the quotes BUT the three characters
-/// "{} must be escaped as follows: \" \{ \}.
+/// where LABEL allows any character BUT the the structure brackets (by default
+/// the curly brackets: {}) must be escaped as follows: \{ \}.
 ///
 /// Example input with complex labels:
-/// std::string s("{\"a\"{\"\\{[b],\\{key:\\\"value\\\"\\}\\}\"{\"\"}}}");
+/// {a{\{[b],\{key:"value"\}\}{}}}
 /// which is a path of three nodes with labels as follows:
 ///
-///                                target LABEL (after removing escapes):
-/// "a"                         -> a
-///  |
-/// "\{[b],\{key:\"value\"\}\}" -> {[b],{key:"value"}}
-///  |
-/// ""                          -> an empty label
+///                         target LABEL (after removing escapes):
+/// a                       -> a
+/// |
+/// \{[b],\{key:"value"\}\} -> {[b],{key:"value"}}
+/// |
+/// ""                      -> an empty label
 /// TODO: Should the matched label be cleaned by removing escapes?
 /// TODO: This parses to StringLabel only. Should the label's type be assigned
 ///       based on user's choice?
 
-#ifndef TREE_SIMILARITY_PARSER_BRACKET_NOTATION_PARSER_H
-#define TREE_SIMILARITY_PARSER_BRACKET_NOTATION_PARSER_H
+#pragma once
 
 #include "node.h"
 #include "string_label.h"
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <regex>
 
 namespace parser {
 
+template <class Label>
 class BracketNotationParser {
-// Types and type aliases
-public:
-  using Label = label::StringLabel;
 
 // Member functions
 public:
   /// Takes the string of a tree in bracket notation, parses it to the Node
-  /// structure with StringLabels, and returns reference to the root.
-  ///
-  /// TODO: Verify if the returned object is not copied.
+  /// structure with StringLabels, and returns the root.
   ///
   /// \param tree_string The string holding the tree in bracket notation.
   ///
-  /// \return Reference to the root node.
-  const node::Node<Label> parse_string(const std::string& tree_string);
+  /// \return Root of the parsed tree.
+  node::Node<Label> parse_single(const std::string& tree_string);
 
+  /// Takes a file with one tree (in bracket notation) per line and parses it
+  /// to a vector of Node objects with StringLabels.
+  ///
+  /// NOTE: It executes parse_single for every line in the data file.
+  /// NOTE: The notation of trees is assumed correct.
+  ///
+  /// \param trees_collection Container to store all trees.
+  /// \param file_path The path to the file with set of trees.
+  void parse_collection(std::vector<node::Node<Label>>& trees_collection,
+      const std::string& file_path);
+
+  /// Generates the tokens for the input string.
+  ///
+  /// \param tree_string The string holding the tree in bracket notation.
+  /// \return Vector with all tokens.
+  std::vector<std::string> get_tokens(const std::string& tree_string);
+
+  /// Validates the bracket notation input.
+  ///
+  /// NOTE: This function could be merged with parse_string but this may
+  ///       decrease readability.
+  ///
+  /// \param tree_string Tree in bracket notation.
+  /// \return True if the input is correct and false otherwise.
+  bool validate_input(const std::string& tree_string) const;
 // Member variables
 private:
   /// A stack to store nodes on a path to the root from the current node in the
@@ -81,30 +100,23 @@ private:
   /// while parsing.
   std::vector<std::reference_wrapper<node::Node<Label>>> node_stack;
 
-  /// Brackets for representing nodes relationships. Could be modified to
-  /// other types of paretheses if necessary.
+  /// Structure brackets for representing nodes relationships. Could be
+  /// modified to other types of paretheses if necessary.
   const std::string kLeftBracket = "{";
   const std::string kRightBracket = "}";
+
+  /// Structure elements of the bracket notation.
+  const std::string kStructureElements = "{}";
+
+  /// Escape character.
+  const char kEscapeChar = '\\';
 
   /// A regex string to match left and right brackets.
   const std::string kMatchLeftBracket = "\\" + kLeftBracket;
   const std::string kMatchRightBracket = "\\" + kRightBracket;
-
-  /// A regex string to match two quotes surrounding zero or more of:
-  /// - any character that's not a quote or a backslash or a curly bracket,
-  /// OR
-  /// - a backslash followed by any character.
-  const std::string kMatchStringLabel = "\"([^\"\\\\" + kLeftBracket
-      + kRightBracket + "]|\\\\.)*\"";
-
-  /// A regex to match either left bracket or label or right bracket.
-  const std::regex kR = std::regex(kMatchLeftBracket + "|" + kMatchStringLabel
-                                   + "|" + kMatchRightBracket);
 };
 
 // Implementation details
 #include "bracket_notation_parser_impl.h"
 
 }
-
-#endif // TREE_SIMILARITY_PARSER_BRACKET_NOTATION_PARSER_H

@@ -1,0 +1,30 @@
+# Test cases taken from 'td_test_data.txt'. Test case 1 - single node
+{a}
+{b}
+2
+1
+# Test case 1a - single node
+{a}
+{b}
+1
+1
+# Test case 2 - two equal paths
+{a{b{c{d}}}}
+{a{b{c{d}}}}
+1
+20
+# Test case 3 - two small standard trees
+{a{b}{c{d{e}{f}}}}
+{a{b}{d{c{e}}{f}}}
+2
+57
+# Test case 6; TED=1; k=1=TED
+{a{b}{c{d{e}{f}}}}
+{a{b}{c{e}{f}}}
+1
+22
+# Test case 4a - standard tree + one node in destination
+{a{b{c}{d{e}}}{f{g}{h{i{j}{k}}}}{l{m}}}
+{a{b{c}{d{x}{e}}}{f{g}{h{i{j}{k}}}}{l{m}}}
+1
+60

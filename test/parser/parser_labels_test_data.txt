@@ -1,0 +1,24 @@
+# Test case 1
+{a}
+a
+# Test case 2
+{a{b{c}{d{e}}}{f{g}{h{i{j}{k}}}}{l{m}}}
+a,b,c,d,e,f,g,h,i,j,k,l,m
+# Test case 3
+{"a{"b"}}
+"a,"b"
+# Test case 4
+{\{a{\{b\}}}
+\{a,\{b\}
+# Test case 5
+{}
+
+# Test case 6
+{{}}
+,
+# Test case 7
+{"a{\{b\}}{}}
+"a,\{b\},
+# Test case 8
+{a{\{[b],\{key:"value"\}\}{}}}
+a,\{[b],\{key:"value"\}\},

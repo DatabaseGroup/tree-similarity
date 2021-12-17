@@ -1,5 +1,6 @@
 // The MIT License (MIT)
-// Copyright (c) 2017 Mateusz Pawlik, Nikolaus Augsten, and Daniel Kocher.
+// Copyright (c) 2017 Mateusz Pawlik, Nikolaus Augsten, Daniel Kocher, and 
+// Thomas Huetter.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -19,13 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/// \file cost_model/unit_cost_model_impl.h
-///
-/// \details
-/// Contains the implementation of a basic cost model, i.e., the unit costs.
-
-#ifndef TREE_SIMILARITY_COST_MODEL_UNIT_COST_MODEL_IMPL_H
-#define TREE_SIMILARITY_COST_MODEL_UNIT_COST_MODEL_IMPL_H
+#pragma once
 
 template <class Label>
 int UnitCostModel<Label>::ren(const node::Node<Label>& node1,
@@ -46,4 +41,58 @@ int UnitCostModel<Label>::ins(const node::Node<Label>& node) const {
   return 1;
 }
 
-#endif // TREE_SIMILARITY_COST_MODEL_UNIT_COST_MODEL_IMPL_H
+
+template <class Label>
+UnitCostModelLD<Label>::UnitCostModelLD(label::LabelDictionary<Label>& ld) :
+    ld_(ld) {}
+
+template <typename Label>
+double UnitCostModelLD<Label>::ren(const int label_id_1,
+    const int label_id_2) const {
+  if (label_id_1 == label_id_2) {
+    return 0.0;
+  }
+  return 1.0;
+}
+
+// Argument's name deleted because not used.
+template <typename Label>
+double UnitCostModelLD<Label>::del(const int) const {
+  return 1.0;
+}
+
+// Argument's name deleted because not used.
+template <typename Label>
+double UnitCostModelLD<Label>::ins(const int) const {
+  return 1.0;
+}
+
+
+template <class Label>
+UnitCostModelJSON<Label>::UnitCostModelJSON(label::LabelDictionary<Label>& ld) :
+    ld_(ld) {}
+
+template <typename Label>
+double UnitCostModelJSON<Label>::ren(const int label_id_1,
+    const int label_id_2) const {
+  if (ld_.get(label_id_1).get_type() != ld_.get(label_id_2).get_type())
+    return std::numeric_limits<double>::infinity();
+
+  if (ld_.get(label_id_1).get_label().compare(ld_.get(label_id_2).get_label()) 
+      == 0)
+    return 0.0;
+  else
+    return 1.0;
+}
+
+// Argument's name deleted because not used.
+template <typename Label>
+double UnitCostModelJSON<Label>::del(const int) const {
+  return 1.0;
+}
+
+// Argument's name deleted because not used.
+template <typename Label>
+double UnitCostModelJSON<Label>::ins(const int) const {
+  return 1.0;
+}

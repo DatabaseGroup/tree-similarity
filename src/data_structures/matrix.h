@@ -32,11 +32,14 @@
 /// down the actual access.
 
 
-#ifndef MATRIX_H
-#define MATRIX_H
+#pragma once
 
 #include <memory>
 #include <vector>
+#include <iostream>
+#include <string>
+#include <algorithm>
+#include <stdexcept>
 
 namespace data_structures {
 
@@ -66,6 +69,47 @@ public:
   ///
   /// \return Reference to the specified element.
   ElementType& at(size_t row, size_t col);
+  /// Reads the element at specific row and column.
+  /// Using this method the element's value cannot be modified.
+  ///
+  /// \param row The row to be accessed.
+  /// \param col The column to be accessed.
+  ///
+  /// \return Reference to the specified element.
+  const ElementType& read_at(size_t row, size_t col) const;
+  void fill_with(ElementType value);
+};
+
+/// A specialised matrix, where only the elements on the diagonal band matter.
+/// The elements on that band in the BandMatrix are shifted left for reducing
+/// memory usage. In order to access the correct element of a BandMatrix, the
+/// column coordinate has to be translated.
+///
+/// One can use BandMatrix as it was a regular rectangular matrix and the index
+/// translations are transparent. One has to ensure that all accessed elements
+/// are within the band.
+template<typename ElementType>
+class BandMatrix : public Matrix<ElementType> {
+// Member variables.
+private:
+  /// The parameter specifying the width of the diagonal bend which is
+  /// 2*band_width_+1.
+  size_t band_width_;
+// Member functions.
+public:
+  /// Constructor(s).
+  BandMatrix() = default;
+  // TODO: Take original rows and original columns and band_width.
+  // TODO: Not every original cell is in the BandMatrix but each of them should
+  //       be possible to call. Throw exception if the called cell is not
+  //       addressed in the BandMatrix.
+  BandMatrix(size_t rows, size_t band_width);
+  /// Returns the band width parameter.
+  size_t get_band_width() const;
+  /// Overwrites the access methods of the rectangular matrix such that the
+  /// column coordinate is correctly translated to the shifted band.
+  ElementType& at(size_t row, size_t col);
+  const ElementType& read_at(size_t row, size_t col) const;
 };
 
 template<typename ElementType>
@@ -88,9 +132,60 @@ size_t Matrix<ElementType>::get_columns() const {
 template<typename ElementType>
 ElementType& Matrix<ElementType>::at(size_t row, size_t col) {
   // NOTE: Using at() for checking bounds.
-  return data_.at(row * columns_ + col);
+  // TODO: There is a max original x-coordinate that can be addressed - maybe
+  //       should be verified here.
+  if (col >= columns_ || col < 0) {
+    throw std::out_of_range ("Matrix<ElementType>::at() : col is out of range, col accessed = " + std::to_string(col));
+  }
+  if (row >= rows_) {
+    throw std::out_of_range ("Matrix<ElementType>::at() : row is out of range, row accessed = " + std::to_string(row));
+  }
+  return data_[row * columns_ + col];
+}
+
+template<typename ElementType>
+const ElementType& Matrix<ElementType>::read_at(size_t row, size_t col) const {
+  if (col >= columns_ || col < 0) {
+    throw std::out_of_range ("Matrix<ElementType>::read_at() : col is out of range, col accessed = " + std::to_string(col));
+  }
+  if (row >= rows_) {
+    throw std::out_of_range ("Matrix<ElementType>::read_at() : row is out of range, row accessed = " + std::to_string(row));
+  }
+  // if (std::isnan(data_[row * columns_ + col])) {
+  //   std::cout << "Matrix<ElementType>::read_at() : reading NaN." << std::endl;
+  //   // throw std::invalid_argument ("Matrix<ElementType>::read_at() : reading NaN.");
+  // }
+  return data_[row * columns_ + col];
+}
+
+template<typename ElementType>
+void Matrix<ElementType>::fill_with(ElementType value) {
+  std::fill(data_.begin(), data_.end(), value);
+}
+
+template<typename ElementType>
+BandMatrix<ElementType>::BandMatrix(size_t rows, size_t band_width)
+  : Matrix<ElementType>::Matrix(rows, 2 * band_width + 1), band_width_(band_width) {}
+
+// TODO: The current implementation of the following two methods causes two
+//       method calls for accessing the cells.
+//       IDEA: Implement access directly without calling methods of the base
+//             class. Or read about inlining.
+
+template<typename ElementType>
+size_t BandMatrix<ElementType>::get_band_width() const {
+  return band_width_;
+}
+
+template<typename ElementType>
+ElementType& BandMatrix<ElementType>::at(size_t row, size_t col) {
+  return Matrix<ElementType>::at(row, col + band_width_ - row);
+}
+
+template<typename ElementType>
+const ElementType& BandMatrix<ElementType>::read_at(size_t row, size_t col) const {
+  return Matrix<ElementType>::read_at(row, col + band_width_ - row);
 }
 
 } // namespace data_structures
 
-#endif // MATRIX_H
