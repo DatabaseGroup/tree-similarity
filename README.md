@@ -35,20 +35,10 @@ doxygen doxygen.config
 ```
 Then, open ``doc/html/index.html`` in your browser.
 
-## Notes on branches (old stuff)
+## Notes on user workflow
 
-[**TODO:** Tidy up. Preferably modify to describe the current state. See TODOs.]
-
-This branch [**TODO:** Which branch is meant?] will **not** include the work of bsc-auinger as Tobias currently tries
-to reimplement his part of the codebase (see `visualization` branch). This part
-of the code will be added/merged when it is finalized.
-
-## Notes on user workflow (old stuff)
-
-[**TODO:** Tidy up. Preferably modify to describe the current state. See TODOs.]
-
-1. If necessary, implement custom Label class and/or custom CostModel class.
-2. If necessary, define the grammar to be used in the parsing process and generate Parser class using [http://www.antlr.org/](ANTLR).
+1. Convert the input data into the Bracket Notation Format or implement a new parser (e.g., [http://www.antlr.org/](ANTLR)).
+2. If necessary, implement custom Label class and/or custom CostModel class.
 3. Modify the types of `Parser`, `Label`, and `CostModel` inside `tree_similarity.cc` if you do not want to use the default types.
 4. Call `make` to (re-)build the framework.
 
