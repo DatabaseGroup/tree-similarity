@@ -6,11 +6,10 @@
 #include "unit_cost_model.h"
 #include "json_label.h"
 #include "node.h"
-#include "label_histogram_converter.h"
-#include "label_intersection.h"
 #include "bracket_notation_parser.h"
+#include "label_intersection.h"
 #include "tree_indexer.h"
-#include "zhang_shasha_tree_index.h"
+#include "wang_index.h"
 
 // argc argument name omitted because not used.
 int main(int, char** argv) {
@@ -24,7 +23,8 @@ int main(int, char** argv) {
   using Label = label::JSONLabel;
   using CostModel = cost_model::UnitCostModelJSON<Label>;
   using LabelDictionary = label::LabelDictionary<Label>;
-  using LabelInt = ted_lb::LabelIntersection<CostModel, node::TreeIndexLI>;
+  using TreeIndexer = node::TreeIndexJSON;
+  using WANG = json::WangTreeIndex<CostModel, TreeIndexer>;
   
   // Initialize label dictionary - separate dictionary for each test tree
   // because it is easier to keep track of label ids.
@@ -32,7 +32,7 @@ int main(int, char** argv) {
   
   // Initialize cost model.
   CostModel ucm(ld);
-  LabelInt li_algorithm(ucm);
+  WANG wang_algorithm(ucm);
   
   // Read results from file.
   std::vector<size_t> results;
@@ -45,8 +45,8 @@ int main(int, char** argv) {
 
   // Initialize two tree indexes.
   // Use TreeIndexAll that is a superset of all algorithms' indexes.
-  node::TreeIndexLI ti1;
-  node::TreeIndexLI ti2;
+  TreeIndexer ti1;
+  TreeIndexer ti2;
 
   // Create the container to store all trees.
   std::vector<node::Node<Label>> trees_collection;
@@ -62,13 +62,13 @@ int main(int, char** argv) {
     node::index_tree(ti2, trees_collection[i-1], ld, ucm);
 
     // Compute the label intersection for two consecutive trees.
-    double label_int = li_algorithm.ted(ti1, ti2);
+    double jediorder = wang_algorithm.jedi(ti1, ti2);
 
     // Verify the result against the given solution.
-    if (label_int != results[i - 1]) {
-      std::cout << " ERROR Incorrect label intersection for trees " << i << 
-          "and " << i+1 << ": " << label_int << " instead of " << 
-          results[i - 1] << std::endl;
+    if (jediorder != results[i - 1]) {
+      std::cout << " ERROR Incorrect JediOrder for trees " << i << " and " 
+          << i+1 << ": " << jediorder << " instead of " << results[i - 1] 
+          << std::endl;
       return -1;
     }
   }

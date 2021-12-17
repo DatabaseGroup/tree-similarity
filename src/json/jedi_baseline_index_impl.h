@@ -145,7 +145,9 @@ double JEDIBaselineTreeIndex<CostModel, TreeIndex>::jedi(
         min_for_ren = e_.at(t1.postl_to_children_[i-1].size(), t2.postl_to_children_[j-1].size()); 
       }
       // In case of two keys, take the costs of mapping their child to one another.
-      else if (t1.postl_to_type_[i - 1] == 2 && t2.postl_to_type_[j - 1] == 2)
+      else if (t1.postl_to_type_[i - 1] == 2 && t2.postl_to_type_[j - 1] == 2 && 
+            t1.postl_to_children_[i-1].size() > 0 && 
+            t2.postl_to_children_[j-1].size() > 0)
       {
         // Keys have exactly one child, therefore, [0] always works.
         min_for_ren = dt_.at(t1.postl_to_children_[i-1][0] + 1, 
@@ -204,6 +206,7 @@ double JEDIBaselineTreeIndex<CostModel, TreeIndex>::jedi(
         min_tree_ren = df_.at(i, j) + c_.ren(t1.postl_to_label_id_[i - 1], 
             t2.postl_to_label_id_[j - 1]);
       }
+
       // Compute minimal tree mapping costs.
       dt_.at(i, j) = min_tree_del >= min_tree_ins ?
           min_tree_ins >= min_tree_ren ? min_tree_ren : min_tree_ins :

@@ -1,15 +1,15 @@
 # JSON label tests.
 
 # Specify list of test strings.
-set(json_label_test_list
-  json_label_test
+set(jediorder_jofilter_test_list
+  jediorder_jofilter_test
 )
 
 # Add custom target for building all label intersection tests.
-add_custom_target(json_label_all_tests)
+add_custom_target(jediorder_jofilter_all_tests)
 
 # Specify test strings in the loop.
-foreach(loop_var ${json_label_test_list})
+foreach(loop_var ${jediorder_jofilter_test_list})
   file(
     COPY        ${loop_var}_data.txt ${loop_var}_results.txt
     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
@@ -29,7 +29,7 @@ foreach(loop_var ${json_label_test_list})
   )
   # Add this target to li_lb_all_tests target.
   add_dependencies(
-    json_label_all_tests   # TARGET
+    jediorder_jofilter_all_tests   # TARGET
     ${loop_var}_driver # TARGET DEPENDENCY
   )
 endforeach(loop_var)
