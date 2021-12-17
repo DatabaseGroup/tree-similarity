@@ -48,12 +48,10 @@ This is a list of of all TODOs split into a few categories.
 
 ### Features.
 - **Command line:** make nicer and document.
-- **APTED:** Implement. There is some C++ code written by Maxi. Java implementation available on https://github.com/DatabaseGroup/apted.
-- **Edit mapping:** Implement with subtree-pairs distance matrix as input such that not only the matrix of Zhang and Shasha can be input. There is C++ code on ``visualisation`` branch by Tobias (review and tests required).
+- **Edit mapping:** Implement with subtree-pairs distance matrix as input such that not only the matrix of Zhang and Shasha can be input. There is C++ code [here](https://frosch.cosy.sbg.ac.at/mpawlik/old-tree-similarity/-/blob/visualisation/src/zhang_shasha/zhang_shasha.h) (review and tests required).
 
 ### README.md
 - Describe functionalities of the library.
-- Explain the input format. Point to format converters.
 - Explain how to use the tool: command line interface and output.
 - Explain (with examples) how to extend the library with custom labels and cost models.
 - Explain how to use the library in an external project (API).
@@ -76,10 +74,7 @@ This is a list of of all TODOs split into a few categories.
   - **Committing.** Write requirements for commit messages.
   - **Merging.** Explain the steps, using rebase, and fast-forwarding.
 
-### Old TODOs:
-[**TODO:** Tidy up or at least move to other TODO categories.]
-- Clean up the repository (from the state of the `xml_parser` branch, i.e., the
-final state of msc-kocher).
+### Random:
 - Add a meaningful documentation to all parts of the codebase in the [Doxygen format](https://www.stack.nl/~dimitri/doxygen/manual/docblocks.html).
 - Refactor parts of the codebase if necessary.
 - Enforce (and probably extend) the coding policy/style described on the `master`
