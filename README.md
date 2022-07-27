@@ -6,6 +6,8 @@ The goal of this repository is to be the home of all code corresponding to tree 
 
 **Currently this README serves everyone, users and contributors.** It is disorganised with an idea that having disorganised and correct content is better than no content. It should be expanded on a regular basis and possibly split into ``README.md`` and ``README_CONTRIBUTOR.md``.
 
+Please find **additional information** at our [project website](http://tree-edit-distance.dbresearch.uni-salzburg.at).
+
 ## Licence
 
 All code in this repository is currently under the [MIT licence](https://opensource.org/licenses/MIT). Each source file must contain the licence and the list of copyright holders (contributors to the source).
