@@ -28,7 +28,6 @@
 #include "unit_cost_model.h"
 #include "bracket_notation_parser.h"
 #include "lgm_tree_index.h"
-#include "apted_tree_index.h"
 
 /// Simple command-line tool for executing Tree Edit Distance.
 
@@ -107,7 +106,6 @@ int main(int argc, char** argv) {
     LabelDictionary ld;
     CostModelLD ucm(ld);
     ted_ub::LGMTreeIndex<CostModelLD, node::TreeIndexLGM> lgm_algorithm(ucm);
-    ted::APTEDTreeIndex<CostModelLD, node::TreeIndexLGM> apted_algorithm(ucm);
     node::TreeIndexLGM ti1;
     node::TreeIndexLGM ti2;
     node::index_tree(ti1, source_tree, ld, ucm);
