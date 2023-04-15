@@ -20,8 +20,9 @@
 // SOFTWARE.
 
 #include <iostream>
-#include <sys/time.h>
-#include <sys/resource.h>
+// These are linux only headers, not available on Windows
+//#include <sys/time.h>
+//#include <sys/resource.h>
 #include "node.h"
 #include "string_label.h"
 #include "unit_cost_model.h"
@@ -36,12 +37,13 @@ int main(int argc, char** argv) {
   using CostModelLD = cost_model::UnitCostModelLD<Label>;
   using LabelDictionary = label::LabelDictionary<Label>;
 
-  // Runtime measurement variables (rusage).
-  rusage before_rusage;
-  rusage after_rusage;
-  timeval runtime_utime;
-  timeval runtime_stime;
-  unsigned int runtime;
+  /////// Runtime measurement should be limited to tests, and use portable libraries if available
+  //// Runtime measurement variables (rusage).
+  //rusage before_rusage;
+  //rusage after_rusage;
+  //timeval runtime_utime;
+  //timeval runtime_stime;
+  //unsigned int runtime;
 
   // Verify parameters.
   if (argc != 5) {
@@ -58,7 +60,7 @@ int main(int argc, char** argv) {
   // Verify the input format before parsing.
   
 
-  getrusage(RUSAGE_SELF, &before_rusage);
+  //getrusage(RUSAGE_SELF, &before_rusage);
   std::ifstream tree_file(argv[1]);
   std::string tree_string;
   std::getline(tree_file, tree_string);
@@ -76,16 +78,16 @@ int main(int argc, char** argv) {
   }
   const node::Node<Label> destination_tree = bnp.parse_single(tree_string);
   tree_file.close();
-  getrusage(RUSAGE_SELF, &after_rusage);
+  /*getrusage(RUSAGE_SELF, &after_rusage);
   timersub(&after_rusage.ru_utime, &before_rusage.ru_utime, &runtime_utime);
   timersub(&after_rusage.ru_stime, &before_rusage.ru_stime, &runtime_stime);
-  runtime = runtime_utime.tv_usec + runtime_utime.tv_sec * 1000000 +
-      runtime_stime.tv_usec + runtime_stime.tv_sec * 1000000;
-  std::cout << runtime << " " << source_tree.get_tree_size() << " " << destination_tree.get_tree_size() << " ";
+  runtime = runtime_utime.tv_usec + runtime_utime.tv_sec * 1000000 + runtime_stime.tv_usec + runtime_stime.tv_sec * 1000000;*/
+  //std::cout << runtime << " " << source_tree.get_tree_size() << " " << destination_tree.get_tree_size() << " ";
+  std::cout << " " << source_tree.get_tree_size() << " " << destination_tree.get_tree_size() << " ";
 
   if (std::strcmp(argv[3], "lgm") == 0) {
     int k = std::stoi(argv[4]);
-    getrusage(RUSAGE_SELF, &before_rusage);
+    //getrusage(RUSAGE_SELF, &before_rusage);
     LabelDictionary ld;
     CostModelLD ucm(ld);
     ted_ub::LGMTreeIndex<CostModelLD, node::TreeIndexLGM> lgm_algorithm(ucm);
@@ -95,13 +97,12 @@ int main(int argc, char** argv) {
     node::index_tree(ti2, destination_tree, ld, ucm);
     lgm_algorithm.init(ti2);
     std::cout << lgm_algorithm.ted_k(ti1, ti2, k);
-    getrusage(RUSAGE_SELF, &after_rusage);
+    //getrusage(RUSAGE_SELF, &after_rusage);
     std::cout << " " << lgm_algorithm.get_subproblem_count();
-    timersub(&after_rusage.ru_utime, &before_rusage.ru_utime, &runtime_utime);
-    timersub(&after_rusage.ru_stime, &before_rusage.ru_stime, &runtime_stime);
-    runtime = runtime_utime.tv_usec + runtime_utime.tv_sec * 1000000 +
-        runtime_stime.tv_usec + runtime_stime.tv_sec * 1000000;
-    std::cout << " " << runtime << std::endl;
+    //timersub(&after_rusage.ru_utime, &before_rusage.ru_utime, &runtime_utime);
+    //timersub(&after_rusage.ru_stime, &before_rusage.ru_stime, &runtime_stime);
+    //runtime = runtime_utime.tv_usec + runtime_utime.tv_sec * 1000000 + runtime_stime.tv_usec + runtime_stime.tv_sec * 1000000;
+    //std::cout << " " << runtime << std::endl;
   }
 
   return 0;
