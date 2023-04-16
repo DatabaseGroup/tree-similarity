@@ -16,6 +16,11 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.9)
         message(FATAL_ERROR "Clang version must be at least 3.9!")
     endif()
+elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC")
+    # require at least MSVC 17.0
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 17.0)
+        message(FATAL_ERROR "MSVC version must be at least 17.0! (Lower versions haven't been tested)")
+    endif()
 else()
     message(WARNING "You are using an unsupported compiler! Compilation has only been tested with Clang and GCC.")
 endif()
@@ -83,3 +88,26 @@ include(CTest)
 # Let CMake know about subdirectories.
 add_subdirectory(src/)
 add_subdirectory(test/)
+
+
+
+# Define install target (used by VCPKG)
+# install and export target
+install(
+  TARGETS TreeSimilarity
+  EXPORT TreeSimilarity-targets)
+
+#install(
+#  DIRECTORY .
+#  DESTINATION ${TreeSimilarity_INSTALL_INCLUDE_DIR}/tree-similiarity)
+
+#install(
+#  EXPORT TreeSimilarity-targets
+#  FILE tree-similiarity-config.cmake
+#  NAMESPACE tree-similiarity::
+#  DESTINATION ${tree_similiarity_INSTALL_CMAKE_DIR}/tree-similiarity)
+  
+#install(
+#  FILES ${CMAKE_CURRENT_BINARY_DIR}/tree-similiarity-config-version.cmake
+#  DESTINATION ${tree_similiarity_INSTALL_CMAKE_DIR}/tree-similiarity)
+
