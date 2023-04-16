@@ -29,8 +29,10 @@
 #include <cstdlib>
 #include <string>
 #include <cmath>
-#include "node.h"
-#include "matrix.h"
+//#include "node.h"
+//#include "matrix.h"
+#include "../../node/node.h"
+#include "../../data_structures/matrix.h"
 #include "ted_algorithm_touzet.h"
 #include "touzet_baseline_tree_index.h"
 

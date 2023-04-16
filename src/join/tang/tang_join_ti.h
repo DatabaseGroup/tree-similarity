@@ -31,9 +31,13 @@
 #include <algorithm>
 #include <unordered_map>
 #include <unordered_set>
-#include "join_result_element.h"
-#include "node.h"
+//#include "join_result_element.h"
+//#include "node.h"
+#include "../join_result_element.h"
+#include "../../node/node.h"
 #include "binary_tree_converter.h"
+
+
 
 namespace join {
 

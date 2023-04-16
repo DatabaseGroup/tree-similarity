@@ -32,8 +32,10 @@
 
 #include <vector>
 #include <unordered_map>
-#include "node.h"
-#include "string_label.h"
+//#include "node.h"
+//#include "string_label.h"
+#include "../../node/node.h"
+#include "../../label/string_label.h"
 #include "label_set_element.h"
 
 namespace label_set_converter_index {

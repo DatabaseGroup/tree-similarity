@@ -32,7 +32,8 @@
 #include <algorithm>
 #include <vector>
 #include <unordered_map>
-#include "node.h"
+//#include "node.h"
+#include "../../node/node.h"
 
 namespace lh_candidate_index {
 

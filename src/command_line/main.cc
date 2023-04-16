@@ -23,11 +23,18 @@
 // These are linux only headers, not available on Windows
 //#include <sys/time.h>
 //#include <sys/resource.h>
-#include "node.h"
-#include "string_label.h"
-#include "unit_cost_model.h"
-#include "bracket_notation_parser.h"
-#include "lgm_tree_index.h"
+//#include "node.h"
+//#include "string_label.h"
+//#include "unit_cost_model.h"
+//#include "bracket_notation_parser.h"
+//#include "lgm_tree_index.h"
+
+#include "../node/node.h"
+#include "../label/string_label.h"
+#include "../cost_model/unit_cost_model.h"
+#include "../parser/bracket_notation_parser.h"
+#include "../ted_ub/lgm_tree_index.h"
+
 
 /// Simple command-line tool for executing Tree Edit Distance.
 

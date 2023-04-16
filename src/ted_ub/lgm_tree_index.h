@@ -25,10 +25,14 @@
 #include <list>
 #include <unordered_map>
 #include <cmath>
-#include "node.h"
-#include "label_dictionary.h"
-#include "tree_indexer.h"
-#include "ted_algorithm.h"
+//#include "node.h"
+//#include "label_dictionary.h"
+//#include "tree_indexer.h"
+//#include "ted_algorithm.h"
+#include "../node/node.h"
+#include "../label/label_dictionary.h"
+#include "../node/tree_indexer.h"
+#include "../ted/ted_algorithm.h"
 
 namespace ted_ub {
 

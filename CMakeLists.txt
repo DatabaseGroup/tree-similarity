@@ -93,13 +93,13 @@ add_subdirectory(test/)
 
 # Define install target (used by VCPKG)
 # install and export target
-install(
-  TARGETS TreeSimilarity
-  EXPORT TreeSimilarity-targets)
-
 #install(
-#  DIRECTORY .
-#  DESTINATION ${TreeSimilarity_INSTALL_INCLUDE_DIR}/tree-similiarity)
+#  TARGETS TreeSimilarity
+#  EXPORT TreeSimilarity-targets)
+
+install(
+  DIRECTORY src
+  DESTINATION ${TreeSimilarity_INSTALL_INCLUDE_DIR}/tree-similiarity)
 
 #install(
 #  EXPORT TreeSimilarity-targets

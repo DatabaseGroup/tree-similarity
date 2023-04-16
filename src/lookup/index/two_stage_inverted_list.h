@@ -35,7 +35,8 @@
 #include <map>
 #include <unordered_set>
 #include <queue>
-#include "node.h"
+//#include "node.h"
+#include "../../node/node.h"
 #include "inverted_list_element.h"
 #include "label_set_element.h"
 
