@@ -25,11 +25,11 @@
 #include <memory>
 //#include "node.h"
 //#include "matrix.h"
-#include "../../node/node.h"
-#include "../../data_structures/matrix.h"
+#include "../node/node.h"
+#include "../data_structures/matrix.h"
 #include <iostream>
 //#include "tree_indexer.h"
-#include "../../node/tree_indexer.h"
+#include "../node/tree_indexer.h"
 #include "ted_algorithm.h"
 
 namespace ted {
