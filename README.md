@@ -27,6 +27,20 @@ Execute ``make test`` to run all tests (currently there are only correctness tes
 
 In the ``build`` directory you find the binary ``ted`` that executes the algorithms from command line. **Currently there is no help or documentation for this binary.**
 
+### Usage
+
+Example execution:
+``./ted string {x{a}} {x{b}} lgm 1``
+
+## Installing the library with VCPKG
+
+This library has been ported to VCPKG package manager. To include in your project, install with ``./vcpkg install tree-similarity``, then include the library in your project's CMakeFile
+
+```
+find_path(TREE_SIMILARITY_INCLUDE_DIRS "tree-similiarity")
+target_include_directories(main PRIVATE ${TREE_SIMILARITY_INCLUDE_DIRS})
+```
+
 ## Generating documentation
 
 Install [Doxygen](http://www.stack.nl/~dimitri/doxygen/) for generating the documentation.
