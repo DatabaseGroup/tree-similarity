@@ -35,10 +35,6 @@
 #include <iostream>
 #include <memory>
 #include <cmath>
-//#include "node.h"
-//#include "matrix.h"
-//#include "label_dictionary.h"
-//#include "tree_indexer.h"
 #include "../node/node.h"
 #include "../data_structures/matrix.h"
 #include "../label/label_dictionary.h"

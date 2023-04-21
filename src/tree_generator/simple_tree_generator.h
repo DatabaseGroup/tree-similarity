@@ -37,7 +37,6 @@
 #include <vector>
 #include <string>
 #include <random>
-//#include "bracket_notation_parser.h"
 #include "../parser/bracket_notation_parser.h"
 
 namespace tree_generator {

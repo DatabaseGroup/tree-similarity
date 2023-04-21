@@ -23,9 +23,6 @@
 
 #include <vector>
 #include <memory>
-//#include "node.h"
-//#include "matrix.h"
-//#include "tree_indexer.h"
 #include "../node/node.h"
 #include "../data_structures/matrix.h"
 #include "../node/tree_indexer.h"

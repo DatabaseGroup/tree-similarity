@@ -33,7 +33,6 @@
 #include <algorithm>
 #include <vector>
 #include <unordered_map>
-//#include "node.h"
 #include "../../node/node.h"
 
 namespace histo_candidate_index {

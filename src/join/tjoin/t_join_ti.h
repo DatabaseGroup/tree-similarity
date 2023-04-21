@@ -23,9 +23,6 @@
 
 #include <vector>
 #include <functional>
-//#include "join_result_element.h"
-//#include "node.h"
-//#include "lgm_tree_index.h"
 #include "../join_result_element.h"
 #include "../../node/node.h"
 #include "../../ted_ub/lgm_tree_index.h"

@@ -33,7 +33,6 @@
 #include <vector>
 #include <unordered_map>
 #include <queue>
-//#include "node.h"
 #include "../../node/node.h"
 #include "inverted_list_element.h"
 #include "set_data.h"

@@ -28,8 +28,6 @@
 #pragma once
 
 #include <unordered_map>
-//#include "node.h"
-//#include "string_label.h"
 #include "../../node/node.h"
 #include "../../label/string_label.h"
 

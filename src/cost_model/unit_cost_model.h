@@ -25,8 +25,6 @@
 #pragma once
 
 #include <limits>
-//#include "node.h"
-//#include "label_dictionary.h"
 #include "../node/node.h"
 #include "../label/label_dictionary.h"
 

@@ -24,12 +24,9 @@
 #include <iostream>
 #include <vector>
 #include <map>
-//#include "node.h"
-//#include "tree_indexer.h"
 #include "../../node/node.h"
 #include "../../node/tree_indexer.h"
 #include "label_set_element.h"
-//#include "lookup_result_element.h"
 #include "../lookup_result_element.h"
 #include "two_stage_inverted_list.h"
 

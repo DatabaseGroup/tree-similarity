@@ -32,8 +32,6 @@
 
 #include <vector>
 #include <functional>
-//#include "join_result_element.h"
-//#include "node.h"
 #include "../join_result_element.h"
 #include "../../node/node.h"
 #include "ldh_candidate_index.h"

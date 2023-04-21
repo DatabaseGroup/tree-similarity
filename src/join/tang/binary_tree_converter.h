@@ -30,8 +30,6 @@
 
 #include <vector>
 #include <unordered_map>
-//#include "binary_node.h"
-//#include "string_label.h"
 #include "../../node/binary_node.h"
 #include "../../label/string_label.h"
 
