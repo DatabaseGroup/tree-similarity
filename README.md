@@ -27,6 +27,21 @@ Execute ``make test`` to run all tests (currently there are only correctness tes
 
 In the ``build`` directory you find the binary ``ted`` that executes the algorithms from command line. **Currently there is no help or documentation for this binary.**
 
+## Usage
+
+The ``command_line`` program allows you to measure the Tree Edit Distance between 2 tree structures (using the Bracket Notation Format) using APTED.
+
+The trees can be passed as string arguments:
+```
+./ted string {x{a}{b}} {x{a}{c}}
+```
+
+or read from files:
+```
+./ted file treeA.txt treeB.txt
+```
+
+
 ## Generating documentation
 
 Install [Doxygen](http://www.stack.nl/~dimitri/doxygen/) for generating the documentation.
