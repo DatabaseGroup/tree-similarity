@@ -33,11 +33,13 @@
 
 #include <vector>
 #include <random>
-#include "join_result_element.h"
-#include "node.h"
-#include "apted_tree_index.h"
-#include "sed_tree_index.h"
-#include "cted_tree_index.h"
+#include "../join_result_element.h"
+#include "../../node/node.h"
+#include "../../ted/apted_tree_index.h"
+#include "../../ted_lb/sed_tree_index.h"
+#include "../../ted_ub/cted_tree_index.h"
+
+
 #include <iostream>
 
 namespace join {

@@ -32,8 +32,8 @@
 
 #include <vector>
 #include <functional>
-#include "join_result_element.h"
-#include "node.h"
+#include "../join_result_element.h"
+#include "../../node/node.h"
 #include "lh_candidate_index.h"
 #include "label_histogram_converter.h"
 

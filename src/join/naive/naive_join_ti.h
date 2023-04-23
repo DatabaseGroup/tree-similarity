@@ -22,9 +22,9 @@
 #pragma once
 
 #include <vector>
-#include "node.h"
-#include "tree_indexer.h"
-#include "join_result_element.h"
+#include "../../node/node.h"
+#include "../../node/tree_indexer.h"
+#include "../join_result_element.h"
 #include <iostream>
 
 namespace join {
