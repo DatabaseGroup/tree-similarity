@@ -45,8 +45,8 @@
 
 #pragma once
 
-#include "node.h"
-#include "string_label.h"
+#include "../node/node.h"
+#include "../label/string_label.h"
 
 #include <cstring>
 #include <iostream>

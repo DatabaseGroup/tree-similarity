@@ -29,9 +29,9 @@
 /// Simple command-line tool for executing Tree Edit Distance.
 int main(int argc, char** argv) {
 
-  using Label = label::StringLabel;
-  using CostModelLD = cost_model::UnitCostModelLD<Label>;
-  using LabelDictionary = label::LabelDictionary<Label>;
+    using Label = label::StringLabel;
+    using CostModelLD = cost_model::UnitCostModelLD<Label>;
+    using LabelDictionary = label::LabelDictionary<Label>;
 
   // Verify parameters.
   if (argc != 4) {
@@ -42,8 +42,8 @@ int main(int argc, char** argv) {
   std::string source_tree_string;
   std::string dest_tree_string;
 
-  parser::BracketNotationParser<Label> bnp;
-  // Verify the input format before parsing.
+    parser::BracketNotationParser<Label> bnp;
+    // Verify the input format before parsing.
 
   if (std::strcmp(argv[1], "string") == 0) {
     source_tree_string = argv[2];
@@ -53,25 +53,26 @@ int main(int argc, char** argv) {
     std::getline(tree_file, source_tree_string);
     tree_file.close();
 
-    tree_file = std::ifstream(argv[3]);
-    std::getline(tree_file, dest_tree_string);
-    tree_file.close();
-  } else {
-    std::cerr << "Incorrect input format. Use either string or file." << std::endl;
-    return -1;
-  }
-  
-  if (!bnp.validate_input(source_tree_string)) {
-    std::cerr << "Incorrect format of source tree. Is the number of opening and closing brackets equal?" << std::endl;
-    return -1;
-  }
-  const node::Node<Label> source_tree = bnp.parse_single(source_tree_string);
+        tree_file = std::ifstream(argv[3]);
+        std::getline(tree_file, dest_tree_string);
+        tree_file.close();
+    }
+    else {
+        std::cerr << "Incorrect input format. Use either string or file." << std::endl;
+        return -1;
+    }
 
-  if (!bnp.validate_input(dest_tree_string)) {
-    std::cerr << "Incorrect format of destination tree. Is the number of opening and closing brackets equal?" << std::endl;
-    return -1;
-  }
-  const node::Node<Label> destination_tree = bnp.parse_single(dest_tree_string);
+    if (!bnp.validate_input(source_tree_string)) {
+        std::cerr << "Incorrect format of source tree. Is the number of opening and closing brackets equal?" << std::endl;
+        return -1;
+    }
+    const node::Node<Label> source_tree = bnp.parse_single(source_tree_string);
+
+    if (!bnp.validate_input(dest_tree_string)) {
+        std::cerr << "Incorrect format of destination tree. Is the number of opening and closing brackets equal?" << std::endl;
+        return -1;
+    }
+    const node::Node<Label> destination_tree = bnp.parse_single(dest_tree_string);
 
   std::cout << "Size of source tree:" << source_tree.get_tree_size() << std::endl;
   std::cout << "Size of destination tree:" << destination_tree.get_tree_size() << std::endl;
@@ -85,5 +86,5 @@ int main(int argc, char** argv) {
   node::index_tree(ti2, destination_tree, ld, ucm);
   std::cout << "Distance TED:" << apted_algorithm.ted(ti1, ti2) << std::endl;
 
-  return 0;
+    return 0;
 }

@@ -27,6 +27,15 @@ Execute ``make test`` to run all tests (currently there are only correctness tes
 
 In the ``build`` directory you find the binary ``ted`` that executes the algorithms from command line. **Currently there is no help or documentation for this binary.**
 
+## Installing the library with VCPKG
+
+This library has been ported to [VCPKG](https://github.com/microsoft/vcpkg) package manager. To include in your project, install with ``./vcpkg install tree-similarity``, then include the library in your project's CMakeFile
+
+```
+find_path(TREE_SIMILARITY_INCLUDE_DIRS "tree-similiarity/CMakeLists.txt")
+target_include_directories(main PRIVATE ${TREE_SIMILARITY_INCLUDE_DIRS})
+```
+
 ## Usage
 
 The ``command_line`` program allows you to measure the Tree Edit Distance between 2 tree structures (using the Bracket Notation Format) using APTED.
