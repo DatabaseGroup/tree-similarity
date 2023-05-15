@@ -36,6 +36,40 @@ find_path(TREE_SIMILARITY_INCLUDE_DIRS "tree-similiarity/CMakeLists.txt")
 target_include_directories(main PRIVATE ${TREE_SIMILARITY_INCLUDE_DIRS})
 ```
 
+## Input format
+
+The library supports only the so-called *bracket notation* as the input format. For example, `{A{B{X}{Y}{F}}{C}}` corresponds to the following tree:
+```
+    A
+   / \
+  B   C
+ /|\
+X Y F
+```
+The curly braces encode labeled nodes. A label can be any string. If part of a label, curly braces must be escaped as `\{` or `\}`.
+
+`{a{\{[b],\{key:"value"\}\}{}}}` is an example input with complex labels, where:
+
+| Input string | Target label |
+|:-------------|:-------------|
+|`a`           |`a`           |
+|`\{[b],\{key:"value"\}\}`|`{[b],{key:"value"}}`|
+|`{}`| a node with empty label|
+
+Test cases for label parsing are in [`./test/parser/parser_labels_test_data.txt`](./test/parser/parser_labels_test_data.txt/)
+
+The `parse_single()` function of the `bracket_notation_parser` validates the input and throws an exception on incorrect syntax.
+
+Applications rarely use the bracket notation. Therefore, we have implemented various converters.
+
+### [JSON converter](https://frosch.cosy.sbg.ac.at/datasets/json/tools)
+
+The `json-to-bracket.py` script converts an input JSON document into a bracket notation.
+
+### [Format converters](https://github.com/DatabaseGroup/format_converters)
+
+It is a generic converter implemented with [ANTLR parser generator](https://www.antlr.org/). The [currently supported input formats](https://github.com/DatabaseGroup/format_converters#available-converters) are listed in the documentation.
+
 ## Usage
 
 The ``command_line`` program allows you to measure the Tree Edit Distance between 2 tree structures (using the Bracket Notation Format) using APTED.
