@@ -1,0 +1,21 @@
+# Test case 1
+{{}
+PARSER-ERROR: There are opening brackets that are never closed.
+# Test case 2
+{a{b}c}
+PARSER-ERROR: Found unexpected token 'c'.
+# Test case 3
+}{"a{"b"}}
+PARSER-ERROR: First character must be an opening bracket.
+# Test case 4
+}{"a{"b"}}{
+PARSER-ERROR: First character must be an opening bracket.
+# Test case 5
+{{}}{{}
+PARSER-ERROR: There are opening brackets that are never closed.
+# Test case 6
+{{}}}{
+PARSER-ERROR: Found a closing bracket for missing opening bracket.
+# Test case 7
+{
+PARSER-ERROR: Tree string needs at least two characters.

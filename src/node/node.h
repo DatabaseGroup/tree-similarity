@@ -61,6 +61,7 @@ public:
 
 // Member functions
 public:
+  Node() = default;
   Node(ConstReference label);
 
   /// Returns the number of children of this node.

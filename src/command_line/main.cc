@@ -62,16 +62,7 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    if (!bnp.validate_input(source_tree_string)) {
-        std::cerr << "Incorrect format of source tree. Is the number of opening and closing brackets equal?" << std::endl;
-        return -1;
-    }
     const node::Node<Label> source_tree = bnp.parse_single(source_tree_string);
-
-    if (!bnp.validate_input(dest_tree_string)) {
-        std::cerr << "Incorrect format of destination tree. Is the number of opening and closing brackets equal?" << std::endl;
-        return -1;
-    }
     const node::Node<Label> destination_tree = bnp.parse_single(dest_tree_string);
 
   std::cout << "Size of source tree:" << source_tree.get_tree_size() << std::endl;

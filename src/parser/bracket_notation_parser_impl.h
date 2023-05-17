@@ -34,6 +34,17 @@ node::Node<Label> BracketNotationParser<Label>::parse_single(
 
   std::vector<std::string> tokens = get_tokens(tree_string);
 
+  if (tree_string.size() < 2) {
+    throw std::runtime_error("PARSER-ERROR: Tree string needs at least two characters.");
+  }
+
+  if (tokens[0] != "{") {
+    throw std::runtime_error("PARSER-ERROR: First character must be an opening bracket.");
+  }
+
+  // Metadata for parser to verify the input.
+  int open_nodes = 1;
+
   // Tokenize the input string - get iterator over tokens.
   auto tokens_begin = tokens.begin();
   auto tokens_end = tokens.end();
@@ -41,8 +52,13 @@ node::Node<Label> BracketNotationParser<Label>::parse_single(
   // Deal with the root node separately.
   ++tokens_begin; // Advance tokens to label.
   std::string match_str = *tokens_begin;
-  if (match_str == kLeftBracket || match_str == kRightBracket) { // Root has an empty label.
+  if (match_str == kLeftBracket) { // Root has an empty label.
     match_str = "";
+    // Do not advance tokens - we're already at kLeftBracket or kRightBracket.
+  } else if (match_str == kRightBracket) { // Node has an empty label.
+    --open_nodes;
+    match_str = "";
+    ++tokens_begin; // Advance tokens.
     // Do not advance tokens - we're already at kLeftBracket or kRightBracket.
   } else { // Non-empty label.
     ++tokens_begin; // Advance tokens.
@@ -51,23 +67,21 @@ node::Node<Label> BracketNotationParser<Label>::parse_single(
   node::Node<Label> root(root_label);
   node_stack.push_back(std::ref(root));
 
-  bool consumed_token = false;
-
   // Iterate all remaining tokens.
   while (tokens_begin != tokens_end) {
     match_str = *tokens_begin;
-    consumed_token = false;
 
     if (match_str == kLeftBracket) { // Enter node.
-      consumed_token = true;
-      ++tokens_begin; // Advance tokens to label.
-      match_str = *tokens_begin;
+      // ++tokens_begin; // Advance tokens to label.
+      match_str = *std::next(tokens_begin,1);
+      ++open_nodes;
 
       if (match_str == kLeftBracket || match_str == kRightBracket) { // Node has an empty label.
         match_str = "";
         // Do not advance tokens - we're already at kLeftBracket or kRightBracket.
       } else { // Non-empty label.
-        ++tokens_begin; // Advance tokens.
+        ++tokens_begin; // Advance tokens to get label.
+        match_str = *tokens_begin;
       }
 
       // Create new node.
@@ -79,18 +93,26 @@ node::Node<Label> BracketNotationParser<Label>::parse_single(
       // Put a reference to just-moved n (last child of its parent) on a stack.
       node_stack.push_back(std::ref(node_stack.back().get().add_child(n)));
     }
-
-    if (match_str == kRightBracket) { // Exit node.
-      consumed_token = true;
+    else if (match_str == kRightBracket) { // Exit node.
+      --open_nodes;
+      if (open_nodes < 0) {
+        throw std::runtime_error("PARSER-ERROR: Found a closing bracket for missing opening bracket.");
+      }
       node_stack.pop_back();
-      ++tokens_begin; // Advance tokens.
     }
-
-    // Skip incorrect token.
-    if (consumed_token == false) {
-      ++tokens_begin; // Advance tokens.
+    else {
+      throw std::runtime_error("PARSER-ERROR: Found unexpected token '" + match_str + "'.");
     }
+    ++tokens_begin; // Advance tokens.
   }
+
+  if (open_nodes > 0) {
+    throw std::runtime_error("PARSER-ERROR: There are opening brackets that are never closed.");
+  }
+  if (open_nodes < 0) {
+    throw std::runtime_error("PARSER-ERROR: Found a closing bracket for missing opening bracket.");
+  }
+
   return root;
 }
 
@@ -100,15 +122,17 @@ void BracketNotationParser<Label>::parse_collection(
     const std::string& file_path) {
   std::ifstream trees_file(file_path);
   if (!trees_file) {
-    throw std::runtime_error("ERROR: Problem with opening the file '" + file_path + "' in BracketNotationParser::parse_collection_efficient.");
+    throw std::runtime_error("PARSER-ERROR: Problem with opening the file '" + file_path + "' in BracketNotationParser::parse_collection_efficient.");
   }
   // Read the trees line by line, parse, and move into the container.
   std::string tree_string;
   while (std::getline(trees_file, tree_string)) {
-    if (!validate_input(tree_string)) {
-      continue;
+    try {
+      trees_collection.push_back(parse_single(tree_string)); // -> This invokes a move constructor (due to push_back(<rvalue>)).
     }
-    trees_collection.push_back(parse_single(tree_string)); // -> This invokes a move constructor (due to push_back(<rvalue>)).
+    catch(const std::exception& e) {
+      std::cout << e.what();
+    }
   }
   trees_file.close();
 }
@@ -148,25 +172,4 @@ std::vector<std::string> BracketNotationParser<Label>::get_tokens(
   }
 
   return tokens;
-}
-
-template<class Label>
-bool BracketNotationParser<Label>::validate_input(const std::string& tree_string) const {
-  int bracket_diff_counter = 0; // Counts difference between the numbers of left and right brackets.
-  int bracket_pair_counter = 0; // Counts number of bracket pairs - number of nodes assuming correct nesting.
-  // Loop over all characters.
-  for(auto it = tree_string.begin(); it != tree_string.end(); ++it) {
-    if (*it == kEscapeChar) { // Skip next character if kEscapeChar is found.
-      ++it;
-    } else if (*it == kLeftBracket[0]) { // Increase bracket_counter when kLeftBracket found.
-      bracket_diff_counter++;
-      bracket_pair_counter++;
-    } else if (*it == kRightBracket[0]) { // Decrease bracket_counter when kRightBracket found.
-      bracket_diff_counter--;
-    }
-  }
-  if (bracket_diff_counter != 0 || bracket_pair_counter == 0) {
-    return false;
-  }
-  return true;
 }

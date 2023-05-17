@@ -134,6 +134,12 @@ int main(int, char** argv) {
   using CostModel = cost_model::UnitCostModelLD<Label>;
   using LabelDictionary = label::LabelDictionary<Label>;
 
+  // Declare parser.
+  parser::BracketNotationParser<Label> bnp;
+
+  // Declare trees.
+  node::Node<Label> tree;
+
   // Parse test cases from file.
   std::ifstream test_data_file(index_test_name + "_data.txt");
   if (!test_data_file.is_open()) {
@@ -149,17 +155,15 @@ int main(int, char** argv) {
       std::string input_tree = line;
       std::getline(test_data_file, line);
       std::string correct_result = line;
-      
-      parser::BracketNotationParser<Label> bnp;
-      
-      // Validate test tree.
-      if (!bnp.validate_input(input_tree)) {
-        std::cerr << "Incorrect format of input tree: '" << input_tree << "'. Is the number of opening and closing brackets equal?" << std::endl;
+
+      // Parse test tree.
+      try {
+        tree = bnp.parse_single(input_tree);
+      }
+      catch(const std::exception& e) {
+        std::cerr << e.what() << std::endl;
         return -1;
       }
-      
-      // Parse test tree.
-      node::Node<Label> tree = bnp.parse_single(input_tree);
       
       // Initialise label dictionary - separate dictionary for each test tree
       // becuse it is easier to keep track of label ids.

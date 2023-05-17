@@ -200,3 +200,18 @@ const std::string map_to_string(const std::unordered_map<int, std::vector<int>>&
 }
 
 }
+
+/// Convert vector of int values to is string representation.
+///
+/// TODO: Move this method to some util.
+///
+/// \param v Vector of int values.
+/// \return String representation of v.
+const std::string vector_to_string(const std::vector<std::string>& v) {
+  std::string s;
+  for (auto e : v) {
+    s += e + ",";
+  }
+  s.pop_back(); // Delete the last coma.s
+  return s;
+}
