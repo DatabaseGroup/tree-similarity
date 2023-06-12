@@ -32,20 +32,21 @@ template<class Label>
 node::Node<Label> BracketNotationParser<Label>::parse_single(
     const std::string& tree_string) {
 
+  // Tokenize the input string.
   std::vector<std::string> tokens = get_tokens(tree_string);
 
   if (tree_string.size() < 2) {
-    throw std::runtime_error("PARSER-ERROR: Tree string needs at least two characters.");
+    throw std::invalid_argument("PARSER-ERROR: Tree string needs at least two characters.");
   }
 
   if (tokens[0] != "{") {
-    throw std::runtime_error("PARSER-ERROR: First character must be an opening bracket.");
+    throw std::invalid_argument("PARSER-ERROR: First character must be an opening bracket.");
   }
 
   // Metadata for parser to verify the input.
   int open_nodes = 1;
 
-  // Tokenize the input string - get iterator over tokens.
+  // Get iterator over input tokens.
   auto tokens_begin = tokens.begin();
   auto tokens_end = tokens.end();
 
@@ -59,7 +60,6 @@ node::Node<Label> BracketNotationParser<Label>::parse_single(
     --open_nodes;
     match_str = "";
     ++tokens_begin; // Advance tokens.
-    // Do not advance tokens - we're already at kLeftBracket or kRightBracket.
   } else { // Non-empty label.
     ++tokens_begin; // Advance tokens.
   }
@@ -96,21 +96,21 @@ node::Node<Label> BracketNotationParser<Label>::parse_single(
     else if (match_str == kRightBracket) { // Exit node.
       --open_nodes;
       if (open_nodes < 0) {
-        throw std::runtime_error("PARSER-ERROR: Found a closing bracket for missing opening bracket.");
+        throw std::invalid_argument("PARSER-ERROR: Found a closing bracket for missing opening bracket.");
       }
       node_stack.pop_back();
     }
     else {
-      throw std::runtime_error("PARSER-ERROR: Found unexpected token '" + match_str + "'.");
+      throw std::invalid_argument("PARSER-ERROR: Found unexpected token '" + match_str + "'.");
     }
     ++tokens_begin; // Advance tokens.
   }
 
   if (open_nodes > 0) {
-    throw std::runtime_error("PARSER-ERROR: There are opening brackets that are never closed.");
+    throw std::invalid_argument("PARSER-ERROR: There are opening brackets that are never closed.");
   }
   if (open_nodes < 0) {
-    throw std::runtime_error("PARSER-ERROR: Found a closing bracket for missing opening bracket.");
+    throw std::invalid_argument("PARSER-ERROR: Found a closing bracket for missing opening bracket.");
   }
 
   return root;
@@ -122,7 +122,7 @@ void BracketNotationParser<Label>::parse_collection(
     const std::string& file_path) {
   std::ifstream trees_file(file_path);
   if (!trees_file) {
-    throw std::runtime_error("PARSER-ERROR: Problem with opening the file '" + file_path + "' in BracketNotationParser::parse_collection_efficient.");
+    throw std::invalid_argument("PARSER-ERROR: Problem with opening the file '" + file_path + "' in BracketNotationParser::parse_collection_efficient.");
   }
   // Read the trees line by line, parse, and move into the container.
   std::string tree_string;

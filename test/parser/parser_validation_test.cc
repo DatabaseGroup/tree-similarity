@@ -47,7 +47,7 @@ int main() {
   }
   
   if (test_cases != identified_cases) {
-    std::cerr << "Validation test failed: only identified " << 
+    std::cerr << "Validation test failed: correctly caught " << 
       identified_cases << " out of " << test_cases << std::endl;
     return -1;
   }
