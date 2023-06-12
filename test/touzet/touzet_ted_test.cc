@@ -19,6 +19,13 @@ int main() {
   using CostModel = cost_model::UnitCostModelLD<Label>;
   using LabelDictionary = label::LabelDictionary<Label>;
   
+  // Declare parser.
+  parser::BracketNotationParser<Label> bnp;
+
+  // Trees.
+  node::Node<Label> t1;
+  node::Node<Label> t2;
+
   // Initialise label dictionary - separate dictionary for each test tree
   // becuse it is easier to keep track of label ids.
   LabelDictionary ld;
@@ -56,21 +63,15 @@ int main() {
       std::getline(test_cases_file, line);
       double expected_result = std::stod(line);
 
-      parser::BracketNotationParser<Label> bnp;
-
-      // Validate test tree.
-      if (!bnp.validate_input(source_tree)) {
-        std::cerr << "Incorrect format of input tree: '" << source_tree << "'. Is the number of opening and closing brackets equal?" << std::endl;
-        return -1;
-      }
-      // Validate test tree.
-      if (!bnp.validate_input(destination_tree)) {
-        std::cerr << "Incorrect format of input tree: '" << destination_tree << "'. Is the number of opening and closing brackets equal?" << std::endl;
-        return -1;
-      }
       // Parse test tree.
-      node::Node<Label> t1 = bnp.parse_single(source_tree);
-      node::Node<Label> t2 = bnp.parse_single(destination_tree);
+      try {
+        t1 = bnp.parse_single(source_tree);
+        t2 = bnp.parse_single(destination_tree);
+      }
+      catch(const std::exception& e) {
+        std::cerr << e.what() << std::endl;
+        return -1;
+      }
 
       // Index input trees.
       node::index_tree(ti1, t1, ld, ucm);

@@ -6,6 +6,7 @@ set(parser_test_list
   parser_labels_test          # Testing parsed labels.
   parser_tokens_test          # Testing parsed tokens.
   parser_collection_size_test # Testing collection tree sizes after parsing (reading from file).
+  parser_validation_test      # Testing the validation function of the parser.
 )
 
 # Add custom target for building all parser's tests.
@@ -24,6 +25,10 @@ foreach(loop_var ${parser_test_list})
   target_link_libraries(
     ${loop_var}_driver # EXECUTABLE NAME
     TreeSimilarity     # LIBRARY NAME
+  )
+  target_link_libraries(
+    ${loop_var}_driver # EXECUTABLE NAME
+    TestCommon         # LIBRARY NAME
   )
   add_test(
     NAME    ${loop_var}        # TEST NAME

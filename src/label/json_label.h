@@ -42,6 +42,7 @@ namespace label {
 /// During the parsing process, the types keys and values cannot 
 class JSONLabel {
 public:
+  JSONLabel() = default;
   JSONLabel(const std::string& label);
 
   /// Operator overloadings.

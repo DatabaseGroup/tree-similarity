@@ -3,25 +3,16 @@
 #include <vector>
 #include <fstream>
 #include "bracket_notation_parser.h"
-
-/// Convert vector of int values to is string representation.
-///
-/// TODO: Move this method to some util.
-///
-/// \param v Vector of int values.
-/// \return String representation of v.
-const std::string vector_to_string(const std::vector<std::string>& v) {
-  std::string s;
-  for (auto e : v) {
-    s += e + ",";
-  }
-  s.pop_back(); // Delete the last coma
-  return s;
-}
+#include "to_string_converters.h"
 
 int main() {
 
   using Label = label::StringLabel;
+
+  // Declarations.
+  parser::BracketNotationParser<Label> bnp;
+  std::string computed_results;
+  node::Node<Label> t;
   
   std::cout << "Tokens test." << std::endl;
 
@@ -39,15 +30,17 @@ int main() {
       std::getline(test_cases_file, line);
       std::string correct_result = line;
 
-      parser::BracketNotationParser<Label> bnp;
-
-      // Validate test tree.
-      if (!bnp.validate_input(input_tree)) {
-        std::cerr << "Incorrect format of input tree: '" << input_tree << "'. Is the number of opening and closing brackets equal?" << std::endl;
+      // Parse test tree.
+      try {
+        t = bnp.parse_single(input_tree);
+      }
+      catch(const std::exception& e) {
+        std::cerr << e.what() << std::endl;
         return -1;
       }
-      // Parse test tree.
-      std::string computed_results = vector_to_string(bnp.get_tokens(input_tree));
+
+      // Compute label sets as comma separated strings.
+      computed_results = vector_to_string(bnp.get_tokens(input_tree));
 
       if (correct_result != computed_results) {
         std::cerr << "Incorrect tokens: " << computed_results << " instead of " << correct_result << std::endl;

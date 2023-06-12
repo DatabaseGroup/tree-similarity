@@ -86,14 +86,6 @@ public:
   /// \return Vector with all tokens.
   std::vector<std::string> get_tokens(const std::string& tree_string);
 
-  /// Validates the bracket notation input.
-  ///
-  /// NOTE: This function could be merged with parse_string but this may
-  ///       decrease readability.
-  ///
-  /// \param tree_string Tree in bracket notation.
-  /// \return True if the input is correct and false otherwise.
-  bool validate_input(const std::string& tree_string) const;
 // Member variables
 private:
   /// A stack to store nodes on a path to the root from the current node in the

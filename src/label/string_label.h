@@ -49,6 +49,7 @@ namespace label {
 /// one wants to use a specialized cost model.
 class StringLabel {
 public:
+    StringLabel() = default;
     StringLabel(const std::string& label);
 
     /// Operator overloadings.

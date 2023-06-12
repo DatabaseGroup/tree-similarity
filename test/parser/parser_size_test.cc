@@ -10,6 +10,11 @@ int main() {
 
   using Label = label::StringLabel;
 
+  // Declarations.
+  parser::BracketNotationParser<Label> bnp;
+  int computed_results;
+  node::Node<Label> t;
+
   // Parse test cases from file.
   std::ifstream test_cases_file("parser_size_test_data.txt");
 
@@ -24,17 +29,17 @@ int main() {
       std::getline(test_cases_file, line);
       int correct_result = std::stoi(line);
 
-      parser::BracketNotationParser<Label> bnp;
-
-      // Validate test tree.
-      if (!bnp.validate_input(input_tree)) {
-        std::cerr << "Incorrect format of input tree: '" << input_tree << "'. Is the number of opening and closing brackets equal?" << std::endl;
+      // Parse test tree.
+      try {
+        t = bnp.parse_single(input_tree);
+      }
+      catch(const std::exception& e) {
+        std::cerr << e.what() << std::endl;
         return -1;
       }
-      // Parse test tree.
-      node::Node<Label> t = bnp.parse_single(input_tree);
 
-      int computed_results = t.get_tree_size();
+      // Compute tree size as integer.
+      computed_results = t.get_tree_size();
 
       if (correct_result != computed_results) {
         std::cerr << "Incorrect number of nodes: " << computed_results << " instead of " << correct_result << std::endl;
