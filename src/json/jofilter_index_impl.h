@@ -118,7 +118,6 @@ double JOFilterTreeIndex<CostModel, TreeIndex>::jedi_k(const TreeIndex& t1,
   for (int x = 1; x <= t1_input_size; ++x) {
     // Get postorder number from favorable child order number.
     i = t1.postl_to_favorder_[x-1] + 1;
-    p_i = t1.postl_to_height_[t1.postl_to_parent_[i-1]];
     
     // Iterate for all j in the threshold range of i.
     j_start = i - threshold;
@@ -173,6 +172,7 @@ double JOFilterTreeIndex<CostModel, TreeIndex>::jedi_k(const TreeIndex& t1,
 
       // Do not compute for the parent of the root node in T1.
       if (i != t1_input_size) {
+        p_i = t1.postl_to_height_[t1.postl_to_parent_[i-1]];
         // Case 1: i is favorable child of parent.
         if (t1.postl_to_fav_child_[t1.postl_to_parent_[i-1]] == i-1) {
           // Store distances for favorable child used to fill the edit distance matrix later on.
@@ -215,6 +215,7 @@ double JOFilterTreeIndex<CostModel, TreeIndex>::jedi_k(const TreeIndex& t1,
     }
     // Case 3: t[i] is the left sibling of the favorable child.
     if (i != t1_input_size) {
+      p_i = t1.postl_to_height_[t1.postl_to_parent_[i-1]];
       if (t1.postl_to_left_fav_child_[t1.postl_to_parent_[i-1]] == i-1) {
         fav_child_postid = t1.postl_to_fav_child_[t1.postl_to_parent_[i-1]]+1;
         
