@@ -27,6 +27,13 @@ Execute ``make test`` to run all tests (currently there are only correctness tes
 
 In the ``build`` directory you find the binary ``ted`` that executes the algorithms from command line. **Currently there is no help or documentation for this binary.**
 
+## Generate the executable 
+In this example we will be using the gcc compiler (feel free to use others) : 
+```shell
+cd src
+g++ --std=c++17 -Inode -Ilabel -Icost_model -Iparser -Ited command_line/main.cc -o ted
+```
+
 ## Installing the library with VCPKG
 
 This library has been ported to [VCPKG](https://github.com/microsoft/vcpkg) package manager. To include in your project, install with ``./vcpkg install tree-similarity``, then include the library in your project's CMakeFile
@@ -64,7 +71,11 @@ Applications rarely use the bracket notation. Therefore, we have implemented var
 
 ### [JSON converter](https://frosch.cosy.sbg.ac.at/datasets/json/tools)
 
-The `json-to-bracket.py` script converts an input JSON document into a bracket notation.
+The [`json-to-bracket.py`](https://github.com/DatabaseGroup/jedi-datasets/blob/main/scripts/json2bracket.py) script converts an input JSON document into a bracket notation. 
+It can also be used : 
+```shell
+python3 scripts/json2bracket.py -f /dir/to/input.json  -s > /dir/to/input.bracket
+```
 
 ### [Format converters](https://github.com/DatabaseGroup/format_converters)
 
